@@ -1,0 +1,333 @@
+# FAZ 3 — Servis Modülü
+
+> PRD §20 Faz 3 | Önkoşul: FAZ 1 + FAZ 2 tamamlanmış olmalı
+
+---
+
+## Amaç
+
+Uygulamanın kalbi olan servis akışını hayata geçirmek: müşteri kabulünden teşhis, onay, parça kullanımı, tamamlama ve teslimat süreçleri dahil tüm servis yaşam döngüsü.
+
+---
+
+## Adım Adım İşlem Basamakları
+
+### ADIM 3.1 — Müşteri ve Makine Varlıkları
+
+**Görevler:**
+- [ ] `Customer` tablosu:
+  - id, business_id, name, phone, normalized_phone, no_phone_flag, address/village, notes, optional_photo_ref, archived_at
+- [ ] `Machine` tablosu:
+  - id, business_id, customer_id, type, brand, model, serial_number (nullable), internal_number (MK-...)
+  - status (TEMPORARY / ACTIVE / INACTIVE), sale_date, sale_price, warranty_end, notes, photo_refs, archived_at
+- [ ] `MachineOwnershipHistory` tablosu:
+  - id, business_id, machine_id, old_customer_id, new_customer_id, changed_at, reason, actor_id, device_id
+
+**Kabul kriteri:**
+- Müşteri ve makine oluşturulur; makine bir müşteriyle ilişkilendirilir.
+
+---
+
+### ADIM 3.2 — Müşteri Yönetimi
+
+**Görevler:**
+- [ ] Müşteri oluşturma: ad-soyad, telefon, adres/köy (zorunlular); fotoğraf, notlar (isteğe bağlı)
+- [ ] **Telefon normalizasyonu** (Adım 1.10'da temel alındı):
+  - Boşluk, tire, parantez temizle
+  - 0 ile başlayan ve +90 ile başlayan biçimler aynı kabul edilir
+  - Aynı normalize telefonla kayıtlı müşteri varsa → mevcut müşteri önerilir
+  - Kullanıcı yine de bilinçli olarak yeni kayıt açabilir (AC-029)
+- [ ] Telefonu olmayan müşteri için `no_phone_flag = true`
+- [ ] Gereksiz kişisel veri (T.C. kimlik no) istenmez
+- [ ] Müşteri listesi: ad-soyad, telefon, açık bakiye göstergesi, hızlı arama
+- [ ] Müşteri profili: makineler, servis geçmişi, satışlar, ödemeler, bakiye, hızlı işlemler
+- [ ] "Ara" ve "WhatsApp'ta aç" bağlantıları (elle açar, otomatik değil)
+- [ ] Müşteri fotoğrafı: istemci tarafında 1600px küçültme, JPEG/WebP (FR-028)
+- [ ] Müşteri arşivleme: açık servisi veya sıfır olmayan bakiyesi varsa engellenir (AC-030)
+
+**İlgili FR:** FR-003  
+**Test:** TC-031, TC-032
+
+---
+
+### ADIM 3.3 — Makine Yönetimi
+
+**Görevler:**
+- [ ] Makine oluşturma: tür, marka, model (zorunlu); seri numarası (isteğe bağlı)
+- [ ] Seri numarası yoksa sistem benzersiz iç makine numarası üretir (MK-...)
+- [ ] Aynı markada aynı seri numarası mevcutsa → uyarı; kullanıcı onayıyla devam (AC-029)
+- [ ] Makine profili: sahibi, seri/iç numara, tür/marka/model, satış bilgisi, garanti bitiş tarihi, servis sayısı, son servis tarihi, servis geçmişi, sahiplik geçmişi
+- [ ] İşlemler: Yeni Servis, QR göster/tara, Düzenle, Sahip değiştir, Birleştir
+- [ ] **Makine sahipliği değişimi:** MachineOwnershipHistory kaydı oluşur; servis geçmişi korunur (AC-018, TC-020)
+- [ ] **Geçici makine kaydı (TEMPORARY):** Makine belirlenemiyorsa açılır; sonradan ACTIVE'e dönüştürülür veya mevcut makineyle birleştirilir (SR-016, AC-051)
+- [ ] Makine arşivleme: açık servisi varsa engellenir (FR-033)
+
+**İlgili FR:** FR-004, FR-005  
+**Test:** TC-020, TC-052
+
+---
+
+### ADIM 3.4 — QR Kodu Sistemi (Makine & Ürün)
+
+**Görevler:**
+- [ ] Makine QR kodu: yalnızca değişmeyen kayıt kimliği/URL içerir
+- [ ] QR ile makine açıldığında: oturum kontrolü → giriş ekranı (oturum yoksa) → makine özeti
+- [ ] Makine QR ekranı: makine özeti, sahibi, geçmiş servisler, "Yeni Servis Başlat" eylemi
+- [ ] Ürün QR ekranı: ad/kod, mevcut stok, satış fiyatı, son alış fiyatı
+- [ ] Etiket boyutu ayardan seçilebilir; QR + kısa kimlik/ürün adı + isteğe bağlı işletme adı
+- [ ] Ürün fiyatı/stoğu değiştiğinde QR yeniden basılmadan güncel veriyi gösterir (AC-035)
+
+**İlgili FR:** FR-006  
+**İlgili AC:** AC-003, AC-035  
+**Test:** TC-003, TC-036
+
+---
+
+### ADIM 3.5 — Kataloglar (Arıza, İşlem, Şablon)
+
+**Görevler:**
+- [ ] `OperationCatalog` (işlem kataloğu): ad, kategori, önerilen fiyat, varsayılan süre, aktif
+- [ ] `IssueCatalog` (arıza kataloğu): ad, kategori, aktif
+- [ ] `ServiceTemplate` ve `ServiceTemplateItem` (şablon ve şablon maddeleri)
+- [ ] Başlangıç işlem kategorileri (§8.1): Arıza Tespiti, Genel Bakım, Karbüratör, Filtre, Buji, Marş, Bıçak/Zincir/Pala, Montaj, İlk Çalıştırma, Motor Testi, Diğer
+- [ ] Başlangıç arıza kategorileri (§8.1): Çalışmıyor, Zor Çalışıyor, Güç Kaybı, Stop Ediyor, Yakıt Kaçağı, Yağlama Sorunu, Titreşim/Ses, Kesmiyor/Biçmiyor, Parça Kırığı/Hasarı, Bakım Talebi, Diğer
+- [ ] Katalog ekleme, düzenleme, pasifleştirme
+- [ ] Kullanılmış geçmiş satırların açıklamaları geriye dönük değişmez
+
+**İlgili FR:** FR-009, FR-011
+
+---
+
+### ADIM 3.6 — Servis Emri Oluşturma (Kabul)
+
+**Görevler:**
+- [ ] `ServiceOrder` tablosunu oluştur (PRD §7 tam alan listesi)
+- [ ] `ServiceIssue`, `ServiceOperation`, `ServicePart`, `ServiceApproval`, `ServiceStatusHistory`, `ServiceChecklistItem` tablolarını oluştur
+- [ ] Yeni Servis akışı (§5.1):
+  1. Mevcut müşteri seçimi veya yeni müşteri oluşturma (mükerrer uyarısı çalışır)
+  2. Müşterinin makineleri listelenir; seçim / QR / yeni makine açma
+  3. Makine seçilince: son servis tarihi, son işlem, servis sayısı özeti gösterilir
+  4. Şikâyet girişi: katalogdan seçim + serbest metin + 'Diğer' seçeneği
+  5. Kabul bilgileri: fotoğraf (isteğe bağlı), mevcut hasar/çizikler, teslim alınan aksesuarlar, müşteri beyanı
+  6. Kayıt açılır; teşhis ve diğerleri sonra tamamlanabilir
+- [ ] Belge numarası: `S-[cihaz_kodu]-[yıl]-[sıra]`
+- [ ] Başlangıç durumu: "Kabul edildi"
+- [ ] Servis oluştuğunda UUID ve belge numarası oluşur (AC-001)
+
+**İlgili FR:** FR-007  
+**İlgili AC:** AC-001, AC-002  
+**Test:** TC-001, TC-002
+
+---
+
+### ADIM 3.7 — Servis Durum Makinesi
+
+**Görevler:**
+- [ ] Durum değerleri ve geçiş kurallarını kodla (§6.1):
+
+| Durum | İzin Verilen Sonraki Durumlar |
+|-------|-------------------------------|
+| Kabul Edildi | Teşhis Bekleniyor, Teşhis Tamamlandı, İptal Edildi |
+| Teşhis Bekleniyor | Teşhis Tamamlandı, İptal Edildi |
+| Teşhis Tamamlandı | Müşteri Onayı Bekleniyor, İşlemde, Parça Bekleniyor, İptal Edildi |
+| Müşteri Onayı Bekleniyor | İşlemde, Parça Bekleniyor, Teşhis Tamamlandı, İptal Edildi |
+| İşlemde | Parça Bekleniyor, Müşteri Onayı Bekleniyor, İş Tamamlandı, İptal Edildi |
+| Parça Bekleniyor | İşlemde, İptal Edildi |
+| İş Tamamlandı | Teslim Edildi, İşlemde (yeniden açma; neden zorunlu), İptal Edildi |
+| Teslim Edildi | İşlemde (yeniden açma; neden zorunlu) — iptal edilemez |
+| İptal Edildi | Terminal durum |
+
+- [ ] Geçersiz geçiş denemesinde hata mesajı gösterilir
+- [ ] Her durum değişikliği `ServiceStatusHistory`'e yazılır: from_status, to_status, changed_at, actor_id, device_id, note
+- [ ] Yeniden açma neden zorunludur
+
+**İlgili FR:** FR-008  
+**İlgili AC:** AC-017, AC-033  
+**Test:** TC-019, TC-034
+
+**Kabul kriteri:**
+- Geçersiz geçiş engellenir; yeniden açılan servis sayacı ikinci kez artırmaz.
+
+---
+
+### ADIM 3.8 — Müşteri Onay Sistemi
+
+**Görevler:**
+- [ ] `ServiceApproval` tablosu: decision, method, approved_amount, decided_at, explanation
+- [ ] Onay eşiği kontrolü (SR-004):
+  - Eşik = BusinessSettings.approval_threshold_amount (varsayılan 1.000 ₺)
+  - 0 = her ücretli işte onay
+  - Onay gereken serviste onay kaydı olmadan "Teşhis Tamamlandı" → "İşlemde" geçişi engellenir
+- [ ] Teklif tutarı artar → yeni onay gerekir → servis "Müşteri Onayı Bekleniyor"a alınır (SR-005)
+- [ ] Onaylananın üstünde işlem yapılmaz; ayarlanabilir tolerans (varsayılan 0)
+- [ ] Onay yöntemi: yüz yüze / telefon / diğer
+- [ ] Her kalem: onaylandı / reddedildi / ertelendi (SR-006)
+- [ ] Reddedilen/ertelenen kalem toplam tutara girmez (TC-004)
+
+**İlgili FR:** FR-032  
+**İlgili AC:** AC-004, AC-042  
+**Test:** TC-005, TC-043, TC-055
+
+---
+
+### ADIM 3.9 — İşlem ve Parça Satırları
+
+**Görevler:**
+- [ ] `ServiceOperation` satırları:
+  - Katalogdan seçim veya serbest metin
+  - Önerilen fiyat otomatik dolar; değiştirilebilir
+  - İşçilik tutarı, indirim, vergi modu/oranı, satır toplamı
+  - Onay durumu (onaylandı / reddedildi / ertelendi)
+  - Fiyat bilinmiyorsa `price_status = PENDING` işareti (SR-007)
+- [ ] `ServicePart` satırları:
+  - Stok ürünü (product_id) veya serbest (product_id boş)
+  - source_type: STOCK_PRODUCT / CUSTOMER_SUPPLIED / NON_STOCK_PURCHASE / OTHER
+  - Müşteri getirdiği parça: stok düşülmez, müşteriye parça bedeli yazılmayabilir (§7.1)
+  - quantity, used_quantity, returned_quantity, supply_status
+  - supply_status: IN_STOCK / TO_ORDER / ORDERED / ARRIVED (SR-019)
+  - Snapshot: description_snapshot, unit_price_snapshot, unit_cost_snapshot
+- [ ] Stok düşümü: `ServicePart.used_quantity > 0` olduğunda (SR-008)
+- [ ] Teklif aşamasında stok değişmez (TC-006)
+- [ ] Bir serviste birden fazla arıza, işlem ve parça olabilir (SR-003)
+
+**İlgili AC:** AC-006, AC-007  
+**Test:** TC-006, TC-007
+
+---
+
+### ADIM 3.10 — Şablon ve Kontrol Listesi
+
+**Görevler:**
+- [ ] Şablon uygulandığında her madde `ServiceChecklistItem` kaydı olarak kopyalanır
+- [ ] Şablon sonradan değişse açık servislerdeki kopya değişmez (AC-005)
+- [ ] Madde alanları: başlık, sıra, zorunlu/isteğe bağlı, tamamlandı durumu, tamamlayan kullanıcı/cihaz, zaman
+- [ ] Kullanıcı serviste adım ekleyebilir, kaldırabilir, tamamlandı işaretleyebilir
+- [ ] Zorunlu madde tamamlanmadan "İş Tamamlandı" geçişinde uyarı
+
+**İlgili FR:** FR-009  
+**Test:** TC-008
+
+---
+
+### ADIM 3.11 — Garanti İşlemleri
+
+**Görevler:**
+- [ ] `ServiceOrder.warranty_claim` bayrağı
+- [ ] Garanti kaynağı ve kapsam açıklaması alanları
+- [ ] Makine kartındaki garanti bitiş tarihi bilgi amaçlı gösterilir; kapsam kullanıcı tarafından doğrulanır
+- [ ] Garanti kapsamında müşteri ücreti sıfır olabilir
+- [ ] Kullanılan parça stok çıkışı ve unit_cost_snapshot yine kaydedilir (SR-011)
+- [ ] Kapora: servis kabulünde alınan ön ödeme; service_order_id bağlı Payment kaydı (SR-018)
+
+**İlgili AC:** AC-009 (garanti fişi TC-009)  
+**Test:** TC-009
+
+---
+
+### ADIM 3.12 — Servis Tamamlama ve Teslim
+
+**Görevler:**
+- [ ] "İş Tamamlandı" geçişi: fiyatı beklenen ücretli kalem varsa geçiş engellenir (SR-007)
+- [ ] Servis sayacı: `ServiceOrder.first_completed_at` dolu + iptal edilmemiş servisler (SR-009)
+- [ ] Yeniden açma sayaçta ikinci artış oluşturmaz
+- [ ] İptal edilen servis sayaçtan düşer; geçmişi korunur
+- [ ] **Teslim akışı (§5.2):**
+  - Teslim anında kalan bakiye açıkça gösterilir
+  - Borçlu teslim mümkündür; bakiye ve müşterinin borç kabulü kaydedilir (AC-025)
+  - Teslim alan kişi (müşteri değilse adı) kaydedilir
+  - Ödeme ve teslim kayıtları oluşturulur
+- [ ] Teslim edilmiş servis iptal edilemez (AC-033)
+
+**İlgili AC:** AC-017, AC-025, AC-033  
+**Test:** TC-010, TC-019, TC-034
+
+---
+
+### ADIM 3.13 — Servis İptali
+
+**Görevler:**
+- [ ] Servis iptali: gerekçe + onay zorunlu (SR-017)
+- [ ] Kullanılmış parça stoğu otomatik geri eklenmez; fiziksel durum ayrıca değerlendirilir
+- [ ] İsteğe bağlı "inceleme/teşhis ücreti" kalemi eklenebilir; servis iptal olarak kalır; sayaç artmaz
+- [ ] Alınmış ön ödeme/kapora: iade edilir veya müşteri alacağına yazılır (§9.7)
+- [ ] Teslim edilmiş servis iptal edilemez → ücret düzeltmesi iade akışıyla yapılır
+
+**İlgili SR:** SR-017  
+**Test:** TC-034, TC-056
+
+---
+
+### ADIM 3.14 — Parça Temin Durumu (Parça Bekleniyor)
+
+**Görevler:**
+- [ ] `ServicePart.supply_status`: IN_STOCK / TO_ORDER / ORDERED / ARRIVED
+- [ ] TO_ORDER veya ORDERED parça olan serviste "Parça Bekleniyor" durumunda kalabilir
+- [ ] Beklenen tarih (expected_at) ve isteğe bağlı sipariş/satın alma kalemi bağlantısı
+- [ ] Tüm parçalar ARRIVED/IN_STOCK olunca bekleme bildirimi çözülür (SR-019)
+
+---
+
+### ADIM 3.15 — Servis Fişleri ve Yazdırma
+
+**Görevler:**
+- [ ] **Servis kabul fişi:** İşletme adı/telefon/logo, servis no/tarih, müşteri, makine, teslim alınan aksesuarlar, mevcut hasar, şikâyet, teslim koşulları (alt metin ayardan)
+- [ ] **Servis sonuç özeti:** İşletme adı/telefon, servis no/tarih, müşteri/makine/seri veya iç numara, şikâyet ve yapılan iş özeti, toplam, tahsil edilen, kalan bakiye, durum, teslim bilgisi
+- [ ] Dahili parça maliyetleri ve maliyet snapshot'ı müşteri çıktısında görünmez (AC-034)
+- [ ] Kâğıt biçimi: A4 + dar fiş; PDF kaydetme alternatifi
+- [ ] Çıktılar resmî fatura olarak adlandırılmaz
+
+**İlgili FR:** FR-010  
+**İlgili AC:** AC-034  
+**Test:** TC-035
+
+---
+
+### ADIM 3.16 — Servis Teslim Tarihi Hatırlatmaları
+
+**Görevler:**
+- [ ] Teslim tarihi yaklaşma bildirimi: varsayılan 1 gün önce
+- [ ] Gecikme durumunda teslim kaydı oluşana kadar günde bir kez bildirim
+- [ ] Ana ekran "Teslim tarihi yaklaşan/geçen" metriği
+- [ ] Ayarlardan hatırlatma günü değiştirilebilir (SR-014)
+
+**İlgili AC:** AC-038
+
+---
+
+### ADIM 3.17 — Servis Ekranı (UI)
+
+**Görevler:**
+- [ ] Servis listesi: aktif / tamamlanmış / iptal edilmiş sekmeleri; durum rozeti, vaat edilen teslim tarihi, bakiye göstergesi
+- [ ] Servis detayı sekmeleri:
+  - Özet (müşteri, makine, durum, tarihler)
+  - Arıza ve teşhis
+  - İşlemler ve parçalar
+  - Onaylar
+  - Kontrol listesi
+  - Ödemeler
+  - Geçmiş (durum geçmişi ve audit)
+- [ ] Ana ekran metrikleri: Aktif Servis, Onay Bekleyen, Parça Bekleyen, Teslim Tarihi Yaklaşan/Geçen
+
+---
+
+## FAZ 3 Tamamlanma Kriterleri
+
+| # | Kriter | AC/TC Referansı |
+|---|--------|----------------|
+| 1 | Mevcut müşteri ve makineyle servis 30 sn'de açılıyor | AC-001, TC-001 |
+| 2 | Yeni müşteri + makine + servis tek akışta bağlanıyor | AC-002, TC-002 |
+| 3 | QR ile makine açılıyor; oturumsuz giriş isteniyor | AC-003, TC-003 |
+| 4 | Reddedilen işlem toplam ve stok tüketimine girmiyor | AC-004, TC-004 |
+| 5 | Teklif arttığında eski onay yeni tutarı kapsamıyor | AC-042, TC-005 |
+| 6 | Şablon kopyalanıyor; şablon değişince kopya sabit kalıyor | AC-005, TC-008 |
+| 7 | Garanti işinde müşteri ücreti sıfır; parça çıkışı var | TC-009 |
+| 8 | Borçlu teslimde bakiye gösterilip kaydediliyor | AC-025, TC-010 |
+| 9 | Durum geçmişi kayıt altına alınıyor | AC-017, TC-019 |
+| 10 | Teslim edilmiş servis iptal edilemiyor | AC-033, TC-034 |
+| 11 | Fiş iç maliyetleri göstermiyor | AC-034, TC-035 |
+
+---
+
+## Sonraki Faz
+
+[FAZ 4 — Ticaret Modülü →](./04_FAZ4_TICARET.md)
