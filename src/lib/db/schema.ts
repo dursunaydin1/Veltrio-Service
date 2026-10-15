@@ -1,0 +1,313 @@
+import Dexie, { type Table } from "dexie";
+import type {
+  Business,
+  BusinessSettings,
+  User,
+  Device,
+  Customer,
+  Machine,
+  Supplier,
+  Product,
+  ProductSerialUnit,
+  StockMovement,
+  Payment,
+  AuditLog,
+  SyncQueueItem,
+  Notification,
+} from "@/types";
+
+// ============================================================
+// FAZ 2-7 İçin Ek Tipler (şema erken tanımlanıyor)
+// ============================================================
+
+export interface OpeningBalance {
+  id: string;
+  business_id: string;
+  party_type: "CUSTOMER" | "SUPPLIER";
+  party_id: string;
+  direction: "OWED_BY_PARTY" | "OWED_TO_PARTY";
+  amount: number;
+  as_of_date: string;
+  source_note?: string;
+  import_batch_id?: string;
+  created_at: string;
+}
+
+export interface PaymentAllocation {
+  id: string;
+  business_id: string;
+  payment_id: string;
+  source_type: string; // 'SERVICE' | 'SALE' | 'OPENING_BALANCE'
+  source_id: string;
+  allocated_amount: number;
+  created_at: string;
+}
+
+export interface ImportBatch {
+  id: string;
+  business_id: string;
+  file_name: string;
+  file_hash: string;
+  imported_at: string;
+  row_count: number;
+  error_count: number;
+  status: "PENDING" | "COMPLETED" | "FAILED";
+}
+
+// Service tipi (FAZ 3)
+export interface Service {
+  id: string;
+  business_id: string;
+  document_no: string;
+  customer_id?: string;
+  machine_id?: string;
+  status: string;
+  description?: string;
+  customer_complaint?: string;
+  diagnosis?: string;
+  resolution?: string;
+  deposit_amount: number;
+  labor_fee: number;
+  total_amount: number;
+  promised_date?: string;
+  received_date: string;
+  completed_date?: string;
+  delivered_date?: string;
+  first_completed_at?: string;
+  warranty_until?: string;
+  is_warranty_claim: boolean;
+  cancel_reason?: string;
+  created_by_device: string;
+  created_at: string;
+  updated_at: string;
+}
+
+export interface ServicePart {
+  id: string;
+  business_id: string;
+  service_id: string;
+  product_id?: string;
+  serial_unit_id?: string;
+  description_snapshot: string;
+  quantity: number;
+  unit: string;
+  unit_price_snapshot: number;
+  unit_cost_snapshot: number;
+  status: string; // PENDING | APPROVED | REJECTED | ARRIVED | USED
+  stock_movement_id?: string;
+  approved_at?: string;
+  approved_amount?: number;
+  created_at: string;
+  updated_at: string;
+}
+
+export interface ServiceStatusHistory {
+  id: string;
+  business_id: string;
+  service_id: string;
+  from_status?: string;
+  to_status: string;
+  changed_by_device: string;
+  note?: string;
+  changed_at: string;
+}
+
+// Sale tipi (FAZ 4)
+export interface Sale {
+  id: string;
+  business_id: string;
+  document_no: string;
+  customer_id?: string;
+  sale_date: string;
+  subtotal: number;
+  discount_total: number;
+  tax_total: number;
+  total_amount: number;
+  status: "DRAFT" | "FINAL" | "CANCELLED";
+  cancel_reason?: string;
+  created_by_device: string;
+  created_at: string;
+  updated_at: string;
+}
+
+export interface SaleItem {
+  id: string;
+  business_id: string;
+  sale_id: string;
+  product_id?: string;
+  serial_unit_id?: string;
+  machine_id?: string;
+  description_snapshot: string;
+  quantity: number;
+  unit: string;
+  unit_price_snapshot: number;
+  unit_cost_snapshot: number;
+  discount_amount: number;
+  tax_mode: string;
+  tax_rate: number;
+  line_total: number;
+  stock_movement_id?: string;
+  created_at: string;
+}
+
+// Purchase tipi (FAZ 4)
+export interface Purchase {
+  id: string;
+  business_id: string;
+  document_no: string;
+  supplier_id?: string;
+  purchase_date: string;
+  total_amount: number;
+  status: "DRAFT" | "RECEIVED" | "CANCELLED";
+  notes?: string;
+  created_by_device: string;
+  created_at: string;
+  updated_at: string;
+}
+
+export interface PurchaseItem {
+  id: string;
+  business_id: string;
+  purchase_id: string;
+  product_id?: string;
+  description_snapshot: string;
+  quantity: number;
+  unit: string;
+  unit_price: number;
+  line_discount: number;
+  tax_mode: string;
+  tax_rate: number;
+  line_total: number;
+  stock_movement_id?: string;
+  created_at: string;
+}
+
+// Return tipi (FAZ 5)
+export interface ReturnTransaction {
+  id: string;
+  business_id: string;
+  document_no: string;
+  original_type: string; // 'SALE' | 'PURCHASE' | 'SERVICE'
+  original_id: string;
+  return_date: string;
+  reason?: string;
+  refund_method?: string;
+  total_amount: number;
+  status: "POSTED" | "REVERSED";
+  created_by_device: string;
+  created_at: string;
+}
+
+export interface ReturnItem {
+  id: string;
+  business_id: string;
+  return_id: string;
+  original_line_type: string;
+  original_line_id: string;
+  product_id?: string;
+  serial_unit_id?: string;
+  quantity: number;
+  unit: string;
+  amount: number;
+  stock_disposition: "SELLABLE" | "DAMAGED" | "NOT_RETURNED";
+  stock_movement_id?: string;
+  created_at: string;
+}
+
+// ============================================================
+// DEXIE VERİTABANI SINIFI
+// ============================================================
+
+export class VeltrioDatabase extends Dexie {
+  // FAZ 1 — Temel tablolar
+  businesses!: Table<Business>;
+  users!: Table<User>;
+  devices!: Table<Device>;
+  audit_logs!: Table<AuditLog>;
+  sync_queue!: Table<SyncQueueItem>;
+  notifications!: Table<Notification>;
+
+  // FAZ 2 — Stok & Ödeme
+  customers!: Table<Customer>;
+  machines!: Table<Machine>;
+  suppliers!: Table<Supplier>;
+  products!: Table<Product>;
+  product_serial_units!: Table<ProductSerialUnit>;
+  stock_movements!: Table<StockMovement>;
+  payments!: Table<Payment>;
+  payment_allocations!: Table<PaymentAllocation>;
+  opening_balances!: Table<OpeningBalance>;
+  import_batches!: Table<ImportBatch>;
+
+  // FAZ 3 — Servis
+  services!: Table<Service>;
+  service_parts!: Table<ServicePart>;
+  service_status_history!: Table<ServiceStatusHistory>;
+
+  // FAZ 4 — Ticaret
+  sales!: Table<Sale>;
+  sale_items!: Table<SaleItem>;
+  purchases!: Table<Purchase>;
+  purchase_items!: Table<PurchaseItem>;
+
+  // FAZ 5 — İade
+  return_transactions!: Table<ReturnTransaction>;
+  return_items!: Table<ReturnItem>;
+
+  constructor() {
+    super("veltrio_db");
+
+    // Şema sürüm 1
+    this.version(1).stores({
+      // --- FAZ 1 ---
+      businesses: "id, device_code_prefix",
+      users: "id, business_id, email",
+      devices: "id, business_id, device_code, is_active",
+      audit_logs: "id, business_id, entity_type, entity_id, changed_at",
+      sync_queue: "id, table_name, record_id, status, created_at",
+      notifications: "id, business_id, type, dedupe_key, read_at, resolved_at",
+
+      // --- FAZ 2 ---
+      customers:
+        "id, business_id, phone_normalized, archived_at, created_at",
+      machines:
+        "id, business_id, customer_id, serial_number, is_temporary, archived_at",
+      suppliers: "id, business_id, archived_at",
+      products: "id, business_id, code, category, archived_at",
+      product_serial_units:
+        "id, business_id, product_id, serial_number, status, machine_id",
+      stock_movements:
+        "id, business_id, product_id, movement_type, source_type, source_id, created_at",
+      payments:
+        "id, business_id, direction, method, customer_id, supplier_id, source_type, source_id, status, payment_date",
+      payment_allocations:
+        "id, business_id, payment_id, source_type, source_id",
+      opening_balances:
+        "id, business_id, party_type, party_id, as_of_date, import_batch_id",
+      import_batches: "id, business_id, file_hash, status",
+
+      // --- FAZ 3 ---
+      services:
+        "id, business_id, document_no, customer_id, machine_id, status, promised_date, created_at",
+      service_parts:
+        "id, business_id, service_id, product_id, serial_unit_id, status",
+      service_status_history:
+        "id, business_id, service_id, to_status, changed_at",
+
+      // --- FAZ 4 ---
+      sales: "id, business_id, document_no, customer_id, status, sale_date",
+      sale_items: "id, business_id, sale_id, product_id, serial_unit_id",
+      purchases:
+        "id, business_id, document_no, supplier_id, status, purchase_date",
+      purchase_items: "id, business_id, purchase_id, product_id",
+
+      // --- FAZ 5 ---
+      return_transactions:
+        "id, business_id, document_no, original_type, original_id, status",
+      return_items: "id, business_id, return_id, product_id, serial_unit_id",
+    });
+  }
+}
+
+// Singleton instance — uygulama boyunca tek bir DB bağlantısı
+export const db = new VeltrioDatabase();
