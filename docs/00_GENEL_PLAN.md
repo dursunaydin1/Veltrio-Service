@@ -37,7 +37,7 @@ Aşağıdaki kararlar ilerleyen adımlarda netleştirilecektir:
 
 | Karar Alanı | Karar |
 |-------------|-------|
-| **Frontend framework** | ✅ **Next.js 14 (App Router)** — SSR + PWA desteği, mobil öncelikli |
+| **Frontend framework** | ✅ **Next.js 16 (App Router)** — SSR + PWA desteği, mobil öncelikli |
 | **Backend / BaaS** | ✅ **Supabase** — PostgreSQL + Auth + Realtime + Storage |
 | **Veritabanı** | ✅ **PostgreSQL** (Supabase üzerinde) — decimal tip, UUID, audit log |
 | **Yerel depolama** | ✅ **Dexie.js** (IndexedDB wrapper) — çevrimdışı kayıt + eşitleme kuyruğu |
@@ -108,7 +108,7 @@ Product ──→ ProductSerialUnit
 
 | Faz | Başlangıç | Tamamlanma | Durum |
 |-----|-----------|------------|-------|
-| FAZ 1 | — | — | 🔴 Başlamadı |
+| FAZ 1 | 2026-10 | — | 🟡 Devam ediyor (eşitleme API, giriş akışı hazır) |
 | FAZ 2 | — | — | 🔴 Başlamadı |
 | FAZ 3 | — | — | 🔴 Başlamadı |
 | FAZ 4 | — | — | 🔴 Başlamadı |

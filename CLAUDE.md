@@ -17,9 +17,10 @@ Veltrio Service: a single-user, mobile-first, offline-capable (PWA) management a
 npm run dev     # next dev (Turbopack)
 npm run build   # next build
 npm run lint    # eslint (flat config, eslint.config.mjs)
+npm test        # vitest run (tek dosya: npx vitest run src/lib/utils/phone.test.ts)
 ```
 
-There is no test runner configured yet. Environment vars go in `.env.local` (see `.env.local.example`): `NEXT_PUBLIC_SUPABASE_URL`, `NEXT_PUBLIC_SUPABASE_ANON_KEY`. If they are missing, `src/proxy.ts` skips the auth redirect so the app still runs locally.
+Tests are Vitest unit tests next to the code (`*.test.ts`, `@` alias configured in `vitest.config.mts`). Environment vars go in `.env.local` (see `.env.local.example`): `NEXT_PUBLIC_SUPABASE_URL`, `NEXT_PUBLIC_SUPABASE_ANON_KEY`. If they are missing, `src/proxy.ts` skips the auth redirect so the app still runs locally.
 
 Database migrations live in `supabase/migrations/` and must be applied in order (001 → 005), via the Supabase SQL editor or `supabase db push`. The sync API routes do not work until `005_sync_changes.sql` is applied.
 

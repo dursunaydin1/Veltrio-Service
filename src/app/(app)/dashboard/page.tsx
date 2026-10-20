@@ -21,7 +21,7 @@ export default function DashboardPage() {
       <div style={{ fontSize: 48 }}>🚀</div>
       <h1 style={{ fontSize: "1.5rem" }}>Dashboard</h1>
       <p style={{ color: "var(--text-muted)" }}>
-        FAZ 1 tamamlandı — FAZ 2&apos;ye geçiliyor…
+        Temel altyapı hazır; uygulama ekranları geliştiriliyor.
       </p>
     </div>
   );
