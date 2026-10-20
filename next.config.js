@@ -1,14 +1,8 @@
-const withPWA = require("next-pwa")({
-  dest: "public",
-  register: true,
-  skipWaiting: true,
-  disable: process.env.NODE_ENV === "development",
-  runtimeCaching: [],
-});
-
 /** @type {import('next').NextConfig} */
 const nextConfig = {
-  // next-pwa next.config.js formatı gerektiriyor
+  // Turbopack etkin (Next.js 16 default)
+  // next-pwa Turbopack ile uyumsuz — FAZ 6'da native service worker ile değiştirilecel
+  turbopack: {},
 };
 
-module.exports = withPWA(nextConfig);
+module.exports = nextConfig;

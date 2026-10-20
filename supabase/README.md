@@ -10,12 +10,13 @@ Bu dizin Supabase PostgreSQL migration dosyalarını içerir.
 | 002 | `002_customers_machines_suppliers.sql` | customers, machines, suppliers, opening_balances |
 | 003 | `003_products_stock.sql` | products, serial_units, stock_movements, payments |
 | 004 | `004_services_sales_returns.sql` | services, sales, purchases, returns, notifications |
+| 005 | `005_sync_changes.sql` | Cihazlar arası artımlı eşitleme günlüğü ve kayıt tetikleyicileri |
 
 ## Supabase Dashboard'dan Uygulama
 
 1. [Supabase Dashboard](https://app.supabase.com) → Projenizi seçin
 2. **SQL Editor** sekmesine girin
-3. Migration dosyalarını **sırasıyla** çalıştırın (001 → 002 → 003 → 004)
+3. Migration dosyalarını **sırasıyla** çalıştırın (001 → 002 → 003 → 004 → 005)
 
 ## Supabase CLI ile Uygulama
 
@@ -32,6 +33,10 @@ supabase link --project-ref YOUR_PROJECT_ID
 # Migration'ları uygula
 supabase db push
 ```
+
+Eşitleme API'si oturum açmış Supabase kullanıcısını ve aktif cihaz kaydını doğrular.
+`005_sync_changes.sql` migration'ı uygulanmadan `/api/sync/push` ve
+`/api/sync/pull` uç noktaları çalışmaz.
 
 ## Önemli Notlar
 

@@ -27,6 +27,9 @@ export async function enqueue(
     created_at: nowISO(),
   };
   await db.sync_queue.add(item);
+  if (typeof window !== "undefined") {
+    window.dispatchEvent(new Event("veltrio:sync-requested"));
+  }
 }
 
 /**

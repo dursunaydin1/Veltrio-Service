@@ -1,9 +1,12 @@
 "use client";
 
 import { useEffect, useCallback } from "react";
-import { createClient } from "@/lib/supabase/client";
 import { useSessionStore } from "@/stores/session";
 import type { User, Business, Device } from "@/types";
+
+const SUPABASE_CONFIGURED =
+  !!process.env.NEXT_PUBLIC_SUPABASE_URL &&
+  !!process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY;
 
 /**
  * Supabase Auth oturumunu dinler ve SessionStore'u günceller.
@@ -13,9 +16,14 @@ import type { User, Business, Device } from "@/types";
  */
 export function useAuthSync() {
   const { setUser, setBusiness, setDevice, clearSession } = useSessionStore();
-  const supabase = createClient();
 
   const loadSession = useCallback(async () => {
+    if (!SUPABASE_CONFIGURED) return; // env yok → atla
+
+    // Dinamik import — env yokken modül import hatasını önler
+    const { createClient } = await import("@/lib/supabase/client");
+    const supabase = createClient();
+
     const {
       data: { user: authUser },
     } = await supabase.auth.getUser();
@@ -43,12 +51,12 @@ export function useAuthSync() {
     const { data: business } = await supabase
       .from("businesses")
       .select("*")
-      .eq("id", dbUser.business_id)
+      .eq("id", (dbUser as User).business_id)
       .single();
 
     if (business) setBusiness(business as Business);
 
-    // Aktif cihazı çek (localStorage'da device_code varsa eşleştir)
+    // Aktif cihazı çek
     const storedCode = localStorage.getItem("veltrio_device_code");
     if (storedCode) {
       const { data: device } = await supabase
@@ -60,28 +68,35 @@ export function useAuthSync() {
 
       if (device) setDevice(device as Device);
     }
-  }, [supabase, setUser, setBusiness, setDevice, clearSession]);
+  }, [setUser, setBusiness, setDevice, clearSession]);
 
   useEffect(() => {
+    if (!SUPABASE_CONFIGURED) return;
+
     loadSession();
 
-    const {
-      data: { subscription },
-    } = supabase.auth.onAuthStateChange((event) => {
-      if (event === "SIGNED_OUT") {
-        clearSession();
-      } else if (event === "SIGNED_IN" || event === "TOKEN_REFRESHED") {
-        loadSession();
-      }
+    let cleanup: (() => void) | undefined;
+
+    import("@/lib/supabase/client").then(({ createClient }) => {
+      const supabase = createClient();
+      const {
+        data: { subscription },
+      } = supabase.auth.onAuthStateChange((event) => {
+        if (event === "SIGNED_OUT") {
+          clearSession();
+        } else if (event === "SIGNED_IN" || event === "TOKEN_REFRESHED") {
+          loadSession();
+        }
+      });
+      cleanup = () => subscription.unsubscribe();
     });
 
-    return () => subscription.unsubscribe();
-  }, [loadSession, supabase.auth, clearSession]);
+    return () => cleanup?.();
+  }, [loadSession, clearSession]);
 }
 
 /**
  * Çevrimiçi/çevrimdışı durumunu dinler.
- * Root layout'ta bir kez kullanılmalıdır.
  */
 export function useOnlineStatus() {
   const setIsOnline = useSessionStore((s) => s.setIsOnline);
@@ -92,8 +107,6 @@ export function useOnlineStatus() {
 
     window.addEventListener("online",  handleOnline);
     window.addEventListener("offline", handleOffline);
-
-    // İlk durum
     setIsOnline(navigator.onLine);
 
     return () => {

@@ -1,7 +1,6 @@
 "use client";
 
 import { useCallback } from "react";
-import { createClient } from "@/lib/supabase/client";
 import { useSessionStore } from "@/stores/session";
 import { generateDeviceCode, generateId, nowISO } from "@/lib/utils";
 import type { Device } from "@/types";
@@ -12,16 +11,20 @@ import type { Device } from "@/types";
  */
 export function useDevice() {
   const { device, user, business, setDevice } = useSessionStore();
-  const supabase = createClient();
+
+  const getSupabase = useCallback(async () => {
+    const { createClient } = await import("@/lib/supabase/client");
+    return createClient();
+  }, []);
 
   /**
    * Yeni cihaz kaydeder ve localStorage'a yazar.
-   * İlk girişte veya cihaz iptal sonrasında çağrılır.
    */
   const registerDevice = useCallback(
     async (deviceName: string): Promise<Device | null> => {
       if (!user || !business) return null;
 
+      const supabase = await getSupabase();
       const deviceCode = generateDeviceCode(business.device_code_prefix);
 
       const newDevice: Device = {
@@ -45,20 +48,20 @@ export function useDevice() {
         return null;
       }
 
-      // localStorage'a kaydet
       localStorage.setItem("veltrio_device_code", deviceCode);
       setDevice(data as Device);
       return data as Device;
     },
-    [user, business, supabase, setDevice]
+    [user, business, getSupabase, setDevice]
   );
 
   /**
-   * Aktif cihazı iptal eder ve yerel veriyi temizler.
-   * PRD §4.4, AC-045: Cihaz iptali + yerel veri silme.
+   * Aktif cihazı iptal eder.
+   * PRD §4.4, AC-045
    */
   const revokeDevice = useCallback(async (): Promise<void> => {
     if (!device) return;
+    const supabase = await getSupabase();
 
     await supabase
       .from("devices")
@@ -67,20 +70,23 @@ export function useDevice() {
 
     localStorage.removeItem("veltrio_device_code");
     setDevice(null);
-  }, [device, supabase, setDevice]);
+  }, [device, getSupabase, setDevice]);
 
   /**
    * Son eşitleme zamanını sunucuya bildirir.
    */
   const updateLastSynced = useCallback(async (): Promise<void> => {
     if (!device) return;
+    const supabase = await getSupabase();
     const now = nowISO();
+
     await supabase
       .from("devices")
       .update({ last_synced_at: now })
       .eq("id", device.id);
+
     useSessionStore.getState().setLastSyncedAt(now);
-  }, [device, supabase]);
+  }, [device, getSupabase]);
 
   return {
     device,

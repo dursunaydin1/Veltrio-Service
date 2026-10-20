@@ -7,11 +7,20 @@ type CookieOption = { name: string; value: string; options?: Record<string, unkn
  * Sunucu taraflı Supabase client (Server Components, Route Handlers).
  */
 export async function createClient() {
+  const url = process.env.NEXT_PUBLIC_SUPABASE_URL;
+  const key = process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY;
+
+  if (!url || !key) {
+    throw new Error(
+      "Supabase yapılandırılmamış. .env.local dosyasını oluşturun (.env.local.example şablonuna bakın)."
+    );
+  }
+
   const cookieStore = await cookies();
 
   return createServerClient(
-    process.env.NEXT_PUBLIC_SUPABASE_URL!,
-    process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!,
+    url,
+    key,
     {
       cookies: {
         getAll() {

@@ -1,6 +1,7 @@
 "use client";
 
 import { useAuthSync, useOnlineStatus } from "@/hooks/useAuth";
+import { useSync } from "@/hooks/useSync";
 
 /**
  * Uygulama genelinde hook'ları tek yerden başlatır.
@@ -12,5 +13,6 @@ import { useAuthSync, useOnlineStatus } from "@/hooks/useAuth";
 export function AppProvider({ children }: { children: React.ReactNode }) {
   useAuthSync();
   useOnlineStatus();
+  useSync();
   return <>{children}</>;
 }

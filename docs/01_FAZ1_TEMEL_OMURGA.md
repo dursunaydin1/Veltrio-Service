@@ -136,17 +136,19 @@ Bu faz tüm diğer modüllerin üzerine inşa edileceği teknik temeli oluşturu
 ### ADIM 1.7 — Eşitleme Altyapısı İskeleti
 
 **Görevler:**
-- [ ] `sync_state` alanları: `PENDING_SYNC | SYNCED | CONFLICT | ERROR`
-- [ ] `version` (integer revision counter) her kayıtta
-- [ ] İstemci tarafı eşitleme kuyruğu (yerel DB'de bekleyen kayıtlar)
-- [ ] Sunucu tarafı eşitleme endpoint'i (`POST /sync/push`, `GET /sync/pull`)
-- [ ] **Idempotency:** Aynı UUID + version ile gelen kayıt ikinci kez oluşmaz
-- [ ] **Append-only:** Finans/stok hareketleri güncellenmez, yeni kayıt eklenir
+- [ ] `sync_state` alanları: `PENDING_SYNC | SYNCED | CONFLICT | ERROR` (kayıt modellerinde henüz yok)
+- [ ] `version` (integer revision counter) her kayıtta (henüz uygulanmadı)
+- [x] İstemci tarafı eşitleme kuyruğu (yerel DB'de bekleyen kayıtlar)
+- [x] Sunucu tarafı eşitleme endpoint'i (`POST /api/sync/push`, `GET /api/sync/pull`)
+- [x] **Idempotency:** Aynı UUID ile gelen ekleme tekrarlandığında ikinci kayıt oluşmaz
+- [x] **Append-only:** Stok/ödeme hareketlerinde yalnızca ekleme kabul edilir
 - [ ] Bağımlılık sırası: üst kayıt önce eşitlenir (Customer → Machine → ServiceOrder → ...)
-- [ ] Hata kuyruğu: başarısız eşitleme kaydı silinmez, yeniden deneme kuyruğunda kalır
+- [x] Hata kuyruğu: başarısız eşitleme kaydı silinmez, yeniden deneme kuyruğunda kalır
 - [ ] Çakışma kuyruğu iskeleti (içerik sonraki fazlarda doldurulur)
 - [ ] `SyncMetadata` güncelleme
 - [ ] Çevrimdışı azami gün kontrolü: 30 günü aşarsa yeni kayıt için çevrimiçi doğrulama
+
+> Push/pull API'si ve artımlı değişiklik günlüğü eklendi. Aktif cihaz doğrulaması yapılır; veritabanı tarafındaki `005_sync_changes.sql` migration'ı uygulanmalıdır. Bağımlılık sıralaması, çakışma çözümü, kayıt sürümü ve uzun süre çevrimdışı kalma kuralı henüz tamamlanmadığından adım bütünüyle bitmiş sayılmaz.
 
 **İlgili FR:** FR-020, FR-021  
 **İlgili AC:** AC-036, AC-037
