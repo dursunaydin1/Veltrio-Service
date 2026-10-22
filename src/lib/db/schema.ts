@@ -100,12 +100,63 @@ export interface ServicePart {
   unit: string;
   unit_price_snapshot: number;
   unit_cost_snapshot: number;
-  status: string; // PENDING | APPROVED | REJECTED | ARRIVED | USED
+  /** Parçanın kaynağı: stok ürünü, müşterinin getirdiği, stok dışı alım, diğer */
+  source_type: PartSourceType;
+  /** Müşteri kararı (K-022): PENDING | APPROVED | REJECTED | DEFERRED */
+  status: LineStatus;
+  /** Fiilen kullanılan miktar; stoktan düşüm bu değerle olur (SR-008) */
+  used_quantity: number;
+  supply_status: PartSupplyStatus;
+  expected_at?: string;
+  discount_amount: number;
+  tax_mode: string;
+  tax_rate: number;
+  line_total: number;
   stock_movement_id?: string;
   approved_at?: string;
   approved_amount?: number;
+  /** Sunucu kayıt sürümü; güncellemede çakışma tespiti için gönderilir. */
+  version?: number;
   created_at: string;
   updated_at: string;
+}
+
+export type PartSourceType = "STOCK_PRODUCT" | "CUSTOMER_SUPPLIED" | "NON_STOCK_PURCHASE" | "OTHER";
+export type PartSupplyStatus = "IN_STOCK" | "TO_ORDER" | "ORDERED" | "ARRIVED";
+export type LineStatus = "PENDING" | "APPROVED" | "REJECTED" | "DEFERRED";
+
+/** Servis işlem (işçilik) satırı — migration 014 */
+export interface ServiceOperation {
+  id: string;
+  business_id: string;
+  service_id: string;
+  description: string;
+  quantity: number;
+  unit_price: number;
+  discount_amount: number;
+  tax_mode: string;
+  tax_rate: number;
+  line_total: number;
+  /** Fiyat henüz belirlenmedi (SR-007); tamamlamayı engeller */
+  price_pending: boolean;
+  status: LineStatus;
+  version?: number;
+  created_at: string;
+  updated_at: string;
+}
+
+/** Müşteri onay kaydı (yalnızca-ekleme) — AC-004, AC-042 */
+export interface ServiceApproval {
+  id: string;
+  business_id: string;
+  service_id: string;
+  decision: "APPROVED" | "REJECTED" | "DEFERRED" | "PARTIAL";
+  method: "IN_PERSON" | "PHONE" | "OTHER";
+  approved_amount: number;
+  explanation?: string;
+  actor_id?: string;
+  changed_by_device: string;
+  decided_at: string;
 }
 
 export interface ServiceStatusHistory {
@@ -259,6 +310,8 @@ export class VeltrioDatabase extends Dexie {
   services!: Table<Service>;
   service_parts!: Table<ServicePart>;
   service_status_history!: Table<ServiceStatusHistory>;
+  service_operations!: Table<ServiceOperation>;
+  service_approvals!: Table<ServiceApproval>;
 
   // FAZ 4 — Ticaret
   sales!: Table<Sale>;
@@ -331,6 +384,12 @@ export class VeltrioDatabase extends Dexie {
     // Şema sürüm 3: makine sahiplik geçmişi
     this.version(3).stores({
       machine_ownership_history: "id, business_id, machine_id, changed_at",
+    });
+
+    // Şema sürüm 4: servis işlem satırları ve müşteri onayları
+    this.version(4).stores({
+      service_operations: "id, business_id, service_id",
+      service_approvals: "id, business_id, service_id, decided_at",
     });
   }
 }

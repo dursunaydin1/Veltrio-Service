@@ -161,16 +161,18 @@ Uygulamanın kalbi olan servis akışını hayata geçirmek: müşteri kabulünd
 ### ADIM 3.8 — Müşteri Onay Sistemi
 
 **Görevler:**
-- [ ] `ServiceApproval` tablosu: decision, method, approved_amount, decided_at, explanation
-- [ ] Onay eşiği kontrolü (SR-004):
+- [x] `ServiceApproval` tablosu: decision, method, approved_amount, decided_at, explanation
+- [x] Onay eşiği kontrolü (SR-004):
   - Eşik = BusinessSettings.approval_threshold_amount (varsayılan 1.000 ₺)
   - 0 = her ücretli işte onay
   - Onay gereken serviste onay kaydı olmadan "Teşhis Tamamlandı" → "İşlemde" geçişi engellenir
-- [ ] Teklif tutarı artar → yeni onay gerekir → servis "Müşteri Onayı Bekleniyor"a alınır (SR-005)
+- [x] Teklif tutarı artar → yeni onay gerekir → servis "Müşteri Onayı Bekleniyor"a alınır (SR-005)
 - [ ] Onaylananın üstünde işlem yapılmaz; ayarlanabilir tolerans (varsayılan 0)
-- [ ] Onay yöntemi: yüz yüze / telefon / diğer
-- [ ] Her kalem: onaylandı / reddedildi / ertelendi (SR-006)
-- [ ] Reddedilen/ertelenen kalem toplam tutara girmez (TC-004)
+- [x] Onay yöntemi: yüz yüze / telefon / diğer
+- [x] Her kalem: onaylandı / reddedildi / ertelendi (SR-006)
+- [x] Reddedilen/ertelenen kalem toplam tutara girmez (TC-004)
+
+> Uygulandı: migration 014, `src/lib/services/lines.ts` (saf teklif özeti ve eşik kuralı), `quote.ts` (`recordApproval`, `refreshServiceTotals` ile otomatik "Müşteri onayı bekleniyor"), servis sayfasında "Müşteri kararını kaydet" formu ve onay geçmişi. Onay kaydı değiştirilemez tabloya yazılır. **Açık:** "Onaylananın üstünde işlem yapılmaz; ayarlanabilir tolerans" (şimdilik tolerans 0 sabit: onaylı kalemin tutarı artarsa yeniden onay bekler); eşik ve negatif stok için ayarlar ekranı.
 
 **İlgili FR:** FR-032  
 **İlgili AC:** AC-004, AC-042  
@@ -181,22 +183,24 @@ Uygulamanın kalbi olan servis akışını hayata geçirmek: müşteri kabulünd
 ### ADIM 3.9 — İşlem ve Parça Satırları
 
 **Görevler:**
-- [ ] `ServiceOperation` satırları:
+- [x] `ServiceOperation` satırları:
   - Katalogdan seçim veya serbest metin
   - Önerilen fiyat otomatik dolar; değiştirilebilir
   - İşçilik tutarı, indirim, vergi modu/oranı, satır toplamı
   - Onay durumu (onaylandı / reddedildi / ertelendi)
   - Fiyat bilinmiyorsa `price_status = PENDING` işareti (SR-007)
-- [ ] `ServicePart` satırları:
+- [x] `ServicePart` satırları:
   - Stok ürünü (product_id) veya serbest (product_id boş)
   - source_type: STOCK_PRODUCT / CUSTOMER_SUPPLIED / NON_STOCK_PURCHASE / OTHER
   - Müşteri getirdiği parça: stok düşülmez, müşteriye parça bedeli yazılmayabilir (§7.1)
   - quantity, used_quantity, returned_quantity, supply_status
   - supply_status: IN_STOCK / TO_ORDER / ORDERED / ARRIVED (SR-019)
   - Snapshot: description_snapshot, unit_price_snapshot, unit_cost_snapshot
-- [ ] Stok düşümü: `ServicePart.used_quantity > 0` olduğunda (SR-008)
-- [ ] Teklif aşamasında stok değişmez (TC-006)
-- [ ] Bir serviste birden fazla arıza, işlem ve parça olabilir (SR-003)
+- [x] Stok düşümü: `ServicePart.used_quantity > 0` olduğunda (SR-008)
+- [x] Teklif aşamasında stok değişmez (TC-006)
+- [x] Bir serviste birden fazla arıza, işlem ve parça olabilir (SR-003)
+
+> Uygulandı: `quote.ts` (`addOperation/updateOperation/removeOperation`, `addPart/updatePart/removePart`, `setPartUsedQuantity`), `ServiceLines.tsx`. Parça kullanımı `SERVICE_USE` stok hareketi + maliyet snapshot'ı üretir (AC-050), geri alma `CANCEL_REVERSAL` ile ve nedenle yapılır; kaynak türleri: stok ürünü / müşterinin getirdiği / stok dışı alım / diğer. Fiyatı belirsiz kalem (`price_pending`) "İş tamamlandı"yı engeller (SR-007). **Açık:** arıza/işlem kataloğu ve önerilen fiyatlar (3.5), `ServiceIssue` tablosu (şikâyet şimdilik metin), parça temin takibi ekranı (3.14).
 
 **İlgili AC:** AC-006, AC-007  
 **Test:** TC-006, TC-007

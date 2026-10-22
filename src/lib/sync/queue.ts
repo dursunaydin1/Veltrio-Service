@@ -1,4 +1,5 @@
 import { db } from "@/lib/db";
+import { pushRank } from "@/lib/sync/tables";
 import { generateId, nowISO } from "@/lib/utils";
 import type { SyncQueueItem } from "@/types";
 
@@ -97,14 +98,16 @@ async function mergeIntoPending(
 }
 
 /**
- * PENDING durumdaki tüm kayıtları döner.
- * En eski kayıttan başlayarak FIFO sıralamayla.
+ * PENDING durumdaki tüm kayıtları gönderim sırasıyla döner: önce bağımlılık
+ * sırası (üst tablolar önce), aynı tabloda en eskiden yeniye (FIFO).
  */
 export async function getPendingItems(): Promise<SyncQueueItem[]> {
-  return db.sync_queue
+  const items = await db.sync_queue
     .where("status")
     .equals("PENDING")
     .sortBy("created_at");
+  // Array.prototype.sort kararlıdır: aynı sırada kalanlar created_at düzenini korur.
+  return items.sort((a, b) => pushRank(a.table_name) - pushRank(b.table_name));
 }
 
 /**

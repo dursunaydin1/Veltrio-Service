@@ -1,6 +1,6 @@
 import { db } from "@/lib/db";
 import type { Service } from "@/lib/db";
-import { fromKurus } from "@/lib/calc";
+import { fromKurus, toKurus } from "@/lib/calc";
 import { recordCustomerPayment } from "@/lib/finance/service";
 import { createMachine } from "@/lib/machines/service";
 import { nextDocumentNo } from "@/lib/numbering";
@@ -9,6 +9,7 @@ import { enqueue } from "@/lib/sync/queue";
 import { generateId, nowISO } from "@/lib/utils";
 import type { BusinessContext } from "@/hooks/useBusinessContext";
 import type { PaymentMethod } from "@/types";
+import { isBilled, needsApprovalBeforeWork, summarizeLines } from "./lines";
 import {
   canTransition,
   isReopen,
@@ -17,6 +18,18 @@ import {
   statusLabel,
   type ServiceStatus,
 } from "./status";
+
+/**
+ * Servis işlemlerinin bağlamı: işletme/cihaz/kullanıcı + işletme ayarları.
+ * Onay eşiği 1.000 ₺ varsayılandır (0 = ücretli her işte onay); negatif stok
+ * ayarı parça kullanımında stok kuralına aktarılır.
+ */
+export type ServiceContext = BusinessContext & {
+  approvalThreshold?: number;
+  allowNegativeStock?: boolean;
+};
+
+export const DEFAULT_APPROVAL_THRESHOLD = 1000;
 
 export class ServiceRuleError extends Error {
   constructor(message: string) {
@@ -229,14 +242,21 @@ export async function openService(ctx: BusinessContext, params: OpenServiceParam
  * kez artmaz (SR-009).
  */
 export async function changeServiceStatus(
-  ctx: BusinessContext,
+  ctx: ServiceContext,
   serviceId: string,
   to: ServiceStatus,
   note?: string
 ): Promise<Service> {
   return db.transaction(
     "rw",
-    [db.services, db.service_status_history, db.sync_queue, db.audit_logs],
+    [
+      db.services,
+      db.service_status_history,
+      db.service_operations,
+      db.service_parts,
+      db.sync_queue,
+      db.audit_logs,
+    ],
     async () => {
       const existing = await db.services.get(serviceId);
       if (!existing || existing.business_id !== ctx.businessId) {
@@ -257,6 +277,23 @@ export async function changeServiceStatus(
         throw new ServiceRuleError(
           to === "CANCELLED" ? "İptal nedeni zorunludur." : "Yeniden açma nedeni zorunludur."
         );
+      }
+
+      // Teklif kuralları: onay gereken serviste karar bekleyen kalem varken işe
+      // başlanamaz (SR-004); fiyatı belirsiz kalemle iş tamamlanamaz (SR-007).
+      if (to === "IN_PROGRESS" && !isReopen(from, to)) {
+        const summary = await loadQuoteSummary(serviceId);
+        if (needsApprovalBeforeWork(summary, ctx.approvalThreshold ?? DEFAULT_APPROVAL_THRESHOLD)) {
+          throw new ServiceRuleError(
+            "Müşteri onayı gerekli: karar bekleyen kalemler var. Önce “Müşteri kararı”nı kaydedin."
+          );
+        }
+      }
+      if (to === "COMPLETED") {
+        const summary = await loadQuoteSummary(serviceId);
+        if (summary.unpriced > 0) {
+          throw new ServiceRuleError("Fiyatı belirlenmemiş kalem var. Tüm kalemlere fiyat girin veya kaldırın.");
+        }
       }
 
       const now = nowISO();
@@ -354,4 +391,72 @@ export async function getMachineServiceSummary(machineId: string): Promise<{
     .filter((s) => s.status !== "CANCELLED")
     .sort((a, b) => b.received_date.localeCompare(a.received_date))[0];
   return { completedCount, lastService };
+}
+
+/** Serviste henüz iptal edilmemiş satırların teklif özeti. */
+async function loadQuoteSummary(serviceId: string) {
+  const [operations, parts] = await Promise.all([
+    db.service_operations.where("service_id").equals(serviceId).toArray(),
+    db.service_parts.where("service_id").equals(serviceId).toArray(),
+  ]);
+  return summarizeLines([...operations, ...parts]);
+}
+
+/**
+ * Servis tutarlarını satırlardan yeniden hesaplar ve kaydeder:
+ *   labor_fee    = faturalanan işlem satırları
+ *   total_amount = faturalanan işlem + parça satırları (reddedilen/ertelenen hariç)
+ * Servis "İşlemde" iken teklif onaylananın üstüne çıkmışsa (karar bekleyen
+ * satır) yeni onay için "Müşteri onayı bekleniyor"a alır (SR-005).
+ */
+export async function refreshServiceTotals(ctx: ServiceContext, serviceId: string): Promise<Service> {
+  return db.transaction(
+    "rw",
+    [
+      db.services,
+      db.service_operations,
+      db.service_parts,
+      db.service_status_history,
+      db.sync_queue,
+      db.audit_logs,
+    ],
+    async () => {
+      const existing = await db.services.get(serviceId);
+      if (!existing || existing.business_id !== ctx.businessId) {
+        throw new ServiceRuleError("Servis bulunamadı.");
+      }
+
+      const [operations, parts] = await Promise.all([
+        db.service_operations.where("service_id").equals(serviceId).toArray(),
+        db.service_parts.where("service_id").equals(serviceId).toArray(),
+      ]);
+      const sumKurus = (rows: { line_total: number; status: Service["status"] | string }[]) =>
+        rows
+          .filter((r) => isBilled(r.status as never))
+          .reduce((acc, r) => acc + toKurus(r.line_total), 0);
+
+      const laborFee = fromKurus(sumKurus(operations));
+      const totalAmount = fromKurus(sumKurus(operations) + sumKurus(parts));
+
+      let current = existing;
+      if (existing.labor_fee !== laborFee || existing.total_amount !== totalAmount) {
+        current = { ...existing, labor_fee: laborFee, total_amount: totalAmount, updated_at: nowISO() };
+        await db.services.put(current);
+        await enqueue("services", serviceId, "UPDATE", updatePayload(current), ctx.deviceCode);
+      }
+
+      if (current.status === "IN_PROGRESS") {
+        const summary = summarizeLines([...operations, ...parts]);
+        if (needsApprovalBeforeWork(summary, ctx.approvalThreshold ?? DEFAULT_APPROVAL_THRESHOLD)) {
+          return changeServiceStatus(
+            ctx,
+            serviceId,
+            "WAITING_CUSTOMER_APPROVAL",
+            "Teklif arttı; yeni müşteri onayı gerekli"
+          );
+        }
+      }
+      return current;
+    }
+  );
 }

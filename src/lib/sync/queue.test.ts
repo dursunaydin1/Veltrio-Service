@@ -1,7 +1,7 @@
 import "fake-indexeddb/auto";
 import { beforeEach, describe, expect, it } from "vitest";
 import { db } from "@/lib/db";
-import { enqueue, markConflict, markError } from "./queue";
+import { enqueue, getPendingItems, markConflict, markError } from "./queue";
 
 const BUSINESS = "00000000-0000-0000-0000-000000000001";
 const ID = "11111111-1111-4111-8111-111111111111";
@@ -95,5 +95,32 @@ describe("markError / markConflict", () => {
       status: "CONFLICT",
       error_message: "sürüm farkı",
     });
+  });
+});
+
+describe("getPendingItems — bağımlılık sırası", () => {
+  it("üst kayıtlar alt kayıtlardan önce gider, aynı tabloda eskiden yeniye", async () => {
+    // Çocuk kayıtlar önce kuyruğa girmiş olsa bile
+    await enqueue("service_status_history", "h1", "INSERT", { id: "h1", business_id: BUSINESS }, DEVICE);
+    await enqueue("service_parts", "p1", "INSERT", { id: "p1", business_id: BUSINESS }, DEVICE);
+    await enqueue("services", "s1", "INSERT", { id: "s1", business_id: BUSINESS }, DEVICE);
+    await enqueue("customers", "c1", "INSERT", { id: "c1", business_id: BUSINESS }, DEVICE);
+    await enqueue("customers", "c2", "INSERT", { id: "c2", business_id: BUSINESS }, DEVICE);
+    await enqueue("audit_logs", "a1", "INSERT", { id: "a1", business_id: BUSINESS }, DEVICE);
+
+    // Aynı milisaniyede eklenen aynı tablo kayıtlarının kendi aralarındaki sırası
+    // belirsizdir; bu yüzden tablo sırası doğrulanır.
+    const order = (await getPendingItems()).map((i) => i.table_name);
+    expect(order).toEqual(["customers", "customers", "services", "service_parts", "service_status_history", "audit_logs"]);
+  });
+
+  it("bilinmeyen tablo en sona kalır; gönderilmiş kayıtlar dönmez", async () => {
+    await enqueue("zzz_unknown", "u1", "INSERT", { id: "u1", business_id: BUSINESS }, DEVICE);
+    await enqueue("customers", "c1", "INSERT", { id: "c1", business_id: BUSINESS }, DEVICE);
+    const [sent] = await db.sync_queue.where("record_id").equals("c1").toArray();
+    await db.sync_queue.update(sent.id, { status: "SYNCED" });
+    await enqueue("machines", "m1", "INSERT", { id: "m1", business_id: BUSINESS }, DEVICE);
+
+    expect((await getPendingItems()).map((i) => i.record_id)).toEqual(["m1", "u1"]);
   });
 });

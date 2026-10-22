@@ -5,6 +5,13 @@
 
 ## 2026-10-22
 
+### K-022 · Servis teklifi: satır bazlı karar, parça kullanımı stokla bağlı, sıralı gönderim
+- **Teklif modeli:** Servis tutarı (`total_amount`) satırlardan hesaplanır ve her değişiklikte güncellenir: yalnızca karar bekleyen (PENDING) ve onaylı (APPROVED) satırlar sayılır; reddedilen/ertelenen girmez. Onay eşiğini (ayar, varsayılan 1.000 ₺; 0 = her ücretli iş) aşan teklifte karar bekleyen satır varken "İşlemde"ye geçilemez; teklif işlem sırasında artarsa servis otomatik "Müşteri onayı bekleniyor"a alınır. Onaylı satırın tutarı artarsa yeniden onay bekler (tolerans 0).
+- **service_parts yeniden anlamlandırıldı:** Eski `status` (PENDING/APPROVED/REJECTED/ARRIVED/USED) hem onayı hem teminat/kullanımı karıştırıyordu. Artık `status` yalnızca müşteri kararı; temin `supply_status`, kullanım `used_quantity`. Mevcut ARRIVED/USED kayıtları APPROVED'a çevrildi.
+- **Stok:** Teklifte stok değişmez; "kullanıldı" denince `SERVICE_USE` (maliyet snapshot'lı) hareketi yazılır, azaltma `CANCEL_REVERSAL` ile ve nedenle. Negatif stok kuralı stok çekirdeğinden gelir.
+- **Eşitleme sırası (Adım 1.7 maddesi kapandı):** Kuyruk, tablo bağımlılığına göre sıralanır (müşteri → ürün → makine → stok hareketi → servis → satırlar → ödeme → geçmiş → audit). Aksi halde bir servis ile satırı aynı anda gönderilirken satır önce gidip yabancı anahtar hatası alabiliyordu.
+- **Etki:** migration 014, `src/lib/services/{lines,quote,service}.ts`, `ServiceLines.tsx`, `ProductPicker.tsx`, `src/lib/sync/{tables,queue}.ts`.
+
 ### K-021 · Servis durum kümesi PRD §6.1'e uyduruldu; kabul ve durum değişimi tek işlemde
 - **Sorun:** Şemadaki durumlar (`WAITING_DIAGNOSIS`, `READY_FOR_DELIVERY`…) PRD §6.1'deki akıştan farklıydı; "Kabul edildi", "Teşhis tamamlandı", "İş tamamlandı" eksikti.
 - **Karar:** `RECEIVED → (WAITING_DIAGNOSIS) → DIAGNOSED → (WAITING_CUSTOMER_APPROVAL) → IN_PROGRESS ⇄ WAITING_PARTS → COMPLETED → DELIVERED / CANCELLED` (eski `READY_FOR_DELIVERY` `COMPLETED` oldu). Geçiş tablosu saf bir modülde (`status.ts`) tutulur. Teslim edilmiş servis iptal edilemez ama yeniden açılabilir; iptal ve yeniden açma neden ister.

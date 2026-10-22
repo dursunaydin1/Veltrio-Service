@@ -6,7 +6,9 @@ import { useLiveQuery } from "dexie-react-hooks";
 import { db } from "@/lib/db";
 import type { Service } from "@/lib/db";
 import { useBusinessContext } from "@/hooks/useBusinessContext";
+import { useServiceContext } from "@/hooks/useServiceContext";
 import { machineTitle } from "@/components/machines/MachineList";
+import { ServiceLines } from "@/components/services/ServiceLines";
 import { StatusBadge } from "@/components/services/StatusBadge";
 import { changeServiceStatus, updateServiceDetails } from "@/lib/services/service";
 import {
@@ -65,6 +67,7 @@ export function ServiceDetail({ id }: { id: string }) {
       </div>
 
       <StatusActions service={service} />
+      <ServiceLines service={service} />
       <DetailsForm key={`${service.id}:${service.version ?? 0}:${service.updated_at}`} service={service} />
       <History serviceId={service.id} />
     </div>
@@ -72,7 +75,7 @@ export function ServiceDetail({ id }: { id: string }) {
 }
 
 function StatusActions({ service }: { service: Service }) {
-  const ctx = useBusinessContext();
+  const ctx = useServiceContext();
   const [pending, setPending] = useState<ServiceStatus | null>(null);
   const [reason, setReason] = useState("");
   const [error, setError] = useState<string | null>(null);

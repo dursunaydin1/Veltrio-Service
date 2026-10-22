@@ -19,12 +19,13 @@ Bu dizin Supabase PostgreSQL migration dosyalarını içerir.
 | 011 | `011_payment_reversal_unique.sql` | Bir ödemenin yalnızca bir kez ters kaydedilmesi (benzersiz indeks) |
 | 012 | `012_machines_ownership.sql` | Makine iç numarası, sahiplik geçmişi tablosu |
 | 013 | `013_service_intake_status.sql` | Servis durum kümesi (PRD §6.1), kabul alanları, durum geçmişi aktörü |
+| 014 | `014_service_lines_approvals.sql` | Servis işlem satırları, parça satırı genişletme, müşteri onay kayıtları |
 
 ## Supabase Dashboard'dan Uygulama
 
 1. [Supabase Dashboard](https://app.supabase.com) → Projenizi seçin
 2. **SQL Editor** sekmesine girin
-3. Migration dosyalarını **sırasıyla** çalıştırın (001 → 002 → 003 → 004 → 005 → 006 → 007 → 008 → 009 → 010 → 011 → 012 → 013)
+3. Migration dosyalarını **sırasıyla** çalıştırın (001 → 002 → 003 → 004 → 005 → 006 → 007 → 008 → 009 → 010 → 011 → 012 → 013 → 014)
 
 ## Supabase CLI ile Uygulama
 

@@ -144,7 +144,7 @@ Bu faz tüm diğer modüllerin üzerine inşa edileceği teknik temeli oluşturu
 - [x] Sunucu tarafı eşitleme endpoint'i (`POST /api/sync/push`, `GET /api/sync/pull`)
 - [x] **Idempotency:** Aynı UUID ile gelen ekleme tekrarlandığında ikinci kayıt oluşmaz
 - [x] **Append-only:** Stok/ödeme hareketlerinde yalnızca ekleme kabul edilir
-- [ ] Bağımlılık sırası: üst kayıt önce eşitlenir (Customer → Machine → ServiceOrder → ...)
+- [x] Bağımlılık sırası: üst kayıt önce eşitlenir (Customer → Machine → ServiceOrder → ...) — `pushRank`, K-022
 - [x] Hata kuyruğu: başarısız eşitleme kaydı silinmez, yeniden deneme kuyruğunda kalır
 - [x] Çakışma kuyruğu iskeleti: sürüm farkı `CONFLICT` olarak kuyrukta bekler (`applyPushItem`); çözüm ekranı sonraki fazlarda
 - [ ] `SyncMetadata` güncelleme
