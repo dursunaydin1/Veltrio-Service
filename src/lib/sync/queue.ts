@@ -7,6 +7,10 @@ type Operation = "INSERT" | "UPDATE" | "DELETE";
 /**
  * Eşitleme kuyruğuna yeni bir kayıt ekler.
  * PRD §13: Çevrimdışı kayıtlar PENDING olarak kuyruğa yazılır.
+ *
+ * UPDATE işlemlerinde payload, kaydın düzenlemeye başlanan `version` değerini
+ * içermelidir; sunucu bu sürüm güncel değilse değişikliği reddedip çakışma
+ * (CONFLICT) bildirir.
  */
 export async function enqueue(
   tableName: string,
@@ -76,8 +80,8 @@ export async function markError(id: string, errorMessage: string): Promise<void>
  * Çakışma kuyruğuna düşür.
  * PRD §13.4: Çakışan kayıt CONFLICT olarak işaretlenir, kullanıcı bildirilir.
  */
-export async function markConflict(id: string): Promise<void> {
-  await db.sync_queue.update(id, { status: "CONFLICT" });
+export async function markConflict(id: string, message?: string): Promise<void> {
+  await db.sync_queue.update(id, { status: "CONFLICT", error_message: message });
 }
 
 /**

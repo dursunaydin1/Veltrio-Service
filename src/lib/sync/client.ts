@@ -1,11 +1,11 @@
 import { db } from "@/lib/db";
-import { getPendingItems, markError, markSynced } from "@/lib/sync/queue";
+import { getPendingItems, markConflict, markError, markSynced } from "@/lib/sync/queue";
 import { isSyncTableName } from "@/lib/sync/tables";
 import { useSessionStore } from "@/stores/session";
 import { nowISO } from "@/lib/utils";
 import type { SyncQueueItem } from "@/types";
 
-type PushResult = { id: string; success: boolean; error?: string };
+type PushResult = { id: string; success: boolean; conflict?: boolean; error?: string };
 type PullChange = {
   id: string;
   table_name: string;
@@ -23,6 +23,7 @@ type PullResponse = {
 export type SyncSummary = {
   pushed: number;
   pulled: number;
+  conflicts: number;
 };
 
 function cursorStorageKey(businessId: string, deviceCode: string): string {
@@ -45,13 +46,14 @@ async function pushPending(
   items: SyncQueueItem[],
   businessId: string,
   deviceCode: string
-): Promise<number> {
+): Promise<{ pushed: number; conflicts: number }> {
   const pending = items.filter(
     (item) => item.payload.business_id === businessId
   );
-  if (pending.length === 0) return 0;
+  if (pending.length === 0) return { pushed: 0, conflicts: 0 };
 
   let pushed = 0;
+  let conflicts = 0;
   for (let start = 0; start < pending.length; start += 100) {
     const batch = pending.slice(start, start + 100);
     const response = await fetch("/api/sync/push", {
@@ -76,13 +78,16 @@ async function pushPending(
       } else if (result.success) {
         await markSynced(item.id);
         pushed += 1;
+      } else if (result.conflict) {
+        await markConflict(item.id, result.error);
+        conflicts += 1;
       } else {
         await markError(item.id, result.error ?? "Kayıt eşitlenemedi.");
       }
     }
   }
 
-  return pushed;
+  return { pushed, conflicts };
 }
 
 async function pullChanges(
@@ -135,9 +140,9 @@ export async function syncNow(
   }
 
   const queue = await getPendingItems();
-  const pushed = await pushPending(queue, businessId, deviceCode);
+  const { pushed, conflicts } = await pushPending(queue, businessId, deviceCode);
   const pulled = await pullChanges(businessId, deviceCode);
 
   useSessionStore.getState().setLastSyncedAt(nowISO());
-  return { pushed, pulled };
+  return { pushed, pulled, conflicts };
 }

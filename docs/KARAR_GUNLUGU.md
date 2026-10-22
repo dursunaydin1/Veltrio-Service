@@ -5,6 +5,12 @@
 
 ## 2026-10-22
 
+### K-010 · Push: ekleme idempotent, güncelleme sürüm kontrollü
+- **Sorun:** Push API her işlemi `upsert` ile uyguluyordu. İki cihaz aynı kaydı değiştirirse sondaki ötekini sessizce eziyordu; ayrıca ağ hatasıyla yeniden denenen eski bir "ekleme", arada güncellenmiş kaydı eski hâline döndürebiliyordu.
+- **Karar:** INSERT yalnızca ekler (kayıt zaten varsa başarı sayılır, ezmez). UPDATE yalnızca `payload.version` sunucudakiyle eşitse uygulanır; değilse `CONFLICT` döner ve kayıt kuyrukta bekler. DELETE koşulsuz kalır (silme yerine `archived_at` tercih edilir).
+- **Not:** Pull sırasında yerel kayıt sunucudakiyle değiştirilir; çakışan yerel düzenleme kuyruktaki `payload`'da saklı kalır, çözüm ekranı sonra yazılacak.
+- **Etki:** `src/lib/sync/apply.ts` (yeni), `push/route.ts`, `client.ts`, `queue.ts` (`markConflict` mesaj alır).
+
 ### K-009 · `sync_state` yalnızca istemcide, `version` hem istemcide hem sunucuda
 - **Plan:** Her kayıtta `version` ve `sync_state` alanı (Adım 1.2, 1.7).
 - **Sorun:** `sync_state` (`PENDING_SYNC | SYNCED | CONFLICT | ERROR`) sunucuda anlamsız: sunucudaki her kayıt zaten eşitlenmiştir. Sütun eklemek yer kaplar, kimse okumaz.

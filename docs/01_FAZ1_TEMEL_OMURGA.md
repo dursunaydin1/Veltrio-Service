@@ -138,21 +138,21 @@ Bu faz tüm diğer modüllerin üzerine inşa edileceği teknik temeli oluşturu
 ### ADIM 1.7 — Eşitleme Altyapısı İskeleti
 
 **Görevler:**
-- [ ] `sync_state` alanları: `PENDING_SYNC | SYNCED | CONFLICT | ERROR` (kayıt modellerinde henüz yok)
-- [ ] `version` (integer revision counter) her kayıtta (henüz uygulanmadı)
+- [x] Eşitleme durumu: `sync_queue.status` = `PENDING | SYNCED | CONFLICT | ERROR` (kayıt başına ayrı `sync_state` sütunu açılmadı, bkz. K-009)
+- [x] `version` (integer revision counter): sunucuda tetikleyiciyle artar (006), pull ile cihaza gelir, push'ta çakışma tespitinde kullanılır
 - [x] İstemci tarafı eşitleme kuyruğu (yerel DB'de bekleyen kayıtlar)
 - [x] Sunucu tarafı eşitleme endpoint'i (`POST /api/sync/push`, `GET /api/sync/pull`)
 - [x] **Idempotency:** Aynı UUID ile gelen ekleme tekrarlandığında ikinci kayıt oluşmaz
 - [x] **Append-only:** Stok/ödeme hareketlerinde yalnızca ekleme kabul edilir
 - [ ] Bağımlılık sırası: üst kayıt önce eşitlenir (Customer → Machine → ServiceOrder → ...)
 - [x] Hata kuyruğu: başarısız eşitleme kaydı silinmez, yeniden deneme kuyruğunda kalır
-- [ ] Çakışma kuyruğu iskeleti (içerik sonraki fazlarda doldurulur)
+- [x] Çakışma kuyruğu iskeleti: sürüm farkı `CONFLICT` olarak kuyrukta bekler (`applyPushItem`); çözüm ekranı sonraki fazlarda
 - [ ] `SyncMetadata` güncelleme
 - [ ] Çevrimdışı azami gün kontrolü: 30 günü aşarsa yeni kayıt için çevrimiçi doğrulama
 
-> `version` sütunu ve artırma tetikleyicisi migration 006'da eklendi (sunucu tarafı); `sync_state` yalnızca istemcide tutulacak (bkz. KARAR_GUNLUGU K-009). İstemcinin sürümü gönderip sunucunun çakışmayı yakalaması sonraki adım.
+> Çakışma tespiti `src/lib/sync/apply.ts` içinde: ekleme idempotent (tekrar gelen ekleme güncel kaydı ezmez), güncelleme yalnızca `version` eşleşirse uygulanır (K-010). Migration 006 Supabase'e uygulandı.
 >
-> Push/pull API'si ve artımlı değişiklik günlüğü eklendi. Aktif cihaz doğrulaması yapılır; veritabanı tarafındaki `005_sync_changes.sql` migration'ı uygulanmalıdır. Bağımlılık sıralaması, çakışma çözümü, kayıt sürümü ve uzun süre çevrimdışı kalma kuralı henüz tamamlanmadığından adım bütünüyle bitmiş sayılmaz.
+> Push/pull API'si ve artımlı değişiklik günlüğü eklendi. Aktif cihaz doğrulaması yapılır; veritabanı tarafındaki `005_sync_changes.sql` migration'ı uygulanmalıdır. Bağımlılık sıralaması, çakışma çözüm ekranı, `SyncMetadata` ve uzun süre çevrimdışı kalma kuralı henüz tamamlanmadığından adım bütünüyle bitmiş sayılmaz.
 
 **İlgili FR:** FR-020, FR-021  
 **İlgili AC:** AC-036, AC-037
