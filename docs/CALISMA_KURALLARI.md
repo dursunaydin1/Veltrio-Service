@@ -22,7 +22,7 @@
 11. Kullanıcıya neyin gönderildiği kısaca söylenir.
 
 ## Tasarım tercihleri
-14. **Nötr koyu gri tema** (mavi/lacivert tonlar "amatör" bulunuyor); parlama ve gradyan efektlerinden kaçınılır. Ekranlar sade tutulur, her zaman görünen bilgiler azaltılır; ayrıntı ilgili sayfaya konur.
+14. **Nötr koyu gri tema, turuncu vurgu** (mavi/lacivert tonlar "amatör" bulunuyor); parlama ve gradyan efektlerinden kaçınılır. Ekranlar sade tutulur, her zaman görünen bilgiler azaltılır; ayrıntı ilgili sayfaya konur.
 
 ## Teknik tercihler (kullanıcı onaylı)
 12. Para tutarları veritabanında `DECIMAL(15,4)`, kodda **kuruş cinsinden tam sayı** (`src/lib/calc.ts`).

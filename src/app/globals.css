@@ -18,9 +18,9 @@
   --bg-hover:       #323235;
 
   /* Aksanlar */
-  --accent-primary:   #3b82f6;
-  --accent-hover:     #2563eb;
-  --accent-light:     #60a5fa;
+  --accent-primary:   #f97316;
+  --accent-hover:     #ea580c;
+  --accent-light:     #fb923c;
   --accent-success:   #22c55e;
   --accent-warning:   #f59e0b;
   --accent-danger:    #ef4444;
@@ -35,13 +35,13 @@
   /* Kenarlık */
   --border-subtle:  #2c2c2e;
   --border-default: #3f3f43;
-  --border-focus:   #3b82f6;
+  --border-focus:   #f97316;
 
   /* Gölge */
   --shadow-sm:  0 1px 3px rgba(0,0,0,0.4);
   --shadow-md:  0 4px 16px rgba(0,0,0,0.5);
   --shadow-lg:  0 8px 32px rgba(0,0,0,0.6);
-  --shadow-glow: 0 0 0 3px rgba(59,130,246,0.25);
+  --shadow-glow: 0 0 0 3px rgba(249,115,22,0.25);
 
   /* Tipografi */
   --font-sans: "Inter", system-ui, -apple-system, sans-serif;
@@ -91,7 +91,7 @@ body {
 /* Seçim rengi */
 ::selection {
   background: var(--accent-primary);
-  color: #fff;
+  color: var(--text-inverse);
 }
 
 /* ============================================================
@@ -155,7 +155,7 @@ a:hover { color: var(--accent-primary); }
 
 .form-input:focus {
   border-color: var(--border-focus);
-  box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.2);
+  box-shadow: 0 0 0 3px rgba(249, 115, 22, 0.25);
 }
 
 .form-input:disabled {
@@ -201,7 +201,7 @@ a:hover { color: var(--accent-primary); }
 
 .btn-primary {
   background: var(--accent-primary);
-  color: #fff;
+  color: var(--text-inverse);
 }
 .btn-primary:hover:not(:disabled) {
   background: var(--accent-hover);
@@ -252,7 +252,7 @@ a:hover { color: var(--accent-primary); }
   width: 16px;
   height: 16px;
   border: 2px solid rgba(255,255,255,0.3);
-  border-top-color: #fff;
+  border-top-color: var(--text-inverse);
   border-radius: 50%;
   animation: spin 0.7s linear infinite;
 }
@@ -371,7 +371,7 @@ a:hover { color: var(--accent-primary); }
   letter-spacing: 0.02em;
 }
 
-.badge-blue    { background: rgba(59,130,246,0.15); color: var(--accent-light); }
+.badge-accent  { background: rgba(249,115,22,0.15); color: var(--accent-light); }
 .badge-green   { background: rgba(34,197,94,0.15);  color: #86efac; }
 .badge-yellow  { background: rgba(245,158,11,0.15); color: #fcd34d; }
 .badge-red     { background: rgba(239,68,68,0.15);  color: #fca5a5; }
@@ -404,10 +404,10 @@ a:hover { color: var(--accent-primary); }
   z-index: 100;
   padding: 10px 16px;
   background: var(--accent-primary);
-  color: #fff;
+  color: var(--text-inverse);
   border-radius: var(--radius-md);
 }
-.skip-link:focus { top: 8px; color: #fff; }
+.skip-link:focus { top: 8px; color: var(--text-inverse); }
 
 .app-shell {
   min-height: 100dvh;

@@ -7,7 +7,7 @@
 
 ### K-012 · Nötr koyu gri tema; eşitleme göstergesi sakin
 - **Geri bildirim:** Lacivert/mavi koyu tema amatör görünüyor; "Eşitlendi 12:40" yazısı her zaman görünmesin.
-- **Tema:** Arka planlar nötr koyu griye çekildi (`#141414` zemin, `#1c1c1e` yüzey, `#242426` yükseltilmiş); metin ve kenarlık renkleri nötrleştirildi. Giriş ekranındaki mavi parlama, logo gradyanı ve gradyanlı başlık kaldırıldı. Vurgu rengi (mavi) şimdilik aynı; ayrı bir token olduğu için tek satırda değiştirilebilir.
+- **Tema:** Arka planlar nötr koyu griye çekildi (`#141414` zemin, `#1c1c1e` yüzey, `#242426` yükseltilmiş); metin ve kenarlık renkleri nötrleştirildi. Giriş ekranındaki mavi parlama, logo gradyanı ve gradyanlı başlık kaldırıldı. Vurgu rengi **turuncu** (`--accent-primary: #f97316`, hover `#ea580c`, açık `#fb923c`); düğme ve seçili sekme bununla boyanır. Turuncu zeminde beyaz yazı okunmadığı için birincil düğme, seçili metin ve atlama bağlantısı koyu yazı (`--text-inverse`) kullanır (kontrast ≥ 6:1). Renk tek yerde (`globals.css` tokenları) tanımlı; `badge-blue` sınıfı `badge-accent` oldu.
 - **Gösterge:** Plan "her zaman görünür: bekleyen sayı, son eşitleme" diyordu. Her şey yolundayken yalnızca küçük simge görünür (ekran okuyucu metni ve ipucu duruyor); bekleyen, sorun ve çevrimdışı durumda metin çıkar. Son eşitleme zamanı Menü sayfasında.
 - **Etki:** `globals.css`, `SyncStatus.tsx`, `LastSyncInfo.tsx`, giriş sayfası, `manifest.json`.
 
