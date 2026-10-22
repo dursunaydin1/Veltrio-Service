@@ -1,8 +1,10 @@
 import "fake-indexeddb/auto";
 import { beforeEach, describe, expect, it } from "vitest";
 import { db } from "@/lib/db";
+import { recordCustomerPayment, setCustomerOpeningBalance } from "@/lib/finance/service";
 import { parseCustomerForm, type CustomerFormInput } from "./schema";
 import {
+  CustomerHasBalanceError,
   CustomerHasOpenServiceError,
   CustomerNotFoundError,
   DuplicatePhoneError,
@@ -32,6 +34,8 @@ function fieldsOf(over: Partial<CustomerFormInput> = {}) {
 
 beforeEach(async () => {
   await db.customers.clear();
+  await db.payments.clear();
+  await db.opening_balances.clear();
   await db.services.clear();
   await db.sync_queue.clear();
   await db.audit_logs.clear();
@@ -166,6 +170,16 @@ describe("arşivleme (AC-030)", () => {
 
     await expect(setCustomerArchived(ctx, c.id, true)).rejects.toBeInstanceOf(CustomerHasOpenServiceError);
     expect((await db.customers.get(c.id))?.archived_at).toBeUndefined();
+  });
+
+  it("bakiyesi sıfır olmayan müşteri arşivlenemez; borç kapanınca arşivlenir", async () => {
+    const c = await createCustomer(ctx, fieldsOf());
+    await setCustomerOpeningBalance(ctx, { customerId: c.id, direction: "OWED_BY_PARTY", amountKurus: 10000, asOfDate: "2026-10-01" });
+
+    await expect(setCustomerArchived(ctx, c.id, true)).rejects.toBeInstanceOf(CustomerHasBalanceError);
+
+    await recordCustomerPayment(ctx, { customerId: c.id, direction: "IN", method: "CASH", amountKurus: 10000 });
+    await expect(setCustomerArchived(ctx, c.id, true)).resolves.toBeTruthy();
   });
 
   it("servisleri teslim/iptal olmuş müşteri arşivlenir, audit log yazılır, geri açılabilir", async () => {

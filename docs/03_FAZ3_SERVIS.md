@@ -45,7 +45,7 @@ Uygulamanın kalbi olan servis akışını hayata geçirmek: müşteri kabulünd
 - [ ] Müşteri fotoğrafı: istemci tarafında 1600px küçültme, JPEG/WebP (FR-028)
 - [x] Müşteri arşivleme: açık servisi veya sıfır olmayan bakiyesi varsa engellenir (AC-030)
 
-> Uygulandı: migration 010 (`no_phone_flag`), `src/lib/customers/` (şema, servis), `src/components/customers/`, `/customers`, `/customers/new`, `/customers/[id]`. Mükerrer telefon yazarken uyarılır (AC-029), kullanıcı bilinçli olarak ayrı kayıt açabilir. Arşivleme açık servis varsa engellenir (AC-030); **sıfırdan farklı bakiye kontrolü bakiye hesabıyla (Adım 2.8) eklenecek**. Açık: müşteri fotoğrafı (FR-028), müşteri profilindeki makine/servis/satış/ödeme/bakiye bölümleri (ilgili adımlarla). Köy/mahalle zorunlu, açık adres isteğe bağlı (K-018).
+> Uygulandı: migration 010 (`no_phone_flag`), `src/lib/customers/` (şema, servis), `src/components/customers/`, `/customers`, `/customers/new`, `/customers/[id]`. Mükerrer telefon yazarken uyarılır (AC-029), kullanıcı bilinçli olarak ayrı kayıt açabilir. Arşivleme açık servis varsa engellenir (AC-030); sıfırdan farklı bakiye de arşivlemeyi engeller. Açık: müşteri fotoğrafı (FR-028), müşteri profilindeki makine/servis/satış/ödeme/bakiye bölümleri (ilgili adımlarla). Köy/mahalle zorunlu, açık adres isteğe bağlı (K-018).
 
 **İlgili FR:** FR-003  
 **Test:** TC-031, TC-032

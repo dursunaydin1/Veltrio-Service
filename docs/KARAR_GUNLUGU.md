@@ -5,6 +5,14 @@
 
 ## 2026-10-22
 
+### K-019 · Ödeme ters kaydı ve açılış bakiyesi
+- **Plan:** "Ters Payment (REVERSED, reversal_of_id)"; açılış bakiyesi değişikliği kritik işlem.
+- **Sorun:** Ödemeler yalnızca-ekleme tablosu (sunucu UPDATE'i reddeder). Orijinali "REVERSED" yapmak güncelleme gerektirirdi.
+- **Karar:** Orijinal ödeme olduğu gibi kalır. Ters kayıt, karşı yönlü yeni bir `Payment`'tır (`status = REVERSED`, `reversal_of_id = orijinal`); bakiye formülü ek kural gerektirmeden doğru çıkar. Ekranda orijinal "İptal edildi", ters kayıt "Ters kayıt" etiketi alır. Bir ödeme yalnızca bir kez ters kaydedilir (sunucuda benzersiz indeks); ters kaydın tersi yapılamaz. Bağlı tahsisler aynı tutarla ters çevrilir. Neden zorunlu, audit log'a yazılır.
+- **Açılış bakiyesi:** Müşteri başına tek kayıt. İlk giriş neden istemez (audit CREATE), değiştirmek neden ister (audit UPDATE, eski/yeni değer). Sahte satış/ödeme üretilmez.
+- **Arşivleme:** Bakiyesi sıfır olmayan müşteri artık arşivlenemez (AC-030 tamamlandı).
+- **Etki:** migration 011, `src/lib/finance/*`, `BalancePanel.tsx`.
+
 ### K-018 · Müşteri: köy zorunlu, adres isteğe bağlı; Türkçe karakterden bağımsız arama
 - **Plan:** "adres/köy" tek zorunlu alan; telefon normalizasyonu mükerrer uyarısı için.
 - **Karar:** `village` ("Köy / mahalle") zorunlu, `address` ("Açık adres") isteğe bağlı; telefon, "Telefonu yok" işaretlenmedikçe zorunlu ve en az 10 haneli (sabit hat ve yurt dışı da kabul). Mükerrer telefon uyarısı yazarken görünür; arşivlenmiş müşteriler uyarıya dahil değildir.

@@ -147,16 +147,18 @@ Servis ve satış modülleri bu fazda kurulan ürün kataloğu, stok hareketi ve
 ### ADIM 2.7 — Temel Ödeme Sistemi
 
 **Görevler:**
-- [ ] `Payment` tablosunu oluştur:
+- [x] `Payment` tablosunu oluştur:
   - id, business_id, customer_id, supplier_id, direction (IN / OUT)
   - method (CASH / CARD / BANK_TRANSFER / OTHER)
   - amount, occurred_at, reference, status (POSTED / REVERSED)
   - reversal_of_id, sale_id, purchase_id, service_order_id
-- [ ] `PaymentAllocation` tablosunu oluştur:
+- [x] `PaymentAllocation` tablosunu oluştur:
   - id, business_id, payment_id, target_type (SALE / SERVICE / PURCHASE / OPENING_BALANCE), target_id, amount
-- [ ] Hatalı ödeme silinmez; ters Payment (REVERSED, reversal_of_id) ile düzeltilir (§9.4)
-- [ ] CREDIT/VERESIYE geçerli tahsilat yöntemi değildir (§9.4)
+- [x] Hatalı ödeme silinmez; ters Payment (REVERSED, reversal_of_id) ile düzeltilir (§9.4)
+- [x] CREDIT/VERESIYE geçerli tahsilat yöntemi değildir (§9.4)
 - [ ] Belgeden alınan ödeme otomatik o belgeye tahsis edilir
+
+> Uygulandı: `src/lib/finance/service.ts` (`recordCustomerPayment`, `reversePayment`), migration 011 (bir ödeme yalnızca bir kez ters kaydedilir). Ters kayıt = karşı yönlü yeni `Payment` (`status = REVERSED`, `reversal_of_id`); orijinal güncellenmez (K-019). Açık: belgeden alınan ödemenin otomatik tahsisi (satış/servis belgeleriyle), tedarikçiye ödeme (Faz 4).
 
 **İlgili PRD:** §9.4  
 **İlgili FR:** FR-017
@@ -166,7 +168,7 @@ Servis ve satış modülleri bu fazda kurulan ürün kataloğu, stok hareketi ve
 ### ADIM 2.8 — Bakiye Hesaplama
 
 **Görevler:**
-- [ ] Müşteri bakiyesi hesaplama formülünü kodla (§9.3):
+- [x] Müşteri bakiyesi hesaplama formülünü kodla (§9.3):
   ```
   müşteri_bakiyesi = açılış_bakiyesi
                    + kesinleşmiş_satış_ve_ücretli_servis_tutarları
@@ -175,9 +177,11 @@ Servis ve satış modülleri bu fazda kurulan ürün kataloğu, stok hareketi ve
                    + müşteriye_yapılan_ödemeler (OUT)
   ```
 - [ ] Tedarikçi bakiyesi hesaplama formülünü kodla (§9.3)
-- [ ] Bakiye her zaman belgelerden hesaplanır; önbellekten değil
+- [x] Bakiye her zaman belgelerden hesaplanır; önbellekten değil
 - [ ] Belge bazlı açık tutara kırılım (hangi belge ne kadar açık)
-- [ ] Pozitif bakiye = müşteri borçlu; negatif bakiye = işletme borçlu
+- [x] Pozitif bakiye = müşteri borçlu; negatif bakiye = işletme borçlu
+
+> Uygulandı: `src/lib/finance/balance.ts` (kuruş hesabı), `getCustomerBalance` ve müşteri sayfasındaki Bakiye bölümü. Satış (FINAL), tamamlanmış servis ve iade tutarları belgeler yazıldıkça formüle kendiliğinden girer (iade şimdilik boş). Açık: tedarikçi bakiyesi (Faz 4), belge bazlı açık tutar kırılımı ve yaşlandırma (Faz 5).
 
 **İlgili AC:** AC-010, AC-011, AC-046
 

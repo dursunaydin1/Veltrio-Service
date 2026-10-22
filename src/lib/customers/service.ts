@@ -2,6 +2,7 @@ import { db } from "@/lib/db";
 import { writeAuditLog } from "@/lib/sync/audit";
 import { enqueue } from "@/lib/sync/queue";
 import { generateId, nowISO } from "@/lib/utils";
+import { getCustomerBalance } from "@/lib/finance/service";
 import type { Customer } from "@/types";
 import type { BusinessContext } from "@/hooks/useBusinessContext";
 import type { CustomerFields } from "./schema";
@@ -19,6 +20,14 @@ export class CustomerHasOpenServiceError extends Error {
   constructor() {
     super("Açık servisi olan müşteri arşivlenemez. Önce servisi teslim edin veya iptal edin.");
     this.name = "CustomerHasOpenServiceError";
+  }
+}
+
+/** Bakiyesi sıfır olmayan müşteri arşivlenemez (AC-030). */
+export class CustomerHasBalanceError extends Error {
+  constructor() {
+    super("Bakiyesi sıfır olmayan müşteri arşivlenemez. Önce borç / alacağı kapatın.");
+    this.name = "CustomerHasBalanceError";
   }
 }
 
@@ -135,9 +144,8 @@ export async function updateCustomer(
 }
 
 /**
- * Müşteriyi arşivler veya geri açar. Açık servisi olan müşteri arşivlenemez
- * (AC-030). Sıfırdan farklı bakiye kontrolü, bakiye hesabı (Adım 2.8)
- * yazıldığında buraya eklenecek.
+ * Müşteriyi arşivler veya geri açar. Açık servisi olan veya bakiyesi sıfır
+ * olmayan müşteri arşivlenemez (AC-030).
  */
 export async function setCustomerArchived(
   ctx: BusinessContext,
@@ -145,7 +153,10 @@ export async function setCustomerArchived(
   archived: boolean,
   reason?: string
 ): Promise<Customer> {
-  return db.transaction("rw", [db.customers, db.services, db.sync_queue, db.audit_logs], async () => {
+  return db.transaction(
+    "rw",
+    [db.customers, db.services, db.opening_balances, db.payments, db.sales, db.sync_queue, db.audit_logs],
+    async () => {
     const existing = await db.customers.get(id);
     if (!existing || existing.business_id !== ctx.businessId) {
       throw new CustomerNotFoundError();
@@ -158,6 +169,9 @@ export async function setCustomerArchived(
         .filter((s) => !CLOSED_SERVICE_STATUSES.includes(s.status))
         .count();
       if (openServices > 0) throw new CustomerHasOpenServiceError();
+
+      const { balance } = await getCustomerBalance(ctx.businessId, id);
+      if (balance !== 0) throw new CustomerHasBalanceError();
     }
 
     const now = nowISO();
@@ -182,5 +196,6 @@ export async function setCustomerArchived(
       newValue: { archived_at: next.archived_at ?? null },
     });
     return next;
-  });
+    }
+  );
 }

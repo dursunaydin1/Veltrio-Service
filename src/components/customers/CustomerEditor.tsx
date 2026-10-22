@@ -6,6 +6,7 @@ import { useLiveQuery } from "dexie-react-hooks";
 import { MessageCircle, Phone } from "lucide-react";
 import { db } from "@/lib/db";
 import { useBusinessContext } from "@/hooks/useBusinessContext";
+import { BalancePanel } from "@/components/customers/BalancePanel";
 import { CustomerForm } from "@/components/customers/CustomerForm";
 import { setCustomerArchived } from "@/lib/customers/service";
 import { telLink, whatsappLink } from "@/lib/utils/phone";
@@ -69,6 +70,8 @@ export function CustomerEditor({ id }: { id: string }) {
           ) : null}
         </div>
       ) : null}
+
+      <BalancePanel customer={customer} />
 
       <CustomerForm key={`${customer.id}:${customer.version ?? 0}`} customer={customer} />
 
