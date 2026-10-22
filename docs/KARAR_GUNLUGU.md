@@ -5,6 +5,10 @@
 
 ## 2026-10-22
 
+### K-013 · "Bugünün durumu" yalnızca işletme bilgisi gösterir
+- **Sorun:** Ana ekrandaki "Eşitlenmeyi bekleyen" ve "Eşitleme sorunu" kutuları üst çubuktaki göstergeyle aynı bilgiydi ve işletme sahibi için teknik.
+- **Karar:** İki kutu kaldırıldı. Ana ekrana iş metrikleri (aktif servis, kritik stok, bugünkü satış, teslim tarihi yaklaşanlar) ilgili özellik yazıldıkça eklenir; eşitleme ayrıntıları Faz 6'daki eşitleme/bildirim merkezinde olacak.
+
 ### K-012 · Nötr koyu gri tema; eşitleme göstergesi sakin
 - **Geri bildirim:** Lacivert/mavi koyu tema amatör görünüyor; "Eşitlendi 12:40" yazısı her zaman görünmesin.
 - **Tema:** Arka planlar nötr koyu griye çekildi (`#141414` zemin, `#1c1c1e` yüzey, `#242426` yükseltilmiş); metin ve kenarlık renkleri nötrleştirildi. Giriş ekranındaki mavi parlama, logo gradyanı ve gradyanlı başlık kaldırıldı. Vurgu rengi **turuncu** (`--accent-primary: #f97316`, hover `#ea580c`, açık `#fb923c`); düğme ve seçili sekme bununla boyanır. Turuncu zeminde beyaz yazı okunmadığı için birincil düğme, seçili metin ve atlama bağlantısı koyu yazı (`--text-inverse`) kullanır (kontrast ≥ 6:1). Renk tek yerde (`globals.css` tokenları) tanımlı; `badge-blue` sınıfı `badge-accent` oldu.
