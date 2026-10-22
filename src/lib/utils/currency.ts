@@ -24,6 +24,19 @@ export function formatCurrency(amount: number): string {
   return TRY_FORMATTER.format(amount);
 }
 
+const QUANTITY_FORMATTER = new Intl.NumberFormat("tr-TR", {
+  minimumFractionDigits: 0,
+  maximumFractionDigits: 4,
+});
+
+/**
+ * Stok miktarını gereksiz sıfır olmadan gösterir (en fazla 4 ondalık).
+ * Örnek: 10 → "10", 2.5 → "2,5", 1234.5 → "1.234,5"
+ */
+export function formatQuantity(value: number): string {
+  return QUANTITY_FORMATTER.format(value);
+}
+
 /**
  * Sayıyı Türkçe ondalık formatında gösterir.
  * Örnek: 1234.567 → "1.234,567"

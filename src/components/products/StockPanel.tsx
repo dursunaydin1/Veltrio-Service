@@ -8,11 +8,17 @@ import { parseMoneyInput, parseQuantityInput } from "@/lib/calc";
 import { unitLabel } from "@/lib/products/constants";
 import { isCriticalStock } from "@/lib/products/stock";
 import { MOVEMENT_LABELS } from "@/lib/stock/labels";
-import { addStock, adjustStock } from "@/lib/stock/service";
-import { formatDateTime, formatNumber } from "@/lib/utils";
+import {
+  InsufficientStockError,
+  addStock,
+  adjustStock,
+  moveDamagedStock,
+  type DamageAction,
+} from "@/lib/stock/service";
+import { formatDateTime, formatQuantity } from "@/lib/utils";
 import type { Product } from "@/types";
 
-type Mode = "entry" | "adjust" | null;
+type Mode = "entry" | "adjust" | "damage" | null;
 
 /** Ürün sayfasındaki stok bölümü: bakiye, giriş, düzeltme ve hareket geçmişi (Adım 2.3, 2.6, 2.9). */
 export function StockPanel({ product }: { product: Product }) {
@@ -42,7 +48,7 @@ export function StockPanel({ product }: { product: Product }) {
         <div className="tile">
           <div className="tile-label">Satılabilir</div>
           <div className="tile-value">
-            {formatNumber(balance.available)} <small>{unit}</small>
+            {formatQuantity(balance.available)} <small>{unit}</small>
           </div>
           {critical ? <span className="badge badge-red">Kritik stok</span> : null}
           {balance.available < 0 ? <span className="badge badge-red">Eksi stok</span> : null}
@@ -50,7 +56,7 @@ export function StockPanel({ product }: { product: Product }) {
         <div className="tile">
           <div className="tile-label">Hasarlı</div>
           <div className="tile-value">
-            {formatNumber(balance.damaged)} <small>{unit}</small>
+            {formatQuantity(balance.damaged)} <small>{unit}</small>
           </div>
         </div>
       </div>
@@ -60,18 +66,31 @@ export function StockPanel({ product }: { product: Product }) {
           Seri takipli ürünlerin stoğu birim kayıtlarıyla yönetilir (yakında).
         </div>
       ) : mode === null ? (
-        <div className="row row-gap-md">
-          <button type="button" className="btn btn-primary" style={{ flex: 1 }} onClick={() => setMode("entry")}>
+        <div className="stack stack-sm">
+          <button type="button" className="btn btn-primary btn-full" onClick={() => setMode("entry")}>
             Stok girişi
           </button>
-          <button type="button" className="btn btn-secondary" style={{ flex: 1 }} onClick={() => setMode("adjust")}>
-            Stok düzelt
-          </button>
+          <div className="row row-gap-md">
+            <button type="button" className="btn btn-secondary" style={{ flex: 1 }} onClick={() => setMode("adjust")}>
+              Stok düzelt
+            </button>
+            <button type="button" className="btn btn-secondary" style={{ flex: 1 }} onClick={() => setMode("damage")}>
+              Hasarlı stok
+            </button>
+          </div>
         </div>
       ) : mode === "entry" ? (
         <EntryForm product={product} onDone={() => setMode(null)} ctx={ctx} />
-      ) : (
+      ) : mode === "adjust" ? (
         <AdjustForm product={product} current={balance.available} onDone={() => setMode(null)} ctx={ctx} />
+      ) : (
+        <DamageForm
+          product={product}
+          available={balance.available}
+          damaged={balance.damaged}
+          onDone={() => setMode(null)}
+          ctx={ctx}
+        />
       )}
 
       <h3>Hareket geçmişi</h3>
@@ -85,7 +104,7 @@ export function StockPanel({ product }: { product: Product }) {
                 <strong>{MOVEMENT_LABELS[m.movement_type] ?? m.movement_type}</strong>
                 <strong style={{ color: m.quantity < 0 ? "var(--accent-danger)" : "var(--accent-success)" }}>
                   {m.quantity > 0 ? "+" : ""}
-                  {formatNumber(m.quantity)} {unit}
+                  {formatQuantity(m.quantity)} {unit}
                   {m.bucket === "DAMAGED" ? " (hasarlı)" : ""}
                 </strong>
               </span>
@@ -203,8 +222,8 @@ function AdjustForm({ product, current, ctx, onDone }: FormProps & { current: nu
       <div className="stack stack-md" role="group" aria-label="Düzeltme onayı">
         <h3>Düzeltmeyi onayla</h3>
         <div className="alert alert-warning">
-          Stok <strong>{formatNumber(current)}</strong> → <strong>{formatNumber(parsed)}</strong> {unit} (fark:{" "}
-          <strong>{diff > 0 ? "+" : ""}{formatNumber(diff)}</strong>)<br />
+          Stok <strong>{formatQuantity(current)}</strong> → <strong>{formatQuantity(parsed)}</strong> {unit} (fark:{" "}
+          <strong>{diff > 0 ? "+" : ""}{formatQuantity(diff)}</strong>)<br />
           Neden: {reason.trim()}
           <br />
           Bu işlem silinemez; yeni bir stok hareketi olarak kaydedilir.
@@ -224,9 +243,9 @@ function AdjustForm({ product, current, ctx, onDone }: FormProps & { current: nu
     <form className="stack stack-md" onSubmit={review} noValidate>
       <h3>Stok düzeltme</h3>
       <p>
-        Önceki miktar: <strong>{formatNumber(current)} {unit}</strong>
+        Önceki miktar: <strong>{formatQuantity(current)} {unit}</strong>
         {diff !== null && diff !== 0 ? (
-          <> · Fark: <strong>{diff > 0 ? "+" : ""}{formatNumber(diff)}</strong></>
+          <> · Fark: <strong>{diff > 0 ? "+" : ""}{formatQuantity(diff)}</strong></>
         ) : null}
       </p>
       <div className="form-group">
@@ -241,6 +260,84 @@ function AdjustForm({ product, current, ctx, onDone }: FormProps & { current: nu
       <div className="row row-gap-md">
         <button type="button" className="btn btn-secondary" style={{ flex: 1 }} onClick={onDone}>Vazgeç</button>
         <button type="submit" className="btn btn-primary" style={{ flex: 1 }}>Devam</button>
+      </div>
+    </form>
+  );
+}
+
+const DAMAGE_ACTIONS: { value: DamageAction; label: string }[] = [
+  { value: "MARK_DAMAGED", label: "Hasarlıya ayır (satılabilirden düş)" },
+  { value: "REPAIRED", label: "Onarıldı (satılabilire aktar)" },
+  { value: "DISPOSE", label: "İmha / hurda (hasarlıdan çıkar)" },
+];
+
+function DamageForm({
+  product,
+  available,
+  damaged,
+  ctx,
+  onDone,
+}: FormProps & { available: number; damaged: number }) {
+  const [action, setAction] = useState<DamageAction>("MARK_DAMAGED");
+  const [quantity, setQuantity] = useState("");
+  const [reason, setReason] = useState("");
+  const [error, setError] = useState<string | null>(null);
+  const [busy, setBusy] = useState(false);
+  const unit = unitLabel(product.unit);
+  const source = action === "MARK_DAMAGED" ? available : damaged;
+
+  async function submit(event: React.FormEvent) {
+    event.preventDefault();
+    setError(null);
+    const qty = parseQuantityInput(quantity);
+    if (qty === null || qty <= 0) return setError("Miktar sıfırdan büyük bir sayı olmalıdır.");
+    if (!reason.trim()) return setError("Neden zorunludur.");
+    if (!ctx) return setError("Cihaz bilgisi henüz yüklenmedi, lütfen tekrar deneyin.");
+
+    setBusy(true);
+    try {
+      await moveDamagedStock(ctx, { productId: product.id, action, quantity: qty, reason });
+      onDone();
+    } catch (e) {
+      setError(
+        e instanceof InsufficientStockError
+          ? `Yetersiz stok. İşlem yapılabilecek miktar: ${formatQuantity(source)} ${unit}.`
+          : e instanceof Error
+            ? e.message
+            : "İşlem yapılamadı."
+      );
+      setBusy(false);
+    }
+  }
+
+  return (
+    <form className="stack stack-md" onSubmit={submit} noValidate>
+      <h3>Hasarlı stok işlemi</h3>
+      <div className="form-group">
+        <label className="form-label" htmlFor="dmg-action">İşlem</label>
+        <select id="dmg-action" className="form-input" value={action} onChange={(e) => setAction(e.target.value as DamageAction)}>
+          {DAMAGE_ACTIONS.map((a) => (
+            <option key={a.value} value={a.value}>{a.label}</option>
+          ))}
+        </select>
+      </div>
+      <p>
+        İşlem yapılabilecek miktar: <strong>{formatQuantity(source)} {unit}</strong>
+      </p>
+      <div className="form-group">
+        <label className="form-label" htmlFor="dmg-qty">Miktar ({unit}) *</label>
+        <input id="dmg-qty" className="form-input" inputMode="decimal" value={quantity} onChange={(e) => setQuantity(e.target.value)} autoFocus />
+      </div>
+      <div className="form-group">
+        <label className="form-label" htmlFor="dmg-reason">Neden *</label>
+        <input id="dmg-reason" className="form-input" placeholder="Ör. düştü, kırık geldi, onarıldı" value={reason} onChange={(e) => setReason(e.target.value)} />
+      </div>
+      {error ? <div className="alert alert-error" role="alert">{error}</div> : null}
+      <div className="row row-gap-md">
+        <button type="button" className="btn btn-secondary" style={{ flex: 1 }} onClick={onDone} disabled={busy}>Vazgeç</button>
+        <button type="submit" className="btn btn-primary" style={{ flex: 1 }} disabled={busy}>
+          {busy ? "Kaydediliyor…" : "Kaydet"}
+        </button>
       </div>
     </form>
   );

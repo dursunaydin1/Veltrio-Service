@@ -212,3 +212,66 @@ export async function adjustStock(
     return { movement, before: balance.available, after: params.newQuantity };
   });
 }
+
+export type DamageAction = "MARK_DAMAGED" | "REPAIRED" | "DISPOSE";
+
+/**
+ * Hasarlı stok işlemleri (Adım 2.5, ST-007, ST-011):
+ *  MARK_DAMAGED : satılabilirden hasarlıya ayır (çift hareket)
+ *  REPAIRED     : hasarlıdan satılabilire aktar — onarıldı (çift hareket)
+ *  DISPOSE      : hasarlıdan çık — imha / hurda
+ * Neden zorunludur; çift hareketler tek işlemde yazılır (biri başarısızsa
+ * hiçbiri yazılmaz) ve ortak bir `source_id` ile bağlanır. Bu işlemlerde
+ * negatif stok ayarı dikkate alınmaz: olmayan stok hasarlıya ayrılamaz.
+ */
+export async function moveDamagedStock(
+  ctx: StockContext,
+  params: { productId: string; action: DamageAction; quantity: number; reason: string }
+): Promise<StockMovement[]> {
+  const reason = params.reason.trim();
+  if (!reason) throw new StockRuleError("Neden zorunludur.");
+  if (!(params.quantity > 0)) {
+    throw new StockRuleError("Miktar sıfırdan büyük olmalıdır.");
+  }
+
+  const strict: StockContext = { ...ctx, allowNegativeStock: false };
+  const groupId = generateId();
+  const common = { sourceType: "DAMAGED_TRANSFER", sourceId: groupId, note: reason };
+  const q = params.quantity;
+
+  const legs: MovementInput[] =
+    params.action === "MARK_DAMAGED"
+      ? [
+          { productId: params.productId, type: "TRANSFER", bucket: "AVAILABLE", quantity: -q, ...common },
+          { productId: params.productId, type: "DAMAGED_IN", bucket: "DAMAGED", quantity: q, ...common },
+        ]
+      : params.action === "REPAIRED"
+        ? [
+            { productId: params.productId, type: "TRANSFER", bucket: "DAMAGED", quantity: -q, ...common },
+            { productId: params.productId, type: "TRANSFER", bucket: "AVAILABLE", quantity: q, ...common },
+          ]
+        : [{ productId: params.productId, type: "DAMAGED_DISPOSE", bucket: "DAMAGED", quantity: -q, ...common }];
+
+  return db.transaction("rw", [...TABLES], async () => {
+    const read = async () =>
+      calcBalance(await db.stock_movements.where("product_id").equals(params.productId).toArray());
+    const before = await read();
+
+    const movements: StockMovement[] = [];
+    for (const leg of legs) movements.push(await appendMovement(strict, leg));
+
+    const after = await read();
+    await writeAuditLog({
+      businessId: ctx.businessId,
+      entityType: "products",
+      entityId: params.productId,
+      action: "UPDATE",
+      deviceCode: ctx.deviceCode,
+      actorId: ctx.actorId,
+      reason,
+      oldValue: { stock_available: before.available, stock_damaged: before.damaged },
+      newValue: { stock_available: after.available, stock_damaged: after.damaged, action: params.action, group_id: groupId },
+    });
+    return movements;
+  });
+}

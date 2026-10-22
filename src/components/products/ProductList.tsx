@@ -8,7 +8,7 @@ import { db } from "@/lib/db";
 import { useSessionStore } from "@/stores/session";
 import { useStockBalances } from "@/hooks/useStock";
 import { EMPTY_BALANCE } from "@/lib/stock/ledger";
-import { formatCurrency, formatNumber } from "@/lib/utils";
+import { formatCurrency, formatQuantity } from "@/lib/utils";
 import { unitLabel } from "@/lib/products/constants";
 import { isCriticalStock } from "@/lib/products/stock";
 import type { Product } from "@/types";
@@ -96,10 +96,10 @@ export function ProductList() {
                 </span>
                 <span className="row row-gap-sm" style={{ flexWrap: "wrap" }}>
                   <span className="badge badge-gray">
-                    Stok: {formatNumber(balance.available)} {unitLabel(p.unit)}
+                    Stok: {formatQuantity(balance.available)} {unitLabel(p.unit)}
                   </span>
                   {balance.damaged > 0 ? (
-                    <span className="badge badge-gray">Hasarlı: {formatNumber(balance.damaged)}</span>
+                    <span className="badge badge-gray">Hasarlı: {formatQuantity(balance.damaged)}</span>
                   ) : null}
                   {isCriticalStock({ stock_available: balance.available, critical_stock_level: p.critical_stock_level }) ? (
                     <span className="badge badge-red">Kritik stok</span>

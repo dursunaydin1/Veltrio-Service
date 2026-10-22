@@ -9,6 +9,7 @@ import {
   StockRuleError,
   addStock,
   adjustStock,
+  moveDamagedStock,
   recordMovement,
 } from "./service";
 
@@ -198,5 +199,73 @@ describe("getBalances", () => {
 describe("InsufficientStockError", () => {
   it("mevcut miktarı taşır", () => {
     expect(new InsufficientStockError(2).available).toBe(2);
+  });
+});
+
+describe("moveDamagedStock (Adım 2.5)", () => {
+  async function productWith(available: number) {
+    const p = await newProduct();
+    await addStock(ctx, { productId: p.id, quantity: available });
+    return p;
+  }
+
+  it("hasarlıya ayırma: satılabilir azalır, hasarlı artar (çift hareket, ortak kaynak)", async () => {
+    const p = await productWith(10);
+    const moves = await moveDamagedStock(ctx, { productId: p.id, action: "MARK_DAMAGED", quantity: 3, reason: "Düştü" });
+
+    expect(await getProductBalance(p.id)).toEqual({ available: 7, damaged: 3 });
+    expect(moves).toHaveLength(2);
+    expect(new Set(moves.map((m) => m.source_id)).size).toBe(1);
+    expect(moves.map((m) => m.bucket).sort()).toEqual(["AVAILABLE", "DAMAGED"]);
+  });
+
+  it("onarıldı: hasarlıdan satılabilire geri döner", async () => {
+    const p = await productWith(10);
+    await moveDamagedStock(ctx, { productId: p.id, action: "MARK_DAMAGED", quantity: 4, reason: "Hasarlı geldi" });
+    await moveDamagedStock(ctx, { productId: p.id, action: "REPAIRED", quantity: 1, reason: "Onarıldı" });
+    expect(await getProductBalance(p.id)).toEqual({ available: 7, damaged: 3 });
+  });
+
+  it("imha: yalnızca hasarlı azalır", async () => {
+    const p = await productWith(10);
+    await moveDamagedStock(ctx, { productId: p.id, action: "MARK_DAMAGED", quantity: 2, reason: "Kırık" });
+    const moves = await moveDamagedStock(ctx, { productId: p.id, action: "DISPOSE", quantity: 2, reason: "Hurda" });
+    expect(moves).toHaveLength(1);
+    expect(await getProductBalance(p.id)).toEqual({ available: 8, damaged: 0 });
+  });
+
+  it("olmayan stok hasarlıya ayrılamaz, ayar açık olsa bile; hiçbir hareket yazılmaz", async () => {
+    const p = await productWith(2);
+    const before = await db.stock_movements.count();
+    await expect(
+      moveDamagedStock({ ...ctx, allowNegativeStock: true }, { productId: p.id, action: "MARK_DAMAGED", quantity: 5, reason: "x" })
+    ).rejects.toBeInstanceOf(InsufficientStockError);
+    expect(await db.stock_movements.count()).toBe(before);
+  });
+
+  it("hasarlı stoktan fazla onarılamaz veya imha edilemez", async () => {
+    const p = await productWith(5);
+    await expect(
+      moveDamagedStock(ctx, { productId: p.id, action: "REPAIRED", quantity: 1, reason: "x" })
+    ).rejects.toBeInstanceOf(InsufficientStockError);
+    await expect(
+      moveDamagedStock(ctx, { productId: p.id, action: "DISPOSE", quantity: 1, reason: "x" })
+    ).rejects.toBeInstanceOf(InsufficientStockError);
+    expect(await getProductBalance(p.id)).toEqual({ available: 5, damaged: 0 });
+  });
+
+  it("neden olmadan işlem yapılmaz; audit log yazılır", async () => {
+    const p = await productWith(5);
+    await expect(
+      moveDamagedStock(ctx, { productId: p.id, action: "MARK_DAMAGED", quantity: 1, reason: " " })
+    ).rejects.toBeInstanceOf(StockRuleError);
+
+    await moveDamagedStock(ctx, { productId: p.id, action: "MARK_DAMAGED", quantity: 1, reason: "Çizik" });
+    const [log] = await db.audit_logs.toArray();
+    expect(log).toMatchObject({
+      reason: "Çizik",
+      old_value: { stock_available: 5, stock_damaged: 0 },
+      new_value: { stock_available: 4, stock_damaged: 1, action: "MARK_DAMAGED" },
+    });
   });
 });

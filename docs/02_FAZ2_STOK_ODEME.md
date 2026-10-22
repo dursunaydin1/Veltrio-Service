@@ -106,14 +106,16 @@ Servis ve satış modülleri bu fazda kurulan ürün kataloğu, stok hareketi ve
 ### ADIM 2.5 — Hasarlı Stok
 
 **Görevler:**
-- [ ] `bucket` alanı: `AVAILABLE` veya `DAMAGED`
-- [ ] `Product.damaged_qty` ayrı takip
-- [ ] Hasarlı stoktan çıkış türleri (ST-011):
+- [x] `bucket` alanı: `AVAILABLE` veya `DAMAGED`
+- [x] `Product.damaged_qty` ayrı takip
+- [x] Hasarlı stoktan çıkış türleri (ST-011) — satılabilire aktarma ve imha tamam, tedarikçiye iade Faz 5'te:
   - Satılabilire aktarma (onarıldı) → DAMAGED çıkış + AVAILABLE giriş (çift hareket)
   - Tedarikçiye iade → DAMAGED çıkış
   - İmha/hurda → DAMAGED çıkış
-- [ ] Neden alanı zorunlu
-- [ ] Hasarlı stok kritik stok hesabına dahil edilmez (ST-009)
+- [x] Neden alanı zorunlu
+- [x] Hasarlı stok kritik stok hesabına dahil edilmez (ST-009)
+
+> Uygulandı: `moveDamagedStock` (hasarlıya ayır / onarıldı / imha; çift hareketler tek işlemde, ortak `source_id`, audit log) ve ürün sayfasındaki "Hasarlı stok" formu. `Product.damaged_qty` yerine `stock_damaged` (özet) kullanılıyor; ekranda bakiye hareketlerden hesaplanır (K-017).
 
 **İlgili PRD:** ST-007, ST-011  
 **İlgili AC:** AC-043, AC-044
