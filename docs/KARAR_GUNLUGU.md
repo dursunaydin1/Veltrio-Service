@@ -5,6 +5,13 @@
 
 ## 2026-10-22
 
+### K-025 · Müşteri ve tedarikçi için ortak "taraf" altyapısı
+- **Sorun:** Ödeme, ters kayıt, açılış bakiyesi ve bakiye paneli yalnızca müşteri için yazılmıştı; tedarikçi için aynısını kopyalamak tutarsızlık riski taşırdı.
+- **Karar:** `recordPartyPayment` / `setPartyOpeningBalance` taraf türü (`CUSTOMER` | `SUPPLIER`) alır; müşteri ve tedarikçi sürümleri ince sarmalayıcıdır. Ters kayıt zaten tarafı orijinalden kopyaladığı için ortak çalışır. `BalancePanel` yerine `PartyBalancePanel`: etiketler tarafa göre değişir (müşteri: Tahsilat al / Müşteriye ödeme; tedarikçi: Ödeme yap / Tedarikçiden iade ödemesi).
+- **Tedarikçi bakiyesi** işletme açısından işaretlidir (pozitif = tedarikçiye borçluyuz): açılış + teslim alınmış alımlar − ödemeler (OUT) − iadeler + tedarikçiden alınan iade ödemeleri (IN).
+- **Test notu:** Ortak ödeme fonksiyonunun işlemi yalnızca ilgili tarafın tablosunu kapsar; tüm tabloları saymak, yalnızca müşteri tablolarını içeren dış işlemlerde (servis kabulü, teslim) "tablo işlemde değil" hatası veriyordu.
+- **Etki:** `src/lib/finance/*`, `src/lib/suppliers/*`, `PartyBalancePanel.tsx`; migration gerekmedi.
+
 ### K-024 · Fiş / PDF: yazdırılabilir sayfa, `jsPDF` değil
 - **Plan:** Tarayıcı taraflı PDF (jsPDF veya react-pdf).
 - **Sorun:** jsPDF'in varsayılan yazı tipleri Türkçe karakterleri (ş, ğ, ı, İ) basamaz; her çıktıya ayrı yazı tipi gömmek gerekir. Dar fiş ve A4 için ayrı yerleşim kodu da ister.

@@ -6,7 +6,12 @@ import { generateId, nowISO } from "@/lib/utils";
 import type { BusinessContext } from "@/hooks/useBusinessContext";
 import type { OpeningBalance } from "@/lib/db";
 import type { Payment, PaymentDirection, PaymentMethod } from "@/types";
-import { calcCustomerBalance, type BalanceBreakdown } from "./balance";
+import {
+  calcCustomerBalance,
+  calcSupplierBalance,
+  type BalanceBreakdown,
+  type SupplierBalanceBreakdown,
+} from "./balance";
 
 export class FinanceRuleError extends Error {
   constructor(message: string) {
@@ -44,29 +49,41 @@ function paymentPayload(payment: Payment): Record<string, unknown> {
   return payload;
 }
 
-/** Müşteriden tahsilat (IN) veya müşteriye ödeme / iade (OUT) kaydeder. */
-export async function recordCustomerPayment(
-  ctx: BusinessContext,
-  params: {
-    customerId: string;
-    direction: PaymentDirection;
-    method: PaymentMethod;
-    /** kuruş */
-    amountKurus: number;
-    note?: string;
-    /** Ödemenin bağlı olduğu belge (ör. servis kaparosu) */
-    sourceType?: string;
-    sourceId?: string;
-  }
-): Promise<Payment> {
+export type PartyType = "CUSTOMER" | "SUPPLIER";
+
+export type PartyPaymentParams = {
+  partyType: PartyType;
+  partyId: string;
+  direction: PaymentDirection;
+  method: PaymentMethod;
+  /** kuruş */
+  amountKurus: number;
+  note?: string;
+  /** Ödemenin bağlı olduğu belge (ör. servis kaparosu, satın alma) */
+  sourceType?: string;
+  sourceId?: string;
+};
+
+/**
+ * Müşteri veya tedarikçi ile ilgili ödeme kaydeder.
+ * Müşteri: IN = tahsilat, OUT = müşteriye ödeme / iade.
+ * Tedarikçi: OUT = tedarikçiye ödeme, IN = tedarikçiden iade ödemesi.
+ */
+export async function recordPartyPayment(ctx: BusinessContext, params: PartyPaymentParams): Promise<Payment> {
   if (!Number.isInteger(params.amountKurus) || params.amountKurus <= 0) {
     throw new FinanceRuleError("Tutar sıfırdan büyük olmalıdır.");
   }
 
-  return db.transaction("rw", db.customers, db.payments, db.sync_queue, async () => {
-    const customer = await db.customers.get(params.customerId);
-    if (!customer || customer.business_id !== ctx.businessId) {
-      throw new FinanceRuleError("Müşteri bulunamadı.");
+  // Yalnızca ilgili tarafın tablosu kapsama alınır; böylece bu fonksiyon, yalnızca
+  // müşteri tablolarını içeren dış işlemlerin (servis kabulü, teslim) içinde de çalışır.
+  const partyTable = params.partyType === "CUSTOMER" ? db.customers : db.suppliers;
+  return db.transaction("rw", partyTable, db.payments, db.sync_queue, async () => {
+    const party =
+      params.partyType === "CUSTOMER"
+        ? await db.customers.get(params.partyId)
+        : await db.suppliers.get(params.partyId);
+    if (!party || party.business_id !== ctx.businessId) {
+      throw new FinanceRuleError(params.partyType === "CUSTOMER" ? "Müşteri bulunamadı." : "Tedarikçi bulunamadı.");
     }
 
     const now = nowISO();
@@ -77,7 +94,8 @@ export async function recordCustomerPayment(
       method: params.method,
       amount: fromKurus(params.amountKurus),
       payment_date: now,
-      customer_id: params.customerId,
+      customer_id: params.partyType === "CUSTOMER" ? params.partyId : undefined,
+      supplier_id: params.partyType === "SUPPLIER" ? params.partyId : undefined,
       source_type: params.sourceType,
       source_id: params.sourceId,
       note: params.note?.trim() || undefined,
@@ -89,6 +107,42 @@ export async function recordCustomerPayment(
     await enqueue("payments", payment.id, "INSERT", paymentPayload(payment), ctx.deviceCode);
     return payment;
   });
+}
+
+/** Müşteriden tahsilat (IN) veya müşteriye ödeme / iade (OUT) kaydeder. */
+export async function recordCustomerPayment(
+  ctx: BusinessContext,
+  params: {
+    customerId: string;
+    direction: PaymentDirection;
+    method: PaymentMethod;
+    /** kuruş */
+    amountKurus: number;
+    note?: string;
+    sourceType?: string;
+    sourceId?: string;
+  }
+): Promise<Payment> {
+  const { customerId, ...rest } = params;
+  return recordPartyPayment(ctx, { partyType: "CUSTOMER", partyId: customerId, ...rest });
+}
+
+/** Tedarikçiye ödeme (OUT) veya tedarikçiden iade ödemesi (IN) kaydeder. */
+export async function recordSupplierPayment(
+  ctx: BusinessContext,
+  params: {
+    supplierId: string;
+    direction: PaymentDirection;
+    method: PaymentMethod;
+    /** kuruş */
+    amountKurus: number;
+    note?: string;
+    sourceType?: string;
+    sourceId?: string;
+  }
+): Promise<Payment> {
+  const { supplierId, ...rest } = params;
+  return recordPartyPayment(ctx, { partyType: "SUPPLIER", partyId: supplierId, ...rest });
 }
 
 /**
@@ -178,14 +232,16 @@ export function reversedPaymentIds(payments: Payment[]): Set<string> {
 type OpeningBalanceRecord = OpeningBalance & { version?: number };
 
 /**
- * Müşterinin açılış bakiyesini ekler veya değiştirir. Sahte satış/ödeme
- * üretilmez (§9.4). Değişiklik kritik işlemdir: mevcut kayıt değiştirilirken
- * neden zorunludur ve audit log'a eski/yeni değer yazılır.
+ * Müşteri veya tedarikçinin açılış bakiyesini ekler / değiştirir. Sahte
+ * satış/ödeme üretilmez (§9.4). Değişiklik kritik işlemdir: mevcut kayıt
+ * değiştirilirken neden zorunludur ve audit log'a eski/yeni değer yazılır.
+ * Taraf başına tek kayıt vardır.
  */
-export async function setCustomerOpeningBalance(
+export async function setPartyOpeningBalance(
   ctx: BusinessContext,
   params: {
-    customerId: string;
+    partyType: PartyType;
+    partyId: string;
     direction: OpeningBalance["direction"];
     /** kuruş */
     amountKurus: number;
@@ -203,17 +259,20 @@ export async function setCustomerOpeningBalance(
 
   return db.transaction(
     "rw",
-    [db.customers, db.opening_balances, db.sync_queue, db.audit_logs],
+    [db.customers, db.suppliers, db.opening_balances, db.sync_queue, db.audit_logs],
     async () => {
-      const customer = await db.customers.get(params.customerId);
-      if (!customer || customer.business_id !== ctx.businessId) {
-        throw new FinanceRuleError("Müşteri bulunamadı.");
+      const party =
+        params.partyType === "CUSTOMER"
+          ? await db.customers.get(params.partyId)
+          : await db.suppliers.get(params.partyId);
+      if (!party || party.business_id !== ctx.businessId) {
+        throw new FinanceRuleError(params.partyType === "CUSTOMER" ? "Müşteri bulunamadı." : "Tedarikçi bulunamadı.");
       }
 
       const existing = (await db.opening_balances
         .where("party_id")
-        .equals(params.customerId)
-        .filter((o) => o.party_type === "CUSTOMER" && o.business_id === ctx.businessId)
+        .equals(params.partyId)
+        .filter((o) => o.party_type === params.partyType && o.business_id === ctx.businessId)
         .first()) as OpeningBalanceRecord | undefined;
 
       const fields = {
@@ -227,8 +286,8 @@ export async function setCustomerOpeningBalance(
         const created: OpeningBalance = {
           id: generateId(),
           business_id: ctx.businessId,
-          party_type: "CUSTOMER",
-          party_id: params.customerId,
+          party_type: params.partyType,
+          party_id: params.partyId,
           created_at: nowISO(),
           ...fields,
         };
@@ -258,7 +317,7 @@ export async function setCustomerOpeningBalance(
           deviceCode: ctx.deviceCode,
           actorId: ctx.actorId,
           reason: params.reason?.trim() || undefined,
-          newValue: { ...fields, party_id: params.customerId },
+          newValue: { ...fields, party_id: params.partyId },
         });
         return created;
       }
@@ -299,6 +358,40 @@ export async function setCustomerOpeningBalance(
   );
 }
 
+/** Müşterinin açılış bakiyesini ekler veya değiştirir. */
+export async function setCustomerOpeningBalance(
+  ctx: BusinessContext,
+  params: {
+    customerId: string;
+    direction: OpeningBalance["direction"];
+    /** kuruş */
+    amountKurus: number;
+    asOfDate: string;
+    note?: string;
+    reason?: string;
+  }
+): Promise<OpeningBalance> {
+  const { customerId, ...rest } = params;
+  return setPartyOpeningBalance(ctx, { partyType: "CUSTOMER", partyId: customerId, ...rest });
+}
+
+/** Tedarikçinin açılış bakiyesini ekler veya değiştirir. */
+export async function setSupplierOpeningBalance(
+  ctx: BusinessContext,
+  params: {
+    supplierId: string;
+    direction: OpeningBalance["direction"];
+    /** kuruş */
+    amountKurus: number;
+    asOfDate: string;
+    note?: string;
+    reason?: string;
+  }
+): Promise<OpeningBalance> {
+  const { supplierId, ...rest } = params;
+  return setPartyOpeningBalance(ctx, { partyType: "SUPPLIER", partyId: supplierId, ...rest });
+}
+
 /** Müşteri bakiyesini belgelerden hesaplar (saklanan bir değere güvenmez). */
 export async function getCustomerBalance(
   businessId: string,
@@ -332,6 +425,41 @@ export async function getCustomerBalance(
     charges: [...sales.map((s) => s.total_amount), ...services.map((s) => s.total_amount)],
     payments,
     // İadeler (Faz 5) eklendiğinde buradan beslenecek.
+    returns: [],
+  });
+}
+
+/**
+ * Tedarikçi bakiyesini belgelerden hesaplar (pozitif = işletme borçlu).
+ * Teslim alınmış (RECEIVED) satın almalar sayılır; iadeler (Faz 5) eklenince
+ * `returns` beslenecek.
+ */
+export async function getSupplierBalance(
+  businessId: string,
+  supplierId: string
+): Promise<SupplierBalanceBreakdown> {
+  const [openingBalances, payments, purchases] = await Promise.all([
+    db.opening_balances
+      .where("party_id")
+      .equals(supplierId)
+      .filter((o) => o.party_type === "SUPPLIER" && o.business_id === businessId)
+      .toArray(),
+    db.payments
+      .where("supplier_id")
+      .equals(supplierId)
+      .filter((p) => p.business_id === businessId)
+      .toArray(),
+    db.purchases
+      .where("supplier_id")
+      .equals(supplierId)
+      .filter((p) => p.business_id === businessId && p.status === "RECEIVED")
+      .toArray(),
+  ]);
+
+  return calcSupplierBalance({
+    openingBalances,
+    purchases: purchases.map((p) => p.total_amount),
+    payments,
     returns: [],
   });
 }

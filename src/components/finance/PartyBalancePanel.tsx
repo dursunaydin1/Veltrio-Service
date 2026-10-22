@@ -9,30 +9,80 @@ import { balanceState } from "@/lib/finance/balance";
 import {
   PAYMENT_METHOD_LABELS,
   getCustomerBalance,
-  recordCustomerPayment,
+  getSupplierBalance,
+  recordPartyPayment,
   reversePayment,
   reversedPaymentIds,
-  setCustomerOpeningBalance,
+  setPartyOpeningBalance,
+  type PartyType,
 } from "@/lib/finance/service";
 import { formatCurrency, formatDateTime, todayLocalDate } from "@/lib/utils";
-import type { Customer, Payment, PaymentDirection, PaymentMethod } from "@/types";
+import type { Payment, PaymentDirection, PaymentMethod } from "@/types";
 
-type Mode = null | "collect" | "payout" | "opening";
+type Mode = null | "primary" | "secondary" | "opening";
+type OpeningDirection = "OWED_BY_PARTY" | "OWED_TO_PARTY";
+
+/** Tarafa (müşteri / tedarikçi) göre değişen etiketler ve yönler. */
+const CONFIG = {
+  CUSTOMER: {
+    debtLabel: "Müşteri borçlu",
+    creditLabel: "Müşteri alacaklı (işletme borçlu)",
+    primary: { direction: "IN" as PaymentDirection, button: "Tahsilat al", title: "Tahsilat al" },
+    secondary: { direction: "OUT" as PaymentDirection, button: "Müşteriye ödeme", title: "Müşteriye ödeme / iade" },
+    rowLabel: { IN: "Tahsilat", OUT: "Müşteriye ödeme" },
+    openingDefault: "OWED_BY_PARTY" as OpeningDirection,
+    openingOptions: [
+      { value: "OWED_BY_PARTY", label: "Müşteri bize borçlu" },
+      { value: "OWED_TO_PARTY", label: "Biz müşteriye borçluyuz" },
+    ],
+    debtIsWarning: true,
+  },
+  SUPPLIER: {
+    debtLabel: "Tedarikçiye borçlusunuz",
+    creditLabel: "Tedarikçi size borçlu (alacağınız)",
+    primary: { direction: "OUT" as PaymentDirection, button: "Ödeme yap", title: "Tedarikçiye ödeme yap" },
+    secondary: { direction: "IN" as PaymentDirection, button: "Tedarikçiden iade ödemesi", title: "Tedarikçiden iade ödemesi alındı" },
+    rowLabel: { IN: "Tedarikçiden iade ödemesi", OUT: "Tedarikçiye ödeme" },
+    openingDefault: "OWED_TO_PARTY" as OpeningDirection,
+    openingOptions: [
+      { value: "OWED_TO_PARTY", label: "Tedarikçiye borçluyuz" },
+      { value: "OWED_BY_PARTY", label: "Tedarikçi bize borçlu" },
+    ],
+    debtIsWarning: true,
+  },
+} as const;
 
 const errorText = (e: unknown, fallback: string) => (e instanceof Error ? e.message : fallback);
 
-/** Müşteri sayfasındaki bakiye bölümü: bakiye, tahsilat / ödeme, açılış bakiyesi, ödeme geçmişi (Adım 2.7-2.8). */
-export function BalancePanel({ customer }: { customer: Customer }) {
+async function loadBalance(kind: PartyType, businessId: string, id: string) {
+  return kind === "CUSTOMER" ? getCustomerBalance(businessId, id) : getSupplierBalance(businessId, id);
+}
+
+/**
+ * Müşteri veya tedarikçi sayfasındaki bakiye bölümü: bakiye, ödeme / tahsilat,
+ * açılış bakiyesi ve ödeme geçmişi (ters kayıt dahil) — Adım 2.7-2.8, 4.7.
+ */
+export function PartyBalancePanel({
+  kind,
+  party,
+}: {
+  kind: PartyType;
+  party: { id: string; business_id: string };
+}) {
+  const cfg = CONFIG[kind];
   const [mode, setMode] = useState<Mode>(null);
 
   const balance = useLiveQuery(
-    () => getCustomerBalance(customer.business_id, customer.id),
-    [customer.id, customer.business_id]
+    () => loadBalance(kind, party.business_id, party.id),
+    [kind, party.id, party.business_id]
   );
   const payments = useLiveQuery(async () => {
-    const all = await db.payments.where("customer_id").equals(customer.id).toArray();
+    const all = await db.payments
+      .where(kind === "CUSTOMER" ? "customer_id" : "supplier_id")
+      .equals(party.id)
+      .toArray();
     return all.sort((a, b) => b.created_at.localeCompare(a.created_at));
-  }, [customer.id]);
+  }, [kind, party.id]);
 
   const state = balance ? balanceState(balance.balance) : "CLEAR";
   const reversed = reversedPaymentIds(payments ?? []);
@@ -42,9 +92,7 @@ export function BalancePanel({ customer }: { customer: Customer }) {
       <h2 id="balance-title">Bakiye</h2>
 
       <div className="tile">
-        <div className="tile-label">
-          {state === "DEBT" ? "Müşteri borçlu" : state === "CREDIT" ? "Müşteri alacaklı (işletme borçlu)" : "Bakiye yok"}
-        </div>
+        <div className="tile-label">{state === "DEBT" ? cfg.debtLabel : state === "CREDIT" ? cfg.creditLabel : "Bakiye yok"}</div>
         <div
           className="tile-value"
           style={{ color: state === "DEBT" ? "var(--accent-warning)" : state === "CREDIT" ? "var(--accent-success)" : undefined }}
@@ -55,12 +103,12 @@ export function BalancePanel({ customer }: { customer: Customer }) {
 
       {mode === null ? (
         <div className="stack stack-sm">
-          <button type="button" className="btn btn-primary btn-full" onClick={() => setMode("collect")}>
-            Tahsilat al
+          <button type="button" className="btn btn-primary btn-full" onClick={() => setMode("primary")}>
+            {cfg.primary.button}
           </button>
           <div className="row row-gap-md">
-            <button type="button" className="btn btn-secondary" style={{ flex: 1 }} onClick={() => setMode("payout")}>
-              Müşteriye ödeme
+            <button type="button" className="btn btn-secondary" style={{ flex: 1 }} onClick={() => setMode("secondary")}>
+              {cfg.secondary.button}
             </button>
             <button type="button" className="btn btn-secondary" style={{ flex: 1 }} onClick={() => setMode("opening")}>
               Açılış bakiyesi
@@ -68,11 +116,13 @@ export function BalancePanel({ customer }: { customer: Customer }) {
           </div>
         </div>
       ) : mode === "opening" ? (
-        <OpeningForm customer={customer} onDone={() => setMode(null)} />
+        <OpeningForm kind={kind} party={party} onDone={() => setMode(null)} />
       ) : (
         <PaymentForm
-          customer={customer}
-          direction={mode === "collect" ? "IN" : "OUT"}
+          kind={kind}
+          party={party}
+          direction={mode === "primary" ? cfg.primary.direction : cfg.secondary.direction}
+          title={mode === "primary" ? cfg.primary.title : cfg.secondary.title}
           onDone={() => setMode(null)}
         />
       )}
@@ -83,7 +133,7 @@ export function BalancePanel({ customer }: { customer: Customer }) {
       ) : (
         <ul className="menu-list" aria-label="Ödemeler">
           {payments.slice(0, 30).map((p) => (
-            <PaymentRow key={p.id} payment={p} cancelled={reversed.has(p.id)} />
+            <PaymentRow key={p.id} kind={kind} payment={p} cancelled={reversed.has(p.id)} />
           ))}
         </ul>
       )}
@@ -91,7 +141,7 @@ export function BalancePanel({ customer }: { customer: Customer }) {
   );
 }
 
-function PaymentRow({ payment, cancelled }: { payment: Payment; cancelled: boolean }) {
+function PaymentRow({ kind, payment, cancelled }: { kind: PartyType; payment: Payment; cancelled: boolean }) {
   const ctx = useBusinessContext();
   const [open, setOpen] = useState(false);
   const [reason, setReason] = useState("");
@@ -99,6 +149,7 @@ function PaymentRow({ payment, cancelled }: { payment: Payment; cancelled: boole
   const [busy, setBusy] = useState(false);
 
   const isReversal = !!payment.reversal_of_id;
+  // Yön işareti: kasaya giren (+) / kasadan çıkan (−)
   const sign = payment.direction === "IN" ? "+" : "−";
 
   async function confirm() {
@@ -127,7 +178,7 @@ function PaymentRow({ payment, cancelled }: { payment: Payment; cancelled: boole
         </span>
       </span>
       <small style={{ color: "var(--text-muted)" }}>
-        {payment.direction === "IN" ? "Tahsilat" : "Müşteriye ödeme"} · {formatDateTime(payment.payment_date)}
+        {CONFIG[kind].rowLabel[payment.direction]} · {formatDateTime(payment.payment_date)}
         {payment.note ? ` · ${payment.note}` : ""}
       </small>
 
@@ -160,12 +211,16 @@ function PaymentRow({ payment, cancelled }: { payment: Payment; cancelled: boole
 }
 
 function PaymentForm({
-  customer,
+  kind,
+  party,
   direction,
+  title,
   onDone,
 }: {
-  customer: Customer;
+  kind: PartyType;
+  party: { id: string };
   direction: PaymentDirection;
+  title: string;
   onDone: () => void;
 }) {
   const ctx = useBusinessContext();
@@ -184,7 +239,7 @@ function PaymentForm({
 
     setBusy(true);
     try {
-      await recordCustomerPayment(ctx, { customerId: customer.id, direction, method, amountKurus: kurus, note });
+      await recordPartyPayment(ctx, { partyType: kind, partyId: party.id, direction, method, amountKurus: kurus, note });
       onDone();
     } catch (e) {
       setError(errorText(e, "Kaydedilemedi."));
@@ -194,7 +249,7 @@ function PaymentForm({
 
   return (
     <form className="stack stack-md" onSubmit={submit} noValidate>
-      <h3>{direction === "IN" ? "Tahsilat al" : "Müşteriye ödeme / iade"}</h3>
+      <h3>{title}</h3>
       <div className="form-group">
         <label className="form-label" htmlFor="pay-amount">Tutar (₺) *</label>
         <input id="pay-amount" className="form-input" inputMode="decimal" placeholder="0,00" value={amount} onChange={(e) => setAmount(e.target.value)} autoFocus />
@@ -222,19 +277,28 @@ function PaymentForm({
   );
 }
 
-function OpeningForm({ customer, onDone }: { customer: Customer; onDone: () => void }) {
+function OpeningForm({
+  kind,
+  party,
+  onDone,
+}: {
+  kind: PartyType;
+  party: { id: string };
+  onDone: () => void;
+}) {
+  const cfg = CONFIG[kind];
   const ctx = useBusinessContext();
   const existing = useLiveQuery(
     () =>
       db.opening_balances
         .where("party_id")
-        .equals(customer.id)
-        .filter((o) => o.party_type === "CUSTOMER")
+        .equals(party.id)
+        .filter((o) => o.party_type === kind)
         .first(),
-    [customer.id]
+    [party.id, kind]
   );
 
-  const [direction, setDirection] = useState<"OWED_BY_PARTY" | "OWED_TO_PARTY">("OWED_BY_PARTY");
+  const [direction, setDirection] = useState<OpeningDirection>(cfg.openingDefault);
   const [amount, setAmount] = useState("");
   const [asOf, setAsOf] = useState(todayLocalDate());
   const [note, setNote] = useState("");
@@ -262,8 +326,9 @@ function OpeningForm({ customer, onDone }: { customer: Customer; onDone: () => v
 
     setBusy(true);
     try {
-      await setCustomerOpeningBalance(ctx, {
-        customerId: customer.id,
+      await setPartyOpeningBalance(ctx, {
+        partyType: kind,
+        partyId: party.id,
         direction,
         amountKurus: kurus,
         asOfDate: asOf,
@@ -283,9 +348,10 @@ function OpeningForm({ customer, onDone }: { customer: Customer; onDone: () => v
       <p>Uygulamaya geçmeden önceki borç / alacak. Sahte satış veya ödeme oluşturulmaz.</p>
       <div className="form-group">
         <label className="form-label" htmlFor="ob-direction">Yön</label>
-        <select id="ob-direction" className="form-input" value={direction} onChange={(e) => setDirection(e.target.value as typeof direction)}>
-          <option value="OWED_BY_PARTY">Müşteri bize borçlu</option>
-          <option value="OWED_TO_PARTY">Biz müşteriye borçluyuz</option>
+        <select id="ob-direction" className="form-input" value={direction} onChange={(e) => setDirection(e.target.value as OpeningDirection)}>
+          {cfg.openingOptions.map((o) => (
+            <option key={o.value} value={o.value}>{o.label}</option>
+          ))}
         </select>
       </div>
       <div className="form-group">

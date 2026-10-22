@@ -6,7 +6,7 @@ import { useLiveQuery } from "dexie-react-hooks";
 import { MessageCircle, Phone } from "lucide-react";
 import { db } from "@/lib/db";
 import { useBusinessContext } from "@/hooks/useBusinessContext";
-import { BalancePanel } from "@/components/customers/BalancePanel";
+import { PartyBalancePanel } from "@/components/finance/PartyBalancePanel";
 import { CustomerMachines } from "@/components/customers/CustomerMachines";
 import { CustomerForm } from "@/components/customers/CustomerForm";
 import { setCustomerArchived } from "@/lib/customers/service";
@@ -74,7 +74,7 @@ export function CustomerEditor({ id }: { id: string }) {
 
       <CustomerMachines customer={customer} />
 
-      <BalancePanel customer={customer} />
+      <PartyBalancePanel kind="CUSTOMER" party={customer} />
 
       <CustomerForm key={`${customer.id}:${customer.version ?? 0}`} customer={customer} />
 
