@@ -5,6 +5,11 @@
 
 ## 2026-10-22
 
+### K-011 · Henüz yapılmamış bölümler 404 yerine "yakında" sayfası gösterir
+- **Sorun:** Alt menü ve hızlı eylemler olmayan sayfalara gidiyordu (404).
+- **Karar:** Her bölüm için ilgili fazı belirten `ComingSoon` sayfası kondu; sayfa gerçekleştiğinde dosya ezilecek. İkincil menüye plandaki öğelere ek olarak "Satın Almalar" eklendi (satın alma için ayrı giriş gerekiyor). Ara ve QR Tara hızlı eylemleri hazır olana kadar devre dışı.
+- **Etki:** `src/app/(app)/*/page.tsx`, `src/components/layout/*`.
+
 ### K-010 · Push: ekleme idempotent, güncelleme sürüm kontrollü
 - **Sorun:** Push API her işlemi `upsert` ile uyguluyordu. İki cihaz aynı kaydı değiştirirse sondaki ötekini sessizce eziyordu; ayrıca ağ hatasıyla yeniden denenen eski bir "ekleme", arada güncellenmiş kaydı eski hâline döndürebiliyordu.
 - **Karar:** INSERT yalnızca ekler (kayıt zaten varsa başarı sayılır, ezmez). UPDATE yalnızca `payload.version` sunucudakiyle eşitse uygulanır; değilse `CONFLICT` döner ve kayıt kuyrukta bekler. DELETE koşulsuz kalır (silme yerine `archived_at` tercih edilir).

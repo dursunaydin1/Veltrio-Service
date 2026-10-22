@@ -237,12 +237,14 @@ Bu faz tüm diğer modüllerin üzerine inşa edileceği teknik temeli oluşturu
 ### ADIM 1.12 — Temel UI İskeleti (Mobil Öncelikli)
 
 **Görevler:**
-- [ ] Ana ekran düzeni: hızlı eylemler (Yeni Servis, Yeni Satış, Ara, QR Tara), Bugünün Durumu alanı
-- [ ] Alt gezinme: Ana Sayfa, Servisler, Satışlar, Stok, Müşteriler
+- [x] Ana ekran düzeni: hızlı eylemler (Yeni Servis, Yeni Satış, Ara, QR Tara), Bugünün Durumu alanı
+- [x] Alt gezinme: Ana Sayfa, Servisler, Satışlar, Stok, Müşteriler
 - [ ] İkincil menü: Tedarikçiler, Raporlar, Ayarlar, Yedekleme, Yardım
-- [ ] Eşitleme durumu göstergesi (her zaman görünür: bekleyen kayıt sayısı, son başarılı eşitleme)
-- [ ] Türkçe, TL, Türkiye tarih biçimi varsayılan
+- [x] Eşitleme durumu göstergesi (her zaman görünür: bekleyen kayıt sayısı, son başarılı eşitleme)
+- [x] Türkçe, TL, Türkiye tarih biçimi varsayılan
 - [ ] Erişilebilirlik: yeterli kontrast, büyük dokunma hedefleri, klavye erişimi
+
+> Uygulandı: `src/components/layout/` (AppShell, BottomNav, SyncStatus, QuickActions, TodayStatus), `(app)/layout.tsx`, `/more` menüsü (çıkış yap dahil). Henüz olmayan bölümler `ComingSoon` sayfasıyla açılır (K-011). Açık: Ara ve QR Tara (devre dışı), ikincil menüde Yedekleme ve Yardım, erişilebilirlik denetimi (skip-link, 44px hedefler, odak çerçevesi var; kontrast ve klavye denetimi Faz 7).
 
 **İlgili PRD:** §3, §4.7  
 **İlgili NFR:** NFR-001, NFR-007, NFR-013
