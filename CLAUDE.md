@@ -23,7 +23,7 @@ npm test        # vitest run (tek dosya: npx vitest run src/lib/utils/phone.test
 
 Tests are Vitest unit tests next to the code (`*.test.ts`, `@` alias configured in `vitest.config.mts`). Environment vars go in `.env.local` (see `.env.local.example`): `NEXT_PUBLIC_SUPABASE_URL`, `NEXT_PUBLIC_SUPABASE_ANON_KEY`. If they are missing, `src/proxy.ts` skips the auth redirect so the app still runs locally.
 
-Database migrations live in `supabase/migrations/` and must be applied in order (001 → 012), via the Supabase SQL editor or `supabase db push`. The sync API routes do not work until `005_sync_changes.sql` is applied.
+Database migrations live in `supabase/migrations/` and must be applied in order (001 → 013), via the Supabase SQL editor or `supabase db push`. The sync API routes do not work until `005_sync_changes.sql` is applied.
 
 ## Stack notes
 

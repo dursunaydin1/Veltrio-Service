@@ -1,8 +1,8 @@
 import type { Metadata } from "next";
-import { ComingSoon } from "@/components/layout/ComingSoon";
+import { ServiceList } from "@/components/services/ServiceList";
 
 export const metadata: Metadata = { title: "Servisler" };
 
-export default function Page() {
-  return <ComingSoon title="Servisler" phase="FAZ 3" />;
+export default function ServicesPage() {
+  return <ServiceList />;
 }

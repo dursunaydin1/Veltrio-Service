@@ -10,7 +10,8 @@ import { CustomerPicker } from "@/components/customers/CustomerPicker";
 import { MachineForm } from "@/components/machines/MachineForm";
 import { machineTitle } from "@/components/machines/MachineList";
 import { changeMachineOwner, setMachineArchived } from "@/lib/machines/service";
-import { formatDateTime } from "@/lib/utils";
+import { StatusBadge } from "@/components/services/StatusBadge";
+import { formatDate, formatDateTime } from "@/lib/utils";
 import type { Machine } from "@/types";
 
 /** Makine profili: sahibi, bilgiler, sahiplik geçmişi, sahip değiştirme, arşivleme (Adım 3.3). */
@@ -72,6 +73,17 @@ export function MachineEditor({ id }: { id: string }) {
           {owner ? <Link href={`/customers/${owner.id}`}>{owner.name}</Link> : "—"}
         </p>
       </div>
+
+      {!archived && machine.customer_id ? (
+        <Link
+          href={`/services/new?customer=${machine.customer_id}&machine=${machine.id}`}
+          className="btn btn-primary btn-full"
+        >
+          Yeni servis başlat
+        </Link>
+      ) : null}
+
+      <MachineServices machineId={machine.id} />
 
       <MachineForm key={`${machine.id}:${machine.version ?? 0}`} machine={machine} />
 
@@ -162,6 +174,38 @@ function OwnerSection({ machine }: { machine: Machine }) {
               <small style={{ color: "var(--text-muted)" }}>
                 {formatDateTime(h.changed_at)} · {h.reason}
               </small>
+            </li>
+          ))}
+        </ul>
+      )}
+    </section>
+  );
+}
+
+function MachineServices({ machineId }: { machineId: string }) {
+  const services = useLiveQuery(async () => {
+    const all = await db.services.where("machine_id").equals(machineId).toArray();
+    return all.sort((a, b) => b.received_date.localeCompare(a.received_date));
+  }, [machineId]);
+
+  return (
+    <section className="card stack stack-md" aria-labelledby="ms-title">
+      <h2 id="ms-title">Servis geçmişi</h2>
+      {services === undefined ? null : services.length === 0 ? (
+        <p>Bu makinede servis kaydı yok.</p>
+      ) : (
+        <ul className="menu-list" aria-label="Servisler">
+          {services.map((s) => (
+            <li key={s.id}>
+              <Link href={`/services/${s.id}`} style={{ flexDirection: "column", alignItems: "flex-start", gap: 2 }}>
+                <span className="row row-between" style={{ width: "100%" }}>
+                  <span>{s.document_no}</span>
+                  <StatusBadge status={s.status} />
+                </span>
+                <small style={{ color: "var(--text-muted)", fontWeight: 500 }}>
+                  {formatDate(s.received_date)} · {s.customer_complaint ?? ""}
+                </small>
+              </Link>
             </li>
           ))}
         </ul>

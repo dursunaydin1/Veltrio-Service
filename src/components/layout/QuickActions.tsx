@@ -9,7 +9,7 @@ import { ScanLine, Search, ShoppingCart, Wrench } from "lucide-react";
 export function QuickActions() {
   return (
     <div className="quick-grid">
-      <Link href="/services" className="quick-action">
+      <Link href="/services/new" className="quick-action">
         <Wrench size={28} aria-hidden="true" />
         Yeni Servis
       </Link>

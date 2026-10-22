@@ -105,18 +105,20 @@ Uygulamanın kalbi olan servis akışını hayata geçirmek: müşteri kabulünd
 ### ADIM 3.6 — Servis Emri Oluşturma (Kabul)
 
 **Görevler:**
-- [ ] `ServiceOrder` tablosunu oluştur (PRD §7 tam alan listesi)
+- [x] `ServiceOrder` tablosunu oluştur (PRD §7 tam alan listesi)
 - [ ] `ServiceIssue`, `ServiceOperation`, `ServicePart`, `ServiceApproval`, `ServiceStatusHistory`, `ServiceChecklistItem` tablolarını oluştur
-- [ ] Yeni Servis akışı (§5.1):
+- [x] Yeni Servis akışı (§5.1) — kataloğun yerini şimdilik sabit arıza başlıkları (düğme) + serbest metin alıyor:
   1. Mevcut müşteri seçimi veya yeni müşteri oluşturma (mükerrer uyarısı çalışır)
   2. Müşterinin makineleri listelenir; seçim / QR / yeni makine açma
   3. Makine seçilince: son servis tarihi, son işlem, servis sayısı özeti gösterilir
   4. Şikâyet girişi: katalogdan seçim + serbest metin + 'Diğer' seçeneği
   5. Kabul bilgileri: fotoğraf (isteğe bağlı), mevcut hasar/çizikler, teslim alınan aksesuarlar, müşteri beyanı
   6. Kayıt açılır; teşhis ve diğerleri sonra tamamlanabilir
-- [ ] Belge numarası: `S-[cihaz_kodu]-[yıl]-[sıra]`
-- [ ] Başlangıç durumu: "Kabul edildi"
-- [ ] Servis oluştuğunda UUID ve belge numarası oluşur (AC-001)
+- [x] Belge numarası: `S-[cihaz_kodu]-[yıl]-[sıra]`
+- [x] Başlangıç durumu: "Kabul edildi"
+- [x] Servis oluştuğunda UUID ve belge numarası oluşur (AC-001)
+
+> Uygulandı: migration 013, `src/lib/services/` (`openService`, `changeServiceStatus`, `updateServiceDetails`, `getMachineServiceSummary`), `/services` (liste), `/services/new` (kabul formu: müşteri → makine / geçici makine → şikâyet → hasar, aksesuar, teslim sözü, kapora), `/services/[id]`. Kapora servise bağlı tahsilat olarak yazılır (SR-018) ve müşteri bakiyesini düşürür. **Açık:** `ServiceIssue/Operation/Part/Approval/ChecklistItem` tabloları ve arıza/işlem kataloğu (3.5, 3.8-3.10), kabul fotoğrafı, kabul fişi (3.15).
 
 **İlgili FR:** FR-007  
 **İlgili AC:** AC-001, AC-002  
@@ -127,7 +129,7 @@ Uygulamanın kalbi olan servis akışını hayata geçirmek: müşteri kabulünd
 ### ADIM 3.7 — Servis Durum Makinesi
 
 **Görevler:**
-- [ ] Durum değerleri ve geçiş kurallarını kodla (§6.1):
+- [x] Durum değerleri ve geçiş kurallarını kodla (§6.1):
 
 | Durum | İzin Verilen Sonraki Durumlar |
 |-------|-------------------------------|
@@ -141,9 +143,11 @@ Uygulamanın kalbi olan servis akışını hayata geçirmek: müşteri kabulünd
 | Teslim Edildi | İşlemde (yeniden açma; neden zorunlu) — iptal edilemez |
 | İptal Edildi | Terminal durum |
 
-- [ ] Geçersiz geçiş denemesinde hata mesajı gösterilir
-- [ ] Her durum değişikliği `ServiceStatusHistory`'e yazılır: from_status, to_status, changed_at, actor_id, device_id, note
-- [ ] Yeniden açma neden zorunludur
+- [x] Geçersiz geçiş denemesinde hata mesajı gösterilir
+- [x] Her durum değişikliği `ServiceStatusHistory`'e yazılır: from_status, to_status, changed_at, actor_id, device_id, note
+- [x] Yeniden açma neden zorunludur
+
+> Uygulandı: `src/lib/services/status.ts` (saf durum makinesi, 28 test), servis detayında yalnızca izinli geçiş düğmeleri; iptal ve yeniden açma neden ister ve audit log'a yazılır. Durum geçmişi değiştirilemez (migration 013 kuralları) ve servis sayfasında görünür. `first_completed_at` yeniden açılsa da korunur (SR-009). **Açık:** onay eşiği kontrolü (3.8), tamamlama/teslim kuralları: fiyatı beklenen kalem, kalan bakiye gösterimi, borçlu teslim (3.12).
 
 **İlgili FR:** FR-008  
 **İlgili AC:** AC-017, AC-033  

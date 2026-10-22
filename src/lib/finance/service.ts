@@ -54,6 +54,9 @@ export async function recordCustomerPayment(
     /** kuruş */
     amountKurus: number;
     note?: string;
+    /** Ödemenin bağlı olduğu belge (ör. servis kaparosu) */
+    sourceType?: string;
+    sourceId?: string;
   }
 ): Promise<Payment> {
   if (!Number.isInteger(params.amountKurus) || params.amountKurus <= 0) {
@@ -75,6 +78,8 @@ export async function recordCustomerPayment(
       amount: fromKurus(params.amountKurus),
       payment_date: now,
       customer_id: params.customerId,
+      source_type: params.sourceType,
+      source_id: params.sourceId,
       note: params.note?.trim() || undefined,
       status: "VALID",
       created_by_device: ctx.deviceCode,

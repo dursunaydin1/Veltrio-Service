@@ -5,6 +5,13 @@
 
 ## 2026-10-22
 
+### K-021 · Servis durum kümesi PRD §6.1'e uyduruldu; kabul ve durum değişimi tek işlemde
+- **Sorun:** Şemadaki durumlar (`WAITING_DIAGNOSIS`, `READY_FOR_DELIVERY`…) PRD §6.1'deki akıştan farklıydı; "Kabul edildi", "Teşhis tamamlandı", "İş tamamlandı" eksikti.
+- **Karar:** `RECEIVED → (WAITING_DIAGNOSIS) → DIAGNOSED → (WAITING_CUSTOMER_APPROVAL) → IN_PROGRESS ⇄ WAITING_PARTS → COMPLETED → DELIVERED / CANCELLED` (eski `READY_FOR_DELIVERY` `COMPLETED` oldu). Geçiş tablosu saf bir modülde (`status.ts`) tutulur. Teslim edilmiş servis iptal edilemez ama yeniden açılabilir; iptal ve yeniden açma neden ister.
+- **Tutarlılık:** Servis açma (servis + durum geçmişi + bağlı geçici makine + kapora tahsilatı + belge sayacı) tek işlemde yazılır; biri başarısızsa hiçbiri kaydedilmez. Kapora normal tahsilat olduğundan müşteri bakiyesini düşürür.
+- **Kabul formu:** Arıza kataloğu henüz yok; sık arıza başlıkları (PRD §8.1) düğme olarak şikâyet metnine eklenir. Makine bilinmiyorsa geçici makine inline açılır (30 saniye hedefi).
+- **Etki:** migration 013, `src/lib/services/*`, `src/components/services/*`, makine ve ana ekran bağlantıları.
+
 ### K-020 · Makine: iç numara her makinede, `status` sütunu yok
 - **Plan:** İç numara yalnızca seri numarası yoksa; `status` (TEMPORARY / ACTIVE / INACTIVE).
 - **Karar:** Her makineye iç numara (`MK-[cihaz]-[sıra]`) atanır: QR ve kısa kimlik için tek biçim, seri numarası yanlış yazılsa da makine tanınır. Durum için ayrı sütun yerine mevcut alanlar kullanılır: geçici = `is_temporary`, pasif = `archived_at`, birleştirilmiş = `merged_into_id`. QR içeriği ayrı sütun değil makine kimliğidir (değişmez).

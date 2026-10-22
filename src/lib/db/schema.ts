@@ -78,6 +78,12 @@ export interface Service {
   warranty_until?: string;
   is_warranty_claim: boolean;
   cancel_reason?: string;
+  /** Kabulde belirtilen mevcut hasar / çizikler */
+  existing_damage?: string;
+  /** Kabulde teslim alınan aksesuarlar */
+  received_accessories?: string;
+  /** Sunucu kayıt sürümü; güncellemede çakışma tespiti için gönderilir. */
+  version?: number;
   created_by_device: string;
   created_at: string;
   updated_at: string;
@@ -108,6 +114,7 @@ export interface ServiceStatusHistory {
   service_id: string;
   from_status?: string;
   to_status: string;
+  actor_id?: string;
   changed_by_device: string;
   note?: string;
   changed_at: string;
