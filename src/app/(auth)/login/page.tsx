@@ -15,8 +15,7 @@ export default function LoginPage() {
         style={{
           padding: "40px 32px",
           border: "1px solid var(--border-default)",
-          boxShadow:
-            "0 0 0 1px rgba(59,130,246,0.08), var(--shadow-lg)",
+          boxShadow: "var(--shadow-lg)",
         }}
       >
         {/* Logo & Başlık */}
@@ -30,12 +29,10 @@ export default function LoginPage() {
               width: 64,
               height: 64,
               borderRadius: 18,
-              background:
-                "linear-gradient(135deg, #3b82f6 0%, #1d4ed8 100%)",
+              background: "var(--accent-primary)",
               display: "flex",
               alignItems: "center",
               justifyContent: "center",
-              boxShadow: "0 8px 24px rgba(59,130,246,0.4)",
               fontSize: 28,
             }}
             aria-hidden="true"
@@ -49,11 +46,7 @@ export default function LoginPage() {
                 fontSize: "1.75rem",
                 fontWeight: 800,
                 letterSpacing: "-0.03em",
-                background:
-                  "linear-gradient(135deg, #f1f5f9 0%, #94a3b8 100%)",
-                WebkitBackgroundClip: "text",
-                WebkitTextFillColor: "transparent",
-                backgroundClip: "text",
+                color: "var(--text-primary)",
                 marginBottom: 6,
               }}
             >

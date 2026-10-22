@@ -2,6 +2,7 @@ import type { Metadata } from "next";
 import Link from "next/link";
 import { LogOut, Settings, ShoppingBag, Truck, ChartColumn } from "lucide-react";
 import { logoutAction } from "@/app/(auth)/login/actions";
+import { LastSyncInfo } from "@/components/layout/LastSyncInfo";
 
 export const metadata: Metadata = { title: "Menü" };
 
@@ -17,6 +18,7 @@ export default function MorePage() {
   return (
     <section className="stack stack-md">
       <h1>Menü</h1>
+      <LastSyncInfo />
       <ul className="menu-list">
         {LINKS.map(({ href, label, Icon }) => (
           <li key={href}>

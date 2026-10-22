@@ -4,8 +4,8 @@
   "description": "Tarım Makineleri Servis, Satış ve Stok Yönetimi",
   "start_url": "/",
   "display": "standalone",
-  "background_color": "#0f172a",
-  "theme_color": "#3b82f6",
+  "background_color": "#141414",
+  "theme_color": "#1c1c1e",
   "orientation": "portrait",
   "lang": "tr",
   "icons": [

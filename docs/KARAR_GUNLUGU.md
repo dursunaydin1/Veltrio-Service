@@ -5,6 +5,12 @@
 
 ## 2026-10-22
 
+### K-012 · Nötr koyu gri tema; eşitleme göstergesi sakin
+- **Geri bildirim:** Lacivert/mavi koyu tema amatör görünüyor; "Eşitlendi 12:40" yazısı her zaman görünmesin.
+- **Tema:** Arka planlar nötr koyu griye çekildi (`#141414` zemin, `#1c1c1e` yüzey, `#242426` yükseltilmiş); metin ve kenarlık renkleri nötrleştirildi. Giriş ekranındaki mavi parlama, logo gradyanı ve gradyanlı başlık kaldırıldı. Vurgu rengi (mavi) şimdilik aynı; ayrı bir token olduğu için tek satırda değiştirilebilir.
+- **Gösterge:** Plan "her zaman görünür: bekleyen sayı, son eşitleme" diyordu. Her şey yolundayken yalnızca küçük simge görünür (ekran okuyucu metni ve ipucu duruyor); bekleyen, sorun ve çevrimdışı durumda metin çıkar. Son eşitleme zamanı Menü sayfasında.
+- **Etki:** `globals.css`, `SyncStatus.tsx`, `LastSyncInfo.tsx`, giriş sayfası, `manifest.json`.
+
 ### K-011 · Henüz yapılmamış bölümler 404 yerine "yakında" sayfası gösterir
 - **Sorun:** Alt menü ve hızlı eylemler olmayan sayfalara gidiyordu (404).
 - **Karar:** Her bölüm için ilgili fazı belirten `ComingSoon` sayfası kondu; sayfa gerçekleştiğinde dosya ezilecek. İkincil menüye plandaki öğelere ek olarak "Satın Almalar" eklendi (satın alma için ayrı giriş gerekiyor). Ara ve QR Tara hızlı eylemleri hazır olana kadar devre dışı.

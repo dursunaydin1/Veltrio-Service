@@ -21,6 +21,9 @@
 10. Anlamlı bir adım tamamlandıkça (testler ve tip kontrolü geçtikten sonra) uygun bir commit mesajıyla (`feat(phase-1): ...`, `docs: ...`, `chore: ...`) commit atılır ve **GitHub'a push edilir**.
 11. Kullanıcıya neyin gönderildiği kısaca söylenir.
 
+## Tasarım tercihleri
+14. **Nötr koyu gri tema** (mavi/lacivert tonlar "amatör" bulunuyor); parlama ve gradyan efektlerinden kaçınılır. Ekranlar sade tutulur, her zaman görünen bilgiler azaltılır; ayrıntı ilgili sayfaya konur.
+
 ## Teknik tercihler (kullanıcı onaylı)
 12. Para tutarları veritabanında `DECIMAL(15,4)`, kodda **kuruş cinsinden tam sayı** (`src/lib/calc.ts`).
 13. Şema değişiklikleri, ihtiyaç duyan özellikten hemen önce ayrı migration olarak yapılır (bkz. karar günlüğü).
