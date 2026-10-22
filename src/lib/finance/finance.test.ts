@@ -198,7 +198,7 @@ describe("açılış bakiyesi", () => {
     expect((await getCustomerBalance(ctx.businessId, customerId)).opening).toBe(70000);
 
     const logs = await db.audit_logs.toArray();
-    expect(logs.at(-1)).toMatchObject({
+    expect(logs.find((l) => l.action === "UPDATE")).toMatchObject({
       action: "UPDATE",
       reason: "Defter yanlış okunmuş",
       old_value: { amount: 500 },

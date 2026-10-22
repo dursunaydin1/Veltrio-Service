@@ -1,5 +1,6 @@
 import Dexie, { type Table } from "dexie";
 import type {
+  MachineOwnershipChange,
   Business,
   BusinessSettings,
   User,
@@ -237,6 +238,7 @@ export class VeltrioDatabase extends Dexie {
   // FAZ 2 — Stok & Ödeme
   customers!: Table<Customer>;
   machines!: Table<Machine>;
+  machine_ownership_history!: Table<MachineOwnershipChange>;
   suppliers!: Table<Supplier>;
   products!: Table<Product>;
   product_serial_units!: Table<ProductSerialUnit>;
@@ -317,6 +319,11 @@ export class VeltrioDatabase extends Dexie {
     // Şema sürüm 2: belge sıra sayaçları
     this.version(2).stores({
       counters: "key",
+    });
+
+    // Şema sürüm 3: makine sahiplik geçmişi
+    this.version(3).stores({
+      machine_ownership_history: "id, business_id, machine_id, changed_at",
     });
   }
 }

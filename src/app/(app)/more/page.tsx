@@ -1,6 +1,6 @@
 import type { Metadata } from "next";
 import Link from "next/link";
-import { LogOut, Settings, ShoppingBag, Truck, ChartColumn } from "lucide-react";
+import { ChartColumn, Cog, LogOut, Settings, ShoppingBag, Truck } from "lucide-react";
 import { logoutAction } from "@/app/(auth)/login/actions";
 import { LastSyncInfo } from "@/components/layout/LastSyncInfo";
 
@@ -8,6 +8,7 @@ export const metadata: Metadata = { title: "Menü" };
 
 /** İkincil menü — PRD §4.7 (Yedekleme ve Yardım ilgili fazlarda eklenecek). */
 const LINKS = [
+  { href: "/machines", label: "Makineler", Icon: Cog },
   { href: "/suppliers", label: "Tedarikçiler", Icon: Truck },
   { href: "/purchases", label: "Satın Almalar", Icon: ShoppingBag },
   { href: "/reports", label: "Raporlar", Icon: ChartColumn },

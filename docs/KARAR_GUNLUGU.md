@@ -5,6 +5,14 @@
 
 ## 2026-10-22
 
+### K-020 · Makine: iç numara her makinede, `status` sütunu yok
+- **Plan:** İç numara yalnızca seri numarası yoksa; `status` (TEMPORARY / ACTIVE / INACTIVE).
+- **Karar:** Her makineye iç numara (`MK-[cihaz]-[sıra]`) atanır: QR ve kısa kimlik için tek biçim, seri numarası yanlış yazılsa da makine tanınır. Durum için ayrı sütun yerine mevcut alanlar kullanılır: geçici = `is_temporary`, pasif = `archived_at`, birleştirilmiş = `merged_into_id`. QR içeriği ayrı sütun değil makine kimliğidir (değişmez).
+- **Mükerrer seri:** Marka + seri numarası, harf ve Türkçe karakterden bağımsız karşılaştırılır; arşivli ve birleştirilmiş makineler sayılmaz; kullanıcı onayla devam edebilir (AC-029).
+- **Sahiplik:** Makine formunda sahip değiştirilemez; değişiklik yalnızca-ekleme geçmişe (eski/yeni müşteri, neden, aktör, cihaz) ve audit log'a yazılır, neden zorunlu (AC-018).
+- **Test notu:** `Table.toArray()` birincil anahtara (rastgele UUID) göre sıralar; "ilk eklenen ilk gelir" varsayan iki test arada düşüyordu, sıradan bağımsız hale getirildi.
+- **Etki:** migration 012, `src/lib/machines/*`, `src/components/machines/*`, `CustomerPicker`.
+
 ### K-019 · Ödeme ters kaydı ve açılış bakiyesi
 - **Plan:** "Ters Payment (REVERSED, reversal_of_id)"; açılış bakiyesi değişikliği kritik işlem.
 - **Sorun:** Ödemeler yalnızca-ekleme tablosu (sunucu UPDATE'i reddeder). Orijinali "REVERSED" yapmak güncelleme gerektirirdi.

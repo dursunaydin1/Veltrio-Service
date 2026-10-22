@@ -2,6 +2,7 @@ export const SYNC_TABLES = [
   "audit_logs",
   "customers",
   "machines",
+  "machine_ownership_history",
   "suppliers",
   "opening_balances",
   "products",
@@ -30,6 +31,7 @@ export const APPEND_ONLY_SYNC_TABLES = new Set<SyncTableName>([
   "payments",
   "payment_allocations",
   "service_status_history",
+  "machine_ownership_history",
 ]);
 
 export function isSyncTableName(value: unknown): value is SyncTableName {

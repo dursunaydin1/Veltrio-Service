@@ -17,10 +17,10 @@ Uygulamanın kalbi olan servis akışını hayata geçirmek: müşteri kabulünd
 **Görevler:**
 - [x] `Customer` tablosu (fotoğraf alanı hariç):
   - id, business_id, name, phone, normalized_phone, no_phone_flag, address/village, notes, optional_photo_ref, archived_at
-- [ ] `Machine` tablosu:
+- [x] `Machine` tablosu (satış/garanti alanları ilgili adımlarla):
   - id, business_id, customer_id, type, brand, model, serial_number (nullable), internal_number (MK-...)
   - status (TEMPORARY / ACTIVE / INACTIVE), sale_date, sale_price, warranty_end, notes, photo_refs, archived_at
-- [ ] `MachineOwnershipHistory` tablosu:
+- [x] `MachineOwnershipHistory` tablosu (`machine_ownership_history`, migration 012):
   - id, business_id, machine_id, old_customer_id, new_customer_id, changed_at, reason, actor_id, device_id
 
 **Kabul kriteri:**
@@ -55,14 +55,16 @@ Uygulamanın kalbi olan servis akışını hayata geçirmek: müşteri kabulünd
 ### ADIM 3.3 — Makine Yönetimi
 
 **Görevler:**
-- [ ] Makine oluşturma: tür, marka, model (zorunlu); seri numarası (isteğe bağlı)
-- [ ] Seri numarası yoksa sistem benzersiz iç makine numarası üretir (MK-...)
-- [ ] Aynı markada aynı seri numarası mevcutsa → uyarı; kullanıcı onayıyla devam (AC-029)
+- [x] Makine oluşturma: tür, marka, model (zorunlu); seri numarası (isteğe bağlı)
+- [x] Seri numarası yoksa sistem benzersiz iç makine numarası üretir (MK-...)
+- [x] Aynı markada aynı seri numarası mevcutsa → uyarı; kullanıcı onayıyla devam (AC-029)
 - [ ] Makine profili: sahibi, seri/iç numara, tür/marka/model, satış bilgisi, garanti bitiş tarihi, servis sayısı, son servis tarihi, servis geçmişi, sahiplik geçmişi
 - [ ] İşlemler: Yeni Servis, QR göster/tara, Düzenle, Sahip değiştir, Birleştir
-- [ ] **Makine sahipliği değişimi:** MachineOwnershipHistory kaydı oluşur; servis geçmişi korunur (AC-018, TC-020)
+- [x] **Makine sahipliği değişimi:** MachineOwnershipHistory kaydı oluşur; servis geçmişi korunur (AC-018, TC-020)
 - [ ] **Geçici makine kaydı (TEMPORARY):** Makine belirlenemiyorsa açılır; sonradan ACTIVE'e dönüştürülür veya mevcut makineyle birleştirilir (SR-016, AC-051)
-- [ ] Makine arşivleme: açık servisi varsa engellenir (FR-033)
+- [x] Makine arşivleme: açık servisi varsa engellenir (FR-033)
+
+> Uygulandı: migration 012 (`internal_number`, `machine_ownership_history`), `src/lib/machines/` (şema, servis), `/machines`, `/machines/new`, `/machines/[id]`, müşteri sayfasında Makineler bölümü, ortak `CustomerPicker`. Geçici kayıt açılır ve marka/model girilince etkin makineye dönüşür. **Açık:** makine profilindeki satış bilgisi / garanti / servis sayısı / son servis (servis akışıyla), "Yeni Servis" ve QR göster/tara eylemleri (3.4, 3.6), geçici makineyi mevcut makineyle **birleştirme** (AC-051; servisler yazılınca). `status` sütunu açılmadı: geçici = `is_temporary`, pasif = arşiv (K-020).
 
 **İlgili FR:** FR-004, FR-005  
 **Test:** TC-020, TC-052

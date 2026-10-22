@@ -103,10 +103,27 @@ export interface Machine {
   is_temporary: boolean; // Henüz müşteriyle eşleştirilmemiş
   merged_into_id?: UUID;
   qr_code?: string;
+  /** MK-[cihaz_kodu]-[sıra]; QR ve kısa kimlik için */
+  internal_number?: string;
   notes?: string;
+  /** Sunucu kayıt sürümü; güncellemede çakışma tespiti için gönderilir. */
+  version?: number;
   archived_at?: ISODateTimeString;
   created_at: ISODateTimeString;
   updated_at: ISODateTimeString;
+}
+
+/** Makine sahiplik değişikliği kaydı (yalnızca-ekleme) — AC-018 */
+export interface MachineOwnershipChange {
+  id: UUID;
+  business_id: UUID;
+  machine_id: UUID;
+  old_customer_id?: UUID;
+  new_customer_id?: UUID;
+  reason: string;
+  actor_id?: UUID;
+  changed_by_device: string;
+  changed_at: ISODateTimeString;
 }
 
 // ============================================================
