@@ -33,6 +33,7 @@ export function formatNumber(value: number): string {
 }
 
 /**
+ * @deprecated Para hesabı için `@/lib/calc` kullanın (kuruş cinsinden tam sayı).
  * Para tutarını 4 ondalık basamakla yuvarlar (veritabanı hassasiyeti).
  */
 export function roundAmount(value: number): number {
@@ -40,6 +41,7 @@ export function roundAmount(value: number): number {
 }
 
 /**
+ * @deprecated Para hesabı için `calcLine` (`@/lib/calc`) kullanın.
  * KDV hesaplar.
  * taxMode INCLUSIVE: tutar KDV dahil → KDV = tutar - tutar / (1 + oran/100)
  * taxMode EXCLUSIVE: tutar KDV hariç → KDV = tutar * oran / 100

@@ -182,13 +182,15 @@ Bu faz tüm diğer modüllerin üzerine inşa edileceği teknik temeli oluşturu
 ### ADIM 1.9 — Ortak Hesaplama Modülü İskeleti
 
 **Görevler:**
-- [ ] `packages/shared/src/calc.ts` (veya eşdeğer) dosyası oluştur
-- [ ] Temel para işlemleri (decimal, yuvarlama, 2 ondalık basamak)
-- [ ] Satır toplamı hesaplama fonksiyonu: `(birim_fiyat - indirim) * miktar ± vergi`
-- [ ] KDV modları: `INCLUSIVE | EXCLUSIVE | NONE`
-- [ ] Belge toplamı = yuvarlanmış satır toplamlarının toplamı
+- [x] `packages/shared/src/calc.ts` (veya eşdeğer) dosyası oluştur
+- [x] Temel para işlemleri (decimal, yuvarlama, 2 ondalık basamak)
+- [x] Satır toplamı hesaplama fonksiyonu: `(birim_fiyat - indirim) * miktar ± vergi`
+- [x] KDV modları: `INCLUSIVE | EXCLUSIVE | NONE`
+- [x] Belge toplamı = yuvarlanmış satır toplamlarının toplamı
 - [ ] İstemci ve sunucu **aynı modülü** kullanır
 - [ ] Hesaplama versiyonu belgeyle birlikte saklanır
+
+> `src/lib/calc.ts` (kuruş cinsinden tam sayı, 20 testli). Sunucu push API'si henüz toplamları bu modülle doğrulamıyor; hesaplama versiyonu (`CALC_VERSION`) belgeyle birlikte henüz saklanmıyor. Bu iki madde açık.
 
 **İlgili PRD:** §7.2, §9.2  
 **İlgili AC:** AC-026
