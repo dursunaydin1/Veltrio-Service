@@ -3,7 +3,9 @@ import {
   CALC_VERSION,
   calcDocument,
   calcLine,
+  distributeAmount,
   fromKurus,
+  lineGross,
   normalizeNumberInput,
   parseMoneyInput,
   parseQuantityInput,
@@ -143,5 +145,49 @@ describe("Türkçe sayı girişi", () => {
     expect(parseQuantityInput("0,0001")).toBe(0.0001);
     expect(parseQuantityInput("10")).toBe(10);
     expect(parseQuantityInput("-1")).toBeNull();
+  });
+});
+
+describe("lineGross", () => {
+  it("birim fiyat × miktar, kuruş yuvarlamasıyla", () => {
+    expect(lineGross(8000, "2,5")).toBe(20000);
+    expect(lineGross(333, 3)).toBe(999);
+    expect(lineGross(1, "0,5")).toBe(1); // 0,5 kuruş yarımlar yukarı
+    expect(() => lineGross(10.5, 1)).toThrow(RangeError);
+  });
+});
+
+describe("distributeAmount", () => {
+  it("toplamı tam korur: kuruş kaybolmaz", () => {
+    for (const [weights, total] of [
+      [[100, 100, 100], 100],
+      [[1, 1, 1], 1],
+      [[333, 333, 334], 7],
+      [[5000, 12000, 250], 999],
+    ] as const) {
+      const shares = distributeAmount([...weights], total);
+      expect(shares.reduce((a, b) => a + b, 0)).toBe(total);
+      expect(shares.every((s) => s >= 0)).toBe(true);
+    }
+  });
+
+  it("orantılı dağıtır; kalan kuruş en büyük kalana gider", () => {
+    expect(distributeAmount([100, 300], 40)).toEqual([10, 30]);
+    expect(distributeAmount([1, 1, 1], 100)).toEqual([34, 33, 33]);
+  });
+
+  it("sıfır tutar ve sıfır ağırlıklı satır", () => {
+    expect(distributeAmount([5, 0, 5], 10)).toEqual([5, 0, 5]);
+    expect(distributeAmount([5, 5], 0)).toEqual([0, 0]);
+  });
+
+  it("tutar toplam ağırlığa eşitse her satır kendi ağırlığını alır", () => {
+    expect(distributeAmount([700, 0, 300], 1000)).toEqual([700, 0, 300]);
+  });
+
+  it("geçersiz girdileri reddeder", () => {
+    expect(() => distributeAmount([0, 0], 5)).toThrow(RangeError);
+    expect(() => distributeAmount([1, -1], 5)).toThrow(RangeError);
+    expect(() => distributeAmount([1], -5)).toThrow(RangeError);
   });
 });

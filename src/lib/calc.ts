@@ -195,3 +195,34 @@ export function calcDocument(lines: LineResult[]): DocumentTotals {
   assertSafe(totals.total, "Belge toplamı");
   return totals;
 }
+
+/** Birim fiyat × miktar (indirimsiz, vergi hariç ham tutar), kuruş. */
+export function lineGross(unitPriceKurus: number, quantity: number | string): number {
+  if (!Number.isInteger(unitPriceKurus) || unitPriceKurus < 0) {
+    throw new RangeError("Birim fiyat kuruş cinsinden negatif olmayan tam sayı olmalı.");
+  }
+  return roundDiv(unitPriceKurus * parseScaled(quantity, 4, "Miktar"), QTY_SCALE);
+}
+
+/**
+ * Bir tutarı (kuruş) ağırlıklarla orantılı dağıtır; toplamı tam olarak
+ * korur (en büyük kalan yöntemi). Belge geneli indirimin satırlara dağıtımında
+ * kullanılır; hiçbir kuruş kaybolmaz veya eklenmez.
+ */
+export function distributeAmount(weights: number[], total: number): number[] {
+  if (!Number.isInteger(total) || total < 0) throw new RangeError("Dağıtılacak tutar negatif olmayan tam sayı olmalı.");
+  if (weights.some((w) => !Number.isInteger(w) || w < 0)) throw new RangeError("Ağırlıklar negatif olmayan tam sayı olmalı.");
+  const sum = weights.reduce((a, b) => a + b, 0);
+  if (total === 0) return weights.map(() => 0);
+  if (sum === 0) throw new RangeError("Dağıtım için en az bir ağırlık sıfırdan büyük olmalı.");
+
+  const shares = weights.map((w) => Math.floor((w * total) / sum));
+  let remainder = total - shares.reduce((a, b) => a + b, 0);
+  const order = weights
+    .map((w, i) => ({ i, frac: (w * total) % sum }))
+    .sort((a, b) => b.frac - a.frac || a.i - b.i);
+  for (let k = 0; remainder > 0; k = (k + 1) % order.length, remainder--) {
+    shares[order[k].i] += 1;
+  }
+  return shares;
+}

@@ -1,0 +1,440 @@
+import { db } from "@/lib/db";
+import type { Sale, SaleItem } from "@/lib/db";
+import { fromKurus, lineGross, toKurus } from "@/lib/calc";
+import { recordDocumentPayment } from "@/lib/finance/service";
+import { nextDocumentNo } from "@/lib/numbering";
+import { computeSaleTotals } from "./totals";
+import { getProductBalance } from "@/lib/stock/ledger";
+import { recordMovement } from "@/lib/stock/service";
+import { writeAuditLog } from "@/lib/sync/audit";
+import { enqueue } from "@/lib/sync/queue";
+import { generateId, nowISO } from "@/lib/utils";
+import type { BusinessContext } from "@/hooks/useBusinessContext";
+import type { Payment, PaymentMethod, Product, TaxMode } from "@/types";
+
+export type SaleContext = BusinessContext & {
+  /** İşletme ayarı: stok eksiye düşebilir mi? (varsayılan false, ST-002) */
+  allowNegativeStock?: boolean;
+};
+
+export class SaleRuleError extends Error {
+  constructor(message: string) {
+    super(message);
+    this.name = "SaleRuleError";
+  }
+}
+
+/** Stok eksiye düşecek ve ayar buna izin veriyor; ancak neden girilmedi (ST-004). */
+export class NegativeStockReasonRequiredError extends SaleRuleError {
+  constructor(public readonly productNames: string[]) {
+    super(`Stok yetersiz (${productNames.join(", ")}). Stoğu eksiye düşürmek için neden yazın.`);
+    this.name = "NegativeStockReasonRequiredError";
+  }
+}
+
+export type SaleLineInput = {
+  productId: string;
+  quantity: number;
+  /** kuruş */
+  unitPriceKurus: number;
+  /** satırın kendi indirimi (toplam), kuruş */
+  discountKurus?: number;
+  taxMode: TaxMode;
+  taxRate: number;
+};
+
+export type SaleInput = {
+  /** Boşsa müşterisiz (peşin) satış; tahsil edilmeyen tutar varsa müşteri zorunludur (AC-041) */
+  customerId?: string;
+  /** YYYY-MM-DD; boşsa şimdi */
+  saleDate?: string;
+  notes?: string;
+  lines: SaleLineInput[];
+  /** Belge geneli indirim (kuruş): satırlara tutara orantılı dağıtılır ve satır indirimine yazılır */
+  documentDiscountKurus?: number;
+};
+
+export type SalePaymentInput = { amountKurus: number; method: PaymentMethod };
+
+const SALE_COLUMNS = [
+  "customer_id",
+  "document_no",
+  "sale_date",
+  "subtotal",
+  "discount_total",
+  "tax_total",
+  "total_amount",
+  "status",
+  "cancel_reason",
+  "notes",
+  "finalized_at",
+  "created_by_device",
+  "created_at",
+] as const;
+const SALE_UPDATE_COLUMNS = SALE_COLUMNS.filter((c) => !["document_no", "created_by_device", "created_at"].includes(c));
+
+const ITEM_COLUMNS = [
+  "sale_id",
+  "product_id",
+  "serial_unit_id",
+  "machine_id",
+  "description_snapshot",
+  "quantity",
+  "unit",
+  "unit_price_snapshot",
+  "unit_cost_snapshot",
+  "discount_amount",
+  "tax_mode",
+  "tax_rate",
+  "line_total",
+  "stock_movement_id",
+  "created_at",
+] as const;
+
+function salePayload(s: Sale, update: boolean): Record<string, unknown> {
+  const payload: Record<string, unknown> = { id: s.id, business_id: s.business_id };
+  for (const c of update ? SALE_UPDATE_COLUMNS : SALE_COLUMNS) payload[c] = s[c] ?? null;
+  if (update) payload.version = s.version ?? 1;
+  return payload;
+}
+
+function itemPayload(i: SaleItem & { version?: number }, update: boolean): Record<string, unknown> {
+  const payload: Record<string, unknown> = { id: i.id, business_id: i.business_id };
+  for (const c of ITEM_COLUMNS) payload[c] = i[c] ?? null;
+  if (update) payload.version = i.version ?? 1;
+  return payload;
+}
+
+const tidy = (v?: string) => v?.trim() || undefined;
+
+const isoOf = (date?: string): string => {
+  if (!date) return nowISO();
+  if (!/^\d{4}-\d{2}-\d{2}$/.test(date)) throw new SaleRuleError("Satış tarihi geçersiz.");
+  return `${date}T12:00:00.000Z`;
+};
+
+function tables() {
+  return [
+    db.sales,
+    db.sale_items,
+    db.customers,
+    db.products,
+    db.stock_movements,
+    db.payments,
+    db.counters,
+    db.sync_queue,
+    db.audit_logs,
+  ] as const;
+}
+
+type Built = {
+  items: SaleItem[];
+  totals: { subtotal: number; discountTotal: number; taxTotal: number; total: number };
+};
+
+/** Satırları doğrular; satır + belge indirimini dağıtıp tutarları kuruş hassasiyetiyle hesaplar. */
+async function buildItems(ctx: SaleContext, saleId: string, input: SaleInput, createdAt: string): Promise<Built> {
+  if (input.lines.length === 0) throw new SaleRuleError("En az bir ürün ekleyin.");
+
+  const products: Product[] = [];
+  for (const line of input.lines) {
+    const product = await db.products.get(line.productId);
+    if (!product || product.business_id !== ctx.businessId) throw new SaleRuleError("Ürün bulunamadı.");
+    if (product.archived_at) throw new SaleRuleError(`“${product.name}” pasif ürün; satılamaz.`);
+    if (product.is_serial_tracked) {
+      throw new SaleRuleError(
+        `“${product.name}” seri takipli bir ürün; makine satışı seri birim seçimiyle yapılır (yakında).`
+      );
+    }
+    if (!(line.quantity > 0)) throw new SaleRuleError("Miktar sıfırdan büyük olmalıdır.");
+    let gross: number;
+    try {
+      gross = lineGross(line.unitPriceKurus, line.quantity);
+    } catch (e) {
+      throw new SaleRuleError(e instanceof Error ? e.message : "Tutar hesaplanamadı.");
+    }
+    if ((line.discountKurus ?? 0) > gross || (line.discountKurus ?? 0) < 0) {
+      throw new SaleRuleError(`“${product.name}”: indirim satır tutarından büyük olamaz.`);
+    }
+    products.push(product);
+  }
+
+  // Tutarlar: satır indirimi + belge indirimi dağıtımı, ekran önizlemesiyle aynı fonksiyon.
+  let computed;
+  try {
+    computed = computeSaleTotals(input.lines, input.documentDiscountKurus ?? 0);
+  } catch (e) {
+    throw new SaleRuleError(e instanceof Error ? e.message : "Tutar hesaplanamadı.");
+  }
+
+  const items: SaleItem[] = input.lines.map((line, i) => {
+    const product = products[i];
+    return {
+      id: generateId(),
+      business_id: ctx.businessId,
+      sale_id: saleId,
+      product_id: product.id,
+      description_snapshot: product.name,
+      quantity: line.quantity,
+      unit: product.unit,
+      unit_price_snapshot: fromKurus(line.unitPriceKurus),
+      unit_cost_snapshot: product.last_purchase_price ?? 0,
+      discount_amount: fromKurus(computed.lines[i].discountKurus),
+      tax_mode: line.taxMode,
+      tax_rate: line.taxRate,
+      line_total: fromKurus(computed.lines[i].result.total),
+      // Satır sırası korunsun diye her satıra 1 ms eklenir.
+      created_at: new Date(Date.parse(createdAt) + i).toISOString(),
+    };
+  });
+
+  return { items, totals: computed.totals };
+}
+
+async function checkCustomer(ctx: SaleContext, customerId?: string): Promise<void> {
+  if (!customerId) return;
+  const customer = await db.customers.get(customerId);
+  if (!customer || customer.business_id !== ctx.businessId) throw new SaleRuleError("Müşteri bulunamadı.");
+  if (customer.archived_at) throw new SaleRuleError("Arşivlenmiş müşteriye satış yapılamaz.");
+}
+
+/** Taslak kaydını (satır + toplamlar) yazar; oluşturma ve düzenleme için ortak. */
+async function persist(ctx: SaleContext, input: SaleInput, existing?: Sale): Promise<Sale> {
+  await checkCustomer(ctx, input.customerId);
+  const now = nowISO();
+  const id = existing?.id ?? generateId();
+  const { items, totals } = await buildItems(ctx, id, input, now);
+
+  const sale: Sale = {
+    ...(existing ?? {
+      id,
+      business_id: ctx.businessId,
+      document_no: await nextDocumentNo("sale", ctx.deviceCode),
+      status: "DRAFT" as const,
+      created_by_device: ctx.deviceCode,
+      created_at: now,
+    }),
+    customer_id: input.customerId,
+    sale_date: isoOf(input.saleDate),
+    subtotal: fromKurus(totals.subtotal),
+    discount_total: fromKurus(totals.discountTotal),
+    tax_total: fromKurus(totals.taxTotal),
+    total_amount: fromKurus(totals.total),
+    notes: tidy(input.notes),
+    updated_at: now,
+  };
+
+  if (existing) {
+    const old = await db.sale_items.where("sale_id").equals(id).toArray();
+    for (const o of old) {
+      await db.sale_items.delete(o.id);
+      await enqueue("sale_items", o.id, "DELETE", itemPayload(o, true), ctx.deviceCode);
+    }
+    await db.sales.put(sale);
+    await enqueue("sales", id, "UPDATE", salePayload(sale, true), ctx.deviceCode);
+  } else {
+    await db.sales.add(sale);
+    await enqueue("sales", id, "INSERT", salePayload(sale, false), ctx.deviceCode);
+  }
+  for (const item of items) {
+    await db.sale_items.add(item);
+    await enqueue("sale_items", item.id, "INSERT", itemPayload(item, false), ctx.deviceCode);
+  }
+  return sale;
+}
+
+/**
+ * Kesinleştirme (§5.3): stok düşer (SALE_OUT, maliyet snapshot'ıyla), tahsilat
+ * kaydedilir. Tahsil edilmeyen tutar varsa müşteri zorunludur (AC-041); fazla
+ * tahsilat kabul edilmez. Taslak belge stok/finans üretmez (ST-006).
+ */
+async function applyFinalize(
+  ctx: SaleContext,
+  sale: Sale,
+  payment: SalePaymentInput | undefined,
+  negativeStockReason?: string
+): Promise<Sale> {
+  const totalKurus = toKurus(sale.total_amount);
+  const paidKurus = payment?.amountKurus ?? 0;
+  if (payment && (!Number.isInteger(payment.amountKurus) || payment.amountKurus <= 0)) {
+    throw new SaleRuleError("Alınan tutar sıfırdan büyük olmalıdır.");
+  }
+  if (paidKurus > totalKurus) throw new SaleRuleError("Alınan tutar satış toplamından fazla olamaz.");
+  if (paidKurus < totalKurus && !sale.customer_id) {
+    throw new SaleRuleError("Tahsil edilmeyen tutar var: veresiye satış için müşteri seçin.");
+  }
+
+  const items = await db.sale_items.where("sale_id").equals(sale.id).toArray();
+
+  // Stok yeterli mi? Aynı ürünün satırları toplanır. Ayar eksi stoğa izin veriyorsa neden istenir (ST-004).
+  const needed = new Map<string, { name: string; qty: number }>();
+  for (const i of items) {
+    if (!i.product_id) continue;
+    const row = needed.get(i.product_id) ?? { name: i.description_snapshot, qty: 0 };
+    row.qty = Math.round((row.qty + i.quantity) * 10000) / 10000;
+    needed.set(i.product_id, row);
+  }
+  if (ctx.allowNegativeStock) {
+    const short: string[] = [];
+    for (const [productId, row] of needed) {
+      if ((await getProductBalance(productId)).available < row.qty) short.push(row.name);
+    }
+    if (short.length > 0 && !negativeStockReason?.trim()) throw new NegativeStockReasonRequiredError(short);
+  }
+
+  const movementNote = [sale.document_no, negativeStockReason?.trim()].filter(Boolean).join(" · ");
+  for (const item of items) {
+    if (!item.product_id) continue;
+    const product = await db.products.get(item.product_id);
+    const unitCost = product?.last_purchase_price ?? item.unit_cost_snapshot;
+    const movement = await recordMovement(ctx, {
+      productId: item.product_id,
+      type: "SALE_OUT",
+      quantity: -item.quantity,
+      unitCost,
+      sourceType: "SALE",
+      sourceId: sale.id,
+      note: movementNote,
+    });
+    const next = { ...item, unit_cost_snapshot: unitCost, stock_movement_id: movement.id } as SaleItem & { version?: number };
+    await db.sale_items.put(next);
+    await enqueue("sale_items", item.id, "UPDATE", itemPayload(next, true), ctx.deviceCode);
+  }
+
+  const now = nowISO();
+  const final: Sale = { ...sale, status: "FINAL", finalized_at: now, updated_at: now };
+  await db.sales.put(final);
+  await enqueue("sales", sale.id, "UPDATE", salePayload(final, true), ctx.deviceCode);
+
+  if (payment) {
+    await recordDocumentPayment(ctx, {
+      customerId: sale.customer_id,
+      direction: "IN",
+      method: payment.method,
+      amountKurus: payment.amountKurus,
+      note: `Satış tahsilatı (${sale.document_no})`,
+      sourceType: "SALE",
+      sourceId: sale.id,
+    });
+  }
+  return final;
+}
+
+export type SaleCreateOptions = {
+  /** true: tek adımda kesinleştirir (hızlı satış); false: taslak */
+  finalize: boolean;
+  payment?: SalePaymentInput;
+  /** Eksi stoğa izin verilen işletmede stok yetersizse zorunlu neden */
+  negativeStockReason?: string;
+};
+
+/** Satış oluşturur: taslak ya da doğrudan kesinleşmiş (hızlı satış). */
+export async function createSale(ctx: SaleContext, input: SaleInput, options: SaleCreateOptions): Promise<Sale> {
+  if (options.payment && !options.finalize) {
+    throw new SaleRuleError("Tahsilat, satış kesinleştirilirken alınır.");
+  }
+  return db.transaction("rw", [...tables()], async () => {
+    const draft = await persist(ctx, input);
+    return options.finalize ? applyFinalize(ctx, draft, options.payment, options.negativeStockReason) : draft;
+  });
+}
+
+async function loadDraft(ctx: SaleContext, id: string): Promise<Sale> {
+  const sale = await db.sales.get(id);
+  if (!sale || sale.business_id !== ctx.businessId) throw new SaleRuleError("Satış bulunamadı.");
+  if (sale.status !== "DRAFT") {
+    throw new SaleRuleError("Yalnızca taslak satış düzenlenebilir. Kesinleşmiş satış iptal veya iade ile düzeltilir.");
+  }
+  return sale;
+}
+
+export async function updateDraftSale(ctx: SaleContext, id: string, input: SaleInput): Promise<Sale> {
+  return db.transaction("rw", [...tables()], async () => persist(ctx, input, await loadDraft(ctx, id)));
+}
+
+/** Taslak satışı kesinleştirir. */
+export async function finalizeSale(
+  ctx: SaleContext,
+  id: string,
+  options: { payment?: SalePaymentInput; negativeStockReason?: string } = {}
+): Promise<Sale> {
+  return db.transaction("rw", [...tables()], async () =>
+    applyFinalize(ctx, await loadDraft(ctx, id), options.payment, options.negativeStockReason)
+  );
+}
+
+/** Taslak satışı iptal eder (neden zorunlu). Stok ve finans etkisi yoktur. */
+export async function cancelDraftSale(ctx: SaleContext, id: string, reason: string): Promise<Sale> {
+  const why = reason.trim();
+  if (!why) throw new SaleRuleError("İptal nedeni zorunludur.");
+  return db.transaction("rw", [...tables()], async () => {
+    const draft = await loadDraft(ctx, id);
+    const next: Sale = { ...draft, status: "CANCELLED", cancel_reason: why, updated_at: nowISO() };
+    await db.sales.put(next);
+    await enqueue("sales", id, "UPDATE", salePayload(next, true), ctx.deviceCode);
+    await writeAuditLog({
+      businessId: ctx.businessId,
+      entityType: "sales",
+      entityId: id,
+      action: "STATE_CHANGE",
+      deviceCode: ctx.deviceCode,
+      actorId: ctx.actorId,
+      reason: why,
+      oldValue: { status: "DRAFT" },
+      newValue: { status: "CANCELLED" },
+    });
+    return next;
+  });
+}
+
+/** Kesinleşmiş satışa sonradan tahsilat (veresiye ödemesi). */
+export async function collectSalePayment(
+  ctx: SaleContext,
+  id: string,
+  params: { amountKurus: number; method: PaymentMethod; note?: string }
+): Promise<Payment> {
+  return db.transaction("rw", [db.sales, db.customers, db.payments, db.sync_queue], async () => {
+    const sale = await db.sales.get(id);
+    if (!sale || sale.business_id !== ctx.businessId) throw new SaleRuleError("Satış bulunamadı.");
+    if (sale.status !== "FINAL") throw new SaleRuleError("Tahsilat yalnızca kesinleşmiş satış için alınır.");
+    return recordDocumentPayment(ctx, {
+      customerId: sale.customer_id,
+      direction: "IN",
+      method: params.method,
+      amountKurus: params.amountKurus,
+      note: params.note?.trim() || `Satış tahsilatı (${sale.document_no})`,
+      sourceType: "SALE",
+      sourceId: id,
+    });
+  });
+}
+
+export type SaleBalance = {
+  /** kuruş */
+  total: number;
+  /** net tahsilat (tahsilat − iade/ters kayıt), kuruş */
+  paid: number;
+  /** total − paid; pozitif: açık alacak (veresiye) */
+  remaining: number;
+};
+
+export async function getSalePayments(saleId: string): Promise<Payment[]> {
+  return db.payments
+    .where("source_id")
+    .equals(saleId)
+    .filter((p) => p.source_type === "SALE")
+    .toArray();
+}
+
+/** Satışın açık alacağı: tutar − bu satışa bağlı net tahsilatlar. */
+export async function getSaleBalance(saleId: string): Promise<SaleBalance> {
+  const [sale, payments] = await Promise.all([db.sales.get(saleId), getSalePayments(saleId)]);
+  const total = toKurus(sale?.total_amount ?? 0);
+  const paid = payments.reduce((acc, p) => acc + (p.direction === "IN" ? 1 : -1) * toKurus(p.amount), 0);
+  return { total, paid, remaining: total - paid };
+}
+
+export async function getSaleItems(saleId: string): Promise<SaleItem[]> {
+  const items = await db.sale_items.where("sale_id").equals(saleId).toArray();
+  return items.sort((a, b) => a.created_at.localeCompare(b.created_at));
+}

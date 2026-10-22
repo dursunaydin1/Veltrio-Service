@@ -109,6 +109,54 @@ export async function recordPartyPayment(ctx: BusinessContext, params: PartyPaym
   });
 }
 
+/**
+ * Bir belgeye (satış, servis…) bağlı ödeme. Müşteri verilirse müşteriye
+ * yazılır; verilmezse (müşterisiz peşin satış) taraf boş kalır ve ödeme yalnızca
+ * belgeye bağlı olur.
+ */
+export async function recordDocumentPayment(
+  ctx: BusinessContext,
+  params: {
+    customerId?: string;
+    direction: PaymentDirection;
+    method: PaymentMethod;
+    /** kuruş */
+    amountKurus: number;
+    note?: string;
+    sourceType: string;
+    sourceId: string;
+  }
+): Promise<Payment> {
+  if (params.customerId) {
+    const { customerId, ...rest } = params;
+    return recordPartyPayment(ctx, { partyType: "CUSTOMER", partyId: customerId, ...rest });
+  }
+  if (!Number.isInteger(params.amountKurus) || params.amountKurus <= 0) {
+    throw new FinanceRuleError("Tutar sıfırdan büyük olmalıdır.");
+  }
+
+  return db.transaction("rw", db.payments, db.sync_queue, async () => {
+    const now = nowISO();
+    const payment: Payment = {
+      id: generateId(),
+      business_id: ctx.businessId,
+      direction: params.direction,
+      method: params.method,
+      amount: fromKurus(params.amountKurus),
+      payment_date: now,
+      source_type: params.sourceType,
+      source_id: params.sourceId,
+      note: params.note?.trim() || undefined,
+      status: "VALID",
+      created_by_device: ctx.deviceCode,
+      created_at: now,
+    };
+    await db.payments.add(payment);
+    await enqueue("payments", payment.id, "INSERT", paymentPayload(payment), ctx.deviceCode);
+    return payment;
+  });
+}
+
 /** Müşteriden tahsilat (IN) veya müşteriye ödeme / iade (OUT) kaydeder. */
 export async function recordCustomerPayment(
   ctx: BusinessContext,

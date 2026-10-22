@@ -17,11 +17,16 @@ export function CustomerPicker({
   onChange,
   label = "Müşteri",
   error,
+  required = true,
+  onClear,
 }: {
   value: string;
   onChange: (customerId: string) => void;
   label?: string;
   error?: string;
+  /** false ise etikette yıldız yok ve seçim `onClear` ile kaldırılabilir */
+  required?: boolean;
+  onClear?: () => void;
 }) {
   const businessId = useSessionStore((s) => s.business?.id);
   const [query, setQuery] = useState("");
@@ -40,7 +45,7 @@ export function CustomerPicker({
   if (selected && !changing) {
     return (
       <div className="form-group">
-        <span className="form-label">{label} *</span>
+        <span className="form-label">{label}{required ? " *" : ""}</span>
         <div className="row row-between card" style={{ padding: 12 }}>
           <span>
             <strong>{selected.name}</strong>
@@ -49,9 +54,16 @@ export function CustomerPicker({
               {[selected.village, selected.phone ? formatPhone(selected.phone) : null].filter(Boolean).join(" · ")}
             </small>
           </span>
-          <button type="button" className="btn btn-secondary btn-sm" onClick={() => setChanging(true)}>
-            Değiştir
-          </button>
+          <span className="row row-gap-sm">
+            <button type="button" className="btn btn-secondary btn-sm" onClick={() => setChanging(true)}>
+              Değiştir
+            </button>
+            {!required && onClear ? (
+              <button type="button" className="btn btn-ghost btn-sm" onClick={onClear}>
+                Kaldır
+              </button>
+            ) : null}
+          </span>
         </div>
       </div>
     );
@@ -64,7 +76,7 @@ export function CustomerPicker({
 
   return (
     <div className="form-group">
-      <label className="form-label" htmlFor="customer-picker">{label} *</label>
+      <label className="form-label" htmlFor="customer-picker">{label}{required ? " *" : ""}</label>
       <input
         id="customer-picker"
         className="form-input"

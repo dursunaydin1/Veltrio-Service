@@ -5,6 +5,15 @@
 
 ## 2026-10-22
 
+### K-027 · Satış: tek hesap fonksiyonu, belge indirimi satıra yazılır, kesinleştirme tek işlem
+- **Tutarlar:** Hesap `computeSaleTotals` (saf) içinde yapılır; hem servis hem ekranın canlı toplamı bunu kullanır, bu yüzden görünen toplam ile kaydedilen toplam aynıdır. Satır indirimi + belge indirimi payı → KDV → satır toplamı → belge toplamı (yuvarlanmış satır toplamlarının toplamı).
+- **Belge indirimi:** Satırların indirim sonrası tutarına orantılı, en büyük kalan yöntemiyle (toplam kuruşu tam korur) dağıtılır ve her satırın `discount_amount`'ına eklenir; ayrı bir "belge indirimi" sütunu yok, dağıtım satırlarda kayıt altındadır (plan: "hangi satırlara dağıtıldığı kayıt altında").
+- **Kesinleştirme tek işlemde:** stok düşümü (`SALE_OUT`, maliyet snapshot'ı kesinleştirme anındaki son alış fiyatından), kalem–hareket bağı, satış durumu ve tahsilat birlikte yazılır; biri başarısızsa (stok yetersiz, müşterisiz veresiye, fazla tahsilat) hiçbiri yazılmaz.
+- **Kurallar:** Müşterisiz satışta tahsil edilmeyen tutar yok (AC-041); fazla tahsilat kabul edilmez; eksi stok yalnızca ayar açıksa ve nedenle; seri takipli ürün bu ekranda satılamaz (makine satışı ayrı akış).
+- **Müşterisiz ödeme:** `recordDocumentPayment` müşteri olmadan da ödemeyi belgeye bağlar.
+- **Test notu:** Türkçe `İ` harfi `/i` bayraklı düzenli ifadeyle eşleşmez; hata mesajı testlerinde bu yüzden sabit kelime parçaları kullanıldı.
+- **Etki:** migration 017, `src/lib/sales/*`, `src/components/sales/*`, `CustomerPicker` (isteğe bağlı mod), `calc.ts` (`lineGross`, `distributeAmount`).
+
 ### K-026 · Satın alma: maliyet KDV dahil, teslim alma tek işlem, düzeltme iade ile
 - **Maliyet:** KDV bilgi amaçlıdır ve indirilmez (§9.5), bu yüzden birim maliyet = **KDV dahil satır toplamı / miktar** (4 ondalık). Stok hareketi `unit_cost`'una ve ürünün son alış fiyatına bu yazılır.
 - **Tek işlem:** Teslim alma (stok hareketleri, kalem–hareket bağı, son alış fiyatı, alım durumu, isteğe bağlı ödeme) birlikte yazılır; biri başarısız olursa hiçbiri yazılmaz. Taslak (DRAFT) stok ve finans etkisi üretmez (ST-006).

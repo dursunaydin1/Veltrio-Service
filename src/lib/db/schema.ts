@@ -190,6 +190,11 @@ export interface Sale {
   total_amount: number;
   status: "DRAFT" | "FINAL" | "CANCELLED";
   cancel_reason?: string;
+  notes?: string;
+  /** Satışın kesinleştiği an; stok çıkışı ve tahsilat bu anda yapılır */
+  finalized_at?: string;
+  /** Sunucu kayıt sürümü; güncellemede çakışma tespiti için gönderilir. */
+  version?: number;
   created_by_device: string;
   created_at: string;
   updated_at: string;

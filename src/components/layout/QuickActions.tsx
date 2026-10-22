@@ -13,7 +13,7 @@ export function QuickActions() {
         <Wrench size={28} aria-hidden="true" />
         Yeni Servis
       </Link>
-      <Link href="/sales" className="quick-action">
+      <Link href="/sales/new" className="quick-action">
         <ShoppingCart size={28} aria-hidden="true" />
         Yeni Satış
       </Link>

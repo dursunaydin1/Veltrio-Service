@@ -15,23 +15,25 @@
 ### ADIM 4.1 — Hızlı Satış
 
 **Görevler:**
-- [ ] `Sale` tablosunu oluştur:
+- [x] `Sale` tablosunu oluştur:
   - id, business_id, document_no, customer_id (nullable), sale_date
   - subtotal, discount_total, tax_total, total_amount
   - status (DRAFT / FINAL / CANCELLED), cancel_reason
-- [ ] `SaleItem` tablosunu oluştur:
+- [x] `SaleItem` tablosunu oluştur:
   - id, business_id, sale_id, product_id, serial_unit_id (nullable), machine_id (nullable)
   - description_snapshot, quantity, unit, unit_price_snapshot, unit_cost_snapshot
   - discount_amount, tax_mode, tax_rate, line_total, stock_movement_id
-- [ ] Hızlı satış akışı (§5.3):
+- [x] Hızlı satış akışı (§5.3):
   1. Ürün ve miktar seçimi
   2. İndirim (isteğe bağlı)
   3. Ödeme yöntemi ve alınan tutar
   4. Tahsil edilmemiş tutar varsa → müşteri seçimi zorunlu (AC-041)
   5. Hızlı satış tek adımda FINAL olur
-- [ ] Müşteri seçilmeden veresiye satış engellemesi (AC-041, TC-042)
-- [ ] Satış kesinleştiğinde stok düşümü (ST-006)
-- [ ] Belge numarası: `SAT-[cihaz_kodu]-[yıl]-[sıra]`
+- [x] Müşteri seçilmeden veresiye satış engellemesi (AC-041, TC-042)
+- [x] Satış kesinleştiğinde stok düşümü (ST-006)
+- [x] Belge numarası: `SAT-[cihaz_kodu]-[yıl]-[sıra]`
+
+> Uygulandı: migration 017 (`notes`, `finalized_at`), `src/lib/sales/service.ts` (`createSale`, `finalizeSale`, `collectSalePayment`, `getSaleBalance`), `/sales/new` (hızlı satış ekranı: ürün ekle, indirim, müşteri (isteğe bağlı), ödeme, "Satışı tamamla"). Müşterisiz satışta tahsil edilmeyen tutar engellenir; fazla tahsilat kabul edilmez; ödeme müşterisiz belgeye bağlanabilir (`recordDocumentPayment`).
 
 **İlgili FR:** FR-014  
 **İlgili AC:** AC-041
@@ -41,13 +43,15 @@
 ### ADIM 4.2 — Detaylı Satış
 
 **Görevler:**
-- [ ] Taslak (DRAFT) olarak kaydedilebilir; stok/finans etkisi yoktur (ST-006)
-- [ ] Ayrıntılı satış: her ürün/miktar/indirim/vergi satırı
-- [ ] Ondalıklı birimli ürün satışı desteklenir (TC-013)
-- [ ] Satış FINAL olunca stok düşümü ve ödeme kaydı oluşur
-- [ ] KDV: INCLUSIVE / EXCLUSIVE / NONE; belge ve satır bazında
-- [ ] İndirim: satır bazlı + belge genelinde; negatif olamaz
-- [ ] Belge genelindeki indirim hangi satırlara dağıtıldığı kayıt altında
+- [x] Taslak (DRAFT) olarak kaydedilebilir; stok/finans etkisi yoktur (ST-006)
+- [x] Ayrıntılı satış: her ürün/miktar/indirim/vergi satırı
+- [x] Ondalıklı birimli ürün satışı desteklenir (TC-013)
+- [x] Satış FINAL olunca stok düşümü ve ödeme kaydı oluşur
+- [x] KDV: INCLUSIVE / EXCLUSIVE / NONE; belge ve satır bazında
+- [x] İndirim: satır bazlı + belge genelinde; negatif olamaz
+- [x] Belge genelindeki indirim hangi satırlara dağıtıldığı kayıt altında
+
+> Uygulandı: tutarlar `computeSaleTotals` ile (ekran önizlemesi ve servis aynı fonksiyonu kullanır); belge indirimi satırların indirim sonrası tutarına orantılı dağıtılıp satırın `discount_amount` alanına yazılır (K-027). Eksi stoğa izin veren işletmede stok yetersizse neden istenir (ST-004). **Açık:** makine (seri takipli) satışı ve seri birim seçimi (4.3).
 
 **İlgili PRD:** §9.2
 
