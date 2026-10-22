@@ -5,6 +5,13 @@
 
 ## 2026-10-22
 
+### K-023 · Tamamlamada parça kullanım kuralı; teslimde kalan bakiye ve borç kabulü
+- **Bulgu:** Gerçek denemede bir servis, stoktan faturalanan parça "kullanıldı" işaretlenmeden teslim edildi: müşteriye parça bedeli yazıldı ama stok düşmedi.
+- **Karar:** Stoktan faturalanan (karar bekleyen veya onaylı) parça tam miktarda kullanıldı işaretlenmeden "İş tamamlandı"ya geçilemez; müşterinin getirdiği, stok dışı ve reddedilen parçalar muaftır.
+- **Teslim:** `deliverService` tek işlemde: (isteğe bağlı) teslim tahsilatı → kalan bakiye = servis tutarı − servise bağlı net ödemeler → kalan > 0 ise müşterinin borcu kabulü zorunlu (aksi halde tahsilat da geri alınır) → durum DELIVERED, teslim alan kişi, kalan tutar ve kabul servise yazılır. Fazla ödeme borç sayılmaz (müşteri alacağı). Yeniden açılınca teslim bilgileri temizlenir, ödemeler kalır.
+- **Servis bakiyesi** servise bağlı ödemelerden hesaplanır (`source_type = SERVICE`, `source_id`); ters kaydedilen ödeme karşı yönlü kopya olduğundan otomatik düşer.
+- **Etki:** migration 015, `src/lib/services/service.ts`, `ServicePayments.tsx`.
+
 ### K-022 · Servis teklifi: satır bazlı karar, parça kullanımı stokla bağlı, sıralı gönderim
 - **Teklif modeli:** Servis tutarı (`total_amount`) satırlardan hesaplanır ve her değişiklikte güncellenir: yalnızca karar bekleyen (PENDING) ve onaylı (APPROVED) satırlar sayılır; reddedilen/ertelenen girmez. Onay eşiğini (ayar, varsayılan 1.000 ₺; 0 = her ücretli iş) aşan teklifte karar bekleyen satır varken "İşlemde"ye geçilemez; teklif işlem sırasında artarsa servis otomatik "Müşteri onayı bekleniyor"a alınır. Onaylı satırın tutarı artarsa yeniden onay bekler (tolerans 0).
 - **service_parts yeniden anlamlandırıldı:** Eski `status` (PENDING/APPROVED/REJECTED/ARRIVED/USED) hem onayı hem teminat/kullanımı karıştırıyordu. Artık `status` yalnızca müşteri kararı; temin `supply_status`, kullanım `used_quantity`. Mevcut ARRIVED/USED kayıtları APPROVED'a çevrildi.

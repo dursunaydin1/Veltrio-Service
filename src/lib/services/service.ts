@@ -8,7 +8,7 @@ import { writeAuditLog } from "@/lib/sync/audit";
 import { enqueue } from "@/lib/sync/queue";
 import { generateId, nowISO } from "@/lib/utils";
 import type { BusinessContext } from "@/hooks/useBusinessContext";
-import type { PaymentMethod } from "@/types";
+import type { Payment, PaymentMethod } from "@/types";
 import { isBilled, needsApprovalBeforeWork, summarizeLines } from "./lines";
 import {
   canTransition,
@@ -61,6 +61,9 @@ const INSERT_COLUMNS = [
   "cancel_reason",
   "existing_damage",
   "received_accessories",
+  "delivered_to",
+  "delivery_balance",
+  "debt_acknowledged",
   "created_by_device",
   "created_at",
 ] as const;
@@ -294,6 +297,19 @@ export async function changeServiceStatus(
         if (summary.unpriced > 0) {
           throw new ServiceRuleError("Fiyatı belirlenmemiş kalem var. Tüm kalemlere fiyat girin veya kaldırın.");
         }
+        // Stoktan faturalanan parça kullanıldı olarak işaretlenmeden iş bitmez;
+        // aksi halde müşteriye parça bedeli yazılır ama stok düşmez (ST-005).
+        const parts = await db.service_parts.where("service_id").equals(serviceId).toArray();
+        const unconsumed = parts.filter(
+          (p) => isBilled(p.status) && p.source_type === "STOCK_PRODUCT" && p.used_quantity < p.quantity
+        );
+        if (unconsumed.length > 0) {
+          throw new ServiceRuleError(
+            `Faturalanan parça kullanıldı olarak işaretlenmemiş (stok düşmedi): ${unconsumed
+              .map((p) => p.description_snapshot)
+              .join(", ")}. “Kullanımı kaydedin” ya da miktarı/parçayı düzeltin.`
+          );
+        }
       }
 
       const now = nowISO();
@@ -307,6 +323,9 @@ export async function changeServiceStatus(
       if (isReopen(from, to)) {
         next.completed_date = undefined;
         next.delivered_date = undefined;
+        next.delivered_to = undefined;
+        next.delivery_balance = undefined;
+        next.debt_acknowledged = false;
       }
 
       await db.services.put(next);
@@ -459,4 +478,147 @@ export async function refreshServiceTotals(ctx: ServiceContext, serviceId: strin
       return current;
     }
   );
+}
+
+// ---------------------------------------------------------------- Ödeme ve teslim
+
+/** Servise bağlı ödemeler (kapora, teslimde veya sonradan alınan tahsilatlar ve ters kayıtları). */
+export async function getServicePayments(serviceId: string): Promise<Payment[]> {
+  return db.payments
+    .where("source_id")
+    .equals(serviceId)
+    .filter((p) => p.source_type === "SERVICE")
+    .toArray();
+}
+
+export type ServiceBalance = {
+  /** Faturalanan servis tutarı, kuruş */
+  total: number;
+  /** Tahsil edilen net tutar (tahsilat − iade/ters kayıt), kuruş */
+  paid: number;
+  /** total − paid; pozitif: müşteri borçlu, negatif: fazla ödeme */
+  remaining: number;
+};
+
+/** Servisin kalan bakiyesi (§5.2): tutar − servise bağlı net ödemeler. */
+export async function getServiceBalance(serviceId: string): Promise<ServiceBalance> {
+  const [service, payments] = await Promise.all([db.services.get(serviceId), getServicePayments(serviceId)]);
+  const total = toKurus(service?.total_amount ?? 0);
+  const paid = payments.reduce(
+    (acc, p) => acc + (p.direction === "IN" ? 1 : -1) * toKurus(p.amount),
+    0
+  );
+  return { total, paid, remaining: total - paid };
+}
+
+export type DeliveryParams = {
+  /** Teslimde alınan tahsilat */
+  payment?: { amountKurus: number; method: PaymentMethod };
+  /** Teslim alan kişi; müşterinin kendisi değilse adı */
+  receiverName?: string;
+  /** Kalan bakiye varsa müşterinin borcu kabul ettiği (AC-025) */
+  debtAcknowledged?: boolean;
+};
+
+/**
+ * Servisi teslim eder (§5.2): "İş tamamlandı" durumundaki servis; teslimde
+ * tahsilat alınabilir. Kalan bakiye varsa (borçlu teslim) müşterinin borcu
+ * kabulü işaretlenmeden teslim edilemez; kalan tutar, teslim alan kişi ve
+ * kabul servise yazılır. Tahsilat, durum değişimi ve teslim bilgileri tek
+ * işlemdedir: teslim reddedilirse tahsilat da kaydedilmez.
+ */
+export async function deliverService(
+  ctx: ServiceContext,
+  serviceId: string,
+  params: DeliveryParams = {}
+): Promise<Service> {
+  return db.transaction(
+    "rw",
+    [
+      db.services,
+      db.customers,
+      db.payments,
+      db.service_operations,
+      db.service_parts,
+      db.service_status_history,
+      db.sync_queue,
+      db.audit_logs,
+    ],
+    async () => {
+      const service = await db.services.get(serviceId);
+      if (!service || service.business_id !== ctx.businessId) {
+        throw new ServiceRuleError("Servis bulunamadı.");
+      }
+      if (service.status !== "COMPLETED") {
+        throw new ServiceRuleError("Yalnızca “İş tamamlandı” durumundaki servis teslim edilebilir.");
+      }
+      if (!service.customer_id) throw new ServiceRuleError("Serviste müşteri bilgisi yok.");
+
+      if (params.payment) {
+        await recordCustomerPayment(ctx, {
+          customerId: service.customer_id,
+          direction: "IN",
+          method: params.payment.method,
+          amountKurus: params.payment.amountKurus,
+          note: `Teslim tahsilatı (${service.document_no})`,
+          sourceType: "SERVICE",
+          sourceId: serviceId,
+        });
+      }
+
+      const { remaining } = await getServiceBalance(serviceId);
+      const indebted = remaining > 0;
+      if (indebted && !params.debtAcknowledged) {
+        throw new ServiceRuleError(
+          `Kalan bakiye ${fromKurus(remaining).toFixed(2).replace(".", ",")} ₺. Tahsilat alın veya müşterinin borcu kabul ettiğini işaretleyin.`
+        );
+      }
+
+      const receiver = params.receiverName?.trim() || undefined;
+      const note = [
+        receiver ? `Teslim alan: ${receiver}` : undefined,
+        indebted ? `Borçlu teslim: kalan ${fromKurus(remaining).toFixed(2).replace(".", ",")} ₺ (müşteri borcu kabul etti)` : undefined,
+      ]
+        .filter(Boolean)
+        .join(" · ");
+
+      const delivered = await changeServiceStatus(ctx, serviceId, "DELIVERED", note || undefined);
+      const next: Service = {
+        ...delivered,
+        delivered_to: receiver,
+        delivery_balance: fromKurus(Math.max(remaining, 0)),
+        debt_acknowledged: indebted && !!params.debtAcknowledged,
+      };
+      await db.services.put(next);
+      await enqueue("services", serviceId, "UPDATE", updatePayload(next), ctx.deviceCode);
+      return next;
+    }
+  );
+}
+
+/**
+ * Servise bağlı tahsilat (kapora dışı, sonradan alınan ödeme). İptal edilmiş
+ * serviste de alınabilir; iade veya mahsup müşteri sayfasından yapılır.
+ */
+export async function collectServicePayment(
+  ctx: ServiceContext,
+  serviceId: string,
+  params: { amountKurus: number; method: PaymentMethod; note?: string }
+): Promise<Payment> {
+  return db.transaction("rw", [db.services, db.customers, db.payments, db.sync_queue], async () => {
+    const service = await db.services.get(serviceId);
+    if (!service || service.business_id !== ctx.businessId) {
+      throw new ServiceRuleError("Servis bulunamadı.");
+    }
+    if (!service.customer_id) throw new ServiceRuleError("Serviste müşteri bilgisi yok.");
+    return recordCustomerPayment(ctx, {
+      customerId: service.customer_id,
+      direction: "IN",
+      method: params.method,
+      amountKurus: params.amountKurus,
+      note: params.note?.trim() || `Tahsilat (${service.document_no})`,
+      sourceType: "SERVICE",
+      sourceId: serviceId,
+    });
+  });
 }

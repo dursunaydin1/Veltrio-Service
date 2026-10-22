@@ -9,8 +9,9 @@ import { useBusinessContext } from "@/hooks/useBusinessContext";
 import { useServiceContext } from "@/hooks/useServiceContext";
 import { machineTitle } from "@/components/machines/MachineList";
 import { ServiceLines } from "@/components/services/ServiceLines";
+import { DeliveryPanel, ServicePayments } from "@/components/services/ServicePayments";
 import { StatusBadge } from "@/components/services/StatusBadge";
-import { changeServiceStatus, updateServiceDetails } from "@/lib/services/service";
+import { changeServiceStatus, getServiceBalance, updateServiceDetails } from "@/lib/services/service";
 import {
   SERVICE_TRANSITIONS,
   isReopen,
@@ -67,7 +68,9 @@ export function ServiceDetail({ id }: { id: string }) {
       </div>
 
       <StatusActions service={service} />
+      <DeliveryPanel service={service} />
       <ServiceLines service={service} />
+      <ServicePayments service={service} />
       <DetailsForm key={`${service.id}:${service.version ?? 0}:${service.updated_at}`} service={service} />
       <History serviceId={service.id} />
     </div>
@@ -80,10 +83,12 @@ function StatusActions({ service }: { service: Service }) {
   const [reason, setReason] = useState("");
   const [error, setError] = useState<string | null>(null);
   const [busy, setBusy] = useState(false);
+  const paid = useLiveQuery(() => getServiceBalance(service.id), [service.id])?.paid ?? 0;
 
   if (!isServiceStatus(service.status)) return null;
   const from = service.status;
-  const options = SERVICE_TRANSITIONS[from];
+  // "İş tamamlandı" → "Teslim edildi" geçişi teslim paneliyle (kalan bakiye, tahsilat) yapılır.
+  const options = SERVICE_TRANSITIONS[from].filter((to) => !(from === "COMPLETED" && to === "DELIVERED"));
   if (options.length === 0) return null;
 
   async function go(to: ServiceStatus, note?: string) {
@@ -124,6 +129,12 @@ function StatusActions({ service }: { service: Service }) {
           <p>
             <strong>{statusLabel(from)}</strong> → <strong>{statusLabel(pending)}</strong>
           </p>
+          {pending === "CANCELLED" && paid > 0 ? (
+            <div className="alert alert-warning" role="note">
+              Bu servise {formatCurrency(paid / 100)} tahsilat yapılmış. İptalde tutar müşteri alacağı olarak kalır;
+              iade etmek için müşteri sayfasında “Müşteriye ödeme” kaydedin.
+            </div>
+          ) : null}
           <div className="form-group">
             <label className="form-label" htmlFor="st-reason">
               {pending === "CANCELLED" ? "İptal nedeni *" : isReopen(from, pending) ? "Yeniden açma nedeni *" : "Neden *"}

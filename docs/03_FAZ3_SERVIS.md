@@ -239,16 +239,18 @@ Uygulamanın kalbi olan servis akışını hayata geçirmek: müşteri kabulünd
 ### ADIM 3.12 — Servis Tamamlama ve Teslim
 
 **Görevler:**
-- [ ] "İş Tamamlandı" geçişi: fiyatı beklenen ücretli kalem varsa geçiş engellenir (SR-007)
-- [ ] Servis sayacı: `ServiceOrder.first_completed_at` dolu + iptal edilmemiş servisler (SR-009)
-- [ ] Yeniden açma sayaçta ikinci artış oluşturmaz
-- [ ] İptal edilen servis sayaçtan düşer; geçmişi korunur
-- [ ] **Teslim akışı (§5.2):**
+- [x] "İş Tamamlandı" geçişi: fiyatı beklenen ücretli kalem varsa geçiş engellenir (SR-007)
+- [x] Servis sayacı: `ServiceOrder.first_completed_at` dolu + iptal edilmemiş servisler (SR-009)
+- [x] Yeniden açma sayaçta ikinci artış oluşturmaz
+- [x] İptal edilen servis sayaçtan düşer; geçmişi korunur
+- [x] **Teslim akışı (§5.2):**
   - Teslim anında kalan bakiye açıkça gösterilir
   - Borçlu teslim mümkündür; bakiye ve müşterinin borç kabulü kaydedilir (AC-025)
   - Teslim alan kişi (müşteri değilse adı) kaydedilir
   - Ödeme ve teslim kayıtları oluşturulur
-- [ ] Teslim edilmiş servis iptal edilemez (AC-033)
+- [x] Teslim edilmiş servis iptal edilemez (AC-033)
+
+> Uygulandı: migration 015 (`delivered_to`, `delivery_balance`, `debt_acknowledged`), `deliverService`, `getServiceBalance`, `collectServicePayment` (`service.ts`); servis sayfasında **Ödemeler** (toplam / tahsil edilen / kalan, tahsilat alma) ve **Teslim et** paneli. Borçlu teslim, müşteri borcu kabul edilmeden yapılamaz; tahsilat ve teslim tek işlemdir. Ek kural (K-023): stoktan faturalanan parça "kullanıldı" işaretlenmeden iş tamamlanamaz.
 
 **İlgili AC:** AC-017, AC-025, AC-033  
 **Test:** TC-010, TC-019, TC-034
@@ -258,11 +260,11 @@ Uygulamanın kalbi olan servis akışını hayata geçirmek: müşteri kabulünd
 ### ADIM 3.13 — Servis İptali
 
 **Görevler:**
-- [ ] Servis iptali: gerekçe + onay zorunlu (SR-017)
-- [ ] Kullanılmış parça stoğu otomatik geri eklenmez; fiziksel durum ayrıca değerlendirilir
+- [x] Servis iptali: gerekçe + onay zorunlu (SR-017)
+- [x] Kullanılmış parça stoğu otomatik geri eklenmez; fiziksel durum ayrıca değerlendirilir
 - [ ] İsteğe bağlı "inceleme/teşhis ücreti" kalemi eklenebilir; servis iptal olarak kalır; sayaç artmaz
-- [ ] Alınmış ön ödeme/kapora: iade edilir veya müşteri alacağına yazılır (§9.7)
-- [ ] Teslim edilmiş servis iptal edilemez → ücret düzeltmesi iade akışıyla yapılır
+- [x] Alınmış ön ödeme/kapora: iade edilir veya müşteri alacağına yazılır (§9.7) — tutar müşteri alacağı olarak kalır, iade "Müşteriye ödeme" ile; iptal ekranı bunu hatırlatır
+- [x] Teslim edilmiş servis iptal edilemez → ücret düzeltmesi iade akışıyla yapılır
 
 **İlgili SR:** SR-017  
 **Test:** TC-034, TC-056

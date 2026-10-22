@@ -82,6 +82,12 @@ export interface Service {
   existing_damage?: string;
   /** Kabulde teslim alınan aksesuarlar */
   received_accessories?: string;
+  /** Teslim alan kişi (müşteri değilse adı) */
+  delivered_to?: string;
+  /** Teslim anındaki kalan servis bakiyesi (> 0: borçlu teslim) */
+  delivery_balance?: number;
+  /** Borçlu teslimde müşterinin borcu kabul ettiği (AC-025) */
+  debt_acknowledged?: boolean;
   /** Sunucu kayıt sürümü; güncellemede çakışma tespiti için gönderilir. */
   version?: number;
   created_by_device: string;
