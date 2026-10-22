@@ -5,6 +5,14 @@
 
 ## 2026-10-22
 
+### K-026 · Satın alma: maliyet KDV dahil, teslim alma tek işlem, düzeltme iade ile
+- **Maliyet:** KDV bilgi amaçlıdır ve indirilmez (§9.5), bu yüzden birim maliyet = **KDV dahil satır toplamı / miktar** (4 ondalık). Stok hareketi `unit_cost`'una ve ürünün son alış fiyatına bu yazılır.
+- **Tek işlem:** Teslim alma (stok hareketleri, kalem–hareket bağı, son alış fiyatı, alım durumu, isteğe bağlı ödeme) birlikte yazılır; biri başarısız olursa hiçbiri yazılmaz. Taslak (DRAFT) stok ve finans etkisi üretmez (ST-006).
+- **Hızlı alım:** Ürün satırı yoksa yalnızca toplam tutar kaydedilir; stok değişmez ("stok girişi yapılmadı" uyarısı) ama tedarikçi borcuna yazılır.
+- **Düzeltme:** Teslim alınmış alım değiştirilemez; hata tedarikçiye iade ile düzeltilir (Faz 5). Yalnızca taslak düzenlenir (satırlar silinip yeniden eklenir) ve iptal edilir.
+- **Sınır:** Seri takipli ürün alımı makine satışı adımıyla (birim kayıtları) gelecek; şimdilik reddedilir.
+- **Etki:** migration 016, `src/lib/purchases/*`, `src/components/purchases/*`, `setLastPurchasePrice`.
+
 ### K-025 · Müşteri ve tedarikçi için ortak "taraf" altyapısı
 - **Sorun:** Ödeme, ters kayıt, açılış bakiyesi ve bakiye paneli yalnızca müşteri için yazılmıştı; tedarikçi için aynısını kopyalamak tutarsızlık riski taşırdı.
 - **Karar:** `recordPartyPayment` / `setPartyOpeningBalance` taraf türü (`CUSTOMER` | `SUPPLIER`) alır; müşteri ve tedarikçi sürümleri ince sarmalayıcıdır. Ters kayıt zaten tarafı orijinalden kopyaladığı için ortak çalışır. `BalancePanel` yerine `PartyBalancePanel`: etiketler tarafa göre değişir (müşteri: Tahsilat al / Müşteriye ödeme; tedarikçi: Ödeme yap / Tedarikçiden iade ödemesi).

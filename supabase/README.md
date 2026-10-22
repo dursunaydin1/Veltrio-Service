@@ -21,12 +21,13 @@ Bu dizin Supabase PostgreSQL migration dosyalarını içerir.
 | 013 | `013_service_intake_status.sql` | Servis durum kümesi (PRD §6.1), kabul alanları, durum geçmişi aktörü |
 | 014 | `014_service_lines_approvals.sql` | Servis işlem satırları, parça satırı genişletme, müşteri onay kayıtları |
 | 015 | `015_service_delivery.sql` | Servis teslim bilgileri (teslim alan, kalan bakiye, borç kabulü) |
+| 016 | `016_purchase_fields.sql` | Satın alma: tedarikçi fatura no, teslim alma zamanı, iptal nedeni |
 
 ## Supabase Dashboard'dan Uygulama
 
 1. [Supabase Dashboard](https://app.supabase.com) → Projenizi seçin
 2. **SQL Editor** sekmesine girin
-3. Migration dosyalarını **sırasıyla** çalıştırın (001 → 002 → 003 → 004 → 005 → 006 → 007 → 008 → 009 → 010 → 011 → 012 → 013 → 014 → 015)
+3. Migration dosyalarını **sırasıyla** çalıştırın (001 → 002 → 003 → 004 → 005 → 006 → 007 → 008 → 009 → 010 → 011 → 012 → 013 → 014 → 015 → 016)
 
 ## Supabase CLI ile Uygulama
 

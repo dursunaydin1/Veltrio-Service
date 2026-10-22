@@ -108,22 +108,24 @@
 ### ADIM 4.6 — Satın Alma
 
 **Görevler:**
-- [ ] `Purchase` tablosu: id, business_id, document_no, supplier_id, purchase_date, total_amount, status, notes
-- [ ] `PurchaseItem` tablosu: product_id, description_snapshot, quantity, unit, unit_price, line_discount, tax_mode, tax_rate, line_total, stock_movement_id
-- [ ] **Hızlı satın alma:**
+- [x] `Purchase` tablosu: id, business_id, document_no, supplier_id, purchase_date, total_amount, status, notes
+- [x] `PurchaseItem` tablosu: product_id, description_snapshot, quantity, unit, unit_price, line_discount, tax_mode, tax_rate, line_total, stock_movement_id
+- [x] **Hızlı satın alma:**
   - Tedarikçi, tarih, toplam, ödenen tutar, kısa açıklama
   - Stok etkisi için ürün + miktar satırları zorunlu
   - Yalnızca toplam tutarlı kayıt stok miktarını değiştirmez; "stok girişi yapılmadı" uyarısı (§9.5)
-- [ ] **Ayrıntılı satın alma:**
+- [x] **Ayrıntılı satın alma:**
   - Her ürün/miktar/birim fiyat/indirim satırı
   - Seri takipli ürünlerde seri numaraları girilebilir
-- [ ] Kayıt RECEIVED olunca:
+- [x] Kayıt RECEIVED olunca:
   - Stok artar (StockMovement: PURCHASE_IN)
   - Son alış fiyatı güncellenir (Product.last_purchase_price)
   - Seri takipli ürünlerde ProductSerialUnit kayıtları oluşur
-- [ ] DRAFT belge stok hareketi üretmez (ST-006)
-- [ ] Belge numarası: `AL-[cihaz_kodu]-[yıl]-[sıra]`
-- [ ] KDV bilgisi yalnızca bilgi amaçlı; indirilecek KDV hesabı yapılmaz
+- [x] DRAFT belge stok hareketi üretmez (ST-006)
+- [x] Belge numarası: `AL-[cihaz_kodu]-[yıl]-[sıra]`
+- [x] KDV bilgisi yalnızca bilgi amaçlı; indirilecek KDV hesabı yapılmaz
+
+> Uygulandı: migration 016 (`supplier_ref`, `received_at`, `cancel_reason`), `src/lib/purchases/service.ts` (`createPurchase`, `updateDraftPurchase`, `receivePurchase`, `cancelDraftPurchase`, `payPurchase`, `getPurchaseBalance`), `/purchases`, `/purchases/new`, `/purchases/[id]`, tedarikçi sayfasında alım geçmişi. Teslim alma: PURCHASE_IN hareketi + ürünün son alış fiyatı + tedarikçi borcu, tek işlemde. **Açık:** seri takipli ürün alımı ve `ProductSerialUnit` kayıtları (makine satışı adımı, 4.3 / 2.2) — şimdilik seri takipli ürün alıma eklenemez.
 
 **İlgili FR:** FR-015  
 **İlgili AC:** AC-007

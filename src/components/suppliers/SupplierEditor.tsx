@@ -8,6 +8,7 @@ import { db } from "@/lib/db";
 import { useBusinessContext } from "@/hooks/useBusinessContext";
 import { PartyBalancePanel } from "@/components/finance/PartyBalancePanel";
 import { SupplierForm } from "@/components/suppliers/SupplierForm";
+import { SupplierPurchases } from "@/components/suppliers/SupplierPurchases";
 import { setSupplierArchived } from "@/lib/suppliers/service";
 import { telLink } from "@/lib/utils/phone";
 
@@ -60,6 +61,8 @@ export function SupplierEditor({ id }: { id: string }) {
       ) : null}
 
       <PartyBalancePanel kind="SUPPLIER" party={supplier} />
+
+      <SupplierPurchases supplier={supplier} />
 
       <SupplierForm key={`${supplier.id}:${supplier.updated_at}`} supplier={supplier} />
 

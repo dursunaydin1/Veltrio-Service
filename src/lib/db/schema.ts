@@ -225,6 +225,13 @@ export interface Purchase {
   total_amount: number;
   status: "DRAFT" | "RECEIVED" | "CANCELLED";
   notes?: string;
+  /** Tedarikçinin fatura / irsaliye numarası (bilgi amaçlı) */
+  supplier_ref?: string;
+  /** Teslim alındığı an; stok girişi bu anda yapılır */
+  received_at?: string;
+  cancel_reason?: string;
+  /** Sunucu kayıt sürümü; güncellemede çakışma tespiti için gönderilir. */
+  version?: number;
   created_by_device: string;
   created_at: string;
   updated_at: string;

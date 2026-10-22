@@ -194,3 +194,28 @@ export async function setProductArchived(
     return next;
   });
 }
+
+/**
+ * Son alış fiyatını (birim maliyet) günceller. Satın alma teslim alınınca
+ * çağrılır. Fiyat aynıysa yazmaz. Çağıran, products + sync_queue tablolarını
+ * kapsayan bir işlem içinde olmalıdır.
+ */
+export async function setLastPurchasePrice(
+  ctx: ProductContext,
+  productId: string,
+  unitCost: number
+): Promise<void> {
+  const existing = await db.products.get(productId);
+  if (!existing || existing.business_id !== ctx.businessId) throw new ProductNotFoundError();
+  if (existing.last_purchase_price === unitCost) return;
+
+  const next: Product = { ...existing, last_purchase_price: unitCost, updated_at: nowISO() };
+  await db.products.put(next);
+  await enqueue(
+    "products",
+    productId,
+    "UPDATE",
+    { ...editablePayload(next), version: existing.version ?? 1 },
+    ctx.deviceCode
+  );
+}
