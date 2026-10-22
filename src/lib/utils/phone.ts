@@ -52,3 +52,31 @@ export function isValidTurkishPhone(phone: string): boolean {
   const normalized = normalizePhone(phone);
   return /^5[0-9]{9}$/.test(normalized);
 }
+
+/**
+ * Makul bir telefon numarası mı? (normalize edilince 10-15 rakam)
+ * Sabit hatlar ve yurt dışı numaralar da kabul edilir; cep telefonu olma
+ * zorunluluğu yoktur.
+ */
+export function isPlausiblePhone(phone: string): boolean {
+  return /^\d{10,15}$/.test(normalizePhone(phone));
+}
+
+/** Uluslararası biçimde rakamlar: 10 haneli yerel numaraya 90 eklenir. */
+function internationalDigits(phone: string): string | null {
+  if (!isPlausiblePhone(phone)) return null;
+  const n = normalizePhone(phone);
+  return n.length === 10 ? `90${n}` : n;
+}
+
+/** "Ara" bağlantısı (kullanıcı elle dokunur, otomatik arama yok). */
+export function telLink(phone: string): string | null {
+  const digits = internationalDigits(phone);
+  return digits ? `tel:+${digits}` : null;
+}
+
+/** "WhatsApp'ta aç" bağlantısı (mesajı kullanıcı yazar/gönderir, otomatik gönderim yok). */
+export function whatsappLink(phone: string): string | null {
+  const digits = internationalDigits(phone);
+  return digits ? `https://wa.me/${digits}` : null;
+}

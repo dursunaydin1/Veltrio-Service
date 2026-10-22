@@ -2,7 +2,7 @@
 
 import { useState } from "react";
 import { useRouter } from "next/navigation";
-import { useProductContext } from "@/hooks/useProductContext";
+import { useBusinessContext } from "@/hooks/useBusinessContext";
 import { useSessionStore } from "@/stores/session";
 import { PRODUCT_CATEGORIES, PRODUCT_UNITS, TAX_MODE_LABELS } from "@/lib/products/constants";
 import { parseProductForm, type ProductFormInput } from "@/lib/products/schema";
@@ -42,7 +42,7 @@ type Errors = Partial<Record<keyof ProductFormInput, string>>;
 /** Ürün oluşturma ve düzenleme formu (Adım 2.1). */
 export function ProductForm({ product }: { product?: Product }) {
   const router = useRouter();
-  const ctx = useProductContext();
+  const ctx = useBusinessContext();
   const settings = useSessionStore((s) => s.business?.settings);
 
   const [values, setValues] = useState<ProductFormInput>(() =>

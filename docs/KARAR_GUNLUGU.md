@@ -5,6 +5,12 @@
 
 ## 2026-10-22
 
+### K-018 · Müşteri: köy zorunlu, adres isteğe bağlı; Türkçe karakterden bağımsız arama
+- **Plan:** "adres/köy" tek zorunlu alan; telefon normalizasyonu mükerrer uyarısı için.
+- **Karar:** `village` ("Köy / mahalle") zorunlu, `address` ("Açık adres") isteğe bağlı; telefon, "Telefonu yok" işaretlenmedikçe zorunlu ve en az 10 haneli (sabit hat ve yurt dışı da kabul). Mükerrer telefon uyarısı yazarken görünür; arşivlenmiş müşteriler uyarıya dahil değildir.
+- **Arama:** Telefonda Türkçe klavye şart olmasın diye ürün ve müşteri aramaları ı/ğ/ü/ş/ö/ç ve büyük/küçük harften bağımsızdır (`foldText`). Yalnızca rakam yazılırsa telefonda aranır (baştaki 0 yok sayılır). Büyük "I" Türkçe'de "ı" olduğundan ("ALI" → "alı") düz küçük harfe çevirme yetersizdi.
+- **Etki:** migration 010, `src/lib/customers/*`, `src/lib/utils/search.ts`, liste bileşenleri.
+
 ### K-017 · Stok: bakiye hareket defterinden hesaplanır; `quantity_before/after` yok
 - **Plan:** Her harekette önceki/sonraki miktar saklanacak; `Product.stock_available` bakiye olarak kullanılacak (Adım 2.3).
 - **Sorun:** İki cihaz çevrimdışı hareket üretirse "önceki/sonraki" değerleri yerelde doğru görünür ama birleşince yanlış olur. Ürün satırındaki bakiye de eşitlemede ezilebilir.

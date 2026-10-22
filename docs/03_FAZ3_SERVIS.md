@@ -15,7 +15,7 @@ Uygulamanın kalbi olan servis akışını hayata geçirmek: müşteri kabulünd
 ### ADIM 3.1 — Müşteri ve Makine Varlıkları
 
 **Görevler:**
-- [ ] `Customer` tablosu:
+- [x] `Customer` tablosu (fotoğraf alanı hariç):
   - id, business_id, name, phone, normalized_phone, no_phone_flag, address/village, notes, optional_photo_ref, archived_at
 - [ ] `Machine` tablosu:
   - id, business_id, customer_id, type, brand, model, serial_number (nullable), internal_number (MK-...)
@@ -31,19 +31,21 @@ Uygulamanın kalbi olan servis akışını hayata geçirmek: müşteri kabulünd
 ### ADIM 3.2 — Müşteri Yönetimi
 
 **Görevler:**
-- [ ] Müşteri oluşturma: ad-soyad, telefon, adres/köy (zorunlular); fotoğraf, notlar (isteğe bağlı)
-- [ ] **Telefon normalizasyonu** (Adım 1.10'da temel alındı):
+- [x] Müşteri oluşturma: ad-soyad, telefon, adres/köy (zorunlular); fotoğraf, notlar (isteğe bağlı)
+- [x] **Telefon normalizasyonu** (Adım 1.10'da temel alındı):
   - Boşluk, tire, parantez temizle
   - 0 ile başlayan ve +90 ile başlayan biçimler aynı kabul edilir
   - Aynı normalize telefonla kayıtlı müşteri varsa → mevcut müşteri önerilir
   - Kullanıcı yine de bilinçli olarak yeni kayıt açabilir (AC-029)
-- [ ] Telefonu olmayan müşteri için `no_phone_flag = true`
-- [ ] Gereksiz kişisel veri (T.C. kimlik no) istenmez
-- [ ] Müşteri listesi: ad-soyad, telefon, açık bakiye göstergesi, hızlı arama
+- [x] Telefonu olmayan müşteri için `no_phone_flag = true`
+- [x] Gereksiz kişisel veri (T.C. kimlik no) istenmez
+- [x] Müşteri listesi: ad-soyad, telefon, açık bakiye göstergesi, hızlı arama
 - [ ] Müşteri profili: makineler, servis geçmişi, satışlar, ödemeler, bakiye, hızlı işlemler
-- [ ] "Ara" ve "WhatsApp'ta aç" bağlantıları (elle açar, otomatik değil)
+- [x] "Ara" ve "WhatsApp'ta aç" bağlantıları (elle açar, otomatik değil)
 - [ ] Müşteri fotoğrafı: istemci tarafında 1600px küçültme, JPEG/WebP (FR-028)
-- [ ] Müşteri arşivleme: açık servisi veya sıfır olmayan bakiyesi varsa engellenir (AC-030)
+- [x] Müşteri arşivleme: açık servisi veya sıfır olmayan bakiyesi varsa engellenir (AC-030)
+
+> Uygulandı: migration 010 (`no_phone_flag`), `src/lib/customers/` (şema, servis), `src/components/customers/`, `/customers`, `/customers/new`, `/customers/[id]`. Mükerrer telefon yazarken uyarılır (AC-029), kullanıcı bilinçli olarak ayrı kayıt açabilir. Arşivleme açık servis varsa engellenir (AC-030); **sıfırdan farklı bakiye kontrolü bakiye hesabıyla (Adım 2.8) eklenecek**. Açık: müşteri fotoğrafı (FR-028), müşteri profilindeki makine/servis/satış/ödeme/bakiye bölümleri (ilgili adımlarla). Köy/mahalle zorunlu, açık adres isteğe bağlı (K-018).
 
 **İlgili FR:** FR-003  
 **Test:** TC-031, TC-032

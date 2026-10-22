@@ -10,18 +10,17 @@ import { useStockBalances } from "@/hooks/useStock";
 import { EMPTY_BALANCE } from "@/lib/stock/ledger";
 import { formatCurrency, formatQuantity } from "@/lib/utils";
 import { unitLabel } from "@/lib/products/constants";
+import { foldText } from "@/lib/utils/search";
 import { isCriticalStock } from "@/lib/products/stock";
 import type { Product } from "@/types";
 
-const tr = (text: string) => text.toLocaleLowerCase("tr");
-
 function matches(product: Product, query: string): boolean {
-  if (!query) return true;
+  if (!query.trim()) return true;
   const haystack = [product.name, product.code, product.category, product.brand, product.model]
     .filter(Boolean)
-    .map((v) => tr(String(v)))
+    .map((v) => foldText(String(v)))
     .join(" ");
-  return query.split(/\s+/).every((word) => haystack.includes(word));
+  return foldText(query.trim()).split(/\s+/).every((word) => haystack.includes(word));
 }
 
 /** Ürün listesi: arama, pasifleri gösterme, kritik stok rozeti (Adım 2.1, 2.9). */
@@ -37,10 +36,9 @@ export function ProductList() {
   );
 
   const visible = useMemo(() => {
-    const q = tr(query.trim());
     return (products ?? [])
       .filter((p) => (showArchived ? true : !p.archived_at))
-      .filter((p) => matches(p, q))
+      .filter((p) => matches(p, query))
       .sort((a, b) => a.name.localeCompare(b.name, "tr"));
   }, [products, query, showArchived]);
 

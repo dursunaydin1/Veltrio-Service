@@ -2,13 +2,19 @@
 
 import { useMemo } from "react";
 import { useSessionStore } from "@/stores/session";
-import type { ProductContext } from "@/lib/products/service";
+
+export type BusinessContext = {
+  businessId: string;
+  deviceCode: string;
+  /** İşlemi yapan kullanıcı (audit log için) */
+  actorId?: string;
+};
 
 /**
- * Ürün işlemleri için işletme, cihaz ve kullanıcı bilgisi.
+ * Veri işlemleri (ürün, müşteri…) için işletme, cihaz ve kullanıcı bilgisi.
  * Oturum veya cihaz henüz yüklenmediyse null döner.
  */
-export function useProductContext(): ProductContext | null {
+export function useBusinessContext(): BusinessContext | null {
   const businessId = useSessionStore((s) => s.business?.id);
   const deviceCode = useSessionStore((s) => s.device?.device_code);
   const actorId = useSessionStore((s) => s.user?.id);

@@ -75,9 +75,13 @@ export interface Customer {
   name: string;
   phone?: string;
   phone_normalized?: string;
+  /** Telefonu olmayan müşteri (AC-029 uyarısından muaf) */
+  no_phone_flag?: boolean;
   village?: string;
   address?: string;
   notes?: string;
+  /** Sunucu kayıt sürümü; güncellemede çakışma tespiti için gönderilir. */
+  version?: number;
   archived_at?: ISODateTimeString;
   created_at: ISODateTimeString;
   updated_at: ISODateTimeString;

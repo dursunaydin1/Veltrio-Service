@@ -4,7 +4,7 @@ import { useState } from "react";
 import { useRouter } from "next/navigation";
 import { useLiveQuery } from "dexie-react-hooks";
 import { db } from "@/lib/db";
-import { useProductContext } from "@/hooks/useProductContext";
+import { useBusinessContext } from "@/hooks/useBusinessContext";
 import { ProductForm } from "@/components/products/ProductForm";
 import { StockPanel } from "@/components/products/StockPanel";
 import { setProductArchived } from "@/lib/products/service";
@@ -12,7 +12,7 @@ import { setProductArchived } from "@/lib/products/service";
 /** Ürün düzenleme sayfasının içeriği: form + pasifleştirme / yeniden etkinleştirme. */
 export function ProductEditor({ id }: { id: string }) {
   const router = useRouter();
-  const ctx = useProductContext();
+  const ctx = useBusinessContext();
   const [error, setError] = useState<string | null>(null);
 
   // Dizi dönmesi, "yükleniyor" (undefined) ile "bulunamadı" ([]) ayrımını sağlar.
