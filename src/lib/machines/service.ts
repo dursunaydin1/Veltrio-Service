@@ -42,6 +42,9 @@ const EDITABLE_COLUMNS = [
   "merged_into_id",
   "qr_code",
   "internal_number",
+  "sale_id",
+  "sale_date",
+  "sale_price",
   "notes",
   "archived_at",
 ] as const;
@@ -87,7 +90,7 @@ export async function findMachinesBySerial(
  */
 export async function createMachine(
   ctx: BusinessContext,
-  fields: MachineFields,
+  fields: MachineFields & Partial<Pick<Machine, "sale_id" | "sale_date" | "sale_price">>,
   options: { allowDuplicateSerial?: boolean } = {}
 ): Promise<Machine> {
   return db.transaction(
@@ -300,4 +303,37 @@ export async function setMachineArchived(
       return next;
     }
   );
+}
+
+/**
+ * Makine satışıyla oluşan / eşleşen makineye satış bilgisini (belge, tarih,
+ * fiyat) yazar. Satış kesinleşirken, satış işleminin içinde çağrılır.
+ */
+export async function attachSaleToMachine(
+  ctx: BusinessContext,
+  machineId: string,
+  sale: { saleId: string; saleDate: string; salePrice: number }
+): Promise<Machine> {
+  return db.transaction("rw", [db.machines, db.sync_queue], async () => {
+    const existing = await db.machines.get(machineId);
+    if (!existing || existing.business_id !== ctx.businessId) {
+      throw new MachineRuleError("Makine bulunamadı.");
+    }
+    const next: Machine = {
+      ...existing,
+      sale_id: sale.saleId,
+      sale_date: sale.saleDate,
+      sale_price: sale.salePrice,
+      updated_at: nowISO(),
+    };
+    await db.machines.put(next);
+    await enqueue(
+      "machines",
+      machineId,
+      "UPDATE",
+      { ...editablePayload(next), version: existing.version ?? 1 },
+      ctx.deviceCode
+    );
+    return next;
+  });
 }

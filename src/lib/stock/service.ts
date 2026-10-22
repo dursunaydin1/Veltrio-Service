@@ -39,6 +39,8 @@ export type MovementInput = {
   note?: string;
   sourceType?: string;
   sourceId?: string;
+  /** Seri takipli ürünlerde hareketin ait olduğu birim (miktar ±1 olmalıdır) */
+  serialUnitId?: string;
 };
 
 /**
@@ -61,9 +63,22 @@ async function appendMovement(ctx: StockContext, input: MovementInput): Promise<
     throw new StockRuleError("Ürün bulunamadı.");
   }
   if (product.is_serial_tracked) {
-    throw new StockRuleError(
-      "Seri takipli ürünlerin stoğu birim kayıtlarıyla yönetilir; elle stok hareketi yapılamaz."
-    );
+    // Seri takipli ürünün stoğu birim kayıtlarıyla yönetilir (ST-012): hareket yalnızca
+    // belirli bir birim için ve ±1 miktarla yazılır (alım, satış, açılış kaydı).
+    if (!input.serialUnitId) {
+      throw new StockRuleError(
+        "Seri takipli ürünlerin stoğu birim kayıtlarıyla yönetilir; elle stok hareketi yapılamaz."
+      );
+    }
+    if (Math.abs(input.quantity) !== 1) {
+      throw new StockRuleError("Seri takipli birim hareketi bir adet olmalıdır.");
+    }
+    const unit = await db.product_serial_units.get(input.serialUnitId);
+    if (!unit || unit.product_id !== input.productId || unit.business_id !== ctx.businessId) {
+      throw new StockRuleError("Seri birim bulunamadı.");
+    }
+  } else if (input.serialUnitId) {
+    throw new StockRuleError("Seri birim yalnızca seri takipli ürünlerde kullanılır.");
   }
 
   const note = input.note?.trim() || undefined;
@@ -90,6 +105,7 @@ async function appendMovement(ctx: StockContext, input: MovementInput): Promise<
     product_id: input.productId,
     movement_type: input.type,
     bucket,
+    serial_unit_id: input.serialUnitId,
     quantity: input.quantity,
     unit_cost: input.unitCost,
     source_type: input.sourceType,
@@ -111,6 +127,7 @@ async function appendMovement(ctx: StockContext, input: MovementInput): Promise<
       movement_type: movement.movement_type,
       bucket: movement.bucket,
       quantity: movement.quantity,
+      serial_unit_id: movement.serial_unit_id ?? null,
       unit_cost: movement.unit_cost ?? null,
       source_type: movement.source_type ?? null,
       source_id: movement.source_id ?? null,
@@ -132,7 +149,10 @@ const TABLES = [db.products, db.stock_movements, db.sync_queue, db.audit_logs] a
  * hasarlı stok hiçbir zaman eksiye düşemez.
  */
 export function recordMovement(ctx: StockContext, input: MovementInput): Promise<StockMovement> {
-  return db.transaction("rw", [...TABLES], () => appendMovement(ctx, input));
+  // Seri birim tablosu yalnızca birimli harekette kapsama girer; böylece birimsiz
+  // çağrılar (satış, servis parçası…) bu tabloyu içermeyen dış işlemlerde de çalışır.
+  const scope = input.serialUnitId ? [...TABLES, db.product_serial_units] : [...TABLES];
+  return db.transaction("rw", scope, () => appendMovement(ctx, input));
 }
 
 /**

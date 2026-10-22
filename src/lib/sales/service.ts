@@ -2,7 +2,14 @@ import { db } from "@/lib/db";
 import type { Sale, SaleItem } from "@/lib/db";
 import { fromKurus, lineGross, toKurus } from "@/lib/calc";
 import { recordDocumentPayment } from "@/lib/finance/service";
+import {
+  attachSaleToMachine,
+  changeMachineOwner,
+  createMachine,
+  findMachinesBySerial,
+} from "@/lib/machines/service";
 import { nextDocumentNo } from "@/lib/numbering";
+import { serialUnitPayload, unitLabel } from "@/lib/serial/service";
 import { computeSaleTotals } from "./totals";
 import { getProductBalance } from "@/lib/stock/ledger";
 import { recordMovement } from "@/lib/stock/service";
@@ -41,6 +48,8 @@ export type SaleLineInput = {
   discountKurus?: number;
   taxMode: TaxMode;
   taxRate: number;
+  /** Seri takipli ürün (makine) satışında satılacak birim; miktar 1 olmalıdır */
+  serialUnitId?: string;
 };
 
 export type SaleInput = {
@@ -118,7 +127,10 @@ function tables() {
     db.sales,
     db.sale_items,
     db.customers,
+    db.machines,
+    db.machine_ownership_history,
     db.products,
+    db.product_serial_units,
     db.stock_movements,
     db.payments,
     db.counters,
@@ -137,16 +149,28 @@ async function buildItems(ctx: SaleContext, saleId: string, input: SaleInput, cr
   if (input.lines.length === 0) throw new SaleRuleError("En az bir ürün ekleyin.");
 
   const products: Product[] = [];
+  const usedUnits = new Set<string>();
   for (const line of input.lines) {
     const product = await db.products.get(line.productId);
     if (!product || product.business_id !== ctx.businessId) throw new SaleRuleError("Ürün bulunamadı.");
     if (product.archived_at) throw new SaleRuleError(`“${product.name}” pasif ürün; satılamaz.`);
-    if (product.is_serial_tracked) {
-      throw new SaleRuleError(
-        `“${product.name}” seri takipli bir ürün; makine satışı seri birim seçimiyle yapılır (yakında).`
-      );
-    }
     if (!(line.quantity > 0)) throw new SaleRuleError("Miktar sıfırdan büyük olmalıdır.");
+    if (product.is_serial_tracked) {
+      // Makine satışı: belirli bir stoktaki birim seçilir, müşteri zorunludur (AC-027, AC-039).
+      if (!input.customerId) throw new SaleRuleError(`“${product.name}” makine satışı için müşteri seçin.`);
+      if (line.quantity !== 1) throw new SaleRuleError(`“${product.name}”: makine satışında miktar 1 olmalıdır.`);
+      const unit = line.serialUnitId ? await db.product_serial_units.get(line.serialUnitId) : undefined;
+      if (!unit || unit.product_id !== product.id || unit.business_id !== ctx.businessId) {
+        throw new SaleRuleError(`“${product.name}” için satılacak birimi seçin.`);
+      }
+      if (unit.status !== "IN_STOCK") {
+        throw new SaleRuleError(`“${unitLabel(unit)}” birimi stokta değil (daha önce satılmış olabilir).`);
+      }
+      if (usedUnits.has(unit.id)) throw new SaleRuleError(`“${unitLabel(unit)}” birimi bu satışta birden fazla kez seçilmiş.`);
+      usedUnits.add(unit.id);
+    } else if (line.serialUnitId) {
+      throw new SaleRuleError(`“${product.name}” seri takipli bir ürün değil; birim seçilemez.`);
+    }
     let gross: number;
     try {
       gross = lineGross(line.unitPriceKurus, line.quantity);
@@ -174,6 +198,7 @@ async function buildItems(ctx: SaleContext, saleId: string, input: SaleInput, cr
       business_id: ctx.businessId,
       sale_id: saleId,
       product_id: product.id,
+      serial_unit_id: line.serialUnitId,
       description_snapshot: product.name,
       quantity: line.quantity,
       unit: product.unit,
@@ -286,6 +311,11 @@ async function applyFinalize(
   for (const item of items) {
     if (!item.product_id) continue;
     const product = await db.products.get(item.product_id);
+
+    if (product?.is_serial_tracked) {
+      await sellSerialUnit(ctx, sale, item, product, movementNote);
+      continue;
+    }
     const unitCost = product?.last_purchase_price ?? item.unit_cost_snapshot;
     const movement = await recordMovement(ctx, {
       productId: item.product_id,
@@ -318,6 +348,82 @@ async function applyFinalize(
     });
   }
   return final;
+}
+
+/**
+ * Makine satışı (§5.3, AC-027, AC-039): seçilen stoktaki birim satılır. Birim
+ * hâlâ stokta değilse (aynı birim iki kez satılamaz) satış reddedilir. Aynı
+ * marka + seri numaralı makine kaydı müşteriye ait olarak zaten varsa o kayıt
+ * kullanılır (çift kayıt açılmaz); başka müşteri adınaysa sahiplik geçmişe
+ * yazılarak devredilir; yoksa yeni makine kaydı açılır. Birim SOLD olur ve
+ * makineye bağlanır; maliyet, birimin alış hareketinden alınır.
+ */
+async function sellSerialUnit(
+  ctx: SaleContext,
+  sale: Sale,
+  item: SaleItem,
+  product: Product,
+  note: string
+): Promise<void> {
+  if (!sale.customer_id) throw new SaleRuleError("Makine satışı için müşteri seçin.");
+  const unit = item.serial_unit_id ? await db.product_serial_units.get(item.serial_unit_id) : undefined;
+  if (!unit || unit.product_id !== product.id) throw new SaleRuleError("Seri birim bulunamadı.");
+  if (unit.status !== "IN_STOCK") {
+    throw new SaleRuleError(`“${unitLabel(unit)}” birimi stokta değil (daha önce satılmış olabilir).`);
+  }
+
+  const intake = (await db.stock_movements.where("product_id").equals(product.id).toArray()).find(
+    (m) => m.serial_unit_id === unit.id && m.quantity > 0
+  );
+  const unitCost = intake?.unit_cost ?? product.last_purchase_price ?? item.unit_cost_snapshot;
+
+  // Makine kaydı: mevcutsa kullan, yoksa aç.
+  const saleInfo = { saleId: sale.id, saleDate: sale.sale_date, salePrice: item.line_total };
+  const [existing] = unit.serial_number
+    ? await findMachinesBySerial(ctx.businessId, product.brand, unit.serial_number)
+    : [];
+  let machineId: string;
+  if (existing) {
+    if (existing.customer_id !== sale.customer_id) {
+      await changeMachineOwner(ctx, existing.id, sale.customer_id, `Makine satışı (${sale.document_no})`);
+    }
+    await attachSaleToMachine(ctx, existing.id, saleInfo);
+    machineId = existing.id;
+  } else {
+    const machine = await createMachine(ctx, {
+      customer_id: sale.customer_id,
+      type: product.category || "Makine",
+      brand: product.brand,
+      model: product.model || product.name,
+      serial_number: unit.serial_number,
+      is_temporary: false,
+      sale_id: sale.id,
+      sale_date: sale.sale_date,
+      sale_price: item.line_total,
+    });
+    machineId = machine.id;
+  }
+
+  const movement = await recordMovement(ctx, {
+    productId: product.id,
+    type: "SALE_OUT",
+    quantity: -1,
+    unitCost,
+    serialUnitId: unit.id,
+    sourceType: "SALE",
+    sourceId: sale.id,
+    note,
+  });
+
+  const sold = { ...unit, status: "SOLD" as const, machine_id: machineId, sale_item_id: item.id, updated_at: nowISO() };
+  await db.product_serial_units.put(sold);
+  await enqueue("product_serial_units", unit.id, "UPDATE", serialUnitPayload(sold, true), ctx.deviceCode);
+
+  const next = { ...item, unit_cost_snapshot: unitCost, stock_movement_id: movement.id, machine_id: machineId } as SaleItem & {
+    version?: number;
+  };
+  await db.sale_items.put(next);
+  await enqueue("sale_items", item.id, "UPDATE", itemPayload(next, true), ctx.deviceCode);
 }
 
 export type SaleCreateOptions = {

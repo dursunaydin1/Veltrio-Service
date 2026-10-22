@@ -27,6 +27,9 @@ type DraftLine = {
   discount: string;
   taxMode: TaxMode;
   taxRate: string;
+  /** Seri takipli ürün: her satıra bir seri numarası (boş satır = iç numara) */
+  isSerial: boolean;
+  serial: string;
 };
 
 const fieldMoney = (tl: number) => tl.toFixed(2).replace(".", ",");
@@ -44,6 +47,8 @@ function fromItems(items: PurchaseItem[]): DraftLine[] {
     discount: i.line_discount > 0 ? fieldMoney(i.line_discount) : "",
     taxMode: i.tax_mode as TaxMode,
     taxRate: String(i.tax_rate).replace(".", ","),
+    isSerial: Array.isArray(i.serial_numbers),
+    serial: (i.serial_numbers ?? []).join("\n"),
   }));
 }
 
@@ -56,6 +61,7 @@ function lineTotal(line: DraftLine): Parsed {
   const discount = line.discount.trim() === "" ? 0 : parseMoneyInput(line.discount);
   const rate = parseQuantityInput(line.taxRate);
   if (qty === null || qty <= 0) return { ok: false, error: `“${line.name}”: miktar sıfırdan büyük olmalıdır.` };
+  if (line.isSerial && !Number.isInteger(qty)) return { ok: false, error: `“${line.name}” seri takipli: miktar tam sayı olmalıdır.` };
   if (price === null) return { ok: false, error: `“${line.name}”: birim fiyat geçersiz.` };
   if (discount === null) return { ok: false, error: `“${line.name}”: indirim geçersiz.` };
   if (rate === null || rate > 100) return { ok: false, error: `“${line.name}”: KDV oranı 0-100 olmalıdır.` };
@@ -110,6 +116,8 @@ export function PurchaseForm({
         discount: "",
         taxMode: product.default_tax_mode,
         taxRate: String(product.default_tax_rate).replace(".", ","),
+        isSerial: product.is_serial_tracked,
+        serial: "",
       },
     ]);
     setPickerKey((k) => k + 1);
@@ -143,6 +151,7 @@ export function PurchaseForm({
         discountKurus: l.discount.trim() === "" ? 0 : (parseMoneyInput(l.discount) as number),
         taxMode: l.taxMode,
         taxRate: parseQuantityInput(l.taxRate) as number,
+        serialNumbers: l.isSerial ? l.serial.split("\n").map((x) => x.trim()) : undefined,
       })),
     };
   }
@@ -216,7 +225,7 @@ export function PurchaseForm({
         </>
       ) : (
         <section className="stack stack-md" aria-label="Ürün satırları">
-          <ProductPicker key={pickerKey} value="" onChange={addProduct} label="Ürün ekle" />
+          <ProductPicker key={pickerKey} value="" onChange={addProduct} label="Ürün ekle" includeSerial />
 
           {lines.length > 0 ? (
             <ul className="menu-list" aria-label="Alım satırları">
@@ -256,6 +265,12 @@ export function PurchaseForm({
                       </label>
                     ) : null}
                   </span>
+                  {l.isSerial ? (
+                    <label className="form-group">
+                      <span className="form-label">Seri numaraları (her satıra bir tane; boş bırakılan birim iç numarayla tanınır)</span>
+                      <textarea className="form-input" rows={Math.min(Math.max(Number(l.quantity) || 1, 2), 6)} value={l.serial} onChange={(e) => update(l.key, { serial: e.target.value })} />
+                    </label>
+                  ) : null}
                   <button type="button" className="btn btn-ghost btn-sm" style={{ alignSelf: "flex-start" }} onClick={() => setLines((c) => c.filter((x) => x.key !== l.key))}>
                     Satırı kaldır
                   </button>

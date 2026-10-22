@@ -187,9 +187,10 @@ describe("stok kuralları (ST-002, ST-004, TC-011)", () => {
     expect(move?.note).toMatch(/Mal yolda/);
   });
 
-  it("seri takipli ve pasif ürün satılamaz", async () => {
+  it("seri takipli ürün birim seçilmeden / müşterisiz satılamaz; pasif ürün satılamaz", async () => {
     const machine = (await createProduct(ctx, { ...productBase, name: "Makine", code: "M1", is_serial_tracked: true })).id;
-    await expect(createSale(ctx, { lines: [line(machine, 1, 100)] }, { finalize: false })).rejects.toThrow(/seri takipli/);
+    await expect(createSale(ctx, { lines: [line(machine, 1, 100)] }, { finalize: false })).rejects.toThrow(/müşteri seçin/);
+    await expect(createSale(ctx, { customerId: ali, lines: [line(machine, 1, 100)] }, { finalize: false })).rejects.toThrow(/birimi seçin/);
     await db.products.update(misina, { archived_at: new Date().toISOString() });
     await expect(createSale(ctx, { lines: [line(misina, 1, 100)] }, { finalize: false })).rejects.toThrow(/pasif/);
   });

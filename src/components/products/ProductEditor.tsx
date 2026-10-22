@@ -6,6 +6,7 @@ import { useLiveQuery } from "dexie-react-hooks";
 import { db } from "@/lib/db";
 import { useBusinessContext } from "@/hooks/useBusinessContext";
 import { ProductForm } from "@/components/products/ProductForm";
+import { SerialUnitsPanel } from "@/components/products/SerialUnitsPanel";
 import { StockPanel } from "@/components/products/StockPanel";
 import { setProductArchived } from "@/lib/products/service";
 
@@ -50,7 +51,7 @@ export function ProductEditor({ id }: { id: string }) {
         {archived ? <span className="badge badge-gray">Pasif</span> : null}
       </div>
 
-      <StockPanel product={product} />
+      {product.is_serial_tracked ? <SerialUnitsPanel product={product} /> : <StockPanel product={product} />}
 
       <ProductForm key={`${product.id}:${product.version ?? 0}`} product={product} />
 

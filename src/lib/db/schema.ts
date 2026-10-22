@@ -256,6 +256,8 @@ export interface PurchaseItem {
   tax_rate: number;
   line_total: number;
   stock_movement_id?: string;
+  /** Seri takipli ürün satırında girilen seri numaraları (boş girilenler iç numarayla tanınır) */
+  serial_numbers?: string[] | null;
   created_at: string;
 }
 

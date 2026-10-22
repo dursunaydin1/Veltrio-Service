@@ -11,7 +11,7 @@ import { MachineForm } from "@/components/machines/MachineForm";
 import { machineTitle } from "@/components/machines/MachineList";
 import { changeMachineOwner, setMachineArchived } from "@/lib/machines/service";
 import { StatusBadge } from "@/components/services/StatusBadge";
-import { formatDate, formatDateTime } from "@/lib/utils";
+import { formatCurrency, formatDate, formatDateTime } from "@/lib/utils";
 import type { Machine } from "@/types";
 
 /** Makine profili: sahibi, bilgiler, sahiplik geçmişi, sahip değiştirme, arşivleme (Adım 3.3). */
@@ -68,6 +68,13 @@ export function MachineEditor({ id }: { id: string }) {
           {machine.type} · İç no: <strong>{machine.internal_number ?? "—"}</strong>
           {machine.serial_number ? ` · Seri no: ${machine.serial_number}` : ""}
         </p>
+        {machine.sale_id ? (
+          <p>
+            Satış: <Link href={`/sales/${machine.sale_id}`}>satış belgesi</Link>
+            {machine.sale_date ? ` · ${formatDate(machine.sale_date)}` : ""}
+            {machine.sale_price != null ? ` · ${formatCurrency(machine.sale_price)}` : ""}
+          </p>
+        ) : null}
         <p>
           Sahibi:{" "}
           {owner ? <Link href={`/customers/${owner.id}`}>{owner.name}</Link> : "—"}

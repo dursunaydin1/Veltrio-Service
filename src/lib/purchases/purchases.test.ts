@@ -189,12 +189,7 @@ describe("doğrulamalar", () => {
     await expect(createPurchase(ctx, input({ lines: [line(buji, 0, 100)] }), { receive: false })).rejects.toThrow(/Miktar/);
   });
 
-  it("seri takipli ve pasif ürünler alıma eklenemez; hiçbir şey yazılmaz", async () => {
-    const machine = (
-      await createProduct(ctx, { name: "Makine", code: "M1", unit: "ADET", is_serial_tracked: true, default_sale_price: 1, default_tax_mode: "NONE", default_tax_rate: 0 })
-    ).id;
-    await expect(createPurchase(ctx, input({ lines: [line(machine, 1, 100)] }), { receive: true })).rejects.toThrow(/seri takipli/);
-
+  it("pasif ürün alıma eklenemez; hiçbir şey yazılmaz", async () => {
     await db.products.update(zincir, { archived_at: new Date().toISOString() });
     await expect(createPurchase(ctx, input({ lines: [line(zincir, 1, 100)] }), { receive: true })).rejects.toThrow(/pasif/);
 

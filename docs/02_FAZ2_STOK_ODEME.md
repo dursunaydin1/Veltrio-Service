@@ -40,13 +40,15 @@ Servis ve satış modülleri bu fazda kurulan ürün kataloğu, stok hareketi ve
 ### ADIM 2.2 — Seri Takipli Ürün (ProductSerialUnit)
 
 **Görevler:**
-- [ ] `ProductSerialUnit` tablosunu oluştur:
+- [x] `ProductSerialUnit` tablosunu oluştur:
   - id, business_id, product_id, serial_number (nullable), internal_number (SB-...), status (IN_STOCK / SOLD / DAMAGED / RETURNED_TO_SUPPLIER)
   - purchase_item_id, sale_item_id, machine_id
-- [ ] `tracks_serial = true` olan ürünlerde satın alma sırasında birim kayıtları oluşturulur
-- [ ] Seri numarası satın alma sırasında veya sonradan girilebilir; girilmezse sistem `SB-[cihaz_kodu]-[sıra]` üretir
-- [ ] Stok miktarı = IN_STOCK birim sayısı (ST-012)
-- [ ] Satışta belirli bir birim seçilir; aynı birim iki kez satılamaz
+- [x] `tracks_serial = true` olan ürünlerde satın alma sırasında birim kayıtları oluşturulur
+- [x] Seri numarası satın alma sırasında veya sonradan girilebilir; girilmezse sistem `SB-[cihaz_kodu]-[sıra]` üretir
+- [x] Stok miktarı = IN_STOCK birim sayısı (ST-012)
+- [x] Satışta belirli bir birim seçilir; aynı birim iki kez satılamaz
+
+> Uygulandı: migration 018, `src/lib/serial/service.ts` (`createSerialUnit`, `addOpeningSerialUnit`), alımda seri numarası girişi, ürün sayfasında **Seri birimler** paneli. Seri takipli ürünün her hareketi bir birime bağlı ve ±1'dir; elle stok girişi/düzeltme kapalıdır. **Açık:** seri numarasının sonradan girilmesi / düzeltilmesi, tedarikçiye iade (`RETURNED_TO_SUPPLIER`, Faz 5).
 
 **İlgili PRD:** §7 (ProductSerialUnit), ST-012  
 **İlgili FR:** FR-031

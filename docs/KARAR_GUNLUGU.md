@@ -5,6 +5,14 @@
 
 ## 2026-10-22
 
+### K-028 · Seri takipli ürünler: birim kaydı, makine satışı ve kuyruk döngüsünün kırılması
+- **Model:** Seri takipli ürünün her fiziksel birimi `product_serial_units` kaydıdır (seri no + iç numara `SB-…`). Stok yine hareket defterinden hesaplanır; her birim için ±1'lik, `serial_unit_id`'li hareket yazılır (ST-012). Bu hareketler dışında seri takipli ürüne elle stok hareketi yapılamaz.
+- **Alım:** Satırda seri numaraları girilir (taslakta `purchase_items.serial_numbers`); teslim alınınca her adet ayrı birim ve +1 hareket olur, birim maliyeti satır tutarından. Aynı üründe tekrar eden seri numarası (harf/Türkçe karakter farkı olsa da) reddedilir ve işlem geri alınır.
+- **Satış:** Makine satışında müşteri ve stoktaki bir birim zorunludur; aynı birim iki kez satılamaz (kesinleştirmede tekrar kontrol edilir, taslak birimi ayırmaz). Kesinleşince birim `SOLD` olur ve makine kaydı bağlanır: müşteriye ait aynı marka+seri no'lu kayıt varsa o kullanılır; başka müşteriye aitse sahiplik geçmişe yazılarak devredilir; yoksa yeni kayıt açılır (satış belgesi, tarihi ve fiyatı makinede saklanır).
+- **Eşitleme sırası:** `purchase_item_id`, `sale_item_id` (birimde) ve `machines.sale_id` yabancı anahtar değildir: birim → alım satırı → stok hareketi → birim döngüsü ve "makine satıştan önce gider" kuralı yabancı anahtarlarla çelişirdi. Bağlantı bilgi amaçlıdır.
+- **İşlem kapsamı:** `recordMovement` seri birim tablosunu yalnızca birimli harekette işleme katar; yoksa birimsiz çağrılar (satış, servis parçası) bu tabloyu içermeyen dış işlemlerde hata verirdi.
+- **Etki:** migration 018, `src/lib/serial/*`, `purchases/service.ts`, `sales/service.ts`, `machines/service.ts`, `SerialUnitsPanel`, `SerialUnitSelect`.
+
 ### K-027 · Satış: tek hesap fonksiyonu, belge indirimi satıra yazılır, kesinleştirme tek işlem
 - **Tutarlar:** Hesap `computeSaleTotals` (saf) içinde yapılır; hem servis hem ekranın canlı toplamı bunu kullanır, bu yüzden görünen toplam ile kaydedilen toplam aynıdır. Satır indirimi + belge indirimi payı → KDV → satır toplamı → belge toplamı (yuvarlanmış satır toplamlarının toplamı).
 - **Belge indirimi:** Satırların indirim sonrası tutarına orantılı, en büyük kalan yöntemiyle (toplam kuruşu tam korur) dağıtılır ve her satırın `discount_amount`'ına eklenir; ayrı bir "belge indirimi" sütunu yok, dağıtım satırlarda kayıt altındadır (plan: "hangi satırlara dağıtıldığı kayıt altında").

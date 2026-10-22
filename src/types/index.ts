@@ -107,6 +107,10 @@ export interface Machine {
   qr_code?: string;
   /** MK-[cihaz_kodu]-[sıra]; QR ve kısa kimlik için */
   internal_number?: string;
+  /** Makine satışıyla oluştuysa satış belgesi, tarihi ve fiyatı (K-028) */
+  sale_id?: UUID;
+  sale_date?: ISODateTimeString;
+  sale_price?: number;
   notes?: string;
   /** Sunucu kayıt sürümü; güncellemede çakışma tespiti için gönderilir. */
   version?: number;
@@ -187,15 +191,21 @@ export interface Product {
   updated_at: ISODateTimeString;
 }
 
-export type SerialUnitStatus = "IN_STOCK" | "SOLD" | "DAMAGED" | "RETURNED";
+export type SerialUnitStatus = "IN_STOCK" | "SOLD" | "DAMAGED" | "RETURNED" | "RETURNED_TO_SUPPLIER";
 
 export interface ProductSerialUnit {
   id: UUID;
   business_id: UUID;
   product_id: UUID;
   serial_number?: string;
+  /** SB-[cihaz_kodu]-[sıra]; seri numarası olmasa da birimi tanımlar */
+  internal_number?: string;
   status: SerialUnitStatus;
   machine_id?: UUID;
+  purchase_item_id?: UUID;
+  sale_item_id?: UUID;
+  /** Sunucu kayıt sürümü; güncellemede çakışma tespiti için gönderilir. */
+  version?: number;
   created_at: ISODateTimeString;
   updated_at: ISODateTimeString;
 }

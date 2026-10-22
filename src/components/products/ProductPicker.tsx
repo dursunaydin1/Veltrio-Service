@@ -18,10 +18,13 @@ export function ProductPicker({
   value,
   onChange,
   label = "Ürün",
+  includeSerial = false,
 }: {
   value: string;
   onChange: (product: Product) => void;
   label?: string;
+  /** true: seri takipli (makine) ürünler de listelenir (satış, alım) */
+  includeSerial?: boolean;
 }) {
   const businessId = useSessionStore((s) => s.business?.id);
   const balances = useStockBalances();
@@ -34,10 +37,10 @@ export function ProductPicker({
         ? db.products
             .where("business_id")
             .equals(businessId)
-            .filter((p) => !p.archived_at && !p.is_serial_tracked)
+            .filter((p) => !p.archived_at && (includeSerial || !p.is_serial_tracked))
             .toArray()
         : [],
-    [businessId]
+    [businessId, includeSerial]
   );
 
   const selected = products?.find((p) => p.id === value);

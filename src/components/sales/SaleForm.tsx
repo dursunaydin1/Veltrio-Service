@@ -6,6 +6,7 @@ import { useServiceContext } from "@/hooks/useServiceContext";
 import { useStockBalances } from "@/hooks/useStock";
 import { CustomerPicker } from "@/components/customers/CustomerPicker";
 import { ProductPicker } from "@/components/products/ProductPicker";
+import { SerialUnitSelect } from "@/components/products/SerialUnitSelect";
 import { parseMoneyInput, parseQuantityInput } from "@/lib/calc";
 import { PAYMENT_METHOD_LABELS } from "@/lib/finance/service";
 import {
@@ -30,6 +31,9 @@ type DraftLine = {
   discount: string;
   taxMode: TaxMode;
   taxRate: string;
+  /** Makine satışı: satılacak stoktaki birim */
+  isSerial: boolean;
+  serialUnitId: string;
 };
 
 const fieldMoney = (tl: number) => tl.toFixed(2).replace(".", ",");
@@ -48,6 +52,8 @@ function fromItems(items: SaleItem[]): DraftLine[] {
     discount: i.discount_amount > 0 ? fieldMoney(i.discount_amount) : "",
     taxMode: i.tax_mode as TaxMode,
     taxRate: String(i.tax_rate).replace(".", ","),
+    isSerial: !!i.serial_unit_id,
+    serialUnitId: i.serial_unit_id ?? "",
   }));
 }
 
@@ -112,6 +118,8 @@ export function SaleForm({
         discount: "",
         taxMode: product.default_tax_mode,
         taxRate: String(product.default_tax_rate).replace(".", ","),
+        isSerial: product.is_serial_tracked,
+        serialUnitId: "",
       },
     ]);
     setPickerKey((k) => k + 1);
@@ -152,6 +160,9 @@ export function SaleForm({
     if (lineError && !lineError.ok) return lineError.error;
     if (docDiscountKurus === null) return "Belge indirimi geçerli bir tutar olmalıdır.";
     if (totalError) return totalError;
+    const noUnit = lines.find((l) => l.isSerial && !l.serialUnitId);
+    if (noUnit) return `“${noUnit.name}” için satılacak birimi seçin.`;
+    if (lines.some((l) => l.isSerial) && !customerId) return "Makine satışı için müşteri seçin.";
     const ok = parsed as Extract<ParsedLine, { ok: true }>[];
     return {
       customerId: customerId || undefined,
@@ -165,6 +176,7 @@ export function SaleForm({
         discountKurus: ok[i].discountKurus,
         taxMode: l.taxMode,
         taxRate: ok[i].taxRate,
+        serialUnitId: l.isSerial ? l.serialUnitId : undefined,
       })),
     };
   }
@@ -212,25 +224,28 @@ export function SaleForm({
       }}
       noValidate
     >
-      <ProductPicker key={pickerKey} value="" onChange={addProduct} label="Ürün ekle" />
+      <ProductPicker key={pickerKey} value="" onChange={addProduct} label="Ürün ekle" includeSerial />
 
       {lines.length > 0 ? (
         <ul className="menu-list" aria-label="Satış satırları">
           {lines.map((l, i) => {
             const p = parsed[i];
             const available = balances?.get(l.productId)?.available ?? 0;
-            const short = p.ok && p.quantity > available;
+            const short = !l.isSerial && p.ok && p.quantity > available;
             return (
               <li key={l.key} style={{ display: "flex", flexDirection: "column", gap: 8, padding: "8px 0" }}>
                 <span className="row row-between">
                   <strong>{l.name}</strong>
                   <span className="badge badge-gray">Stok: {formatQuantity(available)} {l.unit}</span>
                 </span>
+                {l.isSerial ? (
+                  <SerialUnitSelect productId={l.productId} value={l.serialUnitId} onChange={(id) => update(l.key, { serialUnitId: id, quantity: "1" })} />
+                ) : null}
                 {short ? <span className="badge badge-red" role="status">Stok yetersiz</span> : null}
                 <span className="row row-gap-sm">
                   <label className="form-group" style={{ flex: 1 }}>
                     <span className="form-label">Miktar</span>
-                    <input className="form-input" inputMode="decimal" value={l.quantity} onChange={(e) => update(l.key, { quantity: e.target.value })} />
+                    <input className="form-input" inputMode="decimal" value={l.quantity} onChange={(e) => update(l.key, { quantity: e.target.value })} disabled={l.isSerial} />
                   </label>
                   <label className="form-group" style={{ flex: 1 }}>
                     <span className="form-label">Birim fiyat (₺)</span>

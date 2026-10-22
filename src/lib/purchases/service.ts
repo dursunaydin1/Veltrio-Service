@@ -4,6 +4,8 @@ import { calcLine, fromKurus, toKurus } from "@/lib/calc";
 import { recordSupplierPayment } from "@/lib/finance/service";
 import { nextDocumentNo } from "@/lib/numbering";
 import { setLastPurchasePrice } from "@/lib/products/service";
+import { createSerialUnit } from "@/lib/serial/service";
+import { foldText } from "@/lib/utils/search";
 import { recordMovement } from "@/lib/stock/service";
 import { writeAuditLog } from "@/lib/sync/audit";
 import { enqueue } from "@/lib/sync/queue";
@@ -27,6 +29,11 @@ export type PurchaseLineInput = {
   discountKurus?: number;
   taxMode: TaxMode;
   taxRate: number;
+  /**
+   * Seri takipli ürünlerde seri numaraları (en fazla miktar kadar; girilmeyen birim
+   * iç numarasıyla (SB-…) tanınır). Teslim alınınca her biri ayrı birim olur.
+   */
+  serialNumbers?: string[];
 };
 
 export type PurchaseInput = {
@@ -71,6 +78,7 @@ const ITEM_COLUMNS = [
   "tax_rate",
   "line_total",
   "stock_movement_id",
+  "serial_numbers",
   "created_at",
 ] as const;
 
@@ -103,6 +111,7 @@ function tables() {
     db.suppliers,
     db.products,
     db.stock_movements,
+    db.product_serial_units,
     db.payments,
     db.counters,
     db.sync_queue,
@@ -124,12 +133,25 @@ async function buildItems(
     const product = await db.products.get(line.productId);
     if (!product || product.business_id !== ctx.businessId) throw new PurchaseRuleError("Ürün bulunamadı.");
     if (product.archived_at) throw new PurchaseRuleError(`“${product.name}” pasif ürün; alıma eklenemez.`);
-    if (product.is_serial_tracked) {
-      throw new PurchaseRuleError(
-        `“${product.name}” seri takipli bir ürün; seri takipli (makine) alımı makine satışı adımında eklenecek.`
-      );
-    }
     if (!(line.quantity > 0)) throw new PurchaseRuleError("Miktar sıfırdan büyük olmalıdır.");
+
+    // Seri takipli ürün: tam sayı adet, seri numaraları benzersiz ve adetten fazla değil.
+    let serialNumbers: string[] | undefined;
+    if (product.is_serial_tracked) {
+      if (!Number.isInteger(line.quantity)) {
+        throw new PurchaseRuleError(`“${product.name}” seri takipli; miktar tam sayı olmalıdır.`);
+      }
+      serialNumbers = (line.serialNumbers ?? []).map((s) => s.trim());
+      if (serialNumbers.length > line.quantity) {
+        throw new PurchaseRuleError(`“${product.name}”: ${line.quantity} adet için en fazla ${line.quantity} seri numarası girilebilir.`);
+      }
+      const given = serialNumbers.filter(Boolean).map(foldText);
+      if (new Set(given).size !== given.length) {
+        throw new PurchaseRuleError(`“${product.name}”: aynı seri numarası birden fazla girilmiş.`);
+      }
+    } else if (line.serialNumbers?.some((s) => s.trim())) {
+      throw new PurchaseRuleError(`“${product.name}” seri takipli bir ürün değil; seri numarası girilemez.`);
+    }
 
     let lineKurus: number;
     try {
@@ -158,6 +180,7 @@ async function buildItems(
       tax_mode: line.taxMode,
       tax_rate: line.taxRate,
       line_total: fromKurus(lineKurus),
+      serial_numbers: serialNumbers ?? null,
       // Satır sırası korunsun diye her satıra 1 ms eklenir (aynı anda eklenen kayıtların sırası belirsizdir).
       created_at: new Date(Date.parse(createdAt) + index).toISOString(),
     });
@@ -243,6 +266,26 @@ async function applyReceive(ctx: BusinessContext, purchase: Purchase): Promise<P
   for (const item of items) {
     if (!item.product_id) continue;
     const unitCost = Math.round((item.line_total / item.quantity) * 10000) / 10000;
+    const product = await db.products.get(item.product_id);
+
+    if (product?.is_serial_tracked) {
+      // Her fiziksel birim ayrı kayıt + ayrı +1 hareket (ST-012).
+      for (let n = 0; n < item.quantity; n++) {
+        await createSerialUnit(ctx, {
+          productId: item.product_id,
+          serialNumber: item.serial_numbers?.[n] || undefined,
+          unitCost,
+          type: "PURCHASE_IN",
+          purchaseItemId: item.id,
+          sourceType: "PURCHASE",
+          sourceId: purchase.id,
+          note: purchase.document_no,
+        });
+      }
+      await setLastPurchasePrice(ctx, item.product_id, unitCost);
+      continue;
+    }
+
     const movement = await recordMovement(ctx, {
       productId: item.product_id,
       type: "PURCHASE_IN",

@@ -60,13 +60,17 @@
 ### ADIM 4.3 — Makine Satışı (Seri Takipli)
 
 **Görevler:**
-- [ ] Seri takipli makine satışında stoktaki belirli bir ProductSerialUnit seçilir
-- [ ] Satış kesinleştiğinde:
+- [x] Seri takipli makine satışında stoktaki belirli bir ProductSerialUnit seçilir
+- [x] Satış kesinleştiğinde:
   - Seçilen birim → SOLD durumuna geçer
   - İlgili Machine kaydı müşteriyle ilişkilendirilir
-- [ ] Makine kaydı satıştan önce mevcutsa aynı kayıt kullanılır; çift kayıt oluşturulmaz (§5.3)
-- [ ] Seri numarası olmayan makinelerde birim kaydı yine oluşur; sistem iç numara üretir
-- [ ] Aynı birim iki kez satılamaz; çevrimdışı çift satış eşitlemede çakışma kuyruğuna düşer (AC-039, TC-040)
+- [x] Makine kaydı satıştan önce mevcutsa aynı kayıt kullanılır; çift kayıt oluşturulmaz (§5.3)
+- [x] Seri numarası olmayan makinelerde birim kaydı yine oluşur; sistem iç numara üretir
+- [x] Aynı birim iki kez satılamaz; çevrimdışı çift satış eşitlemede çakışma kuyruğuna düşer (AC-039, TC-040)
+
+> Uygulandı: `sellSerialUnit` (`sales/service.ts`), satış formunda birim seçimi, makine sayfasında satış bilgisi. Müşteri zorunlu; makine kaydı müşteriye aitse yeniden kullanılır, başka müşteriye aitse sahiplik geçmişe yazılarak devredilir, yoksa açılır (K-028). Birim maliyeti birimin alış hareketinden alınır. **Açık (AC-039/TC-040):** iki cihazın çevrimdışı aynı birimi satması durumunda eşitlemedeki çakışmanın kullanıcıya gösterilmesi ve çözümü (çakışma ekranı, Faz 2.10/6.7); birim durum güncellemesi sürüm kontrolüyle zaten reddedilir.
+
+> Not: aynı cihazda / çevrimiçi çift satış engellenir (testli); çevrimdışı çift satışın eşitlemede çakışma kuyruğuna düşme kısmı yukarıdaki açık maddedir.
 
 **İlgili FR:** FR-014, FR-029  
 **İlgili AC:** AC-027, AC-039  
@@ -129,7 +133,7 @@
 - [x] Belge numarası: `AL-[cihaz_kodu]-[yıl]-[sıra]`
 - [x] KDV bilgisi yalnızca bilgi amaçlı; indirilecek KDV hesabı yapılmaz
 
-> Uygulandı: migration 016 (`supplier_ref`, `received_at`, `cancel_reason`), `src/lib/purchases/service.ts` (`createPurchase`, `updateDraftPurchase`, `receivePurchase`, `cancelDraftPurchase`, `payPurchase`, `getPurchaseBalance`), `/purchases`, `/purchases/new`, `/purchases/[id]`, tedarikçi sayfasında alım geçmişi. Teslim alma: PURCHASE_IN hareketi + ürünün son alış fiyatı + tedarikçi borcu, tek işlemde. **Açık:** seri takipli ürün alımı ve `ProductSerialUnit` kayıtları (makine satışı adımı, 4.3 / 2.2) — şimdilik seri takipli ürün alıma eklenemez.
+> Uygulandı: migration 016 (`supplier_ref`, `received_at`, `cancel_reason`), `src/lib/purchases/service.ts` (`createPurchase`, `updateDraftPurchase`, `receivePurchase`, `cancelDraftPurchase`, `payPurchase`, `getPurchaseBalance`), `/purchases`, `/purchases/new`, `/purchases/[id]`, tedarikçi sayfasında alım geçmişi. Teslim alma: PURCHASE_IN hareketi + ürünün son alış fiyatı + tedarikçi borcu, tek işlemde. Seri takipli ürün alımı da desteklenir: her adet ayrı birim olur, seri numaraları satırda girilir (K-028).
 
 **İlgili FR:** FR-015  
 **İlgili AC:** AC-007
