@@ -6,6 +6,8 @@ import { useLiveQuery } from "dexie-react-hooks";
 import { Plus } from "lucide-react";
 import { db } from "@/lib/db";
 import { useSessionStore } from "@/stores/session";
+import { useStockBalances } from "@/hooks/useStock";
+import { EMPTY_BALANCE } from "@/lib/stock/ledger";
 import { formatCurrency, formatNumber } from "@/lib/utils";
 import { unitLabel } from "@/lib/products/constants";
 import { isCriticalStock } from "@/lib/products/stock";
@@ -27,6 +29,7 @@ export function ProductList() {
   const businessId = useSessionStore((s) => s.business?.id);
   const [query, setQuery] = useState("");
   const [showArchived, setShowArchived] = useState(false);
+  const balances = useStockBalances();
 
   const products = useLiveQuery(
     () => (businessId ? db.products.where("business_id").equals(businessId).toArray() : []),
@@ -77,7 +80,9 @@ export function ProductList() {
         </div>
       ) : (
         <ul className="menu-list" aria-label="Ürünler">
-          {visible.map((p) => (
+          {visible.map((p) => {
+            const balance = balances?.get(p.id) ?? EMPTY_BALANCE;
+            return (
             <li key={p.id}>
               <Link href={`/products/${p.id}`} style={{ alignItems: "flex-start", flexDirection: "column", gap: 4 }}>
                 <span className="row row-between" style={{ width: "100%", gap: 8 }}>
@@ -91,14 +96,20 @@ export function ProductList() {
                 </span>
                 <span className="row row-gap-sm" style={{ flexWrap: "wrap" }}>
                   <span className="badge badge-gray">
-                    Stok: {formatNumber(p.stock_available)} {unitLabel(p.unit)}
+                    Stok: {formatNumber(balance.available)} {unitLabel(p.unit)}
                   </span>
-                  {isCriticalStock(p) ? <span className="badge badge-red">Kritik stok</span> : null}
+                  {balance.damaged > 0 ? (
+                    <span className="badge badge-gray">Hasarlı: {formatNumber(balance.damaged)}</span>
+                  ) : null}
+                  {isCriticalStock({ stock_available: balance.available, critical_stock_level: p.critical_stock_level }) ? (
+                    <span className="badge badge-red">Kritik stok</span>
+                  ) : null}
                   {p.archived_at ? <span className="badge badge-gray">Pasif</span> : null}
                 </span>
               </Link>
             </li>
-          ))}
+            );
+          })}
         </ul>
       )}
     </section>

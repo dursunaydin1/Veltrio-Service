@@ -5,6 +5,13 @@
 
 ## 2026-10-22
 
+### K-017 · Stok: bakiye hareket defterinden hesaplanır; `quantity_before/after` yok
+- **Plan:** Her harekette önceki/sonraki miktar saklanacak; `Product.stock_available` bakiye olarak kullanılacak (Adım 2.3).
+- **Sorun:** İki cihaz çevrimdışı hareket üretirse "önceki/sonraki" değerleri yerelde doğru görünür ama birleşince yanlış olur. Ürün satırındaki bakiye de eşitlemede ezilebilir.
+- **Karar:** Bakiye daima hareketlerin toplamıdır (`ledger.ts`, tam sayı birimlerle); ekranda gösterilen budur, böylece eşitlenmemiş yerel hareketler de anında yansır. `products.stock_available/damaged` sunucuda hareket eklenince tetikleyiciyle güncellenen bir özet olarak kalır (raporlar ve ileride tutarlılık denetimi için). Yalnızca stok değişen ürün güncellemesi `version` artırmaz; aksi halde her hareket ürünü düzenleyen cihazda sahte çakışma üretirdi.
+- **Kovalar:** `bucket` = `AVAILABLE | DAMAGED`; hasarlı stok kritik stok hesabına girmez ve hiç eksiye düşmez.
+- **Etki:** migration 009, `src/lib/stock/*`, `StockPanel.tsx`, `ProductList.tsx`.
+
 ### K-015 · Kuyruk birleştirme ve "stok alanı sunucuya yazılmaz" kuralı
 - **Sorun 1:** Çevrimdışıyken aynı kaydı iki kez düzenlemek kuyrukta aynı sürümden iki UPDATE oluşturur; birincisi gidince sunucu sürümü artar, ikincisi sahte çakışma olurdu.
 - **Karar 1:** `enqueue`, aynı kayda ait bekleyen (PENDING) değişikliği yeni kayıt açmadan birleştirir (INSERT+UPDATE → INSERT; INSERT+DELETE → ikisi de silinir; UPDATE+UPDATE → ilk `version` korunur; UPDATE+DELETE → DELETE).

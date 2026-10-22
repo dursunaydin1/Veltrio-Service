@@ -29,6 +29,10 @@ export interface BusinessSettings {
   currency: "TRY";
   service_approval_threshold: number; // Onay gerektiren üst limit (TL)
   default_service_reminder_days: number; // Teslim hatırlatması
+  /** Stoktan fazla çıkışa izin verilsin mi? Varsayılan false (ST-002). */
+  allow_negative_stock?: boolean;
+  /** Çevrimdışı çalışmanın azami günü (Adım 1.7). */
+  max_offline_days?: number;
   locale: "tr-TR";
 }
 
@@ -188,7 +192,11 @@ export type StockMovementType =
   | "ADJUSTMENT_OUT"
   | "DAMAGED_IN"
   | "DAMAGED_DISPOSE"
-  | "TRANSFER";
+  | "TRANSFER"
+  | "CANCEL_REVERSAL";
+
+/** Stok kovası: satılabilir veya hasarlı (ST-011). */
+export type StockBucket = "AVAILABLE" | "DAMAGED";
 
 export interface StockMovement {
   id: UUID;
@@ -196,7 +204,10 @@ export interface StockMovement {
   product_id: UUID;
   serial_unit_id?: UUID;
   movement_type: StockMovementType;
+  bucket: StockBucket;
   quantity: number; // + giriş, - çıkış
+  /** Bu hareketin düzelttiği hareket (ters kayıtlarda) */
+  reversal_of_id?: UUID;
   unit_cost?: number;
   source_type?: string; // 'SERVICE' | 'SALE' | 'PURCHASE' | 'ADJUSTMENT' | ...
   source_id?: UUID;

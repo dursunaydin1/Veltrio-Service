@@ -13,12 +13,14 @@ Bu dizin Supabase PostgreSQL migration dosyalarını içerir.
 | 005 | `005_sync_changes.sql` | Cihazlar arası artımlı eşitleme günlüğü ve kayıt tetikleyicileri |
 | 006 | `006_versioning_and_audit_sync.sql` | Kayıt sürümü (`version`), audit log eşitleme, ayar varsayılanları |
 | 007 | `007_register_device.sql` | Sunucu tarafı cihaz kaydı (`register_device`), cihaz tablosu yetki sıkılaştırması |
+| 008 | `008_product_catalog_fields.sql` | Ürün marka, model, raf ve uyumlu model alanları |
+| 009 | `009_stock_ledger.sql` | Stok hareketi kovası/ters kaydı, ürün stok özeti tetikleyicisi |
 
 ## Supabase Dashboard'dan Uygulama
 
 1. [Supabase Dashboard](https://app.supabase.com) → Projenizi seçin
 2. **SQL Editor** sekmesine girin
-3. Migration dosyalarını **sırasıyla** çalıştırın (001 → 002 → 003 → 004 → 005 → 006 → 007)
+3. Migration dosyalarını **sırasıyla** çalıştırın (001 → 002 → 003 → 004 → 005 → 006 → 007 → 008 → 009)
 
 ## Supabase CLI ile Uygulama
 

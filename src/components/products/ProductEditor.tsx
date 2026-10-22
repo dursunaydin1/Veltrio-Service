@@ -6,6 +6,7 @@ import { useLiveQuery } from "dexie-react-hooks";
 import { db } from "@/lib/db";
 import { useProductContext } from "@/hooks/useProductContext";
 import { ProductForm } from "@/components/products/ProductForm";
+import { StockPanel } from "@/components/products/StockPanel";
 import { setProductArchived } from "@/lib/products/service";
 
 /** Ürün düzenleme sayfasının içeriği: form + pasifleştirme / yeniden etkinleştirme. */
@@ -48,6 +49,8 @@ export function ProductEditor({ id }: { id: string }) {
         <h1>{product.name}</h1>
         {archived ? <span className="badge badge-gray">Pasif</span> : null}
       </div>
+
+      <StockPanel product={product} />
 
       <ProductForm key={`${product.id}:${product.version ?? 0}`} product={product} />
 

@@ -56,18 +56,20 @@ Servis ve satış modülleri bu fazda kurulan ürün kataloğu, stok hareketi ve
 ### ADIM 2.3 — Stok Hareketi (StockMovement)
 
 **Görevler:**
-- [ ] `StockMovement` tablosunu oluştur:
+- [x] `StockMovement` tablosunu oluştur:
   - id, business_id, product_id, serial_unit_id, bucket (AVAILABLE / DAMAGED)
   - movement_type, quantity_delta, quantity_before, quantity_after, unit
   - unit_cost_snapshot, source_type, source_id, reason, occurred_at, device_id, reversal_of_id
-- [ ] `movement_type` değerleri: PURCHASE_IN, SALE_OUT, SERVICE_USE, RETURN_IN, ADJUSTMENT, CANCEL_REVERSAL, DAMAGED_TRANSFER, DAMAGED_DISPOSE, OPENING
-- [ ] Stok bakiyesi hareketlerden yeniden hesaplanabilir olmalı (ST-013)
+- [x] `movement_type` değerleri: PURCHASE_IN, SALE_OUT, SERVICE_USE, RETURN_IN, ADJUSTMENT, CANCEL_REVERSAL, DAMAGED_TRANSFER, DAMAGED_DISPOSE, OPENING
+- [x] Stok bakiyesi hareketlerden yeniden hesaplanabilir olmalı (ST-013)
 - [ ] Fark bulunursa hareketler esas alınır; audit log'a yazılır
 - [ ] **Zamanlar:**
   - Satış stoğu → satış FINAL olduğunda
   - Servis stoğu → ServicePart.used_quantity > 0 olduğunda
   - Satın alma stoğu → Purchase RECEIVED olduğunda
   - DRAFT belge stok/finans hareketi üretmez (ST-006)
+
+> Uygulandı: migration 009 (`bucket`, `reversal_of_id`, `CANCEL_REVERSAL`, sunucuda stok özeti tetikleyicisi), `src/lib/stock/` (`ledger.ts` bakiye, `service.ts` `recordMovement/addStock/adjustStock`). `quantity_before/after` bilerek yok (K-017). Açık: fark bulunursa audit log'a yazan yeniden hesaplama denetimi (Faz 7, TC-054) ve satış/servis/satın alma zamanları (Faz 3-4, aynı `recordMovement` çekirdeğiyle).
 
 **İlgili PRD:** ST-005, ST-006  
 **İlgili FR:** FR-012, FR-036  
@@ -81,14 +83,16 @@ Servis ve satış modülleri bu fazda kurulan ürün kataloğu, stok hareketi ve
 ### ADIM 2.4 — Negatif Stok ve Kritik Stok Kuralları
 
 **Görevler:**
-- [ ] Negatif stok varsayılan olarak engellendi (ST-002)
-- [ ] Kullanılabilir stok = eşitlenmiş + yerel bekleyen hareketler dahil satılabilir miktar
-- [ ] Negatif stok denemesinde: uyarı + işlem engeli
-- [ ] İşletme ayarıyla negatif stoka izin verilirse: kullanıcı onayı + neden kaydı + kritik uyarı (ST-004)
+- [x] Negatif stok varsayılan olarak engellendi (ST-002)
+- [x] Kullanılabilir stok = eşitlenmiş + yerel bekleyen hareketler dahil satılabilir miktar
+- [x] Negatif stok denemesinde: uyarı + işlem engeli
+- [x] İşletme ayarıyla negatif stoka izin verilirse: kullanıcı onayı + neden kaydı + kritik uyarı (ST-004)
 - [ ] **Kritik stok:** AVAILABLE miktar critical_stock_level'e eşit veya altına indiğinde bildirim oluştur (ST-009)
   - Çözülmeden tekrar bildirim oluşmaz
   - Stok tekrar düşerse yeni bildirim
   - Hasarlı stok kritik stok hesabına dahil edilmez
+
+> Kural `recordMovement` içinde (hasarlı stok hiç eksiye düşmez; ayar `allow_negative_stock` açıksa neden zorunlu). Açık: ayarı değiştiren ekran (Ayarlar), kullanıcı onay penceresi (satış/servis ekranlarında) ve kritik stok **bildirimi** (Faz 6.6; şimdilik yalnızca rozet).
 
 **İlgili PRD:** ST-002, ST-004, ST-009  
 **İlgili FR:** FR-013  
@@ -119,15 +123,15 @@ Servis ve satış modülleri bu fazda kurulan ürün kataloğu, stok hareketi ve
 ### ADIM 2.6 — Stok Düzeltme
 
 **Görevler:**
-- [ ] Stok düzeltme ekranı:
+- [x] Stok düzeltme ekranı:
   - Önceki miktar (mevcut stok)
   - Yeni miktar (kullanıcı girer)
   - Fark (otomatik hesaplanır)
   - Neden (zorunlu)
   - Tarih
   - Onay adımı (kritik işlem)
-- [ ] Düzeltme yeni StockMovement kaydı olarak eklenir; geçmiş hareketler silinmez (ST-008)
-- [ ] Audit log'a yazılır
+- [x] Düzeltme yeni StockMovement kaydı olarak eklenir; geçmiş hareketler silinmez (ST-008)
+- [x] Audit log'a yazılır
 
 **İlgili PRD:** ST-008  
 **İlgili AC:** AC-031  
