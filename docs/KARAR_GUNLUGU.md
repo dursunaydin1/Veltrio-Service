@@ -5,6 +5,17 @@
 
 ## 2026-10-22
 
+### K-015 · Kuyruk birleştirme ve "stok alanı sunucuya yazılmaz" kuralı
+- **Sorun 1:** Çevrimdışıyken aynı kaydı iki kez düzenlemek kuyrukta aynı sürümden iki UPDATE oluşturur; birincisi gidince sunucu sürümü artar, ikincisi sahte çakışma olurdu.
+- **Karar 1:** `enqueue`, aynı kayda ait bekleyen (PENDING) değişikliği yeni kayıt açmadan birleştirir (INSERT+UPDATE → INSERT; INSERT+DELETE → ikisi de silinir; UPDATE+UPDATE → ilk `version` korunur; UPDATE+DELETE → DELETE).
+- **Sorun 2:** Ürün güncellemesine yerel `stock_available` değerini koymak, sunucudaki gerçek stoğu eski değerle ezerdi.
+- **Karar 2:** UPDATE yalnızca kullanıcının düzenleyebildiği sütunları gönderir; boş alanlar `null` gider (aksi halde sunucu eski değeri korur). Stok yalnızca stok hareketleriyle değişecek (Adım 2.3).
+- **Bilinen sınırlama:** Pull, yerel kaydı sunucudakiyle değiştirir; push ile pull arasında yapılan yeni bir düzenleme geçici olarak eski görünebilir. Eşitleme sağlamlaştırma adımında ele alınacak.
+- **Etki:** `src/lib/sync/queue.ts`, `src/lib/products/service.ts`.
+
+### K-016 · Ürün kategorileri ve birimleri sabit liste
+- **Karar:** Başlangıç kategorileri (PRD §8.1) ve birimler tablo değil kod sabiti (`src/lib/products/constants.ts`); kullanıcı yeni kategori ihtiyacı duyarsa tablo + yönetim ekranı sonra eklenir. Ürün kodu aynı işletmede büyük/küçük harf ayrımsız benzersizdir (yerelde engellenir, sunucuda `UNIQUE (business_id, code)`).
+
 ### K-014 · Cihaz kaydı sunucu fonksiyonuyla (K-002 kapatıldı)
 - **Sorun:** Cihaz kodunu tarayıcı rastgele üretip `devices` tablosuna kendisi ekliyordu (FR-002'ye aykırı, kod çakışırsa kayıt başarısız). Sunucuda iptal edilmiş cihaz tarayıcıda hâlâ "kayıtlı" görünüyordu. İptal edilen cihaz kendini yeniden etkinleştirebiliyordu.
 - **Karar:** `register_device(p_device_name)` (SECURITY DEFINER) kodu `PREFIX-XXXX` biçiminde üretir, çakışırsa 10 kez yeniden dener. Tarayıcının `devices` tablosuna INSERT yetkisi kaldırıldı; UPDATE yalnızca `device_name, last_synced_at, is_active, revoked_at` sütunlarına izinli. Tetikleyici iptal edilen cihazın yeniden etkinleştirilmesini engeller (AC-045). İstemci tarafı `generateDeviceCode` silindi.

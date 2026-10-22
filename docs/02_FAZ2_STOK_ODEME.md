@@ -15,17 +15,19 @@ Servis ve satış modülleri bu fazda kurulan ürün kataloğu, stok hareketi ve
 ### ADIM 2.1 — Ürün Kataloğu
 
 **Görevler:**
-- [ ] `Product` tablosunu migration ile oluştur:
+- [x] `Product` tablosunu migration ile oluştur:
   - ad, kategori, marka, model, kod, birim, stock_qty (satılabilir), damaged_qty (hasarlı), critical_stock_level
   - sale_price, last_purchase_price, default_tax_mode, default_tax_rate
   - compatible_models_note, photo_ref, storage_location, tracks_serial, active
   - created_at, updated_at, version, sync_state, business_id
-- [ ] Ürün oluşturma, düzenleme, pasifleştirme
-- [ ] Ürün arama ve listeleme
-- [ ] Başlangıç kategorileri hazır gelmeli (PRD §8.1): Makineler, Yağlar, Misina, Buji, Hava Filtresi, Yakıt Filtresi, Karbüratör, Marş Grubu, Debriyaj, Bıçak, Zincir, Pala, Aksesuar, Diğer
+- [x] Ürün oluşturma, düzenleme, pasifleştirme
+- [x] Ürün arama ve listeleme
+- [x] Başlangıç kategorileri hazır gelmeli (PRD §8.1): Makineler, Yağlar, Misina, Buji, Hava Filtresi, Yakıt Filtresi, Karbüratör, Marş Grubu, Debriyaj, Bıçak, Zincir, Pala, Aksesuar, Diğer
 - [ ] Ürün fotoğrafı isteğe bağlı; boyut küçültme uygulanır (FR-028)
-- [ ] Raf/konum alanı isteğe bağlı metin
-- [ ] Kritik stok seviyesi ürün bazında ayarlanabilir
+- [x] Raf/konum alanı isteğe bağlı metin
+- [x] Kritik stok seviyesi ürün bazında ayarlanabilir
+
+> Uygulandı: migration 001/003/006/008, `src/lib/products/` (şema, servis, kritik stok), `src/components/products/`, `/products`, `/products/new`, `/products/[id]`. Açık: ürün fotoğrafı (`photo_ref`, FR-028; fotoğraf altyapısıyla), `tracks_serial` değişimini stok hareketi sonrası kilitleme (şimdilik yalnızca düzenlemede devre dışı), ürün detay sekmeleri (Adım 2.9).
 
 **İlgili FR:** FR-011, FR-012  
 **İlgili AC:** AC-008

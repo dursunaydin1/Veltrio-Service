@@ -1,5 +1,14 @@
 import { describe, expect, it } from "vitest";
-import { CALC_VERSION, calcDocument, calcLine, fromKurus, toKurus } from "./calc";
+import {
+  CALC_VERSION,
+  calcDocument,
+  calcLine,
+  fromKurus,
+  normalizeNumberInput,
+  parseMoneyInput,
+  parseQuantityInput,
+  toKurus,
+} from "./calc";
 
 describe("toKurus / fromKurus", () => {
   it.each([
@@ -102,5 +111,37 @@ describe("calcDocument", () => {
 
   it("boş belge sıfırdır", () => {
     expect(calcDocument([]).total).toBe(0);
+  });
+});
+
+describe("Türkçe sayı girişi", () => {
+  it.each([
+    ["1.234,50", "1234.50"],
+    ["1234,5", "1234.5"],
+    ["1234.5", "1234.5"],
+    ["1.234", "1234"],
+    ["1.234.567", "1234567"],
+    ["12,5", "12.5"],
+    [" 7 ", "7"],
+  ])("normalizeNumberInput(%s) → %s", (input, expected) => {
+    expect(normalizeNumberInput(input)).toBe(expected);
+  });
+
+  it.each(["", "abc", "1,2,3", "-5", "1.2.3", "12a"])("geçersiz: %s", (input) => {
+    expect(normalizeNumberInput(input)).toBeNull();
+  });
+
+  it("parseMoneyInput kuruş döner", () => {
+    expect(parseMoneyInput("1.234,50")).toBe(123450);
+    expect(parseMoneyInput("0")).toBe(0);
+    expect(parseMoneyInput("abc")).toBeNull();
+    expect(parseMoneyInput("")).toBeNull();
+  });
+
+  it("parseQuantityInput 4 ondalığa kadar kabul eder", () => {
+    expect(parseQuantityInput("2,5")).toBe(2.5);
+    expect(parseQuantityInput("0,0001")).toBe(0.0001);
+    expect(parseQuantityInput("10")).toBe(10);
+    expect(parseQuantityInput("-1")).toBeNull();
   });
 });

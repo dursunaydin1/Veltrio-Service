@@ -140,6 +140,8 @@ export interface Product {
   name: string;
   code?: string;
   category?: string;
+  brand?: string;
+  model?: string;
   unit: StockUnit;
   is_serial_tracked: boolean;
   default_sale_price: number;
@@ -149,6 +151,10 @@ export interface Product {
   critical_stock_level?: number;
   stock_available: number; // Anlık satılabilir stok
   stock_damaged: number;   // Hasarlı stok (satışa dahil değil)
+  compatible_models_note?: string;
+  storage_location?: string;
+  /** Sunucu kayıt sürümü; güncellemede çakışma tespiti için gönderilir. */
+  version?: number;
   archived_at?: ISODateTimeString;
   created_at: ISODateTimeString;
   updated_at: ISODateTimeString;

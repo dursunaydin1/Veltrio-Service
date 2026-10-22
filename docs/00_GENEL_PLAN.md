@@ -109,7 +109,7 @@ Product ──→ ProductSerialUnit
 | Faz | Başlangıç | Tamamlanma | Durum |
 |-----|-----------|------------|-------|
 | FAZ 1 | 2026-10 | — | 🟡 Devam ediyor (eşitleme API, giriş akışı hazır) |
-| FAZ 2 | — | — | 🔴 Başlamadı |
+| FAZ 2 | 2026-10 | — | 🟡 Devam ediyor (ürün kataloğu hazır) |
 | FAZ 3 | — | — | 🔴 Başlamadı |
 | FAZ 4 | — | — | 🔴 Başlamadı |
 | FAZ 5 | — | — | 🔴 Başlamadı |

@@ -19,6 +19,11 @@ export async function enqueue(
   payload: Record<string, unknown>,
   deviceCode: string
 ): Promise<void> {
+  if (await mergeIntoPending(tableName, recordId, operation, payload)) {
+    notifySyncRequested();
+    return;
+  }
+
   const item: SyncQueueItem = {
     id: generateId(),
     table_name: tableName,
@@ -31,9 +36,64 @@ export async function enqueue(
     created_at: nowISO(),
   };
   await db.sync_queue.add(item);
+  notifySyncRequested();
+}
+
+function notifySyncRequested(): void {
   if (typeof window !== "undefined") {
     window.dispatchEvent(new Event("veltrio:sync-requested"));
   }
+}
+
+/**
+ * Aynı kayda ait henüz gönderilmemiş (PENDING) değişiklik varsa yeni kuyruk
+ * kaydı açmak yerine onunla birleştirir. Böylece çevrimdışı arka arkaya
+ * yapılan düzenlemeler tek paket olarak gider ve aynı sürümden iki güncelleme
+ * yüzünden sahte çakışma oluşmaz.
+ *
+ *   bekleyen INSERT  + UPDATE → INSERT, son hâliyle
+ *   bekleyen INSERT  + DELETE → ikisi de silinir (sunucu hiç görmedi)
+ *   bekleyen UPDATE  + UPDATE → UPDATE, ilk düzenlemenin `version` değeriyle
+ *   bekleyen UPDATE  + DELETE → DELETE
+ *
+ * Birleştirme yapıldıysa true döner.
+ */
+async function mergeIntoPending(
+  tableName: string,
+  recordId: string,
+  operation: Operation,
+  payload: Record<string, unknown>
+): Promise<boolean> {
+  if (operation === "INSERT") return false;
+
+  const pending = await db.sync_queue
+    .where("record_id")
+    .equals(recordId)
+    .filter((q) => q.table_name === tableName && q.status === "PENDING")
+    .first();
+  if (!pending) return false;
+
+  if (pending.operation === "INSERT") {
+    if (operation === "DELETE") {
+      await db.sync_queue.delete(pending.id);
+    } else {
+      await db.sync_queue.update(pending.id, { payload });
+    }
+    return true;
+  }
+
+  if (pending.operation === "UPDATE") {
+    if (operation === "DELETE") {
+      await db.sync_queue.update(pending.id, { operation: "DELETE", payload });
+    } else {
+      await db.sync_queue.update(pending.id, {
+        payload: { ...payload, version: pending.payload.version },
+      });
+    }
+    return true;
+  }
+
+  return false;
 }
 
 /**

@@ -64,6 +64,45 @@ export function toKurus(amount: number | string): number {
   return parseScaled(amount, 2, "Tutar");
 }
 
+/**
+ * Kullanıcının yazdığı sayıyı noktalı ondalık metne çevirir (Türkçe biçim):
+ *   "1.234,50" → "1234.50"   "1234,5" → "1234.5"   "1234.5" → "1234.5"
+ *   "1.234" → "1234" (nokta + tam 3 hane = binlik ayracı)
+ * Geçersiz girdide null döner.
+ */
+export function normalizeNumberInput(input: string): string | null {
+  const text = input.trim().replace(/\s/g, "");
+  if (text === "") return null;
+  if (text.includes(",")) {
+    const cleaned = text.replace(/\./g, "").replace(",", ".");
+    return /^\d+(\.\d+)?$/.test(cleaned) ? cleaned : null;
+  }
+  if (/^\d{1,3}(\.\d{3})+$/.test(text)) return text.replace(/\./g, "");
+  return /^\d+(\.\d+)?$/.test(text) ? text : null;
+}
+
+/** Form girdisinden tutar → kuruş. Geçersiz veya negatif ise null. */
+export function parseMoneyInput(input: string): number | null {
+  const text = normalizeNumberInput(input);
+  if (text === null) return null;
+  try {
+    return toKurus(text);
+  } catch {
+    return null;
+  }
+}
+
+/** Form girdisinden miktar (en fazla 4 ondalık basamak). Geçersiz veya negatif ise null. */
+export function parseQuantityInput(input: string): number | null {
+  const text = normalizeNumberInput(input);
+  if (text === null) return null;
+  try {
+    return parseScaled(text, 4, "Miktar") / QTY_SCALE;
+  } catch {
+    return null;
+  }
+}
+
 /** 123450 → 1234.5 (veritabanına yazılacak değer) */
 export function fromKurus(kurus: number): number {
   assertSafe(kurus, "Tutar");
