@@ -52,3 +52,6 @@ The client works against a **local IndexedDB (Dexie)** database and syncs with S
 - Store all timestamps in UTC (`nowISO()`) and display them in `Europe/Istanbul` (`src/lib/utils/date.ts`).
 - Ledger-style tables are immutable: `stock_movements` and `audit_logs` are protected by Postgres RULEs. Corrections, returns and cancellations are recorded as reversing entries, never by editing history.
 - Critical changes must write an audit log (`writeAuditLog` / `logStateChange` in `src/lib/sync/audit.ts`) with the actor device, old and new values, and a reason.
+
+## QA
+`npm test` (birim/akış), `npm run test:e2e` (gerçek Supabase'e karşı; `E2E_EMAIL`/`E2E_PASSWORD` ortam değişkeni gerekir, yoksa atlanır). Ayrıntı: `docs/08_QA_TEST.md`. Yeni akış eklenince ikisi de güncellenir.

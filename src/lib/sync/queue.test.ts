@@ -36,6 +36,16 @@ describe("enqueue — birleştirme", () => {
     expect(all[0].payload.name).toBe("Buji NGK");
   });
 
+  it("bekleyen INSERT + eksik sütunlu UPDATE → INSERT'in belge no/oluşturma bilgisi korunur", async () => {
+    await enqueue("sales", ID, "INSERT", rec({ document_no: "S-1", created_by_device: DEVICE, created_at: "x" }), DEVICE);
+    await enqueue("sales", ID, "UPDATE", { id: ID, business_id: BUSINESS, status: "FINAL", version: 1 }, DEVICE);
+
+    const all = await db.sync_queue.toArray();
+    expect(all).toHaveLength(1);
+    expect(all[0].payload).toMatchObject({ document_no: "S-1", created_by_device: DEVICE, status: "FINAL" });
+    expect(all[0].payload.version).toBeUndefined();
+  });
+
   it("bekleyen INSERT + DELETE → kuyruk boşalır (sunucu kaydı hiç görmedi)", async () => {
     await enqueue("products", ID, "INSERT", rec(), DEVICE);
     await enqueue("products", ID, "DELETE", rec(), DEVICE);

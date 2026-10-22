@@ -78,7 +78,11 @@ async function mergeIntoPending(
     if (operation === "DELETE") {
       await db.sync_queue.delete(pending.id);
     } else {
-      await db.sync_queue.update(pending.id, { payload });
+      // UPDATE yükü yalnızca değişebilir sütunları taşır (belge no, oluşturma
+      // bilgisi yok); INSERT'in tam yükü üzerine bindirilmeli, ezilmemeli.
+      const { version: _ignored, ...changes } = payload;
+      void _ignored;
+      await db.sync_queue.update(pending.id, { payload: { ...pending.payload, ...changes } });
     }
     return true;
   }

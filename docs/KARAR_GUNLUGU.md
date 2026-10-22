@@ -5,6 +5,11 @@
 
 ## 2026-10-22
 
+### K-029 · Sunucuya karşı otomatik QA testi ve kuyruk birleştirme hatası
+- **Karar:** `npm run test:e2e` ile gerçek Supabase'e karşı uçtan uca test düzeneği kuruldu (`docs/08_QA_TEST.md`). Tarayıcıda elle deneme yerine her adım sonrası çalıştırılır.
+- **Bulunan hata:** `enqueue` bekleyen INSERT'e UPDATE birleştirirken INSERT yükünü eziyordu; UPDATE yükünde belge no/oluşturma sütunları olmadığından sunucu NOT NULL ile reddediyordu. Artık UPDATE değişiklikleri INSERT yükünün üzerine bindirilir (regresyon testi `queue.test.ts`).
+- **Etki:** `src/lib/sync/queue.ts`, `e2e/`, `vitest.e2e.config.mts`.
+
 ### K-028 · Seri takipli ürünler: birim kaydı, makine satışı ve kuyruk döngüsünün kırılması
 - **Model:** Seri takipli ürünün her fiziksel birimi `product_serial_units` kaydıdır (seri no + iç numara `SB-…`). Stok yine hareket defterinden hesaplanır; her birim için ±1'lik, `serial_unit_id`'li hareket yazılır (ST-012). Bu hareketler dışında seri takipli ürüne elle stok hareketi yapılamaz.
 - **Alım:** Satırda seri numaraları girilir (taslakta `purchase_items.serial_numbers`); teslim alınınca her adet ayrı birim ve +1 hareket olur, birim maliyeti satır tutarından. Aynı üründe tekrar eden seri numarası (harf/Türkçe karakter farkı olsa da) reddedilir ve işlem geri alınır.
