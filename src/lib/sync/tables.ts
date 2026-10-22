@@ -1,4 +1,5 @@
 export const SYNC_TABLES = [
+  "audit_logs",
   "customers",
   "machines",
   "suppliers",
@@ -24,6 +25,7 @@ export const SYNC_TABLES = [
 export type SyncTableName = (typeof SYNC_TABLES)[number];
 
 export const APPEND_ONLY_SYNC_TABLES = new Set<SyncTableName>([
+  "audit_logs",
   "stock_movements",
   "payments",
   "payment_allocations",

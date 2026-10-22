@@ -1,4 +1,5 @@
 import { db } from "@/lib/db";
+import { enqueue } from "@/lib/sync/queue";
 import { generateId, nowISO } from "@/lib/utils";
 import type { AuditLog } from "@/types";
 
@@ -14,6 +15,11 @@ type AuditAction = "CREATE" | "UPDATE" | "DELETE" | "STATE_CHANGE" | "RESTORE";
  * @param deviceCode - İşlemi yapan cihaz kodu
  * @param oldValue   - İşlem öncesi değer (UPDATE/DELETE/STATE_CHANGE için)
  * @param newValue   - İşlem sonrası değer (CREATE/UPDATE/STATE_CHANGE için)
+ * @param actorId    - İşlemi yapan kullanıcı (users.id)
+ * @param reason     - Gerekçe (kritik işlemlerde zorunlu)
+ *
+ * Kayıt yerel veritabanına yazılırken aynı işlemde eşitleme kuyruğuna da
+ * eklenir; böylece denetim kayıtları sunucuya da ulaşır (AC-032).
  */
 export async function writeAuditLog(params: {
   businessId: string;
@@ -23,6 +29,8 @@ export async function writeAuditLog(params: {
   deviceCode: string;
   oldValue?: Record<string, unknown>;
   newValue?: Record<string, unknown>;
+  actorId?: string;
+  reason?: string;
 }): Promise<void> {
   const log: AuditLog = {
     id: generateId(),
@@ -32,11 +40,22 @@ export async function writeAuditLog(params: {
     action: params.action,
     old_value: params.oldValue,
     new_value: params.newValue,
+    actor_id: params.actorId,
+    reason: params.reason,
     changed_by_device: params.deviceCode,
     changed_at: nowISO(),
   };
 
-  await db.audit_logs.add(log);
+  await db.transaction("rw", db.audit_logs, db.sync_queue, async () => {
+    await db.audit_logs.add(log);
+    await enqueue(
+      "audit_logs",
+      log.id,
+      "INSERT",
+      log as unknown as Record<string, unknown>,
+      params.deviceCode
+    );
+  });
 }
 
 /**

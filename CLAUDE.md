@@ -9,6 +9,7 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 Veltrio Service: a single-user, mobile-first, offline-capable (PWA) management app for a business that sells and services gasoline-powered agricultural/forestry machines (service orders, sales, stock, customer/supplier accounts). The UI, comments, error messages and docs are in **Turkish**; keep new user-facing strings in Turkish.
 
 - `PRD.md` is the product spec (v2.1). Code comments cite it as `PRD §N` / `AC-NNN`.
+- **Read `docs/CALISMA_KURALLARI.md` first**: it holds the owner's standing working rules (Turkish replies, short step-by-step guidance, explain what was done, commit + push to GitHub after each meaningful step, keep docs updated). Plan deviations are logged in `docs/KARAR_GUNLUGU.md`; the docs under `docs/` may be corrected when they turn out to be wrong or incomplete.
 - `docs/00_GENEL_PLAN.md` is the master plan; work is split into 7 phases (`docs/01_…` through `docs/07_…`). Phase 1 (auth, devices, UUIDs, sync, audit log) is in progress. The Dexie schema and SQL migrations already define tables for all 7 phases.
 
 ## Commands
@@ -22,7 +23,7 @@ npm test        # vitest run (tek dosya: npx vitest run src/lib/utils/phone.test
 
 Tests are Vitest unit tests next to the code (`*.test.ts`, `@` alias configured in `vitest.config.mts`). Environment vars go in `.env.local` (see `.env.local.example`): `NEXT_PUBLIC_SUPABASE_URL`, `NEXT_PUBLIC_SUPABASE_ANON_KEY`. If they are missing, `src/proxy.ts` skips the auth redirect so the app still runs locally.
 
-Database migrations live in `supabase/migrations/` and must be applied in order (001 → 005), via the Supabase SQL editor or `supabase db push`. The sync API routes do not work until `005_sync_changes.sql` is applied.
+Database migrations live in `supabase/migrations/` and must be applied in order (001 → 006), via the Supabase SQL editor or `supabase db push`. The sync API routes do not work until `005_sync_changes.sql` is applied.
 
 ## Stack notes
 

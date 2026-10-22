@@ -11,12 +11,13 @@ Bu dizin Supabase PostgreSQL migration dosyalarını içerir.
 | 003 | `003_products_stock.sql` | products, serial_units, stock_movements, payments |
 | 004 | `004_services_sales_returns.sql` | services, sales, purchases, returns, notifications |
 | 005 | `005_sync_changes.sql` | Cihazlar arası artımlı eşitleme günlüğü ve kayıt tetikleyicileri |
+| 006 | `006_versioning_and_audit_sync.sql` | Kayıt sürümü (`version`), audit log eşitleme, ayar varsayılanları |
 
 ## Supabase Dashboard'dan Uygulama
 
 1. [Supabase Dashboard](https://app.supabase.com) → Projenizi seçin
 2. **SQL Editor** sekmesine girin
-3. Migration dosyalarını **sırasıyla** çalıştırın (001 → 002 → 003 → 004 → 005)
+3. Migration dosyalarını **sırasıyla** çalıştırın (001 → 002 → 003 → 004 → 005 → 006)
 
 ## Supabase CLI ile Uygulama
 

@@ -237,6 +237,10 @@ export interface AuditLog {
   action: "CREATE" | "UPDATE" | "DELETE" | "STATE_CHANGE" | "RESTORE";
   old_value?: Record<string, unknown>;
   new_value?: Record<string, unknown>;
+  /** İşlemi yapan kullanıcı (users.id) */
+  actor_id?: UUID;
+  /** Kritik işlemlerde zorunlu gerekçe */
+  reason?: string;
   changed_by_device: string;
   changed_at: ISODateTimeString;
 }

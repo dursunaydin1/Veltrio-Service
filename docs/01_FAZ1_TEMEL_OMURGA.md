@@ -150,6 +150,8 @@ Bu faz tüm diğer modüllerin üzerine inşa edileceği teknik temeli oluşturu
 - [ ] `SyncMetadata` güncelleme
 - [ ] Çevrimdışı azami gün kontrolü: 30 günü aşarsa yeni kayıt için çevrimiçi doğrulama
 
+> `version` sütunu ve artırma tetikleyicisi migration 006'da eklendi (sunucu tarafı); `sync_state` yalnızca istemcide tutulacak (bkz. KARAR_GUNLUGU K-009). İstemcinin sürümü gönderip sunucunun çakışmayı yakalaması sonraki adım.
+>
 > Push/pull API'si ve artımlı değişiklik günlüğü eklendi. Aktif cihaz doğrulaması yapılır; veritabanı tarafındaki `005_sync_changes.sql` migration'ı uygulanmalıdır. Bağımlılık sıralaması, çakışma çözümü, kayıt sürümü ve uzun süre çevrimdışı kalma kuralı henüz tamamlanmadığından adım bütünüyle bitmiş sayılmaz.
 
 **İlgili FR:** FR-020, FR-021  
@@ -164,14 +166,16 @@ Bu faz tüm diğer modüllerin üzerine inşa edileceği teknik temeli oluşturu
 ### ADIM 1.8 — Audit Log Mekanizması
 
 **Görevler:**
-- [ ] `AuditLog` tablosu şeması (PRD §7)
-- [ ] Audit log yazma yardımcı fonksiyonu (entity_type, entity_id, action, before/after snapshot, reason, actor, device)
+- [x] `AuditLog` tablosu şeması (PRD §7)
+- [x] Audit log yazma yardımcı fonksiyonu (entity_type, entity_id, action, before/after snapshot, reason, actor, device)
 - [ ] Hangi işlemlerin audit log'a yazılacağını listele:
   - Kritik işlemler: iade, satış/servis iptali, stok düzeltme, kayıt arşivleme, açılış bakiyesi değişikliği, cihaz iptali, veri dışa aktarma, yedekten geri yükleme
   - Makine sahipliği değişikliği
   - Belge numarası çakışması + yeniden numaralama
   - Kullanıcı kayıt/giriş/şifre değişimi
 - [ ] Audit log'u okuyan "geçmiş" ekranı iskeleti
+
+> Tablo (001 + 006: `actor_id`, `reason`), `writeAuditLog` (yerel kayıt + eşitleme kuyruğu, `src/lib/sync/audit.ts`) ve sunucu eşitlemesi hazır. Açık: hangi işlemlerin loglanacağının kod tarafında uygulanması (her özellik kendi işlemini loglar) ve geçmiş ekranı.
 
 **İlgili PRD:** §2, §7  
 **İlgili AC:** AC-032
