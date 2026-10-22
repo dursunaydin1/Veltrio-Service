@@ -284,11 +284,13 @@ Uygulamanın kalbi olan servis akışını hayata geçirmek: müşteri kabulünd
 ### ADIM 3.15 — Servis Fişleri ve Yazdırma
 
 **Görevler:**
-- [ ] **Servis kabul fişi:** İşletme adı/telefon/logo, servis no/tarih, müşteri, makine, teslim alınan aksesuarlar, mevcut hasar, şikâyet, teslim koşulları (alt metin ayardan)
-- [ ] **Servis sonuç özeti:** İşletme adı/telefon, servis no/tarih, müşteri/makine/seri veya iç numara, şikâyet ve yapılan iş özeti, toplam, tahsil edilen, kalan bakiye, durum, teslim bilgisi
-- [ ] Dahili parça maliyetleri ve maliyet snapshot'ı müşteri çıktısında görünmez (AC-034)
-- [ ] Kâğıt biçimi: A4 + dar fiş; PDF kaydetme alternatifi
-- [ ] Çıktılar resmî fatura olarak adlandırılmaz
+- [x] **Servis kabul fişi:** İşletme adı/telefon/logo, servis no/tarih, müşteri, makine, teslim alınan aksesuarlar, mevcut hasar, şikâyet, teslim koşulları (alt metin ayardan)
+- [x] **Servis sonuç özeti:** İşletme adı/telefon, servis no/tarih, müşteri/makine/seri veya iç numara, şikâyet ve yapılan iş özeti, toplam, tahsil edilen, kalan bakiye, durum, teslim bilgisi
+- [x] Dahili parça maliyetleri ve maliyet snapshot'ı müşteri çıktısında görünmez (AC-034)
+- [x] Kâğıt biçimi: A4 + dar fiş; PDF kaydetme alternatifi
+- [x] Çıktılar resmî fatura olarak adlandırılmaz
+
+> Uygulandı: `src/lib/services/receipt.ts` (müşteriye gösterilecek saf model; maliyet alanı modelde yok), `ReceiptView.tsx`, `/services/[id]/receipt?type=intake|summary`, servis sayfasında "Kabul fişi" / "Sonuç özeti" düğmeleri. A4 ve dar fiş (72 mm) önizlenir; "Yazdır / PDF kaydet" tarayıcının yazdır penceresini açar (K-024). Alt metin `business.settings.receipt_terms` ile değiştirilebilir (ayar ekranı sonra). **Açık:** işletme logosu (logo altyapısıyla), fişe QR kod (3.4).
 
 **İlgili FR:** FR-010  
 **İlgili AC:** AC-034  

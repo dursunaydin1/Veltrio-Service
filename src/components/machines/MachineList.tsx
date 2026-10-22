@@ -6,6 +6,7 @@ import { useLiveQuery } from "dexie-react-hooks";
 import { Plus } from "lucide-react";
 import { db } from "@/lib/db";
 import { useSessionStore } from "@/stores/session";
+import { machineTitleOf } from "@/lib/machines/title";
 import { foldText } from "@/lib/utils/search";
 import type { Machine } from "@/types";
 
@@ -26,10 +27,7 @@ export function matchesMachine(machine: Machine, ownerName: string, query: strin
   return foldText(query.trim()).split(/\s+/).every((word) => haystack.includes(word));
 }
 
-export function machineTitle(machine: Pick<Machine, "type" | "brand" | "model">): string {
-  const name = [machine.brand, machine.model].filter(Boolean).join(" ");
-  return name || machine.type;
-}
+export const machineTitle = machineTitleOf;
 
 /** Makine listesi: marka, model, seri no, iç numara veya sahibe göre arama (Adım 3.3). */
 export function MachineList() {

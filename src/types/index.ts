@@ -33,6 +33,8 @@ export interface BusinessSettings {
   allow_negative_stock?: boolean;
   /** Çevrimdışı çalışmanın azami günü (Adım 1.7). */
   max_offline_days?: number;
+  /** Servis kabul fişinin alt metni (teslim koşulları); boşsa varsayılan metin */
+  receipt_terms?: string;
   locale: "tr-TR";
 }
 

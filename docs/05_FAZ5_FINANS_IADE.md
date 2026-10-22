@@ -145,11 +145,11 @@ Veresiye yönetimi, vade takibi, açılış bakiyeleri, müşteri/tedarikçi iad
 ### ADIM 5.9 — Servis Fişinde Bakiye Gösterimi
 
 **Görevler:**
-- [ ] Servis kabul fişi ve sonuç özeti ödemeler bölümü:
+- [x] Servis kabul fişi ve sonuç özeti ödemeler bölümü:
   - Toplam tutar
   - Tahsil edilen (kapora dahil)
   - Kalan bakiye
-- [ ] Borçlu teslimde kalan bakiye açıkça gösterilir (AC-025)
+- [x] Borçlu teslimde kalan bakiye açıkça gösterilir (AC-025)
 
 ---
 

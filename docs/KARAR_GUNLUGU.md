@@ -5,6 +5,13 @@
 
 ## 2026-10-22
 
+### K-024 · Fiş / PDF: yazdırılabilir sayfa, `jsPDF` değil
+- **Plan:** Tarayıcı taraflı PDF (jsPDF veya react-pdf).
+- **Sorun:** jsPDF'in varsayılan yazı tipleri Türkçe karakterleri (ş, ğ, ı, İ) basamaz; her çıktıya ayrı yazı tipi gömmek gerekir. Dar fiş ve A4 için ayrı yerleşim kodu da ister.
+- **Karar:** Fiş, tarayıcıda yazdırılabilir bir sayfadır (CSS ile A4 ve 72 mm dar fiş). "Yazdır / PDF kaydet" tarayıcının yazdır penceresini açar: yazıcıya basar ya da "PDF olarak kaydet" ile dosya üretir. Türkçe karakterler ve her cihazın yazıcı sürücüsü tarayıcı tarafından yönetilir. Gerekirse sonradan WhatsApp'a gönderilecek PDF için ayrı bir üretici eklenebilir.
+- **Gizlilik:** Müşteri çıktısı, maliyet alanı hiç bulunmayan saf bir modelden üretilir (AC-034); testle doğrulanır. Belge "resmî fatura yerine geçmez" notu taşır.
+- **Etki:** `src/lib/services/receipt.ts`, `ReceiptView.tsx`, `globals.css` yazdırma stilleri.
+
 ### K-023 · Tamamlamada parça kullanım kuralı; teslimde kalan bakiye ve borç kabulü
 - **Bulgu:** Gerçek denemede bir servis, stoktan faturalanan parça "kullanıldı" işaretlenmeden teslim edildi: müşteriye parça bedeli yazıldı ama stok düşmedi.
 - **Karar:** Stoktan faturalanan (karar bekleyen veya onaylı) parça tam miktarda kullanıldı işaretlenmeden "İş tamamlandı"ya geçilemez; müşterinin getirdiği, stok dışı ve reddedilen parçalar muaftır.

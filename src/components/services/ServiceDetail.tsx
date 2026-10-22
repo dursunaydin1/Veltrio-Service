@@ -67,6 +67,15 @@ export function ServiceDetail({ id }: { id: string }) {
         ) : null}
       </div>
 
+      <div className="row row-gap-sm" style={{ flexWrap: "wrap" }}>
+        <Link href={`/services/${service.id}/receipt?type=intake`} className="btn btn-secondary btn-sm">
+          Kabul fişi
+        </Link>
+        <Link href={`/services/${service.id}/receipt?type=summary`} className="btn btn-secondary btn-sm">
+          Sonuç özeti
+        </Link>
+      </div>
+
       <StatusActions service={service} />
       <DeliveryPanel service={service} />
       <ServiceLines service={service} />
