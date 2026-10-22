@@ -114,16 +114,18 @@ Bu faz tüm diğer modüllerin üzerine inşa edileceği teknik temeli oluşturu
 ### ADIM 1.6 — UUID ve Belge Numarası Sistemi
 
 **Görevler:**
-- [ ] UUID v4 üretim fonksiyonu (istemci tarafında, sunucudan bağımsız)
-- [ ] Belge numarası formatlarını kodla:
+- [x] UUID v4 üretim fonksiyonu (istemci tarafında, sunucudan bağımsız)
+- [x] Belge numarası formatlarını kodla:
   - Servis: `S-[cihaz_kodu]-[yıl]-[sıra]`
   - Satış: `SAT-[cihaz_kodu]-[yıl]-[sıra]`
   - Satın alma: `AL-[cihaz_kodu]-[yıl]-[sıra]`
   - İade: `IAD-[cihaz_kodu]-[yıl]-[sıra]`
   - Makine iç numarası: `MK-[cihaz_kodu]-[sıra]`
   - Ürün seri birimi: `SB-[cihaz_kodu]-[sıra]`
-- [ ] Çevrimdışı sıra sayacı (cihaz bazlı, kalıcı yerel depolama)
+- [x] Çevrimdışı sıra sayacı (cihaz bazlı, kalıcı yerel depolama)
 - [ ] Sunucu tarafında numara çakışması tespiti ve yeniden numaralama + AuditLog
+
+> `formatDocumentNo` (`utils/id.ts`) ve `nextDocumentNo` (`src/lib/numbering.ts`, Dexie `counters` tablosu, şema v2). Sunucuda numara çakışması tespiti ve yeniden numaralama henüz yok; şimdilik yalnızca `UNIQUE (business_id, document_no)` kısıtı çakışmayı reddediyor.
 
 **İlgili PRD:** §7.3  
 **İlgili AC:** AC-016

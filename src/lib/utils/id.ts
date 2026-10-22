@@ -8,57 +8,45 @@ export function generateId(): string {
   return uuidv4();
 }
 
-/**
- * Servis belge numarası üretir.
- * Format: SRV-[cihaz_kodu]-[yıl]-[sıra_no]
- * Örnek: SRV-ABC1-2025-00042
- */
-export function generateServiceNo(
-  deviceCode: string,
-  sequence: number
-): string {
-  const year = new Date().getFullYear();
-  const seq = String(sequence).padStart(5, "0");
-  return `SRV-${deviceCode}-${year}-${seq}`;
+/** Belge numarası türleri ve önekleri (Adım 1.6). */
+export const DOCUMENT_PREFIXES = {
+  service: "S",
+  sale: "SAT",
+  purchase: "AL",
+  return: "IAD",
+  machine: "MK",
+  serialUnit: "SB",
+} as const;
+
+export type DocumentKind = keyof typeof DOCUMENT_PREFIXES;
+
+/** Yıl içermeyen (cihaz başına tek sayaçlı) türler. */
+const UNYEARLY_KINDS: ReadonlySet<DocumentKind> = new Set(["machine", "serialUnit"]);
+
+export function isYearlyKind(kind: DocumentKind): boolean {
+  return !UNYEARLY_KINDS.has(kind);
 }
 
 /**
- * Satış belge numarası üretir.
- * Format: SAT-[cihaz_kodu]-[yıl]-[sıra_no]
+ * Belge numarasını biçimlendirir (saf fonksiyon, sayaç tutmaz).
+ *   Yıllık:  S-DEMO-AB23-2026-00001
+ *   Yılsız:  MK-DEMO-AB23-00001
+ * Sayacı artırmak için `nextDocumentNo` (@/lib/numbering) kullanılır.
  */
-export function generateSaleNo(
+export function formatDocumentNo(
+  kind: DocumentKind,
   deviceCode: string,
-  sequence: number
+  sequence: number,
+  year: number
 ): string {
-  const year = new Date().getFullYear();
+  if (!Number.isInteger(sequence) || sequence < 1) {
+    throw new RangeError("Sıra numarası 1 veya daha büyük tam sayı olmalı.");
+  }
   const seq = String(sequence).padStart(5, "0");
-  return `SAT-${deviceCode}-${year}-${seq}`;
-}
-
-/**
- * Satın alma belge numarası üretir.
- * Format: AL-[cihaz_kodu]-[yıl]-[sıra_no]
- */
-export function generatePurchaseNo(
-  deviceCode: string,
-  sequence: number
-): string {
-  const year = new Date().getFullYear();
-  const seq = String(sequence).padStart(5, "0");
-  return `AL-${deviceCode}-${year}-${seq}`;
-}
-
-/**
- * İade belge numarası üretir.
- * Format: IAD-[cihaz_kodu]-[yıl]-[sıra_no]
- */
-export function generateReturnNo(
-  deviceCode: string,
-  sequence: number
-): string {
-  const year = new Date().getFullYear();
-  const seq = String(sequence).padStart(5, "0");
-  return `IAD-${deviceCode}-${year}-${seq}`;
+  const prefix = DOCUMENT_PREFIXES[kind];
+  return isYearlyKind(kind)
+    ? `${prefix}-${deviceCode}-${year}-${seq}`
+    : `${prefix}-${deviceCode}-${seq}`;
 }
 
 /**

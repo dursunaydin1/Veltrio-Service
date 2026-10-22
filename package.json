@@ -38,6 +38,7 @@
     "@types/uuid": "^10.0.0",
     "eslint": "^9",
     "eslint-config-next": "16.4.1",
+    "fake-indexeddb": "^6.2.6",
     "typescript": "^5",
     "vitest": "^5.0.5"
   }

@@ -76,6 +76,17 @@ export function todayLocalDate(): string {
 }
 
 /**
+ * Europe/Istanbul takvimine göre yıl (belge numaralarında kullanılır).
+ */
+export function istanbulYear(date: Date = new Date()): number {
+  const year = new Intl.DateTimeFormat("en-US", {
+    year: "numeric",
+    timeZone: "Europe/Istanbul",
+  }).format(date);
+  return Number(year);
+}
+
+/**
  * İki tarih arasındaki gün farkını hesaplar.
  * Pozitif → date2, date1'den sonra
  */

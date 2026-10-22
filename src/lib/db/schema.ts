@@ -214,6 +214,12 @@ export interface ReturnItem {
   created_at: string;
 }
 
+/** Cihaz bazlı kalıcı belge sıra sayacı (Adım 1.6). key: "<kind>:<cihaz>:<yıl|-->" */
+export interface DocumentCounter {
+  key: string;
+  last_value: number;
+}
+
 // ============================================================
 // DEXIE VERİTABANI SINIFI
 // ============================================================
@@ -226,6 +232,7 @@ export class VeltrioDatabase extends Dexie {
   audit_logs!: Table<AuditLog>;
   sync_queue!: Table<SyncQueueItem>;
   notifications!: Table<Notification>;
+  counters!: Table<DocumentCounter>;
 
   // FAZ 2 — Stok & Ödeme
   customers!: Table<Customer>;
@@ -305,6 +312,11 @@ export class VeltrioDatabase extends Dexie {
       return_transactions:
         "id, business_id, document_no, original_type, original_id, status",
       return_items: "id, business_id, return_id, product_id, serial_unit_id",
+    });
+
+    // Şema sürüm 2: belge sıra sayaçları
+    this.version(2).stores({
+      counters: "key",
     });
   }
 }
