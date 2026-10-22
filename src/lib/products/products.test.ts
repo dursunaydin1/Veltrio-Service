@@ -136,6 +136,17 @@ describe("ürün servisi", () => {
     expect((await db.products.get(p.id))?.stock_available).toBe(7);
   });
 
+  it("içerik değişmediyse hiçbir şey yazmaz ve kuyruğa eklemez", async () => {
+    const p = await createProduct(ctx, fieldsOf());
+    await db.sync_queue.clear();
+    await db.products.put({ ...p, version: 1 });
+
+    await updateProduct(ctx, p.id, fieldsOf());
+
+    expect(await db.sync_queue.count()).toBe(0);
+    expect((await db.products.get(p.id))?.updated_at).toBe(p.updated_at);
+  });
+
   it("başka ürünün koduna güncelleme reddedilir, kendi kodunu korumak serbesttir", async () => {
     await createProduct(ctx, fieldsOf({ code: "A" }));
     const b = await createProduct(ctx, fieldsOf({ code: "B" }));

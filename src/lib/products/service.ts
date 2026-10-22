@@ -133,6 +133,10 @@ export async function updateProduct(
     }
 
     const next: Product = { ...existing, ...fields, updated_at: nowISO() };
+    // İçerik değişmediyse sürüm artırıp sunucuya boş güncelleme göndermeyelim.
+    if (JSON.stringify(editablePayload(existing)) === JSON.stringify(editablePayload(next))) {
+      return existing;
+    }
     await db.products.put(next);
     // Sunucuya eklenmiş ama henüz geri çekilmemiş kayıtta version yoktur; sunucu 1 ile başlar.
     await enqueue(
