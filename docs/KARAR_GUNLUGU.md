@@ -5,6 +5,13 @@
 
 ## 2026-10-22
 
+### K-014 · Cihaz kaydı sunucu fonksiyonuyla (K-002 kapatıldı)
+- **Sorun:** Cihaz kodunu tarayıcı rastgele üretip `devices` tablosuna kendisi ekliyordu (FR-002'ye aykırı, kod çakışırsa kayıt başarısız). Sunucuda iptal edilmiş cihaz tarayıcıda hâlâ "kayıtlı" görünüyordu. İptal edilen cihaz kendini yeniden etkinleştirebiliyordu.
+- **Karar:** `register_device(p_device_name)` (SECURITY DEFINER) kodu `PREFIX-XXXX` biçiminde üretir, çakışırsa 10 kez yeniden dener. Tarayıcının `devices` tablosuna INSERT yetkisi kaldırıldı; UPDATE yalnızca `device_name, last_synced_at, is_active, revoked_at` sütunlarına izinli. Tetikleyici iptal edilen cihazın yeniden etkinleştirilmesini engeller (AC-045). İstemci tarafı `generateDeviceCode` silindi.
+- **İstemci:** Oturum sunucudan yüklenince (`sessionLoaded`) cihaz kayıtlı/aktif değilse uygulama yerine "Bu cihazı kaydet" ekranı çıkar; sunucuda iptal edilmiş cihaz artık yerelde de tanımsız sayılır.
+- **Açık:** İptal sonrası yerel verinin silinmesi (`wipe_confirmed_at`) ve cihaz listesi/iptal ekranı.
+- **Etki:** `supabase/migrations/007_register_device.sql`, `useDevice.ts`, `useAuth.ts`, `DeviceSetup.tsx`, `AppShell.tsx`, `session.ts`.
+
 ### K-013 · "Bugünün durumu" yalnızca işletme bilgisi gösterir
 - **Sorun:** Ana ekrandaki "Eşitlenmeyi bekleyen" ve "Eşitleme sorunu" kutuları üst çubuktaki göstergeyle aynı bilgiydi ve işletme sahibi için teknik.
 - **Karar:** İki kutu kaldırıldı. Ana ekrana iş metrikleri (aktif servis, kritik stok, bugünkü satış, teslim tarihi yaklaşanlar) ilgili özellik yazıldıkça eklenir; eşitleme ayrıntıları Faz 6'daki eşitleme/bildirim merkezinde olacak.

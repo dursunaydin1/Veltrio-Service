@@ -3,12 +3,29 @@
 import Link from "next/link";
 import { Menu } from "lucide-react";
 import { BottomNav } from "@/components/layout/BottomNav";
+import { DeviceSetup } from "@/components/layout/DeviceSetup";
 import { SyncStatus } from "@/components/layout/SyncStatus";
 import { useSessionStore } from "@/stores/session";
 
-/** Giriş yapmış kullanıcının gördüğü sayfa çerçevesi. */
+/**
+ * Giriş yapmış kullanıcının gördüğü sayfa çerçevesi.
+ * Oturum yüklenene kadar bekler; bu tarayıcı kayıtlı bir cihaz değilse
+ * uygulama yerine "Bu cihazı kaydet" ekranını gösterir (FR-002).
+ */
 export function AppShell({ children }: { children: React.ReactNode }) {
   const businessName = useSessionStore((s) => s.business?.name);
+  const sessionLoaded = useSessionStore((s) => s.sessionLoaded);
+  const hasUser = useSessionStore((s) => !!s.user);
+  const hasDevice = useSessionStore((s) => !!s.device);
+
+  if (!sessionLoaded) {
+    return (
+      <div className="page-loader" role="status" aria-label="Yükleniyor">
+        <div className="loader-ring" />
+      </div>
+    );
+  }
+  if (hasUser && !hasDevice) return <DeviceSetup />;
 
   return (
     <div className="app-shell">

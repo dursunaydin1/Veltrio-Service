@@ -19,6 +19,8 @@ interface SessionState {
   isOnline: boolean;
   // Son başarılı eşitleme
   lastSyncedAt: string | null;
+  // Oturum sunucudan en az bir kez yüklendi mi? (kalıcı değil)
+  sessionLoaded: boolean;
 
   // Actions
   setUser: (user: User | null) => void;
@@ -26,6 +28,7 @@ interface SessionState {
   setDevice: (device: Device | null) => void;
   setIsOnline: (online: boolean) => void;
   setLastSyncedAt: (at: string) => void;
+  setSessionLoaded: (loaded: boolean) => void;
   clearSession: () => void;
 }
 
@@ -37,12 +40,14 @@ export const useSessionStore = create<SessionState>()(
       device: null,
       isOnline: true,
       lastSyncedAt: null,
+      sessionLoaded: false,
 
       setUser: (user) => set({ user }),
       setBusiness: (business) => set({ business }),
       setDevice: (device) => set({ device }),
       setIsOnline: (isOnline) => set({ isOnline }),
       setLastSyncedAt: (lastSyncedAt) => set({ lastSyncedAt }),
+      setSessionLoaded: (sessionLoaded) => set({ sessionLoaded }),
 
       clearSession: () =>
         set({

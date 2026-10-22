@@ -2,7 +2,7 @@
 
 import { useCallback } from "react";
 import { useSessionStore } from "@/stores/session";
-import { generateDeviceCode, generateId, nowISO } from "@/lib/utils";
+import { nowISO } from "@/lib/utils";
 import type { Device } from "@/types";
 
 /**
@@ -18,39 +18,33 @@ export function useDevice() {
   }, []);
 
   /**
-   * Yeni cihaz kaydeder ve localStorage'a yazar.
+   * Bu tarayıcıyı yeni cihaz olarak kaydeder (FR-002).
+   * Cihaz kodunu sunucudaki `register_device` fonksiyonu üretir; tarayıcı
+   * kod seçemez. Hata durumunda anlaşılır mesajla `Error` fırlatır.
    */
   const registerDevice = useCallback(
-    async (deviceName: string): Promise<Device | null> => {
-      if (!user || !business) return null;
+    async (deviceName: string): Promise<Device> => {
+      if (!user || !business) {
+        throw new Error("Cihaz kaydı için önce giriş yapmalısınız.");
+      }
+      if (typeof navigator !== "undefined" && !navigator.onLine) {
+        throw new Error("Cihaz kaydı için internet bağlantısı gereklidir.");
+      }
 
       const supabase = await getSupabase();
-      const deviceCode = generateDeviceCode(business.device_code_prefix);
-
-      const newDevice: Device = {
-        id: generateId(),
-        business_id: business.id,
-        user_id: user.id,
-        device_code: deviceCode,
-        device_name: deviceName,
-        is_active: true,
-        created_at: nowISO(),
-      };
-
-      const { data, error } = await supabase
-        .from("devices")
-        .insert(newDevice)
-        .select()
-        .single();
+      const { data, error } = await supabase.rpc("register_device", {
+        p_device_name: deviceName,
+      });
 
       if (error || !data) {
         console.error("Cihaz kaydedilemedi:", error?.message);
-        return null;
+        throw new Error("Cihaz kaydedilemedi. Lütfen tekrar deneyin.");
       }
 
-      localStorage.setItem("veltrio_device_code", deviceCode);
-      setDevice(data as Device);
-      return data as Device;
+      const registered = data as Device;
+      localStorage.setItem("veltrio_device_code", registered.device_code);
+      setDevice(registered);
+      return registered;
     },
     [user, business, getSupabase, setDevice]
   );

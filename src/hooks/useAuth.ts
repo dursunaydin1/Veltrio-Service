@@ -15,10 +15,14 @@ const SUPABASE_CONFIGURED =
  * Root layout'ta bir kez kullanılmalıdır.
  */
 export function useAuthSync() {
-  const { setUser, setBusiness, setDevice, clearSession } = useSessionStore();
+  const { setUser, setBusiness, setDevice, clearSession, setSessionLoaded } =
+    useSessionStore();
 
   const loadSession = useCallback(async () => {
-    if (!SUPABASE_CONFIGURED) return; // env yok → atla
+    if (!SUPABASE_CONFIGURED) {
+      setSessionLoaded(true); // env yok → atla
+      return;
+    }
 
     // Dinamik import — env yokken modül import hatasını önler
     const { createClient } = await import("@/lib/supabase/client");
@@ -30,6 +34,7 @@ export function useAuthSync() {
 
     if (!authUser) {
       clearSession();
+      setSessionLoaded(true);
       return;
     }
 
@@ -42,6 +47,7 @@ export function useAuthSync() {
 
     if (!dbUser) {
       clearSession();
+      setSessionLoaded(true);
       return;
     }
 
@@ -57,18 +63,23 @@ export function useAuthSync() {
     if (business) setBusiness(business as Business);
 
     // Aktif cihazı çek
+    // Kayıtlı cihaz kodu yoksa veya sunucuda iptal edilmişse cihaz tanımsız
+    // sayılır; kullanıcı "Bu cihazı kaydet" ekranına yönlendirilir.
     const storedCode = localStorage.getItem("veltrio_device_code");
+    let activeDevice: Device | null = null;
     if (storedCode) {
       const { data: device } = await supabase
         .from("devices")
         .select("*")
         .eq("device_code", storedCode)
         .eq("is_active", true)
-        .single();
+        .maybeSingle();
 
-      if (device) setDevice(device as Device);
+      activeDevice = (device as Device | null) ?? null;
     }
-  }, [setUser, setBusiness, setDevice, clearSession]);
+    setDevice(activeDevice);
+    setSessionLoaded(true);
+  }, [setUser, setBusiness, setDevice, clearSession, setSessionLoaded]);
 
   useEffect(() => {
     if (!SUPABASE_CONFIGURED) return;

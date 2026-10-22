@@ -78,7 +78,7 @@ Bu faz tüm diğer modüllerin üzerine inşa edileceği teknik temeli oluşturu
 
 **Görevler:**
 - [ ] İlk kurulum adımlarını tanımla: işletme adı, telefon, adres, e-posta, para birimi, vergi varsayılanı
-- [ ] Sunucu tarafında cihaz kodu otomatik ataması yap (kullanıcı girmez)
+- [x] Sunucu tarafında cihaz kodu otomatik ataması yap (kullanıcı girmez) — `register_device` (migration 007) + "Bu cihazı kaydet" ekranı
 - [ ] İlk kurulum mutlaka çevrimiçi yapılır — çevrimdışı kurulumu engelle
 - [ ] `BusinessSettings` varsayılan değerleri kaydet:
   - approval_threshold: 1.000 ₺

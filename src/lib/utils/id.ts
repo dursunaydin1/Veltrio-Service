@@ -59,19 +59,6 @@ export function validateDeviceCode(code: string): boolean {
 }
 
 /**
- * İşletme prefix'inden cihaz kodu üretir.
- * businessPrefix: 2-6 alfanümerik karakter
- * suffix: 4 rastgele alfanümerik karakter
- */
-export function generateDeviceCode(businessPrefix: string): string {
-  const chars = "ABCDEFGHJKLMNPQRSTUVWXYZ23456789"; // Karışabilecek I/O/1/0 hariç
-  const suffix = Array.from({ length: 4 }, () =>
-    chars[Math.floor(Math.random() * chars.length)]
-  ).join("");
-  return `${businessPrefix.toUpperCase()}-${suffix}`;
-}
-
-/**
  * Dedupe anahtarı üretir (bildirim tekrarını önler).
  * Format: [type]-[relatedId]-[tarih]
  */
