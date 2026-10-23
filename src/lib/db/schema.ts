@@ -273,6 +273,10 @@ export interface ReturnTransaction {
   refund_method?: string;
   total_amount: number;
   status: "POSTED" | "REVERSED";
+  /** Para iadesi ödemesi (müşteri alacağına yazıldıysa yok) */
+  refund_payment_id?: string;
+  reversal_reason?: string;
+  version?: number;
   created_by_device: string;
   created_at: string;
 }
@@ -410,6 +414,11 @@ export class VeltrioDatabase extends Dexie {
     this.version(4).stores({
       service_operations: "id, business_id, service_id",
       service_approvals: "id, business_id, service_id, decided_at",
+    });
+
+    // Şema sürüm 5: iade satırları, orijinal satış satırına göre aranır
+    this.version(5).stores({
+      return_items: "id, business_id, return_id, product_id, serial_unit_id, original_line_id",
     });
   }
 }

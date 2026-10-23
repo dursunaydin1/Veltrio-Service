@@ -5,6 +5,11 @@
 
 ## 2026-10-22
 
+### K-031 · Müşteri ürün iadesi: para ve bakiye kuralı
+- **Karar:** İade, orijinal satış satırına bağlı `return_transactions`/`return_items` kaydıdır; stok durumu SELLABLE / DAMAGED / NOT_RETURNED. Para tarafı çift saymayı önlemek için şöyle işler: iade tutarı satış bakiyesini (ve müşteri bakiyesini) düşürür; nakit/kart/havale seçilirse yalnızca **satışa fazladan ödenmiş kısım** kadar `OUT` ödemesi yazılır (veresiye satışta nakit çıkmaz, borç düşer); `CUSTOMER_CREDIT` seçilirse ödeme yazılmaz, fazla ödeme müşteri alacağı olarak kalır.
+- İade ödemesi satış belgesine (`source_type SALE`) bağlanır; böylece satışın kalan tutarı doğru çıkar. İadesi olan satış iptal edilemez (önce iade geri alınır). İade geri alma: ters stok hareketi + ters ödeme, kayıt REVERSED kalır. Seri numaralı ürünün iadesi geri alınamaz.
+- **Etki:** migration 019, Dexie v5 (`original_line_id` indeksi), `returns/service.ts`, `finance/service.ts` (müşteri bakiyesi), `sales/service.ts` (`getSaleBalance.returned`), `SaleReturnPanel`.
+
 ### K-030 · Kesinleşmiş satış iptali
 - **Karar:** İptal, belgeyi silmeden ters kayıtlarla yapılır: stok için `CANCEL_REVERSAL` hareketi (`reversal_of_id` ile asıl harekete bağlı), tahsilat için karşı yönlü ters ödeme, seri birim `IN_STOCK`, makine satışında satış bilgisi makineden kalkar ve sahiplik geri alınır. Tek kullanıcılı uygulamada ayrı yönetici onayı yerine zorunlu neden + açık onay ekranı kullanılır.
 - **Etki:** `sales/service.ts` (`cancelFinalSale`), `machines/service.ts` (`detachSaleFromMachine`), `stock/service.ts` (`reversalOfId`), `SaleDetail`.

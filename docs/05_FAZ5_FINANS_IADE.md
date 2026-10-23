@@ -79,20 +79,22 @@ Veresiye yönetimi, vade takibi, açılış bakiyeleri, müşteri/tedarikçi iad
 ### ADIM 5.5 — Müşteri Ürün İadesi
 
 **Görevler:**
-- [ ] `ReturnTransaction` tablosu: id, business_id, document_no, original_type, original_id, return_date, reason, refund_method, total_amount, status (POSTED/REVERSED), created_by_device
-- [ ] `ReturnItem` tablosu: original_line_type, original_line_id, product_id, serial_unit_id, quantity, unit, amount, stock_disposition (SELLABLE/DAMAGED/NOT_RETURNED), stock_movement_id
-- [ ] Orijinal satış ve satır referansı zorunludur (§9.7)
-- [ ] Tam/kısmi miktar; daha önce iade edilmiş miktar toplamı aşamaz (AC-012)
-- [ ] **Ürün durumu:**
+- [x] `ReturnTransaction` tablosu: id, business_id, document_no, original_type, original_id, return_date, reason, refund_method, total_amount, status (POSTED/REVERSED), created_by_device
+- [x] `ReturnItem` tablosu: original_line_type, original_line_id, product_id, serial_unit_id, quantity, unit, amount, stock_disposition (SELLABLE/DAMAGED/NOT_RETURNED), stock_movement_id
+- [x] Orijinal satış ve satır referansı zorunludur (§9.7)
+- [x] Tam/kısmi miktar; daha önce iade edilmiş miktar toplamı aşamaz (AC-012)
+- [x] **Ürün durumu:**
   - SELLABLE → AVAILABLE stoğa döner
   - DAMAGED → DAMAGED bucket'ına yazılır; kritik stok hesabına dahil edilmez
   - NOT_RETURNED → stok hareketi yok
-- [ ] **Para iadesi seçenekleri (kullanıcı açıkça seçer):**
+- [x] **Para iadesi seçenekleri (kullanıcı açıkça seçer):**
   - Nakit/kart/banka → Payment (direction=OUT)
   - Müşteri alacağı (CUSTOMER_CREDIT) → bakiyeye yazılır
   - Aynı tutar hem nakit hem müşteri alacağı olarak çift sayılmaz
-- [ ] İade kaydı silinmez; hatalı iade için ters iade hareketi + audit log
-- [ ] Belge numarası: `IAD-[cihaz_kodu]-[yıl]-[sıra]`
+- [x] İade kaydı silinmez; hatalı iade için ters iade hareketi + audit log
+- [x] Belge numarası: `IAD-[cihaz_kodu]-[yıl]-[sıra]`
+
+> Uygulandı: migration 019 (`refund_payment_id`, `reversal_reason`), `src/lib/returns/service.ts` (`createSaleReturn`, `reverseSaleReturn`), satış detayında **Ürün iadesi** paneli (K-031). Müşteri bakiyesi ve satış bakiyesi iadeleri düşer. **Açık:** servis parçası ve satın alma iadesi (5.6/5.7); makine iadesi geri alınamaz (yeniden satış yapılır).
 
 **İlgili FR:** FR-018, FR-019  
 **İlgili AC:** AC-012, AC-043, AC-046  

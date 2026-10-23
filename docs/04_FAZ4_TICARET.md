@@ -157,11 +157,13 @@
 ### ADIM 4.8 — Satış Ekranı (UI)
 
 **Görevler:**
-- [ ] Satışlar sekmesi: hızlı satışlar, makine satışları, taslaklar, tahsilatlar, satış geçmişi
-- [ ] Taslak listesi ve taslak düzenleme
-- [ ] Satış detayı görüntüleme
-- [ ] Satış iptal akışı ekranı
-- [ ] Ödeme ekleme ekranı: birden fazla ödeme yöntemi, kısmi tahsilat
+- [x] Satışlar sekmesi: hızlı satışlar, makine satışları, taslaklar, tahsilatlar, satış geçmişi
+- [x] Taslak listesi ve taslak düzenleme
+- [x] Satış detayı görüntüleme
+- [x] Satış iptal akışı ekranı
+- [x] Ödeme ekleme ekranı: birden fazla ödeme yöntemi, kısmi tahsilat
+
+> Uygulandı: `/sales` (Satışlar / Taslak / İptal sekmeleri ve arama), `/sales/new`, `/sales/[id]` (kalemler, taslak işlemleri, tahsilat ve geçmişi, iade, iptal). Birden fazla yöntem, ayrı tahsilat kayıtlarıyla desteklenir. **Not:** makine satışları ayrı sekme değil; satır, makine olarak satış detayında görünür.
 
 ---
 

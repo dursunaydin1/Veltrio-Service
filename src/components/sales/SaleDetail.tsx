@@ -8,6 +8,7 @@ import type { Sale } from "@/lib/db";
 import { useServiceContext } from "@/hooks/useServiceContext";
 import { SALE_STATUS_BADGE, SALE_STATUS_LABEL } from "@/components/sales/SaleList";
 import { SaleForm } from "@/components/sales/SaleForm";
+import { SaleReturnPanel } from "@/components/sales/SaleReturnPanel";
 import { parseMoneyInput } from "@/lib/calc";
 import { PAYMENT_METHOD_LABELS, reversedPaymentIds } from "@/lib/finance/service";
 import {
@@ -103,6 +104,7 @@ export function SaleDetail({ id }: { id: string }) {
 
       {sale.status === "DRAFT" ? <DraftActions sale={sale} onEdit={() => setEditing(true)} /> : null}
       {sale.status === "FINAL" ? <SalePayments sale={sale} /> : null}
+      {sale.status === "FINAL" ? <SaleReturnPanel sale={sale} /> : null}
       {sale.status === "FINAL" ? <FinalCancel sale={sale} /> : null}
     </div>
   );

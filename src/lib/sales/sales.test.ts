@@ -86,7 +86,7 @@ describe("hızlı satış — tek adımda FINAL (§5.3, FR-014)", () => {
     const [pay] = await db.payments.toArray();
     expect(pay).toMatchObject({ direction: "IN", amount: 200, source_type: "SALE", source_id: s.id });
     expect(pay.customer_id).toBeUndefined();
-    expect(await getSaleBalance(s.id)).toEqual({ total: 20000, paid: 20000, remaining: 0 });
+    expect(await getSaleBalance(s.id)).toMatchObject({ total: 20000, paid: 20000, remaining: 0 });
   });
 
   it("numaralar sırayla artar", async () => {
@@ -127,7 +127,7 @@ describe("veresiye ve tahsilat (AC-041, TC-042)", () => {
 
   it("müşterili veresiye: borç bakiyeye yansır; sonradan tahsilat kalanı kapatır, ters kayıt geri açar", async () => {
     const s = await createSale(ctx, input({ customerId: ali }), { finalize: true, payment: { amountKurus: 5000, method: "CASH" } });
-    expect(await getSaleBalance(s.id)).toEqual({ total: 20000, paid: 5000, remaining: 15000 });
+    expect(await getSaleBalance(s.id)).toMatchObject({ total: 20000, paid: 5000, remaining: 15000 });
     expect((await getCustomerBalance(ctx.businessId, ali)).balance).toBe(15000);
 
     const pay = await collectSalePayment(ctx, s.id, { amountKurus: 15000, method: "CARD" });

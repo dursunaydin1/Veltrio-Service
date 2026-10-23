@@ -155,7 +155,7 @@ export async function setCustomerArchived(
 ): Promise<Customer> {
   return db.transaction(
     "rw",
-    [db.customers, db.services, db.opening_balances, db.payments, db.sales, db.sync_queue, db.audit_logs],
+    [db.customers, db.services, db.opening_balances, db.payments, db.sales, db.return_transactions, db.sync_queue, db.audit_logs],
     async () => {
     const existing = await db.customers.get(id);
     if (!existing || existing.business_id !== ctx.businessId) {

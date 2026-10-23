@@ -506,10 +506,16 @@ export async function cancelDraftSale(ctx: SaleContext, id: string, reason: stri
 export async function cancelFinalSale(ctx: SaleContext, id: string, reason: string): Promise<Sale> {
   const why = reason.trim();
   if (!why) throw new SaleRuleError("İptal nedeni zorunludur.");
-  return db.transaction("rw", [...tables(), db.payment_allocations, db.services], async () => {
+  return db.transaction("rw", [...tables(), db.payment_allocations, db.services, db.return_transactions], async () => {
     const sale = await db.sales.get(id);
     if (!sale || sale.business_id !== ctx.businessId) throw new SaleRuleError("Satış bulunamadı.");
     if (sale.status !== "FINAL") throw new SaleRuleError("Yalnızca kesinleşmiş satış bu şekilde iptal edilir.");
+    const posted = await db.return_transactions
+      .where("original_id")
+      .equals(id)
+      .filter((r) => r.original_type === "SALE" && r.status === "POSTED")
+      .count();
+    if (posted > 0) throw new SaleRuleError("Bu satışa bağlı iade var: önce iadeleri geri alın.");
     const note = `Satış iptali (${sale.document_no}): ${why}`;
 
     for (const item of await getSaleItems(id)) {
@@ -565,7 +571,7 @@ export async function cancelFinalSale(ctx: SaleContext, id: string, reason: stri
   });
 }
 
-async function undoMachineSale(ctx: SaleContext, sale: Sale, machineId: string, note: string): Promise<void> {
+export async function undoMachineSale(ctx: SaleContext, sale: Sale, machineId: string, note: string): Promise<void> {
   const machine = await db.machines.get(machineId);
   if (!machine || machine.sale_id !== sale.id) return;
   await detachSaleFromMachine(ctx, machineId);
@@ -610,8 +616,10 @@ export async function collectSalePayment(
 export type SaleBalance = {
   /** kuruş */
   total: number;
-  /** net tahsilat (tahsilat − iade/ters kayıt), kuruş */
+  /** net tahsilat (tahsilat − para iadesi/ters kayıt), kuruş */
   paid: number;
+  /** satıştan düşülen iade tutarı, kuruş (`total` bunu zaten düşmüş hâlidir) */
+  returned: number;
   /** total − paid; pozitif: açık alacak (veresiye) */
   remaining: number;
 };
@@ -626,10 +634,19 @@ export async function getSalePayments(saleId: string): Promise<Payment[]> {
 
 /** Satışın açık alacağı: tutar − bu satışa bağlı net tahsilatlar. */
 export async function getSaleBalance(saleId: string): Promise<SaleBalance> {
-  const [sale, payments] = await Promise.all([db.sales.get(saleId), getSalePayments(saleId)]);
-  const total = toKurus(sale?.total_amount ?? 0);
+  const [sale, payments, returns] = await Promise.all([
+    db.sales.get(saleId),
+    getSalePayments(saleId),
+    db.return_transactions
+      .where("original_id")
+      .equals(saleId)
+      .filter((r) => r.original_type === "SALE" && r.status === "POSTED")
+      .toArray(),
+  ]);
+  const returned = returns.reduce((acc, r) => acc + toKurus(r.total_amount), 0);
+  const total = toKurus(sale?.total_amount ?? 0) - returned;
   const paid = payments.reduce((acc, p) => acc + (p.direction === "IN" ? 1 : -1) * toKurus(p.amount), 0);
-  return { total, paid, remaining: total - paid };
+  return { total, paid, returned, remaining: total - paid };
 }
 
 export async function getSaleItems(saleId: string): Promise<SaleItem[]> {

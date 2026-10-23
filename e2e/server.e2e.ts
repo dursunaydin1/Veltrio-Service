@@ -8,7 +8,8 @@ import { createCustomer } from "@/lib/customers/service";
 import { getSupplierBalance, recordSupplierPayment, setSupplierOpeningBalance } from "@/lib/finance/service";
 import { createProduct } from "@/lib/products/service";
 import { createPurchase } from "@/lib/purchases/service";
-import { cancelFinalSale, createSale, getSaleBalance } from "@/lib/sales/service";
+import { createSaleReturn, reverseSaleReturn } from "@/lib/returns/service";
+import { cancelFinalSale, createSale, getSaleBalance, getSaleItems } from "@/lib/sales/service";
 import { getInStockUnits } from "@/lib/serial/service";
 import { getProductBalance } from "@/lib/stock/ledger";
 import { addStock } from "@/lib/stock/service";
@@ -51,6 +52,7 @@ const TAG = `E2E-${RUN}`;
 let supabase: SupabaseClient;
 let ctx: { businessId: string; deviceCode: string; actorId?: string };
 let hasSerial = false;
+let hasReturns = false;
 
 const created: string[] = [];
 
@@ -145,11 +147,12 @@ describe.skipIf(!URL || !ANON || !EMAIL || !PASSWORD)("sunucuya karşı uçtan u
 
     const probe = await supabase.from("product_serial_units").select("internal_number").limit(1);
     hasSerial = !probe.error;
+    hasReturns = !(await supabase.from("return_transactions").select("refund_payment_id").limit(1)).error;
   });
 
   it("0) bağlantı: oturum, işletme ve migration durumu", () => {
     expect(ctx.businessId).toMatch(/^[0-9a-f-]{36}$/);
-    console.log(`[e2e] cihaz=${DEVICE} · migration 018 (seri birim): ${hasSerial ? "VAR" : "YOK"}`);
+    console.log(`[e2e] cihaz=${DEVICE} · 018 (seri birim): ${hasSerial ? "VAR" : "YOK"} · 019 (iade): ${hasReturns ? "VAR" : "YOK"}`);
   });
 
   it("1) tedarikçi: açılış bakiyesi ve ödeme sunucuya gider, bakiye sunucu verisinden doğru çıkar", async () => {
@@ -230,7 +233,7 @@ describe.skipIf(!URL || !ANON || !EMAIL || !PASSWORD)("sunucuya karşı uçtan u
     expect(pays?.[0]).toMatchObject({ customer_id: customerId, source_type: "SALE" });
 
     near((await one<{ stock_available: number }>("products", bujiId)).stock_available, 13);
-    expect(await getSaleBalance(sale.id)).toEqual({ total: 20000, paid: 5000, remaining: 15000 });
+    expect(await getSaleBalance(sale.id)).toMatchObject({ total: 20000, paid: 5000, remaining: 15000 });
     created.push("alım", "veresiye satış");
   });
 
@@ -370,6 +373,42 @@ describe.skipIf(!URL || !ANON || !EMAIL || !PASSWORD)("sunucuya karşı uçtan u
     const back = await one<{ status: string; machine_id: string | null }>("product_serial_units", unit.id);
     expect(back).toMatchObject({ status: "IN_STOCK", machine_id: null });
     near((await one<{ stock_available: number }>("products", machineProductId)).stock_available, 1);
+  });
+
+  it("7c) müşteri iadesi: iade belgesi, satırlar, stok, para iadesi ve geri alma sunucuda doğru", async (ctxTest) => {
+    if (!hasReturns) {
+      console.log("[e2e] migration 019 uygulanmamış: iade bölümü atlandı");
+      return ctxTest.skip();
+    }
+    const sale = await createSale(
+      ctx,
+      { customerId, lines: [{ productId: bujiId, quantity: 4, unitPriceKurus: 10000, taxMode: "NONE", taxRate: 0 }] },
+      { finalize: true, payment: { amountKurus: 40000, method: "CASH" } }
+    );
+    await sync("iade için satış");
+    const [item] = await getSaleItems(sale.id);
+    const before = Number((await one<{ stock_available: number }>("products", bujiId)).stock_available);
+
+    const ret = await createSaleReturn(ctx, {
+      saleId: sale.id, reason: "e2e iade", refundMethod: "CASH",
+      lines: [{ saleItemId: item.id, quantity: 1, disposition: "SELLABLE" }],
+    });
+    await sync("iade");
+    const row = await one<{ status: string; total_amount: number; document_no: string; refund_payment_id: string | null }>("return_transactions", ret.id);
+    expect(row).toMatchObject({ status: "POSTED", refund_payment_id: ret.refund_payment_id });
+    near(row.total_amount, 100);
+    const { data: ritems } = await supabase.from("return_items").select("quantity,amount,stock_disposition,stock_movement_id,original_line_id").eq("return_id", ret.id);
+    expect(ritems).toHaveLength(1);
+    expect(ritems?.[0]).toMatchObject({ stock_disposition: "SELLABLE", original_line_id: item.id });
+    near((await one<{ stock_available: number }>("products", bujiId)).stock_available, before + 1);
+    const refund = await one<{ direction: string; amount: number }>("payments", ret.refund_payment_id as string);
+    expect(refund.direction).toBe("OUT");
+    near(refund.amount, 100);
+
+    await reverseSaleReturn(ctx, ret.id, "e2e geri alma");
+    await sync("iade geri alma");
+    expect((await one<{ status: string }>("return_transactions", ret.id)).status).toBe("REVERSED");
+    near((await one<{ stock_available: number }>("products", bujiId)).stock_available, before);
   });
 
   it("8) başka bir cihaz gibi çekme: yerel veri silinip sunucudan alınınca stok ve bakiyeler aynı çıkar", async () => {

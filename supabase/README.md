@@ -24,12 +24,13 @@ Bu dizin Supabase PostgreSQL migration dosyalarını içerir.
 | 016 | `016_purchase_fields.sql` | Satın alma: tedarikçi fatura no, teslim alma zamanı, iptal nedeni |
 | 017 | `017_sale_fields.sql` | Satış: not ve kesinleşme zamanı |
 | 018 | `018_serial_units.sql` | Seri takipli birimler (iç numara, bağlantılar), alım satırı seri no'ları, makine satış bilgisi |
+| 019 | `019_return_refund.sql` | Müşteri iadesi: para iadesi ödemesi bağlantısı, geri alma nedeni |
 
 ## Supabase Dashboard'dan Uygulama
 
 1. [Supabase Dashboard](https://app.supabase.com) → Projenizi seçin
 2. **SQL Editor** sekmesine girin
-3. Migration dosyalarını **sırasıyla** çalıştırın (001 → 002 → 003 → 004 → 005 → 006 → 007 → 008 → 009 → 010 → 011 → 012 → 013 → 014 → 015 → 016 → 017 → 018)
+3. Migration dosyalarını **sırasıyla** çalıştırın (001 → 002 → 003 → 004 → 005 → 006 → 007 → 008 → 009 → 010 → 011 → 012 → 013 → 014 → 015 → 016 → 017 → 018 → 019)
 
 ## Supabase CLI ile Uygulama
 
