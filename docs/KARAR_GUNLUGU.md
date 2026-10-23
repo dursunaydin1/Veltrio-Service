@@ -5,6 +5,10 @@
 
 ## 2026-10-22
 
+### K-032 · Tedarikçiye iade
+- **Karar:** Satış iadesiyle aynı tablolar (`return_transactions`, `original_type = PURCHASE`) ve aynı para kuralı kullanılır: iade tutarı tedarikçi borcunu düşürür; ödeme yöntemi seçilirse yalnızca alıma fazla ödenen kısım tedarikçiden geri alınmış (IN) sayılır; “borçtan düş” seçilirse ödeme yazılmaz. Stok RETURN_OUT ile seçilen kovadan çıkar, yeterli stok yoksa işlem reddedilir. Seri takipli üründe birimler tek tek seçilir ve `RETURNED_TO_SUPPLIER` olur (stokta olmayan birim iade edilemez); bu iade geri alınamaz.
+- **Etki:** `returns/purchase.ts`, `finance/service.ts` (tedarikçi bakiyesi), `purchases/service.ts` (`getPurchaseBalance.returned`), `PurchaseReturnPanel`.
+
 ### K-031 · Müşteri ürün iadesi: para ve bakiye kuralı
 - **Karar:** İade, orijinal satış satırına bağlı `return_transactions`/`return_items` kaydıdır; stok durumu SELLABLE / DAMAGED / NOT_RETURNED. Para tarafı çift saymayı önlemek için şöyle işler: iade tutarı satış bakiyesini (ve müşteri bakiyesini) düşürür; nakit/kart/havale seçilirse yalnızca **satışa fazladan ödenmiş kısım** kadar `OUT` ödemesi yazılır (veresiye satışta nakit çıkmaz, borç düşer); `CUSTOMER_CREDIT` seçilirse ödeme yazılmaz, fazla ödeme müşteri alacağı olarak kalır.
 - İade ödemesi satış belgesine (`source_type SALE`) bağlanır; böylece satışın kalan tutarı doğru çıkar. İadesi olan satış iptal edilemez (önce iade geri alınır). İade geri alma: ters stok hareketi + ters ödeme, kayıt REVERSED kalır. Seri numaralı ürünün iadesi geri alınamaz.

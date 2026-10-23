@@ -437,10 +437,12 @@ export async function payPurchase(
 }
 
 export type PurchaseBalance = {
-  /** kuruş */
+  /** iadeler düşülmüş alım tutarı, kuruş */
   total: number;
   /** tedarikçiye yapılan net ödeme, kuruş */
   paid: number;
+  /** alımdan düşülen iade tutarı, kuruş */
+  returned: number;
   /** total − paid; pozitif: hâlâ borçlusunuz, negatif: fazla ödeme */
   remaining: number;
 };
@@ -455,10 +457,19 @@ export async function getPurchasePayments(purchaseId: string): Promise<Payment[]
 
 /** Alımın kalan borcu: tutar − bu alıma bağlı net ödemeler. */
 export async function getPurchaseBalance(purchaseId: string): Promise<PurchaseBalance> {
-  const [purchase, payments] = await Promise.all([db.purchases.get(purchaseId), getPurchasePayments(purchaseId)]);
-  const total = toKurus(purchase?.total_amount ?? 0);
+  const [purchase, payments, returns] = await Promise.all([
+    db.purchases.get(purchaseId),
+    getPurchasePayments(purchaseId),
+    db.return_transactions
+      .where("original_id")
+      .equals(purchaseId)
+      .filter((r) => r.original_type === "PURCHASE" && r.status === "POSTED")
+      .toArray(),
+  ]);
+  const returned = returns.reduce((acc, r) => acc + toKurus(r.total_amount), 0);
+  const total = toKurus(purchase?.total_amount ?? 0) - returned;
   const paid = payments.reduce((acc, p) => acc + (p.direction === "OUT" ? 1 : -1) * toKurus(p.amount), 0);
-  return { total, paid, remaining: total - paid };
+  return { total, paid, returned, remaining: total - paid };
 }
 
 export async function getPurchaseItems(purchaseId: string): Promise<PurchaseItem[]> {

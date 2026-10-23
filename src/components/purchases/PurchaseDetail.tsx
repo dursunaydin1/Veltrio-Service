@@ -8,6 +8,7 @@ import type { Purchase } from "@/lib/db";
 import { useBusinessContext } from "@/hooks/useBusinessContext";
 import { PURCHASE_STATUS_BADGE, PURCHASE_STATUS_LABEL } from "@/components/purchases/PurchaseList";
 import { PurchaseForm } from "@/components/purchases/PurchaseForm";
+import { PurchaseReturnPanel } from "@/components/purchases/PurchaseReturnPanel";
 import { parseMoneyInput } from "@/lib/calc";
 import { PAYMENT_METHOD_LABELS, reversedPaymentIds } from "@/lib/finance/service";
 import {
@@ -105,6 +106,7 @@ export function PurchaseDetail({ id }: { id: string }) {
 
       {purchase.status === "DRAFT" ? <DraftActions purchase={purchase} onEdit={() => setEditing(true)} /> : null}
       {purchase.status === "RECEIVED" ? <PurchasePayments purchase={purchase} /> : null}
+      {purchase.status === "RECEIVED" ? <PurchaseReturnPanel purchase={purchase} /> : null}
     </div>
   );
 }

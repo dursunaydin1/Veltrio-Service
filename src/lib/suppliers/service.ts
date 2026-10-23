@@ -73,7 +73,7 @@ export async function setSupplierArchived(
 ): Promise<Supplier> {
   return db.transaction(
     "rw",
-    [db.suppliers, db.opening_balances, db.payments, db.purchases, db.sync_queue, db.audit_logs],
+    [db.suppliers, db.opening_balances, db.payments, db.purchases, db.return_transactions, db.sync_queue, db.audit_logs],
     async () => {
       const existing = (await db.suppliers.get(id)) as SupplierRecord | undefined;
       if (!existing || existing.business_id !== ctx.businessId) {

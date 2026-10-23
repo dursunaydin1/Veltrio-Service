@@ -66,25 +66,28 @@ const ITEM_COLUMNS = [
   "created_at",
 ] as const;
 
-function returnPayload(r: ReturnTransaction, update: boolean): Record<string, unknown> {
+export function returnPayload(r: ReturnTransaction, update: boolean): Record<string, unknown> {
   const payload: Record<string, unknown> = { id: r.id, business_id: r.business_id };
   for (const c of update ? RETURN_UPDATE_COLUMNS : RETURN_COLUMNS) payload[c] = r[c] ?? null;
   if (update) payload.version = r.version ?? 1;
   return payload;
 }
 
-function itemPayload(i: ReturnItem): Record<string, unknown> {
+export function itemPayload(i: ReturnItem): Record<string, unknown> {
   const payload: Record<string, unknown> = { id: i.id, business_id: i.business_id };
   for (const c of ITEM_COLUMNS) payload[c] = i[c] ?? null;
   return payload;
 }
 
-const scope = () =>
+export const scope = () =>
   [
     db.return_transactions,
     db.return_items,
     db.sales,
     db.sale_items,
+    db.purchases,
+    db.purchase_items,
+    db.suppliers,
     db.customers,
     db.machines,
     db.machine_ownership_history,
@@ -100,7 +103,7 @@ const scope = () =>
   ] as const;
 
 /** Bir satış satırının daha önce (geçerli iadelerde) iade edilen miktarı ve tutarı. */
-async function returnedSoFar(saleItemId: string): Promise<{ quantity: number; amountKurus: number }> {
+export async function returnedSoFar(saleItemId: string): Promise<{ quantity: number; amountKurus: number }> {
   const items = await db.return_items.where("original_line_id").equals(saleItemId).toArray();
   let quantity = 0;
   let amountKurus = 0;
@@ -281,7 +284,7 @@ export async function createSaleReturn(ctx: SaleContext, input: SaleReturnInput)
  * ters hareketle çıkarılır, para iadesi ters ödemeyle geri alınır. Seri numaralı
  * (makine) iadesi geri alınamaz; satış yeniden yapılır.
  */
-export async function reverseSaleReturn(ctx: SaleContext, returnId: string, reason: string): Promise<ReturnTransaction> {
+export async function reverseReturn(ctx: SaleContext, returnId: string, reason: string): Promise<ReturnTransaction> {
   const why = reason.trim();
   if (!why) throw new ReturnRuleError("Geri alma nedeni zorunludur.");
 
@@ -292,7 +295,7 @@ export async function reverseSaleReturn(ctx: SaleContext, returnId: string, reas
 
     const items = await db.return_items.where("return_id").equals(returnId).toArray();
     if (items.some((i) => i.serial_unit_id && i.stock_disposition !== "NOT_RETURNED")) {
-      throw new ReturnRuleError("Seri numaralı ürünün iadesi geri alınamaz; ürünü yeniden satın.");
+      throw new ReturnRuleError("Seri numaralı ürünün iadesi geri alınamaz.");
     }
 
     for (const item of items) {
@@ -344,3 +347,6 @@ export async function getSaleReturns(saleId: string): Promise<ReturnTransaction[
 export async function getReturnItems(returnId: string): Promise<ReturnItem[]> {
   return db.return_items.where("return_id").equals(returnId).toArray();
 }
+
+/** Satış iadesini geri alır (bkz. `reverseReturn`). */
+export const reverseSaleReturn = reverseReturn;

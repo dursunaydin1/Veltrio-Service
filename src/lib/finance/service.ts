@@ -510,11 +510,17 @@ export async function getSupplierBalance(
       .filter((p) => p.business_id === businessId && p.status === "RECEIVED")
       .toArray(),
   ]);
+  const purchaseIds = new Set(purchases.map((p) => p.id));
+  const returnAmounts = (
+    await db.return_transactions
+      .filter((r) => r.business_id === businessId && r.original_type === "PURCHASE" && r.status === "POSTED" && purchaseIds.has(r.original_id))
+      .toArray()
+  ).map((r) => r.total_amount);
 
   return calcSupplierBalance({
     openingBalances,
     purchases: purchases.map((p) => p.total_amount),
     payments,
-    returns: [],
+    returns: returnAmounts,
   });
 }

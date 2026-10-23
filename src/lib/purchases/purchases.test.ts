@@ -89,7 +89,7 @@ describe("createPurchase — teslim alınmış (RECEIVED)", () => {
   it("ödemeyle birlikte: tedarikçi borcu net, alım bakiyesi kalan gösterir; ters kayıt geri alır", async () => {
     const p = await createPurchase(ctx, input(), { receive: true, payment: { amountKurus: 20000, method: "CASH" } });
 
-    expect(await getPurchaseBalance(p.id)).toEqual({ total: 50000, paid: 20000, remaining: 30000 });
+    expect(await getPurchaseBalance(p.id)).toMatchObject({ total: 50000, paid: 20000, remaining: 30000 });
     expect((await getSupplierBalance(ctx.businessId, supplierId)).balance).toBe(30000);
 
     const pay = await payPurchase(ctx, p.id, { amountKurus: 30000, method: "BANK_TRANSFER" });

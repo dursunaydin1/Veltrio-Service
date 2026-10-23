@@ -7,7 +7,8 @@ import { db } from "@/lib/db";
 import { createCustomer } from "@/lib/customers/service";
 import { getSupplierBalance, recordSupplierPayment, setSupplierOpeningBalance } from "@/lib/finance/service";
 import { createProduct } from "@/lib/products/service";
-import { createPurchase } from "@/lib/purchases/service";
+import { createPurchase, getPurchaseItems } from "@/lib/purchases/service";
+import { createPurchaseReturn } from "@/lib/returns/purchase";
 import { createSaleReturn, reverseSaleReturn } from "@/lib/returns/service";
 import { cancelFinalSale, createSale, getSaleBalance, getSaleItems } from "@/lib/sales/service";
 import { getInStockUnits } from "@/lib/serial/service";
@@ -411,6 +412,32 @@ describe.skipIf(!URL || !ANON || !EMAIL || !PASSWORD)("sunucuya karşı uçtan u
     near((await one<{ stock_available: number }>("products", bujiId)).stock_available, before);
   });
 
+  it("7d) tedarikçiye iade: stok çıkışı, iade belgesi ve tedarikçi bakiyesi sunucuda doğru", async (ctxTest) => {
+    if (!hasReturns) return ctxTest.skip();
+    const purchase = await createPurchase(
+      ctx,
+      { supplierId, lines: [{ productId: bujiId, quantity: 3, unitPriceKurus: 5000, taxMode: "NONE", taxRate: 0 }] },
+      { receive: true }
+    );
+    await sync("iade için alım");
+    const [item] = await getPurchaseItems(purchase.id);
+    const stockBefore = Number((await one<{ stock_available: number }>("products", bujiId)).stock_available);
+    const balanceBefore = (await getSupplierBalance(ctx.businessId, supplierId)).balance;
+
+    const ret = await createPurchaseReturn(ctx, {
+      purchaseId: purchase.id, reason: "e2e tedarikçi iadesi", refundMethod: "SUPPLIER_CREDIT",
+      lines: [{ purchaseItemId: item.id, quantity: 2, bucket: "AVAILABLE" }],
+    });
+    await sync("tedarikçi iadesi");
+    expect(await one<{ original_type: string; status: string }>("return_transactions", ret.id)).toMatchObject({ original_type: "PURCHASE", status: "POSTED" });
+    near((await one<{ stock_available: number }>("products", bujiId)).stock_available, stockBefore - 2);
+    const { data: mv } = await supabase.from("stock_movements").select("movement_type,quantity").eq("source_id", ret.id);
+    expect(mv).toHaveLength(1);
+    expect(mv?.[0]).toMatchObject({ movement_type: "RETURN_OUT" });
+    near(mv?.[0].quantity, -2);
+    expect((await getSupplierBalance(ctx.businessId, supplierId)).balance).toBe(balanceBefore + 15000 - 10000);
+  });
+
   it("8) başka bir cihaz gibi çekme: yerel veri silinip sunucudan alınınca stok ve bakiyeler aynı çıkar", async () => {
     for (const t of db.tables) await t.clear();
     const { data: first } = await supabase.from("sync_changes").select("id").order("id", { ascending: true }).limit(1);
@@ -419,10 +446,11 @@ describe.skipIf(!URL || !ANON || !EMAIL || !PASSWORD)("sunucuya karşı uçtan u
     expect(applied).toBeGreaterThan(0);
 
     const server = await one<{ stock_available: number }>("products", bujiId);
-    near(server.stock_available, 12);
-    expect((await getProductBalance(bujiId)).available).toBe(12);
+    const expectedBuji = hasReturns ? 13 : 12; // 7d: +3 alım −2 iade
+    near(server.stock_available, expectedBuji);
+    expect((await getProductBalance(bujiId)).available).toBe(expectedBuji);
     // makine alımı (2 × 4.000 TL) yapıldıysa borç 8.000 TL artmıştır
-    expect((await getSupplierBalance(ctx.businessId, supplierId)).balance).toBe(hasSerial ? 1115000 : 315000);
+    expect((await getSupplierBalance(ctx.businessId, supplierId)).balance).toBe((hasSerial ? 1115000 : 315000) + (hasReturns ? 5000 : 0));
     if (hasSerial) expect((await getProductBalance(machineProductId)).available).toBe(1);
     console.log(`[e2e] ${applied} değişiklik çekildi · doğrulanan adımlar: ${created.join(", ")}`);
   });

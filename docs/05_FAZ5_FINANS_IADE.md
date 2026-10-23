@@ -105,10 +105,12 @@ Veresiye yönetimi, vade takibi, açılış bakiyeleri, müşteri/tedarikçi iad
 ### ADIM 5.6 — Tedarikçiye İade
 
 **Görevler:**
-- [ ] Orijinal satın alma satırına bağlanır (§9.7)
-- [ ] Miktar, tutar, stok çıkışı (DAMAGED bucket veya AVAILABLE) ve tedarikçi bakiyesi etkisi kaydedilir
-- [ ] Stok çıkışı: StockMovement (DAMAGED_DISPOSE veya özel iade türü)
-- [ ] Tedarikçi bakiyesi güncellenir
+- [x] Orijinal satın alma satırına bağlanır (§9.7)
+- [x] Miktar, tutar, stok çıkışı (DAMAGED bucket veya AVAILABLE) ve tedarikçi bakiyesi etkisi kaydedilir
+- [x] Stok çıkışı: StockMovement (DAMAGED_DISPOSE veya özel iade türü)
+- [x] Tedarikçi bakiyesi güncellenir
+
+> Uygulandı: `src/lib/returns/purchase.ts` (`createPurchaseReturn`), alım detayında **Tedarikçiye iade** paneli, tedarikçi bakiyesi ve alımın kalan borcu iadeleri düşer (K-032). Geri alma `reverseReturn` ile satış iadesiyle ortaktır.
 
 **İlgili AC:** AC-013  
 **Test:** TC-015
