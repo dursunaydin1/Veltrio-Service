@@ -84,14 +84,16 @@
 ### ADIM 4.4 — Satış İptali
 
 **Görevler:**
-- [ ] Kesinleşmiş satış: gerekçe + onay ile iptal edilebilir (§9.6)
-- [ ] İptal işlemi:
+- [x] Kesinleşmiş satış: gerekçe + onay ile iptal edilebilir (§9.6)
+- [x] İptal işlemi:
   - Ürün AVAILABLE stoğa döner
   - Seri birim → IN_STOCK olur
   - Ödemeler ters kaydı veya müşteriye para iadesi
   - Makine satışıysa makine-müşteri ilişkisi geri alınır (sahiplik geçmişine yazılır)
-- [ ] İptal ≠ iade (fiziksel ürünün geri gelmesi değil, hatalı kayıt düzeltmesi)
+- [x] İptal ≠ iade (fiziksel ürünün geri gelmesi değil, hatalı kayıt düzeltmesi)
 - [ ] Raporlarda ayrı görünür; net toplamdan düşer; belge silinmez (AC-044)
+
+> Uygulandı: `cancelFinalSale` (`sales/service.ts`) ve satış detayında “Satışı iptal et”. Stok ters hareketle (CANCEL_REVERSAL, `reversal_of_id`) döner, seri birim IN_STOCK olur, tahsilatlar ters ödemeyle iade edilir; makine satışında devralınan makine eski sahibine döner (geçmişe yazılır), satışla açılmış servissiz makine arşivlenir. Onay adımı tek kullanıcılı olduğundan nedenin yazılması ve açık onay ekranı yeterli sayıldı (K-030). **Açık:** raporlarda iptallerin ayrı görünmesi (Faz 6).
 
 **İlgili FR:** FR-037  
 **İlgili AC:** AC-044  

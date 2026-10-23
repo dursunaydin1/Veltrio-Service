@@ -1,12 +1,14 @@
 import { db } from "@/lib/db";
 import type { Sale, SaleItem } from "@/lib/db";
 import { fromKurus, lineGross, toKurus } from "@/lib/calc";
-import { recordDocumentPayment } from "@/lib/finance/service";
+import { recordDocumentPayment, reversePayment, reversedPaymentIds } from "@/lib/finance/service";
 import {
   attachSaleToMachine,
   changeMachineOwner,
   createMachine,
+  detachSaleFromMachine,
   findMachinesBySerial,
+  setMachineArchived,
 } from "@/lib/machines/service";
 import { nextDocumentNo } from "@/lib/numbering";
 import { serialUnitPayload, unitLabel } from "@/lib/serial/service";
@@ -491,6 +493,96 @@ export async function cancelDraftSale(ctx: SaleContext, id: string, reason: stri
     });
     return next;
   });
+}
+
+/**
+ * Kesinleşmiş satışı iptal eder (§9.6, AC-044). İade değil, hatalı kaydın
+ * düzeltmesidir: belge silinmez, CANCELLED olur; her şey ters kayıtla geri alınır.
+ *  - stok: her satış hareketi için ters hareket (CANCEL_REVERSAL); seri birim IN_STOCK olur
+ *  - ödemeler: alınan her tahsilat için karşı yönlü ters ödeme (para iadesi)
+ *  - makine satışı: makineden satış bilgisi kalkar; satışla devredilen makine eski sahibine
+ *    döner (sahiplik geçmişine yazılır); satışla açılmış, servisi olmayan makine arşivlenir
+ */
+export async function cancelFinalSale(ctx: SaleContext, id: string, reason: string): Promise<Sale> {
+  const why = reason.trim();
+  if (!why) throw new SaleRuleError("İptal nedeni zorunludur.");
+  return db.transaction("rw", [...tables(), db.payment_allocations, db.services], async () => {
+    const sale = await db.sales.get(id);
+    if (!sale || sale.business_id !== ctx.businessId) throw new SaleRuleError("Satış bulunamadı.");
+    if (sale.status !== "FINAL") throw new SaleRuleError("Yalnızca kesinleşmiş satış bu şekilde iptal edilir.");
+    const note = `Satış iptali (${sale.document_no}): ${why}`;
+
+    for (const item of await getSaleItems(id)) {
+      const original = item.stock_movement_id ? await db.stock_movements.get(item.stock_movement_id) : undefined;
+      if (!original) continue;
+      await recordMovement(ctx, {
+        productId: original.product_id,
+        type: "CANCEL_REVERSAL",
+        bucket: original.bucket,
+        quantity: -original.quantity,
+        unitCost: original.unit_cost,
+        sourceType: "SALE",
+        sourceId: id,
+        note,
+        reversalOfId: original.id,
+        serialUnitId: original.serial_unit_id,
+      });
+
+      if (original.serial_unit_id) {
+        const unit = await db.product_serial_units.get(original.serial_unit_id);
+        if (unit) {
+          const back = { ...unit, status: "IN_STOCK" as const, machine_id: undefined, sale_item_id: undefined, updated_at: nowISO() };
+          await db.product_serial_units.put(back);
+          await enqueue("product_serial_units", unit.id, "UPDATE", serialUnitPayload(back, true), ctx.deviceCode);
+        }
+      }
+      if (item.machine_id) await undoMachineSale(ctx, sale, item.machine_id, note);
+    }
+
+    const payments = await getSalePayments(id);
+    const reversed = reversedPaymentIds(payments);
+    for (const p of payments) {
+      if (p.direction === "IN" && !p.reversal_of_id && !reversed.has(p.id)) {
+        await reversePayment(ctx, p.id, note);
+      }
+    }
+
+    const next: Sale = { ...sale, status: "CANCELLED", cancel_reason: why, updated_at: nowISO() };
+    await db.sales.put(next);
+    await enqueue("sales", id, "UPDATE", salePayload(next, true), ctx.deviceCode);
+    await writeAuditLog({
+      businessId: ctx.businessId,
+      entityType: "sales",
+      entityId: id,
+      action: "STATE_CHANGE",
+      deviceCode: ctx.deviceCode,
+      actorId: ctx.actorId,
+      reason: why,
+      oldValue: { status: "FINAL" },
+      newValue: { status: "CANCELLED" },
+    });
+    return next;
+  });
+}
+
+async function undoMachineSale(ctx: SaleContext, sale: Sale, machineId: string, note: string): Promise<void> {
+  const machine = await db.machines.get(machineId);
+  if (!machine || machine.sale_id !== sale.id) return;
+  await detachSaleFromMachine(ctx, machineId);
+
+  const history = await db.machine_ownership_history.where("machine_id").equals(machineId).toArray();
+  const transfer = history
+    .filter((h) => h.reason === `Makine satışı (${sale.document_no})`)
+    .sort((a, b) => a.changed_at.localeCompare(b.changed_at))
+    .pop();
+  if (transfer?.old_customer_id) {
+    await changeMachineOwner(ctx, machineId, transfer.old_customer_id, note);
+    return;
+  }
+  const createdBySale = machine.created_at >= sale.created_at && history.length === 0;
+  if (createdBySale && (await db.services.where("machine_id").equals(machineId).count()) === 0) {
+    await setMachineArchived(ctx, machineId, true, note);
+  }
 }
 
 /** Kesinleşmiş satışa sonradan tahsilat (veresiye ödemesi). */

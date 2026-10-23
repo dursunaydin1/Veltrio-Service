@@ -13,6 +13,7 @@ import { PAYMENT_METHOD_LABELS, reversedPaymentIds } from "@/lib/finance/service
 import {
   NegativeStockReasonRequiredError,
   cancelDraftSale,
+  cancelFinalSale,
   collectSalePayment,
   finalizeSale,
   getSaleBalance,
@@ -102,6 +103,7 @@ export function SaleDetail({ id }: { id: string }) {
 
       {sale.status === "DRAFT" ? <DraftActions sale={sale} onEdit={() => setEditing(true)} /> : null}
       {sale.status === "FINAL" ? <SalePayments sale={sale} /> : null}
+      {sale.status === "FINAL" ? <FinalCancel sale={sale} /> : null}
     </div>
   );
 }
@@ -313,8 +315,56 @@ function SalePayments({ sale }: { sale: Sale }) {
         </ul>
       )}
       <small style={{ color: "var(--text-muted)" }}>
-        Kesinleşmiş satışın hatası iptal veya iade ile düzeltilir (Adım 4.4, Faz 5). Hatalı tahsilat, müşteri sayfasındaki geçmişten ters kaydedilir.
+        Hatalı satış aşağıdan iptal edilir; fiziksel ürün geri geliyorsa bu iade (Faz 5) olur. Hatalı tahsilat, müşteri sayfasındaki geçmişten ters kaydedilir.
       </small>
+    </section>
+  );
+}
+
+/** Kesinleşmiş satış iptali: nedeni zorunlu, her şey ters kayıtla geri alınır (AC-044). */
+function FinalCancel({ sale }: { sale: Sale }) {
+  const ctx = useServiceContext();
+  const [open, setOpen] = useState(false);
+  const [reason, setReason] = useState("");
+  const [error, setError] = useState<string | null>(null);
+  const [busy, setBusy] = useState(false);
+
+  async function cancel() {
+    if (!ctx) return setError("Cihaz bilgisi henüz yüklenmedi, lütfen tekrar deneyin.");
+    setBusy(true);
+    setError(null);
+    try {
+      await cancelFinalSale(ctx, sale.id, reason);
+    } catch (e) {
+      setError(e instanceof Error ? e.message : "İptal edilemedi.");
+      setBusy(false);
+    }
+  }
+
+  return (
+    <section className="card stack stack-md" aria-labelledby="fc-title">
+      <h2 id="fc-title">Satışı iptal et</h2>
+      {open ? (
+        <div className="stack stack-md">
+          <p>
+            Ürünler stoğa geri döner (makine birimi stokta olur), alınan tahsilatlar ters kaydedilir, makine satışıysa makine
+            kaydı geri alınır. Belge silinmez, “İptal” olarak kalır.
+          </p>
+          <div className="form-group">
+            <label className="form-label" htmlFor="fc-reason">İptal nedeni *</label>
+            <input id="fc-reason" className="form-input" value={reason} onChange={(e) => setReason(e.target.value)} autoFocus />
+          </div>
+          {error ? <div className="alert alert-error" role="alert">{error}</div> : null}
+          <div className="row row-gap-md">
+            <button type="button" className="btn btn-secondary" style={{ flex: 1 }} onClick={() => setOpen(false)} disabled={busy}>Vazgeç</button>
+            <button type="button" className="btn btn-danger" style={{ flex: 1 }} onClick={cancel} disabled={busy}>
+              {busy ? "İptal ediliyor…" : "Satışı iptal et"}
+            </button>
+          </div>
+        </div>
+      ) : (
+        <button type="button" className="btn btn-ghost btn-full" onClick={() => setOpen(true)}>İptal et…</button>
+      )}
     </section>
   );
 }

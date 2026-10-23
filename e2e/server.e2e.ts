@@ -8,7 +8,7 @@ import { createCustomer } from "@/lib/customers/service";
 import { getSupplierBalance, recordSupplierPayment, setSupplierOpeningBalance } from "@/lib/finance/service";
 import { createProduct } from "@/lib/products/service";
 import { createPurchase } from "@/lib/purchases/service";
-import { createSale, getSaleBalance } from "@/lib/sales/service";
+import { cancelFinalSale, createSale, getSaleBalance } from "@/lib/sales/service";
 import { getInStockUnits } from "@/lib/serial/service";
 import { getProductBalance } from "@/lib/stock/ledger";
 import { addStock } from "@/lib/stock/service";
@@ -84,12 +84,14 @@ async function sync(label: string) {
     }
   }
   if (errors.length > 0) throw new Error(`[${label}] sunucu reddetti (${errors.length}/${items.length}):\n${errors.join("\n")}`);
+  await pullAll(); // uygulama da gönderdikten sonra çeker: yerel sürümler sunucununkine yetişir
   return { pushed, conflicts };
 }
 
 /** Sunucudaki kayıtları (başka bir cihaz gibi) yerel veritabanına çeker. */
+let pullCursor = 0;
 async function pullAll() {
-  let cursor = 0;
+  let cursor = pullCursor;
   let applied = 0;
   for (;;) {
     const { data, error } = await supabase
@@ -109,6 +111,7 @@ async function pullAll() {
     }
     cursor = data[data.length - 1].id as number;
   }
+  pullCursor = cursor;
   return applied;
 }
 
@@ -126,6 +129,7 @@ describe.skipIf(!URL || !ANON || !EMAIL || !PASSWORD)("sunucuya karşı uçtan u
   let customerId: string;
   let bujiId: string;
   let machineProductId: string;
+  let creditSaleId: string;
 
   beforeAll(async () => {
     supabase = createClient(URL as string, ANON as string, { auth: { persistSession: false } });
@@ -134,6 +138,10 @@ describe.skipIf(!URL || !ANON || !EMAIL || !PASSWORD)("sunucuya karşı uçtan u
 
     const { data: profile } = await supabase.from("users").select("business_id").eq("id", data.user.id).single();
     ctx = { businessId: profile?.business_id as string, deviceCode: DEVICE, actorId: data.user.id };
+
+    // Önceki çalıştırmaların kayıtlarını çekmemek için imleç, mevcut son değişikliğe konur.
+    const { data: last } = await supabase.from("sync_changes").select("id").order("id", { ascending: false }).limit(1);
+    pullCursor = (last?.[0]?.id as number | undefined) ?? 0;
 
     const probe = await supabase.from("product_serial_units").select("internal_number").limit(1);
     hasSerial = !probe.error;
@@ -211,6 +219,7 @@ describe.skipIf(!URL || !ANON || !EMAIL || !PASSWORD)("sunucuya karşı uçtan u
       { finalize: true, payment: { amountKurus: 5000, method: "CASH" } }
     );
     await sync("veresiye satış");
+    creditSaleId = sale.id;
 
     const row = await one<{ status: string; total_amount: number; finalized_at: string | null; customer_id: string }>("sales", sale.id);
     expect(row).toMatchObject({ status: "FINAL", customer_id: customerId });
@@ -240,7 +249,7 @@ describe.skipIf(!URL || !ANON || !EMAIL || !PASSWORD)("sunucuya karşı uçtan u
   });
 
   it("6) sunucu kuralı: aynı ekleme yeniden gönderilince kopya oluşmaz (idempotent), eski sürümle güncelleme çakışma verir", async () => {
-    const pending = await db.sales.where("business_id").equals(ctx.businessId).first();
+    const pending = await db.sales.get(creditSaleId);
     expect(pending).toBeTruthy();
 
     // Aynı satış kaydını tekrar INSERT et: kopya oluşmamalı
@@ -327,8 +336,46 @@ describe.skipIf(!URL || !ANON || !EMAIL || !PASSWORD)("sunucuya karşı uçtan u
     created.push("makine alımı", "makine satışı");
   });
 
+  it("7b) satış iptali: stok, birim, tahsilat ve makine sunucuda geri alınır", async (ctxTest) => {
+    // Müşterili veresiye satış (4. adımdaki) yerine yeni bir satış: izlenmesi kolay
+    const sale = await createSale(
+      ctx,
+      { customerId, lines: [{ productId: bujiId, quantity: 2, unitPriceKurus: 10000, taxMode: "NONE", taxRate: 0 }] },
+      { finalize: true, payment: { amountKurus: 20000, method: "CASH" } }
+    );
+    await sync("iptal edilecek satış");
+    near((await one<{ stock_available: number }>("products", bujiId)).stock_available, 10);
+
+    await cancelFinalSale(ctx, sale.id, "e2e iptal");
+    await sync("satış iptali");
+    expect((await one<{ status: string; cancel_reason: string }>("sales", sale.id))).toMatchObject({ status: "CANCELLED", cancel_reason: "e2e iptal" });
+    near((await one<{ stock_available: number }>("products", bujiId)).stock_available, 12);
+    const { data: pays } = await supabase.from("payments").select("direction,status,reversal_of_id").eq("source_id", sale.id);
+    expect(pays).toHaveLength(2);
+    expect(pays?.some((p) => p.status === "REVERSED" && p.direction === "OUT" && p.reversal_of_id)).toBe(true);
+    const { data: mv } = await supabase.from("stock_movements").select("reversal_of_id,movement_type").eq("source_id", sale.id).eq("movement_type", "CANCEL_REVERSAL");
+    expect(mv).toHaveLength(1);
+    expect(mv?.[0].reversal_of_id).toBeTruthy();
+
+    if (!hasSerial) return ctxTest.skip();
+    const unit = (await getInStockUnits(machineProductId))[0];
+    const msale = await createSale(
+      ctx,
+      { customerId, lines: [{ productId: machineProductId, quantity: 1, unitPriceKurus: 600000, taxMode: "NONE", taxRate: 0, serialUnitId: unit.id }] },
+      { finalize: true, payment: { amountKurus: 600000, method: "CASH" } }
+    );
+    await sync("ikinci makine satışı");
+    await cancelFinalSale(ctx, msale.id, "e2e makine iptali");
+    await sync("makine satışı iptali");
+    const back = await one<{ status: string; machine_id: string | null }>("product_serial_units", unit.id);
+    expect(back).toMatchObject({ status: "IN_STOCK", machine_id: null });
+    near((await one<{ stock_available: number }>("products", machineProductId)).stock_available, 1);
+  });
+
   it("8) başka bir cihaz gibi çekme: yerel veri silinip sunucudan alınınca stok ve bakiyeler aynı çıkar", async () => {
     for (const t of db.tables) await t.clear();
+    const { data: first } = await supabase.from("sync_changes").select("id").order("id", { ascending: true }).limit(1);
+    pullCursor = ((first?.[0]?.id as number | undefined) ?? 1) - 1;
     const applied = await pullAll();
     expect(applied).toBeGreaterThan(0);
 

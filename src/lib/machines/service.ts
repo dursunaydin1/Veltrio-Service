@@ -305,6 +305,32 @@ export async function setMachineArchived(
   );
 }
 
+/** Satış iptalinde makineden satış bilgisini (belge, tarih, fiyat) kaldırır. */
+export async function detachSaleFromMachine(ctx: BusinessContext, machineId: string): Promise<Machine> {
+  return db.transaction("rw", [db.machines, db.sync_queue], async () => {
+    const existing = await db.machines.get(machineId);
+    if (!existing || existing.business_id !== ctx.businessId) {
+      throw new MachineRuleError("Makine bulunamadı.");
+    }
+    const next: Machine = {
+      ...existing,
+      sale_id: undefined,
+      sale_date: undefined,
+      sale_price: undefined,
+      updated_at: nowISO(),
+    };
+    await db.machines.put(next);
+    await enqueue(
+      "machines",
+      machineId,
+      "UPDATE",
+      { ...editablePayload(next), version: existing.version ?? 1 },
+      ctx.deviceCode
+    );
+    return next;
+  });
+}
+
 /**
  * Makine satışıyla oluşan / eşleşen makineye satış bilgisini (belge, tarih,
  * fiyat) yazar. Satış kesinleşirken, satış işleminin içinde çağrılır.

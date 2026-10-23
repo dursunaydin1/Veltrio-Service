@@ -5,6 +5,11 @@
 
 ## 2026-10-22
 
+### K-030 · Kesinleşmiş satış iptali
+- **Karar:** İptal, belgeyi silmeden ters kayıtlarla yapılır: stok için `CANCEL_REVERSAL` hareketi (`reversal_of_id` ile asıl harekete bağlı), tahsilat için karşı yönlü ters ödeme, seri birim `IN_STOCK`, makine satışında satış bilgisi makineden kalkar ve sahiplik geri alınır. Tek kullanıcılı uygulamada ayrı yönetici onayı yerine zorunlu neden + açık onay ekranı kullanılır.
+- **Etki:** `sales/service.ts` (`cancelFinalSale`), `machines/service.ts` (`detachSaleFromMachine`), `stock/service.ts` (`reversalOfId`), `SaleDetail`.
+- **Test düzeneği:** sunucu testinde her gönderimden sonra çekme yapılır (uygulama da yapar); aksi halde art arda güncelleme sahte sürüm çakışması verirdi.
+
 ### K-029 · Sunucuya karşı otomatik QA testi ve kuyruk birleştirme hatası
 - **Karar:** `npm run test:e2e` ile gerçek Supabase'e karşı uçtan uca test düzeneği kuruldu (`docs/08_QA_TEST.md`). Tarayıcıda elle deneme yerine her adım sonrası çalıştırılır.
 - **Bulunan hata:** `enqueue` bekleyen INSERT'e UPDATE birleştirirken INSERT yükünü eziyordu; UPDATE yükünde belge no/oluşturma sütunları olmadığından sunucu NOT NULL ile reddediyordu. Artık UPDATE değişiklikleri INSERT yükünün üzerine bindirilir (regresyon testi `queue.test.ts`).

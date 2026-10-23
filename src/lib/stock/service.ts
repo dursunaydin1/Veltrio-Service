@@ -41,6 +41,8 @@ export type MovementInput = {
   sourceId?: string;
   /** Seri takipli ürünlerde hareketin ait olduğu birim (miktar ±1 olmalıdır) */
   serialUnitId?: string;
+  /** Bu hareketin düzelttiği (ters kaydettiği) hareket */
+  reversalOfId?: string;
 };
 
 /**
@@ -106,6 +108,7 @@ async function appendMovement(ctx: StockContext, input: MovementInput): Promise<
     movement_type: input.type,
     bucket,
     serial_unit_id: input.serialUnitId,
+    reversal_of_id: input.reversalOfId,
     quantity: input.quantity,
     unit_cost: input.unitCost,
     source_type: input.sourceType,
@@ -128,6 +131,7 @@ async function appendMovement(ctx: StockContext, input: MovementInput): Promise<
       bucket: movement.bucket,
       quantity: movement.quantity,
       serial_unit_id: movement.serial_unit_id ?? null,
+      reversal_of_id: movement.reversal_of_id ?? null,
       unit_cost: movement.unit_cost ?? null,
       source_type: movement.source_type ?? null,
       source_id: movement.source_id ?? null,
