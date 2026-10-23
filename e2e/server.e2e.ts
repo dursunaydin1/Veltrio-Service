@@ -435,7 +435,7 @@ describe.skipIf(!URL || !ANON || !EMAIL || !PASSWORD)("sunucuya karşı uçtan u
     expect(mv).toHaveLength(1);
     expect(mv?.[0]).toMatchObject({ movement_type: "RETURN_OUT" });
     near(mv?.[0].quantity, -2);
-    expect((await getSupplierBalance(ctx.businessId, supplierId)).balance).toBe(balanceBefore + 15000 - 10000);
+    expect((await getSupplierBalance(ctx.businessId, supplierId)).balance).toBe(balanceBefore - 10000); // bakiye, yeni alımı zaten içeriyor; 2 adetlik iade 100 TL düşürür
   });
 
   it("8) başka bir cihaz gibi çekme: yerel veri silinip sunucudan alınınca stok ve bakiyeler aynı çıkar", async () => {
@@ -446,11 +446,11 @@ describe.skipIf(!URL || !ANON || !EMAIL || !PASSWORD)("sunucuya karşı uçtan u
     expect(applied).toBeGreaterThan(0);
 
     const server = await one<{ stock_available: number }>("products", bujiId);
-    const expectedBuji = hasReturns ? 13 : 12; // 7d: +3 alım −2 iade
+    const expectedBuji = hasReturns ? 9 : 12; // 7c: −4 satış +1 iade −1 geri alma; 7d: +3 alım −2 iade
     near(server.stock_available, expectedBuji);
     expect((await getProductBalance(bujiId)).available).toBe(expectedBuji);
     // makine alımı (2 × 4.000 TL) yapıldıysa borç 8.000 TL artmıştır
-    expect((await getSupplierBalance(ctx.businessId, supplierId)).balance).toBe((hasSerial ? 1115000 : 315000) + (hasReturns ? 5000 : 0));
+    expect((await getSupplierBalance(ctx.businessId, supplierId)).balance).toBe((hasSerial ? 1115000 : 315000) + (hasReturns ? 15000 - 10000 : 0));
     if (hasSerial) expect((await getProductBalance(machineProductId)).available).toBe(1);
     console.log(`[e2e] ${applied} değişiklik çekildi · doğrulanan adımlar: ${created.join(", ")}`);
   });
