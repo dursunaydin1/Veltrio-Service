@@ -95,6 +95,7 @@ export function SaleForm({
   const [customerId, setCustomerId] = useState(sale?.customer_id ?? initialCustomerId);
   const [date, setDate] = useState(sale ? sale.sale_date.slice(0, 10) : todayLocalDate());
   const [notes, setNotes] = useState(sale?.notes ?? "");
+  const [dueDate, setDueDate] = useState(sale?.due_date ?? "");
   const [lines, setLines] = useState<DraftLine[]>(() => fromItems(items));
   const [docDiscount, setDocDiscount] = useState("");
   const [pickerKey, setPickerKey] = useState(0);
@@ -168,6 +169,7 @@ export function SaleForm({
       customerId: customerId || undefined,
       saleDate: date,
       notes,
+      dueDate: dueDate || undefined,
       documentDiscountKurus: docDiscountKurus,
       lines: lines.map((l, i) => ({
         productId: l.productId,
@@ -308,6 +310,13 @@ export function SaleForm({
             {customerId
               ? `Veresiye: ${formatCurrency(unpaidKurus / 100)} müşterinin borcuna yazılacak.`
               : `Tahsil edilmeyen ${formatCurrency(unpaidKurus / 100)} var: veresiye için müşteri seçin ya da tutarı tahsil edin.`}
+          </div>
+        ) : null}
+        {unpaidKurus > 0 && totalKurus > 0 && customerId ? (
+          <div className="form-group">
+            <label className="form-label" htmlFor="sl-due">Vade tarihi (isteğe bağlı)</label>
+            <input id="sl-due" className="form-input" type="date" value={dueDate} onChange={(e) => setDueDate(e.target.value)} />
+            <small style={{ color: "var(--text-muted)" }}>Girilirse vade gününde ve 7 gün gecikince hatırlatılır.</small>
           </div>
         ) : null}
       </fieldset>

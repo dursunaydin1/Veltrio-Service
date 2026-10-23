@@ -164,6 +164,7 @@ export function DeliveryPanel({ service }: { service: Service }) {
   const [method, setMethod] = useState<PaymentMethod>("CASH");
   const [receiver, setReceiver] = useState("");
   const [ack, setAck] = useState(false);
+  const [dueDate, setDueDate] = useState("");
   const [error, setError] = useState<string | null>(null);
   const [busy, setBusy] = useState(false);
 
@@ -185,7 +186,7 @@ export function DeliveryPanel({ service }: { service: Service }) {
 
     setBusy(true);
     try {
-      await deliverService(ctx, service.id, { payment, receiverName: receiver, debtAcknowledged: ack });
+      await deliverService(ctx, service.id, { payment, receiverName: receiver, debtAcknowledged: ack, dueDate: dueDate || undefined });
     } catch (e) {
       setError(e instanceof Error ? e.message : "Teslim edilemedi.");
       setBusy(false);
@@ -231,6 +232,12 @@ export function DeliveryPanel({ service }: { service: Service }) {
           <input type="checkbox" checked={ack} onChange={(e) => setAck(e.target.checked)} />
           Müşteri kalan {money(after)} borcu kabul ediyor (borçlu teslim)
         </label>
+      ) : null}
+      {after > 0 ? (
+        <div className="form-group">
+          <label className="form-label" htmlFor="dl-due">Ödeme sözü / vade tarihi (isteğe bağlı)</label>
+          <input id="dl-due" className="form-input" type="date" value={dueDate} onChange={(e) => setDueDate(e.target.value)} />
+        </div>
       ) : null}
 
       {error ? <div className="alert alert-error" role="alert">{error}</div> : null}

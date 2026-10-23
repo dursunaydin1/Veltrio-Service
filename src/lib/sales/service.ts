@@ -1,6 +1,7 @@
 import { db } from "@/lib/db";
 import type { Sale, SaleItem } from "@/lib/db";
 import { fromKurus, lineGross, toKurus } from "@/lib/calc";
+import { getAllocatedKurus } from "@/lib/finance/allocated";
 import { recordDocumentPayment, reversePayment, reversedPaymentIds } from "@/lib/finance/service";
 import {
   attachSaleToMachine,
@@ -61,6 +62,8 @@ export type SaleInput = {
   saleDate?: string;
   notes?: string;
   lines: SaleLineInput[];
+  /** Vade tarihi (YYYY-MM-DD, isteğe bağlı): kalan tutar için söz verilen ödeme günü */
+  dueDate?: string;
   /** Belge geneli indirim (kuruş): satırlara tutara orantılı dağıtılır ve satır indirimine yazılır */
   documentDiscountKurus?: number;
 };
@@ -79,6 +82,7 @@ const SALE_COLUMNS = [
   "cancel_reason",
   "notes",
   "finalized_at",
+  "due_date",
   "created_by_device",
   "created_at",
 ] as const;
@@ -124,6 +128,12 @@ const isoOf = (date?: string): string => {
   return `${date}T12:00:00.000Z`;
 };
 
+const dueOf = (date?: string): string | undefined => {
+  if (!date) return undefined;
+  if (!/^\d{4}-\d{2}-\d{2}$/.test(date)) throw new SaleRuleError("Vade tarihi geçersiz.");
+  return date;
+};
+
 function tables() {
   return [
     db.sales,
@@ -135,6 +145,7 @@ function tables() {
     db.product_serial_units,
     db.stock_movements,
     db.payments,
+    db.payment_allocations,
     db.counters,
     db.sync_queue,
     db.audit_logs,
@@ -248,6 +259,7 @@ async function persist(ctx: SaleContext, input: SaleInput, existing?: Sale): Pro
     tax_total: fromKurus(totals.taxTotal),
     total_amount: fromKurus(totals.total),
     notes: tidy(input.notes),
+    due_date: dueOf(input.dueDate),
     updated_at: now,
   };
 
@@ -506,7 +518,7 @@ export async function cancelDraftSale(ctx: SaleContext, id: string, reason: stri
 export async function cancelFinalSale(ctx: SaleContext, id: string, reason: string): Promise<Sale> {
   const why = reason.trim();
   if (!why) throw new SaleRuleError("İptal nedeni zorunludur.");
-  return db.transaction("rw", [...tables(), db.payment_allocations, db.services, db.return_transactions], async () => {
+  return db.transaction("rw", [...tables(), db.services, db.return_transactions], async () => {
     const sale = await db.sales.get(id);
     if (!sale || sale.business_id !== ctx.businessId) throw new SaleRuleError("Satış bulunamadı.");
     if (sale.status !== "FINAL") throw new SaleRuleError("Yalnızca kesinleşmiş satış bu şekilde iptal edilir.");
@@ -645,7 +657,9 @@ export async function getSaleBalance(saleId: string): Promise<SaleBalance> {
   ]);
   const returned = returns.reduce((acc, r) => acc + toKurus(r.total_amount), 0);
   const total = toKurus(sale?.total_amount ?? 0) - returned;
-  const paid = payments.reduce((acc, p) => acc + (p.direction === "IN" ? 1 : -1) * toKurus(p.amount), 0);
+  const paid =
+    payments.reduce((acc, p) => acc + (p.direction === "IN" ? 1 : -1) * toKurus(p.amount), 0) +
+    (await getAllocatedKurus("SALE", saleId));
   return { total, paid, returned, remaining: total - paid };
 }
 

@@ -8,6 +8,9 @@ import { createCustomer } from "@/lib/customers/service";
 import { getSupplierBalance, recordSupplierPayment, setSupplierOpeningBalance } from "@/lib/finance/service";
 import { createProduct } from "@/lib/products/service";
 import { createPurchase, getPurchaseItems } from "@/lib/purchases/service";
+import { recordCustomerCollection, getCustomerOpenItems } from "@/lib/finance/openItems";
+import { fifoAllocate } from "@/lib/finance/aging";
+import { syncPaymentDueNotifications } from "@/lib/notifications/paymentDue";
 import { createMachine } from "@/lib/machines/service";
 import { addOperation, addPart, recordApproval, setPartUsedQuantity } from "@/lib/services/quote";
 import { changeServiceStatus, deliverService, getServiceBalance, openService } from "@/lib/services/service";
@@ -58,6 +61,7 @@ let supabase: SupabaseClient;
 let ctx: { businessId: string; deviceCode: string; actorId?: string };
 let hasSerial = false;
 let hasReturns = false;
+let hasDue = false;
 
 const created: string[] = [];
 
@@ -150,6 +154,7 @@ describe.skipIf(!URL || !ANON || !EMAIL || !PASSWORD)("sunucuya karşı uçtan u
     const { data: last } = await supabase.from("sync_changes").select("id").order("id", { ascending: false }).limit(1);
     pullCursor = (last?.[0]?.id as number | undefined) ?? 0;
 
+    hasDue = !(await supabase.from("sales").select("due_date").limit(1)).error;
     const probe = await supabase.from("product_serial_units").select("internal_number").limit(1);
     hasSerial = !probe.error;
     hasReturns = !(await supabase.from("return_transactions").select("refund_payment_id").limit(1)).error;
@@ -157,7 +162,7 @@ describe.skipIf(!URL || !ANON || !EMAIL || !PASSWORD)("sunucuya karşı uçtan u
 
   it("0) bağlantı: oturum, işletme ve migration durumu", () => {
     expect(ctx.businessId).toMatch(/^[0-9a-f-]{36}$/);
-    console.log(`[e2e] cihaz=${DEVICE} · 018 (seri birim): ${hasSerial ? "VAR" : "YOK"} · 019 (iade): ${hasReturns ? "VAR" : "YOK"}`);
+    console.log(`[e2e] cihaz=${DEVICE} · 018 (seri birim): ${hasSerial ? "VAR" : "YOK"} · 019 (iade): ${hasReturns ? "VAR" : "YOK"} · 020 (vade): ${hasDue ? "VAR" : "YOK"}`);
   });
 
   it("1) tedarikçi: açılış bakiyesi ve ödeme sunucuya gider, bakiye sunucu verisinden doğru çıkar", async () => {
@@ -481,6 +486,47 @@ describe.skipIf(!URL || !ANON || !EMAIL || !PASSWORD)("sunucuya karşı uçtan u
     expect(await getServiceBalance(service.id)).toMatchObject({ remaining: 0 });
   });
 
+  it("7f) vadeli veresiye, genel tahsilat tahsisi ve vade bildirimi sunucuda doğru", async (ctxTest) => {
+    if (!hasDue) {
+      console.log("[e2e] migration 020 uygulanmamış: vade/tahsis bölümü atlandı");
+      return ctxTest.skip();
+    }
+    const dueDate = "2026-01-10";
+    const a = await createSale(ctx, { customerId, saleDate: "2026-01-01", dueDate, lines: [{ productId: bujiId, quantity: 1, unitPriceKurus: 20000, taxMode: "NONE", taxRate: 0 }] }, { finalize: true });
+    const b = await createSale(ctx, { customerId, saleDate: "2026-01-05", lines: [{ productId: bujiId, quantity: 1, unitPriceKurus: 30000, taxMode: "NONE", taxRate: 0 }] }, { finalize: true });
+    await sync("vadeli veresiye satışlar");
+    expect((await one<{ due_date: string }>("sales", a.id)).due_date).toBe(dueDate);
+
+    // Genel tahsilat: en eski borçtan başlayarak 250 TL dağıt
+    const open = await getCustomerOpenItems(ctx.businessId, customerId);
+    const mine = open.items.filter((i) => i.id === a.id || i.id === b.id);
+    const parts = fifoAllocate(mine.map((i) => ({ key: i.key, refDate: i.refDate, remainingKurus: i.remainingKurus })), 25000);
+    const allocations = parts.map((p) => {
+      const item = mine.find((i) => i.key === p.key)!;
+      return { kind: item.kind, id: item.id, amountKurus: p.amountKurus };
+    });
+    const payment = await recordCustomerCollection(ctx, { customerId, method: "CASH", amountKurus: 25000, allocations });
+    await sync("genel tahsilat");
+    const { data: allocs } = await supabase.from("payment_allocations").select("source_id,allocated_amount").eq("payment_id", payment.id);
+    expect(allocs).toHaveLength(2);
+    expect(Object.fromEntries((allocs ?? []).map((x) => [x.source_id, Number(x.allocated_amount)]))).toEqual({ [a.id]: 200, [b.id]: 50 });
+    expect(await getSaleBalance(a.id)).toMatchObject({ remaining: 0 });
+    expect(await getSaleBalance(b.id)).toMatchObject({ remaining: 25000 });
+
+    // Vade bildirimi: a ödendi (bildirim yok); b'ye vade verilmemiş → bildirim üretilmez
+    expect(await syncPaymentDueNotifications(ctx, "2026-03-01")).toBe(0);
+    const c = await createSale(ctx, { customerId, dueDate: "2026-02-01", lines: [{ productId: bujiId, quantity: 1, unitPriceKurus: 10000, taxMode: "NONE", taxRate: 0 }] }, { finalize: true });
+    expect(await syncPaymentDueNotifications(ctx, "2026-03-01")).toBe(2); // vade günü + 7 gün gecikme
+    await sync("vade bildirimleri");
+    const { data: notes } = await supabase.from("notifications").select("dedupe_key,type").eq("related_record_id", c.id);
+    expect(notes?.map((n) => n.dedupe_key).sort()).toEqual([`PAYMENT_DUE:SALE:${c.id}:DUE`, `PAYMENT_DUE:SALE:${c.id}:OVERDUE7`].sort());
+    // Aynı olay ikinci cihazda aynı kimlikle üretilir: tekrar gönderim çakışma değil
+    await db.notifications.clear();
+    await db.sync_queue.clear();
+    await syncPaymentDueNotifications({ ...ctx, deviceCode: "DEMO-ZZ99" }, "2026-03-01");
+    await sync("ikinci cihaz bildirimleri");
+  });
+
   it("8) başka bir cihaz gibi çekme: yerel veri silinip sunucudan alınınca stok ve bakiyeler aynı çıkar", async () => {
     for (const t of db.tables) await t.clear();
     const { data: first } = await supabase.from("sync_changes").select("id").order("id", { ascending: true }).limit(1);
@@ -489,7 +535,7 @@ describe.skipIf(!URL || !ANON || !EMAIL || !PASSWORD)("sunucuya karşı uçtan u
     expect(applied).toBeGreaterThan(0);
 
     const server = await one<{ stock_available: number }>("products", bujiId);
-    const expectedBuji = hasReturns ? 8 : 12; // 7c: −4 satış +1 iade −1 geri alma; 7d: +3 alım −2 iade; 7e: −2 servis +1 iade
+    const expectedBuji = (hasReturns ? 8 : 12) - (hasDue ? 3 : 0); // 7c: −4 satış +1 iade −1 geri alma; 7d: +3 alım −2 iade; 7e: −2 servis +1 iade
     near(server.stock_available, expectedBuji);
     expect((await getProductBalance(bujiId)).available).toBe(expectedBuji);
     // makine alımı (2 × 4.000 TL) yapıldıysa borç 8.000 TL artmıştır

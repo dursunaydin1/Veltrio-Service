@@ -88,6 +88,8 @@ export interface Service {
   delivery_balance?: number;
   /** Borçlu teslimde müşterinin borcu kabul ettiği (AC-025) */
   debt_acknowledged?: boolean;
+  /** Borçlu teslimde söz verilen ödeme tarihi (YYYY-MM-DD); boşsa vade yok */
+  due_date?: string;
   /** Sunucu kayıt sürümü; güncellemede çakışma tespiti için gönderilir. */
   version?: number;
   created_by_device: string;
@@ -193,6 +195,8 @@ export interface Sale {
   notes?: string;
   /** Satışın kesinleştiği an; stok çıkışı ve tahsilat bu anda yapılır */
   finalized_at?: string;
+  /** Vade (YYYY-MM-DD); boşsa vade yok */
+  due_date?: string;
   /** Sunucu kayıt sürümü; güncellemede çakışma tespiti için gönderilir. */
   version?: number;
   created_by_device: string;

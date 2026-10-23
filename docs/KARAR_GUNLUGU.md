@@ -5,6 +5,12 @@
 
 ## 2026-10-22
 
+### K-034 · Vade tarihi belgede; belgesiz tahsilat tahsisi; bildirim kimliği
+- **Vade (plan sapması):** Plan vadeyi `Payment`'ta tutmayı söylüyordu. Ödenmemiş alacak henüz bir ödeme olmadığından vade **belgeye** yazılır: `sales.due_date`, borçlu teslimde `services.due_date` (migration 020). Boşsa vade yoktur: hatırlatma üretilmez, yaşlandırma belge tarihine göre yapılır.
+- **Tahsis:** Belgeden alınan ödeme `source_id` ile o belgeye bağlıdır. Belgesiz genel tahsilat `payment_allocations` ile açık kalemlere dağıtılır (varsayılan en eski kalem önce, kullanıcı değiştirebilir); dağıtılmayan kısım avans olarak kalır ve onayla mahsup edilir. Tahsisler ters kaydedilmiş ödemelerde sayılmaz. Net bakiye hesabı değişmedi (belgelerden hesaplanır); `creditKurus` = brüt açık borç − net bakiye.
+- **Bildirimler:** `PAYMENT_DUE` bildirimi vade gününde ve 7 günü aşınca bir kez üretilir; kimlik `dedupe_key`'den deterministik türetilir (uuid v5) ki birden fazla cihaz aynı olayı üretince sunucudaki UNIQUE (işletme, dedupe_key) kısıtı çakışmasın.
+- **Etki:** migration 020, `finance/{aging,allocated,openItems}.ts`, `notifications/paymentDue.ts`, `OpenItemsPanel`, `BalanceReport`, `usePaymentDueReminders`.
+
 ### K-033 · Servis ücret iadesi ve eşitleme hatası düzeltmesi
 - **Karar:** Teslim öncesi iptalde alınan kapora ters finans hareketiyle (servise bağlı OUT ödeme, tutar sınırlı) iade edilir; iade edilmezse müşteri alacağı olarak bakiyede kalır. İptal edilmiş servisin tutarı 0 sayılır. Teslim sonrası düzeltme `return_transactions` (`original_type = SERVICE`) ile yapılır: parça iadesi (stok durumuyla) ve/veya parçaya bağlı olmayan tutar; para kuralı satış iadesiyle aynıdır (K-031). Kullanılmış parça stoğu iptalde otomatik geri eklenmez.
 - **Düzeltilen hata (sunucu testiyle bulundu):** Yeni servis kaydının `debt_acknowledged` alanı `null` gönderiliyordu; sunucu sütunu NOT NULL olduğundan (migration 015) yeni servisler eşitlenemiyordu. Artık varsayılan `false` gönderilir; regresyon testi eklendi.

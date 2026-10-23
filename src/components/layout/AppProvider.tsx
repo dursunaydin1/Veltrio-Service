@@ -1,6 +1,7 @@
 "use client";
 
 import { useAuthSync, useOnlineStatus } from "@/hooks/useAuth";
+import { usePaymentDueReminders } from "@/hooks/usePaymentDueReminders";
 import { useSync } from "@/hooks/useSync";
 
 /**
@@ -14,5 +15,6 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
   useAuthSync();
   useOnlineStatus();
   useSync();
+  usePaymentDueReminders();
   return <>{children}</>;
 }

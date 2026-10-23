@@ -15,12 +15,14 @@ Veresiye yönetimi, vade takibi, açılış bakiyeleri, müşteri/tedarikçi iad
 ### ADIM 5.1 — Veresiye ve Tahsilat Ayrımı
 
 **Görevler:**
-- [ ] Veresiye = tahsil edilmemiş alacak durumu; ödeme yöntemi değildir (§9.4)
-- [ ] 'Veresiye' seçimi Payment kaydı yaratmaz; satış bakiyesini açık bırakır
-- [ ] Payment.method sadece: CASH / CARD / BANK_TRANSFER / OTHER
-- [ ] CREDIT/VERESIYE geçerli tahsilat yöntemi değildir
-- [ ] Satışın toplamı, fiilen tahsil edilen ödeme hareketleri ve kalan alacak ayrı tutulur
-- [ ] Veresiye tutarı tahsilat raporuna girmez (AC-010)
+- [x] Veresiye = tahsil edilmemiş alacak durumu; ödeme yöntemi değildir (§9.4)
+- [x] 'Veresiye' seçimi Payment kaydı yaratmaz; satış bakiyesini açık bırakır
+- [x] Payment.method sadece: CASH / CARD / BANK_TRANSFER / OTHER
+- [x] CREDIT/VERESIYE geçerli tahsilat yöntemi değildir
+- [x] Satışın toplamı, fiilen tahsil edilen ödeme hareketleri ve kalan alacak ayrı tutulur
+- [x] Veresiye tutarı tahsilat raporuna girmez (AC-010)
+
+> Uygulandı (önceki adımlarda): Payment.method yalnızca CASH/CARD/BANK_TRANSFER/OTHER; veresiye ödeme kaydı üretmez, satış/servis bakiyesini açık bırakır; tahsilat ve kalan alacak ayrı hesaplanır (`getSaleBalance`, `getServiceBalance`). Veresiye tutarı kasa/tahsilat toplamına girmez (yalnızca gerçek Payment satırları sayılır).
 
 **Test:** TC-042 (müşteri seçmeden veresiye engeli)
 
@@ -29,17 +31,19 @@ Veresiye yönetimi, vade takibi, açılış bakiyeleri, müşteri/tedarikçi iad
 ### ADIM 5.2 — Ödeme Tahsis Sistemi (PaymentAllocation)
 
 **Görevler:**
-- [ ] Belgeden alınan ödeme otomatik o belgeye tahsis edilir
-- [ ] Kısmi ödeme: bir veya birden fazla Payment kaydı
-- [ ] **Belgesiz genel tahsilat** müşteri profilinden alınabilir:
+- [x] Belgeden alınan ödeme otomatik o belgeye tahsis edilir
+- [x] Kısmi ödeme: bir veya birden fazla Payment kaydı
+- [x] **Belgesiz genel tahsilat** müşteri profilinden alınabilir:
   - Varsayılan tahsis sırası: en eski açık kalemden başlar (FIFO)
   - Vade tarihi varsa vadeyee, yoksa belge tarihine göre sıralama
   - Açılış bakiyesi as_of_date'ine göre sıralanır
   - Kullanıcı tahsis önizlemesinde belgeleri elle değiştirebilir (AC-040)
-- [ ] **Fazla ödeme:** Belgelere dağıtılamayan kısım müşteri alacağı (avans) olarak kalır
+- [x] **Fazla ödeme:** Belgelere dağıtılamayan kısım müşteri alacağı (avans) olarak kalır
   - Sonraki borçlara kullanıcı onayıyla mahsup edilir (AC-040)
-- [ ] Kalan bakiye = belge toplamı − belgeye tahsis edilmiş geçerli ödemeler ± finansal düzeltmeler
-- [ ] Hatalı ödeme silinmez; ters Payment (REVERSED, reversal_of_id) ile düzeltilir
+- [x] Kalan bakiye = belge toplamı − belgeye tahsis edilmiş geçerli ödemeler ± finansal düzeltmeler
+- [x] Hatalı ödeme silinmez; ters Payment (REVERSED, reversal_of_id) ile düzeltilir
+
+> Uygulandı: `finance/openItems.ts` (`getCustomerOpenItems`, `recordCustomerCollection`, `applyCustomerCredit`), `finance/aging.ts` (`fifoAllocate`), müşteri sayfasında **Açık kalemler** ve tahsis önizlemeli **Tahsilat al** formu (K-034). Belgeden alınan ödeme belgeye `source_id` ile bağlıdır (otomatik tahsis); belgesiz tahsilat `payment_allocations` ile dağıtılır. **Sınır:** mahsup yalnızca belgesiz genel tahsilat avansları için; iade/kapora/fazla ödeme alacakları net bakiyeye yansır ama mahsup edilemez.
 
 **İlgili FR:** FR-017  
 **İlgili AC:** AC-010, AC-011, AC-040, AC-046  
@@ -50,27 +54,31 @@ Veresiye yönetimi, vade takibi, açılış bakiyeleri, müşteri/tedarikçi iad
 ### ADIM 5.3 — Vade Takibi
 
 **Görevler:**
-- [ ] Vade tarihi Payment'ta isteğe bağlı alan
-- [ ] Vade girilmezse hatırlatma oluşturulmaz
-- [ ] Vade hatırlatması uygulama içi bildirim:
+- [x] Vade tarihi Payment'ta isteğe bağlı alan
+- [x] Vade girilmezse hatırlatma oluşturulmaz
+- [x] Vade hatırlatması uygulama içi bildirim:
   - Vade gününde bir kez
   - Gecikme 7 günü aşınca bir kez daha (§9.4)
-- [ ] Müşteri yaşlandırma bantları (§15): 0–7 gün, 8–30 gün, 31–60 gün, 60+ gün
+- [x] Müşteri yaşlandırma bantları (§15): 0–7 gün, 8–30 gün, 31–60 gün, 60+ gün
   - Yalnızca müşteri borcu olan (pozitif bakiye) açık kalemler için
   - Vade tarihi varsa vadeye, yoksa belge tarihine göre
   - Müşteri alacakları ayrı gösterilir (AC-046)
+
+> Uygulandı: vade belgeye yazılır (satış `due_date`, borçlu teslimde servis `due_date`; migration 020, K-034); `notifications/paymentDue.ts` vade gününde ve 7 günü aşınca bir kez bildirim üretir, ödeme tamamlanınca çözer; aynı olay her cihazda aynı kimliği alır. Ana ekranda **Vadesi gelen alacak** kutusu. Yaşlandırma bantları açık kalemlerde ve rapor sayfasında. **Açık:** bildirim merkezi ekranı (Faz 6).
 
 ---
 
 ### ADIM 5.4 — Açılış Bakiyeleri (OpeningBalance)
 
 **Görevler:**
-- [ ] `OpeningBalance` tablosu: id, business_id, party_type (CUSTOMER/SUPPLIER), party_id, direction (OWED_BY_PARTY / OWED_TO_PARTY), amount, as_of_date, source_note, import_batch_id
-- [ ] Sahte satış/ödeme kaydı yaratılmaz; OpeningBalance olarak tutulur
-- [ ] OWED_BY_PARTY: taraf işletmeye borçlu (müşteri borcu)
-- [ ] OWED_TO_PARTY: işletme tarafa borçlu (tedarikçi borcu veya müşteri alacağı)
-- [ ] Açılış bakiyesi değişikliği kritik işlem onayı gerektirir
-- [ ] Bakiye hesabında açılış bakiyesi başlangıç noktası olarak dahil edilir
+- [x] `OpeningBalance` tablosu: id, business_id, party_type (CUSTOMER/SUPPLIER), party_id, direction (OWED_BY_PARTY / OWED_TO_PARTY), amount, as_of_date, source_note, import_batch_id
+- [x] Sahte satış/ödeme kaydı yaratılmaz; OpeningBalance olarak tutulur
+- [x] OWED_BY_PARTY: taraf işletmeye borçlu (müşteri borcu)
+- [x] OWED_TO_PARTY: işletme tarafa borçlu (tedarikçi borcu veya müşteri alacağı)
+- [x] Açılış bakiyesi değişikliği kritik işlem onayı gerektirir
+- [x] Bakiye hesabında açılış bakiyesi başlangıç noktası olarak dahil edilir
+
+> Uygulandı (Adım 2.7 / 4.7): `opening_balances`, `setPartyOpeningBalance` (değişiklikte neden + audit log), bakiye hesabında başlangıç noktası; açılış borcu artık açık kalem olarak tahsis alabilir.
 
 **İlgili FR:** FR-016
 
@@ -139,12 +147,12 @@ Veresiye yönetimi, vade takibi, açılış bakiyeleri, müşteri/tedarikçi iad
 ### ADIM 5.8 — Bakiye Raporlama Ekranı
 
 **Görevler:**
-- [ ] Müşteri profili: toplam bakiye, belge bazlı açık tutarlar, ödeme geçmişi
-- [ ] Yaşlandırma bantları görüntüleme: 0–7, 8–30, 31–60, 60+ gün
-- [ ] Müşteri alacakları ayrı bölümde
-- [ ] Tedarikçi profili: açılış bakiyesi, satın alma toplamı, ödeme toplamı, iadeler, kalan borç
-- [ ] Müşteri bakiyeleri listesi raporu (tüm müşteriler)
-- [ ] Tedarikçi bakiyeleri listesi raporu
+- [x] Müşteri profili: toplam bakiye, belge bazlı açık tutarlar, ödeme geçmişi
+- [x] Yaşlandırma bantları görüntüleme: 0–7, 8–30, 31–60, 60+ gün
+- [x] Müşteri alacakları ayrı bölümde
+- [x] Tedarikçi profili: açılış bakiyesi, satın alma toplamı, ödeme toplamı, iadeler, kalan borç
+- [x] Müşteri bakiyeleri listesi raporu (tüm müşteriler)
+- [x] Tedarikçi bakiyeleri listesi raporu
 
 ---
 

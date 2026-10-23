@@ -4,6 +4,7 @@ import { useState } from "react";
 import { useLiveQuery } from "dexie-react-hooks";
 import { db } from "@/lib/db";
 import { useBusinessContext } from "@/hooks/useBusinessContext";
+import { CollectionForm, OpenItemsPanel } from "@/components/finance/OpenItemsPanel";
 import { parseMoneyInput } from "@/lib/calc";
 import { balanceState } from "@/lib/finance/balance";
 import {
@@ -117,6 +118,8 @@ export function PartyBalancePanel({
         </div>
       ) : mode === "opening" ? (
         <OpeningForm kind={kind} party={party} onDone={() => setMode(null)} />
+      ) : kind === "CUSTOMER" && mode === "primary" ? (
+        <CollectionForm party={party} onDone={() => setMode(null)} />
       ) : (
         <PaymentForm
           kind={kind}
@@ -126,6 +129,8 @@ export function PartyBalancePanel({
           onDone={() => setMode(null)}
         />
       )}
+
+      {kind === "CUSTOMER" ? <OpenItemsPanel party={party} /> : null}
 
       <h3>Ödeme geçmişi</h3>
       {payments === undefined ? null : payments.length === 0 ? (

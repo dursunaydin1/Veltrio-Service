@@ -195,7 +195,7 @@ export async function refundCancelledServicePayment(
   serviceId: string,
   params: { amountKurus: number; method: PaymentMethod; note?: string }
 ): Promise<Payment> {
-  return db.transaction("rw", [db.services, db.customers, db.payments, db.return_transactions, db.sync_queue, db.audit_logs], async () => {
+  return db.transaction("rw", [db.services, db.customers, db.payments, db.payment_allocations, db.return_transactions, db.sync_queue, db.audit_logs], async () => {
     const service = await db.services.get(serviceId);
     if (!service || service.business_id !== ctx.businessId) throw new ReturnRuleError("Servis bulunamadı.");
     if (service.status !== "CANCELLED") throw new ReturnRuleError("Kapora iadesi yalnızca iptal edilmiş servis için yapılır.");

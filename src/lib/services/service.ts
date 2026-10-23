@@ -1,6 +1,7 @@
 import { db } from "@/lib/db";
 import type { Service } from "@/lib/db";
 import { fromKurus, toKurus } from "@/lib/calc";
+import { getAllocatedKurus } from "@/lib/finance/allocated";
 import { recordCustomerPayment } from "@/lib/finance/service";
 import { createMachine } from "@/lib/machines/service";
 import { nextDocumentNo } from "@/lib/numbering";
@@ -64,6 +65,7 @@ const INSERT_COLUMNS = [
   "delivered_to",
   "delivery_balance",
   "debt_acknowledged",
+  "due_date",
   "created_by_device",
   "created_at",
 ] as const;
@@ -518,11 +520,16 @@ export async function getServiceBalance(serviceId: string): Promise<ServiceBalan
   const returned = returns.reduce((acc, r) => acc + toKurus(r.total_amount), 0);
   // İptal edilmiş servis müşteriye yazılmaz (bakiyeye girmez); alınan kapora fazla ödeme olarak kalır.
   const total = service?.status === "CANCELLED" ? 0 : toKurus(service?.total_amount ?? 0) - returned;
-  const paid = payments.reduce(
-    (acc, p) => acc + (p.direction === "IN" ? 1 : -1) * toKurus(p.amount),
-    0
-  );
+  const paid =
+    payments.reduce((acc, p) => acc + (p.direction === "IN" ? 1 : -1) * toKurus(p.amount), 0) +
+    (await getAllocatedKurus("SERVICE", serviceId));
   return { total, paid, returned, remaining: total - paid };
+}
+
+function dueDateOf(date?: string): string | undefined {
+  if (!date) return undefined;
+  if (!/^\d{4}-\d{2}-\d{2}$/.test(date)) throw new ServiceRuleError("Vade tarihi geçersiz.");
+  return date;
 }
 
 export type DeliveryParams = {
@@ -532,6 +539,8 @@ export type DeliveryParams = {
   receiverName?: string;
   /** Kalan bakiye varsa müşterinin borcu kabul ettiği (AC-025) */
   debtAcknowledged?: boolean;
+  /** Borçlu teslimde söz verilen ödeme tarihi (YYYY-MM-DD, isteğe bağlı) */
+  dueDate?: string;
 };
 
 /**
@@ -552,6 +561,7 @@ export async function deliverService(
       db.services,
       db.customers,
       db.payments,
+      db.payment_allocations,
       db.return_transactions,
       db.service_operations,
       db.service_parts,
@@ -603,6 +613,7 @@ export async function deliverService(
         delivered_to: receiver,
         delivery_balance: fromKurus(Math.max(remaining, 0)),
         debt_acknowledged: indebted && !!params.debtAcknowledged,
+        due_date: indebted ? dueDateOf(params.dueDate) : undefined,
       };
       await db.services.put(next);
       await enqueue("services", serviceId, "UPDATE", updatePayload(next), ctx.deviceCode);
