@@ -99,7 +99,7 @@ describe("faturalanan stok parçası kullanılmadan iş tamamlanamaz", () => {
 describe("getServiceBalance", () => {
   it("tutar − net ödeme; kapora ve tahsilat sayılır, ters kayıt geri alır", async () => {
     const s = await completedService(30000);
-    expect(await getServiceBalance(s.id)).toEqual({ total: 100000, paid: 30000, remaining: 70000 });
+    expect(await getServiceBalance(s.id)).toMatchObject({ total: 100000, paid: 30000, remaining: 70000 });
 
     const pay = await collectServicePayment(ctx, s.id, { amountKurus: 20000, method: "CARD" });
     expect((await getServiceBalance(s.id)).remaining).toBe(50000);

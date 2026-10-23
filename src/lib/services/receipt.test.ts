@@ -50,7 +50,7 @@ const source = (over: Partial<ReceiptSource> = {}): ReceiptSource => ({
   machine: { type: "Zincirli testere", brand: "Stihl", model: "MS 180", serial_number: "SN-1", internal_number: "MK-DEMO-AB23-00001" },
   operations: [op("Karbüratör ayarı", 500, "APPROVED"), op("Reddedilen iş", 300, "REJECTED")],
   parts: [part("NGK Buji", 125.5, "APPROVED"), part("Ertelenen parça", 90, "DEFERRED")],
-  balance: { total: 62550, paid: 50000, remaining: 12550 },
+  balance: { total: 62550, paid: 50000, returned: 0, remaining: 12550 },
   ...over,
 });
 
@@ -99,7 +99,7 @@ describe("buildReceiptModel", () => {
     const m = buildReceiptModel(
       "summary",
       source({
-        balance: { total: 10000, paid: 15000, remaining: -5000 },
+        balance: { total: 10000, paid: 15000, returned: 0, remaining: -5000 },
         business: { name: "X", settings: { receipt_terms: "Özel koşullar" } as never },
       })
     );

@@ -10,6 +10,7 @@ import { useServiceContext } from "@/hooks/useServiceContext";
 import { machineTitle } from "@/components/machines/MachineList";
 import { ServiceLines } from "@/components/services/ServiceLines";
 import { DeliveryPanel, ServicePayments } from "@/components/services/ServicePayments";
+import { ServiceReturnPanel } from "@/components/services/ServiceReturnPanel";
 import { StatusBadge } from "@/components/services/StatusBadge";
 import { changeServiceStatus, getServiceBalance, updateServiceDetails } from "@/lib/services/service";
 import {
@@ -80,6 +81,7 @@ export function ServiceDetail({ id }: { id: string }) {
       <DeliveryPanel service={service} />
       <ServiceLines service={service} />
       <ServicePayments service={service} />
+      <ServiceReturnPanel service={service} />
       <DetailsForm key={`${service.id}:${service.version ?? 0}:${service.updated_at}`} service={service} />
       <History serviceId={service.id} />
     </div>

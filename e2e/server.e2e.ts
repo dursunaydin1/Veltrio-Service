@@ -8,6 +8,10 @@ import { createCustomer } from "@/lib/customers/service";
 import { getSupplierBalance, recordSupplierPayment, setSupplierOpeningBalance } from "@/lib/finance/service";
 import { createProduct } from "@/lib/products/service";
 import { createPurchase, getPurchaseItems } from "@/lib/purchases/service";
+import { createMachine } from "@/lib/machines/service";
+import { addOperation, addPart, recordApproval, setPartUsedQuantity } from "@/lib/services/quote";
+import { changeServiceStatus, deliverService, getServiceBalance, openService } from "@/lib/services/service";
+import { createServiceReturn, refundCancelledServicePayment } from "@/lib/returns/service-return";
 import { createPurchaseReturn } from "@/lib/returns/purchase";
 import { createSaleReturn, reverseSaleReturn } from "@/lib/returns/service";
 import { cancelFinalSale, createSale, getSaleBalance, getSaleItems } from "@/lib/sales/service";
@@ -438,6 +442,45 @@ describe.skipIf(!URL || !ANON || !EMAIL || !PASSWORD)("sunucuya karşı uçtan u
     expect((await getSupplierBalance(ctx.businessId, supplierId)).balance).toBe(balanceBefore - 10000); // bakiye, yeni alımı zaten içeriyor; 2 adetlik iade 100 TL düşürür
   });
 
+  it("7e) servis: kapora iadesi ve teslim sonrası parça iadesi sunucuda doğru", async (ctxTest) => {
+    if (!hasReturns) return ctxTest.skip();
+    const machineId = (await createMachine(ctx, { customer_id: customerId, type: "Testere", brand: "Stihl", model: "E2E", is_temporary: false })).id;
+
+    // a) iptal edilen servis + kapora iadesi
+    const cancelled = await openService(ctx, { customerId, machineId, complaint: "e2e", deposit: { amountKurus: 20000, method: "CASH" } });
+    await changeServiceStatus(ctx, cancelled.id, "CANCELLED", "e2e vazgeçti");
+    await refundCancelledServicePayment(ctx, cancelled.id, { amountKurus: 20000, method: "CASH" });
+    await sync("iptal edilen servis");
+    expect((await one<{ status: string }>("services", cancelled.id)).status).toBe("CANCELLED");
+    const { data: pays } = await supabase.from("payments").select("direction,amount").eq("source_id", cancelled.id);
+    expect(pays?.map((p) => p.direction).sort()).toEqual(["IN", "OUT"]);
+    expect(await getServiceBalance(cancelled.id)).toMatchObject({ paid: 0, remaining: 0 });
+
+    // b) teslim edilmiş servis + parça iadesi
+    const service = await openService(ctx, { customerId, machineId, complaint: "e2e" });
+    const op = await addOperation(ctx, service.id, { description: "Bakım", unitPriceKurus: 50000, taxMode: "NONE", taxRate: 0 });
+    const part = await addPart(ctx, service.id, { sourceType: "STOCK_PRODUCT", productId: bujiId, quantity: 2 });
+    await recordApproval(ctx, service.id, {
+      decisions: [{ kind: "operation", id: op.id, decision: "APPROVED" }, { kind: "part", id: part.id, decision: "APPROVED" }],
+      method: "IN_PERSON",
+    });
+    for (const to of ["DIAGNOSED", "IN_PROGRESS"] as const) await changeServiceStatus(ctx, service.id, to);
+    await setPartUsedQuantity(ctx, part.id, 2);
+    await changeServiceStatus(ctx, service.id, "COMPLETED");
+    await deliverService(ctx, service.id, { payment: { amountKurus: 70000, method: "CASH" } });
+    await sync("teslim edilen servis");
+    const stockBefore = Number((await one<{ stock_available: number }>("products", bujiId)).stock_available);
+
+    const ret = await createServiceReturn(ctx, {
+      serviceId: service.id, reason: "e2e parça iadesi", refundMethod: "CASH",
+      lines: [{ servicePartId: part.id, quantity: 1, disposition: "SELLABLE" }],
+    });
+    await sync("servis iadesi");
+    expect(await one<{ original_type: string; status: string }>("return_transactions", ret.id)).toMatchObject({ original_type: "SERVICE", status: "POSTED" });
+    near((await one<{ stock_available: number }>("products", bujiId)).stock_available, stockBefore + 1);
+    expect(await getServiceBalance(service.id)).toMatchObject({ remaining: 0 });
+  });
+
   it("8) başka bir cihaz gibi çekme: yerel veri silinip sunucudan alınınca stok ve bakiyeler aynı çıkar", async () => {
     for (const t of db.tables) await t.clear();
     const { data: first } = await supabase.from("sync_changes").select("id").order("id", { ascending: true }).limit(1);
@@ -446,7 +489,7 @@ describe.skipIf(!URL || !ANON || !EMAIL || !PASSWORD)("sunucuya karşı uçtan u
     expect(applied).toBeGreaterThan(0);
 
     const server = await one<{ stock_available: number }>("products", bujiId);
-    const expectedBuji = hasReturns ? 9 : 12; // 7c: −4 satış +1 iade −1 geri alma; 7d: +3 alım −2 iade
+    const expectedBuji = hasReturns ? 8 : 12; // 7c: −4 satış +1 iade −1 geri alma; 7d: +3 alım −2 iade; 7e: −2 servis +1 iade
     near(server.stock_available, expectedBuji);
     expect((await getProductBalance(bujiId)).available).toBe(expectedBuji);
     // makine alımı (2 × 4.000 TL) yapıldıysa borç 8.000 TL artmıştır

@@ -78,6 +78,8 @@ const UPDATE_COLUMNS = INSERT_COLUMNS.filter(
 function payloadOf(service: Service, columns: readonly (keyof Service)[]): Record<string, unknown> {
   const payload: Record<string, unknown> = { id: service.id, business_id: service.business_id };
   for (const column of columns) payload[column] = service[column] ?? null;
+  // Sunucuda NOT NULL DEFAULT FALSE: açıkça null gönderilirse varsayılan uygulanmaz ve kayıt reddedilir.
+  if (columns.includes("debt_acknowledged")) payload.debt_acknowledged = service.debt_acknowledged ?? false;
   return payload;
 }
 const insertPayload = (s: Service) => payloadOf(s, INSERT_COLUMNS);
@@ -492,8 +494,10 @@ export async function getServicePayments(serviceId: string): Promise<Payment[]> 
 }
 
 export type ServiceBalance = {
-  /** Faturalanan servis tutarı, kuruş */
+  /** Faturalanan servis tutarı (iadeler düşülmüş; iptal edilmiş serviste 0), kuruş */
   total: number;
+  /** Servisten düşülen iade / ücret düzeltmesi, kuruş */
+  returned: number;
   /** Tahsil edilen net tutar (tahsilat − iade/ters kayıt), kuruş */
   paid: number;
   /** total − paid; pozitif: müşteri borçlu, negatif: fazla ödeme */
@@ -502,13 +506,23 @@ export type ServiceBalance = {
 
 /** Servisin kalan bakiyesi (§5.2): tutar − servise bağlı net ödemeler. */
 export async function getServiceBalance(serviceId: string): Promise<ServiceBalance> {
-  const [service, payments] = await Promise.all([db.services.get(serviceId), getServicePayments(serviceId)]);
-  const total = toKurus(service?.total_amount ?? 0);
+  const [service, payments, returns] = await Promise.all([
+    db.services.get(serviceId),
+    getServicePayments(serviceId),
+    db.return_transactions
+      .where("original_id")
+      .equals(serviceId)
+      .filter((r) => r.original_type === "SERVICE" && r.status === "POSTED")
+      .toArray(),
+  ]);
+  const returned = returns.reduce((acc, r) => acc + toKurus(r.total_amount), 0);
+  // İptal edilmiş servis müşteriye yazılmaz (bakiyeye girmez); alınan kapora fazla ödeme olarak kalır.
+  const total = service?.status === "CANCELLED" ? 0 : toKurus(service?.total_amount ?? 0) - returned;
   const paid = payments.reduce(
     (acc, p) => acc + (p.direction === "IN" ? 1 : -1) * toKurus(p.amount),
     0
   );
-  return { total, paid, remaining: total - paid };
+  return { total, paid, returned, remaining: total - paid };
 }
 
 export type DeliveryParams = {
@@ -538,6 +552,7 @@ export async function deliverService(
       db.services,
       db.customers,
       db.payments,
+      db.return_transactions,
       db.service_operations,
       db.service_parts,
       db.service_status_history,

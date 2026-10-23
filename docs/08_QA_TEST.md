@@ -19,7 +19,7 @@ $env:E2E_EMAIL="..."; $env:E2E_PASSWORD="..."; npm run test:e2e   (PowerShell)
 - Muhasebe/stok kayıtları değiştirilemez olduğundan test verisi sunucuda kalır. Silinmesi gerekirse deneme işletmesi/veri tabanı sıfırlanır; asıl veri için ayrı bir "test işletmesi" kullanmak önerilir.
 
 ## Kapsanan akışlar (`e2e/server.e2e.ts`)
-tedarikçi + açılış bakiyesi + ödeme · müşteri · ürün + açılış stoğu (sunucu stok özeti) · teslim alınmış alım (stok, son alış fiyatı, tedarikçi borcu) · veresiye satış + kısmi tahsilat · müşterisiz peşin satış · idempotent tekrar gönderim ve sürüm çakışması · seri takipli alım + makine satışı + çift satış engeli · satış iptali (stok, tahsilat, seri birim) · yerel veri silinip sunucudan çekilince stok/bakiye eşitliği.
+tedarikçi + açılış bakiyesi + ödeme · müşteri · ürün + açılış stoğu (sunucu stok özeti) · teslim alınmış alım (stok, son alış fiyatı, tedarikçi borcu) · veresiye satış + kısmi tahsilat · müşterisiz peşin satış · idempotent tekrar gönderim ve sürüm çakışması · seri takipli alım + makine satışı + çift satış engeli · satış iptali (stok, tahsilat, seri birim) · müşteri/tedarikçi/servis iadeleri ve geri alma · yerel veri silinip sunucudan çekilince stok/bakiye eşitliği.
 
 ## Kural
 Yeni bir iş akışı eklenince: (1) birim testi, (2) e2e dosyasına sunucu doğrulaması eklenir, (3) iki komut da yeşil olmadan commit atılmaz.
@@ -28,4 +28,5 @@ Yeni bir iş akışı eklenince: (1) birim testi, (2) e2e dosyasına sunucu doğ
 Tarayıcı arayüzü (render, tıklama), `/api/sync/*` HTTP rotası, PWA/çevrimdışı önbellek. Faz 7'de Playwright ile arayüz testi eklenecek.
 
 ## Bu düzenekle bulunan hatalar
+- Yeni servis kaydında `debt_acknowledged` null gidiyordu; migration 015'ten beri yeni servisler sunucuya yazılamıyordu → düzeltildi (K-033).
 - Eşitlenmemiş INSERT'e UPDATE birleşince kuyruk INSERT yükünü eziyordu (`document_no` kaybı) → internetsizken oluşturulup hemen teslim alınan alım/satış sunucuda reddedilirdi. Düzeltildi (K-029).

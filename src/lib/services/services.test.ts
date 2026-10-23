@@ -59,6 +59,8 @@ describe("openService (§5.1)", () => {
     expect(queue.map((q) => q.table_name).sort()).toEqual(["service_status_history", "services"]);
     expect(queue.find((q) => q.table_name === "services")?.payload).toMatchObject({
       document_no: s.document_no, status: "RECEIVED", cancel_reason: null,
+      // Sunucuda NOT NULL: null gönderilirse yeni servis eşitlenemez
+      debt_acknowledged: false,
     });
   });
 

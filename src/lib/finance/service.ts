@@ -468,10 +468,10 @@ export async function getCustomerBalance(
       .toArray(),
   ]);
 
-  const saleIds = new Set(sales.map((s) => s.id));
+  const saleIds = new Set([...sales.map((s) => s.id), ...services.map((s) => s.id)]);
   const returnAmounts = (
     await db.return_transactions
-      .filter((r) => r.business_id === businessId && r.original_type === "SALE" && r.status === "POSTED" && saleIds.has(r.original_id))
+      .filter((r) => r.business_id === businessId && (r.original_type === "SALE" || r.original_type === "SERVICE") && r.status === "POSTED" && saleIds.has(r.original_id))
       .toArray()
   ).map((r) => r.total_amount);
 

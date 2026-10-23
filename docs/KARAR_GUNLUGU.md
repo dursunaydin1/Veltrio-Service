@@ -5,6 +5,11 @@
 
 ## 2026-10-22
 
+### K-033 · Servis ücret iadesi ve eşitleme hatası düzeltmesi
+- **Karar:** Teslim öncesi iptalde alınan kapora ters finans hareketiyle (servise bağlı OUT ödeme, tutar sınırlı) iade edilir; iade edilmezse müşteri alacağı olarak bakiyede kalır. İptal edilmiş servisin tutarı 0 sayılır. Teslim sonrası düzeltme `return_transactions` (`original_type = SERVICE`) ile yapılır: parça iadesi (stok durumuyla) ve/veya parçaya bağlı olmayan tutar; para kuralı satış iadesiyle aynıdır (K-031). Kullanılmış parça stoğu iptalde otomatik geri eklenmez.
+- **Düzeltilen hata (sunucu testiyle bulundu):** Yeni servis kaydının `debt_acknowledged` alanı `null` gönderiliyordu; sunucu sütunu NOT NULL olduğundan (migration 015) yeni servisler eşitlenemiyordu. Artık varsayılan `false` gönderilir; regresyon testi eklendi.
+- **Etki:** `returns/service-return.ts`, `services/service.ts` (`getServiceBalance.returned`, iptalde tutar 0), `finance/service.ts` (müşteri bakiyesi), `ServiceReturnPanel`.
+
 ### K-032 · Tedarikçiye iade
 - **Karar:** Satış iadesiyle aynı tablolar (`return_transactions`, `original_type = PURCHASE`) ve aynı para kuralı kullanılır: iade tutarı tedarikçi borcunu düşürür; ödeme yöntemi seçilirse yalnızca alıma fazla ödenen kısım tedarikçiden geri alınmış (IN) sayılır; “borçtan düş” seçilirse ödeme yazılmaz. Stok RETURN_OUT ile seçilen kovadan çıkar, yeterli stok yoksa işlem reddedilir. Seri takipli üründe birimler tek tek seçilir ve `RETURNED_TO_SUPPLIER` olur (stokta olmayan birim iade edilemez); bu iade geri alınamaz.
 - **Etki:** `returns/purchase.ts`, `finance/service.ts` (tedarikçi bakiyesi), `purchases/service.ts` (`getPurchaseBalance.returned`), `PurchaseReturnPanel`.

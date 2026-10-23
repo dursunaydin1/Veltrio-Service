@@ -120,14 +120,16 @@ Veresiye yönetimi, vade takibi, açılış bakiyeleri, müşteri/tedarikçi iad
 ### ADIM 5.7 — Servis Ücret İadesi ve Düzeltmesi
 
 **Görevler:**
-- [ ] **Teslim öncesi servis iptali (SR-017):**
+- [x] **Teslim öncesi servis iptali (SR-017):**
   - Alınmış ödeme ve kapora → ters finans hareketi ile iade edilir veya müşteri alacağına yazılır
   - Kullanılmış parça stoğu otomatik geri eklenmez
-- [ ] **Teslim sonrası ücret düzeltmesi:**
+- [x] **Teslim sonrası ücret düzeltmesi:**
   - Teslim edilmiş servis iptal edilemez
   - ReturnTransaction (original_type = SERVICE) ile işlenir
   - İade edilecek kalemler ve tutar belirtilir
   - Gerekirse parça iadesi stok durumuyla kaydedilir
+
+> Uygulandı: `returns/service-return.ts` (`createServiceReturn`, `refundCancelledServicePayment`), servis detayında **Kapora iadesi** (iptal edilmiş servis) ve **Ücret iadesi / düzeltme** (teslim edilmiş servis) panelleri (K-033). İptal edilen servis bakiyeye yazılmaz; alınan kapora müşteri alacağı olarak durur, iade edilirse kapanır.
 
 **İlgili AC:** AC-014, AC-033  
 **Test:** TC-016, TC-056
