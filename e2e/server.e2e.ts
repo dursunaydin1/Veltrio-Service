@@ -13,6 +13,7 @@ import { syncPaymentDueNotifications } from "@/lib/notifications/paymentDue";
 import { createIssueEntry, createOperationEntry, createTemplate, updateTemplate } from "@/lib/catalog/service";
 import { addChecklistItem, applyTemplate, setChecklistItemDone } from "@/lib/services/checklist";
 import { setPartSupply } from "@/lib/services/quote";
+import { createBackup, restoreBackup } from "@/lib/backup/backup";
 import { mergeTemporaryMachine } from "@/lib/machines/service";
 import { createMachine } from "@/lib/machines/service";
 import { addOperation, addPart, recordApproval, setPartUsedQuantity } from "@/lib/services/quote";
@@ -594,6 +595,50 @@ describe.skipIf(!URL || !ANON || !EMAIL || !PASSWORD)("sunucuya karşı uçtan u
     const merged = await one<{ merged_into_id: string; archived_at: string | null }>("machines", temp.id);
     expect(merged.merged_into_id).toBe(real.id);
     expect(merged.archived_at).toBeTruthy();
+  });
+
+  it("7i) güvenlik: başka işletmenin kaydı eklenemez, okunamaz; tahmin edilen kimlikle erişim boş döner (AC-019, TC-021)", async () => {
+    const foreign = "ffffffff-ffff-4fff-8fff-ffffffffffff";
+    const stolen = await supabase.from("customers").insert({ id: crypto.randomUUID(), business_id: foreign, name: `${TAG} yabancı`, village: "x" });
+    expect(stolen.error).toBeTruthy(); // RLS WITH CHECK reddeder
+
+    const read = await supabase.from("customers").select("id").eq("business_id", foreign);
+    expect(read.data ?? []).toHaveLength(0);
+    const guess = await supabase.from("customers").select("*").eq("id", crypto.randomUUID()).maybeSingle();
+    expect(guess.data).toBeNull();
+
+    // Eşitleme çekirdeği, başka işletmenin yükünü kabul etmez
+    const result = await applyPushItem(
+      { supabase: supabase as never, businessId: ctx.businessId },
+      { id: "x", table_name: "customers", record_id: crypto.randomUUID(), operation: "INSERT", payload: { id: crypto.randomUUID(), business_id: foreign, name: "x" } }
+    );
+    expect(result.success).toBe(false);
+    for (const table of ["customers", "sales", "payments", "products", "audit_logs"]) {
+      const { data } = await supabase.from(table).select("business_id").limit(500);
+      expect((data ?? []).every((row) => row.business_id === ctx.businessId)).toBe(true);
+    }
+  });
+
+  it("7j) yedek provası: yedekten geri yükleme sunucuda kopya üretmez, kayıt sayıları aynı kalır (TC-030)", async () => {
+    const before = async () => ({
+      customers: (await supabase.from("customers").select("id", { count: "exact", head: true }).eq("business_id", ctx.businessId)).count,
+      products: (await supabase.from("products").select("id", { count: "exact", head: true }).eq("business_id", ctx.businessId)).count,
+      sales: (await supabase.from("sales").select("id", { count: "exact", head: true }).eq("business_id", ctx.businessId)).count,
+    });
+    const serverBefore = await before();
+    const backup = await createBackup(ctx);
+    expect(backup.counts.customers).toBeGreaterThan(0);
+
+    for (const t of db.tables) await t.clear(); // cihaz verisi kayboldu
+    const result = await restoreBackup(ctx, backup);
+    expect(result.added).toBeGreaterThan(0);
+    const queued = await getPendingItems();
+    expect(queued.length).toBeGreaterThanOrEqual(result.added);
+    await sync("yedekten geri yükleme");
+
+    expect(await before()).toEqual(serverBefore); // idempotent: sunucuda kopya yok
+    await pullAll();
+    expect(await db.customers.count()).toBeGreaterThan(0);
   });
 
   it("8) başka bir cihaz gibi çekme: yerel veri silinip sunucudan alınınca stok ve bakiyeler aynı çıkar", async () => {

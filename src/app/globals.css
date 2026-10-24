@@ -240,7 +240,7 @@ a:hover { color: var(--accent-primary); }
 }
 
 .btn-full { width: 100%; }
-.btn-sm { min-height: 36px; padding: 8px 16px; font-size: 0.875rem; }
+.btn-sm { min-height: var(--touch-min); padding: 8px 16px; font-size: 0.875rem; }
 .btn-lg { min-height: 52px; padding: 14px 28px; font-size: 1.0625rem; }
 
 /* Yükleniyor animasyonu */
@@ -495,7 +495,7 @@ a:hover { color: var(--accent-primary); }
   display: inline-flex;
   align-items: center;
   gap: 6px;
-  min-height: 36px;
+  min-height: var(--touch-min);
   padding: 4px 12px;
   border-radius: var(--radius-full);
   font-size: 0.8125rem;

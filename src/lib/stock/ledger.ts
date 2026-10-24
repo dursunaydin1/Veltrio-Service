@@ -36,14 +36,12 @@ export async function getProductBalance(productId: string): Promise<StockBalance
 /** İşletmedeki tüm ürünlerin bakiyesi (liste ekranı için tek geçiş). */
 export async function getBalances(businessId: string): Promise<Map<string, StockBalance>> {
   const byProduct = new Map<string, MovementLike[]>();
-  await db.stock_movements
-    .where("business_id")
-    .equals(businessId)
-    .each((m) => {
-      const list = byProduct.get(m.product_id);
-      if (list) list.push(m);
-      else byProduct.set(m.product_id, [m]);
-    });
+  // toArray (tek seferde okuma) imleçle tek tek dolaşmaktan belirgin biçimde hızlıdır
+  for (const m of await db.stock_movements.where("business_id").equals(businessId).toArray()) {
+    const list = byProduct.get(m.product_id);
+    if (list) list.push(m);
+    else byProduct.set(m.product_id, [m]);
+  }
 
   const result = new Map<string, StockBalance>();
   for (const [productId, movements] of byProduct) {
