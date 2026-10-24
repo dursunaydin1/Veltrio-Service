@@ -1,6 +1,6 @@
 import { db } from "@/lib/db";
 import type { Service } from "@/lib/db";
-import { fromKurus, toKurus } from "@/lib/calc";
+import { CALC_VERSION, fromKurus, toKurus } from "@/lib/calc";
 import { getAllocatedKurus } from "@/lib/finance/allocated";
 import { recordCustomerPayment } from "@/lib/finance/service";
 import { createMachine } from "@/lib/machines/service";
@@ -80,6 +80,7 @@ const INSERT_COLUMNS = [
   "debt_acknowledged",
   "due_date",
   "intake_photo",
+  "calc_version",
   "created_by_device",
   "created_at",
 ] as const;
@@ -237,6 +238,7 @@ export async function openService(ctx: BusinessContext, params: OpenServiceParam
         is_warranty_claim: !!params.warranty,
         warranty_source: tidy(params.warranty?.source),
         warranty_coverage: tidy(params.warranty?.coverage),
+        calc_version: CALC_VERSION,
         created_by_device: ctx.deviceCode,
         created_at: now,
         updated_at: now,

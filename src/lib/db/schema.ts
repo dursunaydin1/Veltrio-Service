@@ -83,6 +83,8 @@ export interface Service {
   intake_photo?: string;
   /** İptal edilen serviste alınan inceleme / teşhis ücreti (TL) */
   cancel_fee?: number;
+  /** Belgeyi hesaplayan ortak modülün sürümü (AC-026) */
+  calc_version?: number;
   cancel_reason?: string;
   /** Kabulde belirtilen mevcut hasar / çizikler */
   existing_damage?: string;
@@ -271,6 +273,8 @@ export interface Sale {
   finalized_at?: string;
   /** Vade (YYYY-MM-DD); boşsa vade yok */
   due_date?: string;
+  /** Belgeyi hesaplayan ortak modülün sürümü (AC-026) */
+  calc_version?: number;
   /** Sunucu kayıt sürümü; güncellemede çakışma tespiti için gönderilir. */
   version?: number;
   created_by_device: string;
@@ -313,6 +317,8 @@ export interface Purchase {
   /** Teslim alındığı an; stok girişi bu anda yapılır */
   received_at?: string;
   cancel_reason?: string;
+  /** Belgeyi hesaplayan ortak modülün sürümü (AC-026) */
+  calc_version?: number;
   /** Sunucu kayıt sürümü; güncellemede çakışma tespiti için gönderilir. */
   version?: number;
   created_by_device: string;

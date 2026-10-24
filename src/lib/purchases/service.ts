@@ -1,6 +1,6 @@
 import { db } from "@/lib/db";
 import type { Purchase, PurchaseItem } from "@/lib/db";
-import { calcLine, fromKurus, toKurus } from "@/lib/calc";
+import { CALC_VERSION, calcLine, fromKurus, toKurus } from "@/lib/calc";
 import { recordSupplierPayment } from "@/lib/finance/service";
 import { nextDocumentNo } from "@/lib/numbering";
 import { setLastPurchasePrice } from "@/lib/products/service";
@@ -59,6 +59,7 @@ const PURCHASE_COLUMNS = [
   "supplier_ref",
   "received_at",
   "cancel_reason",
+  "calc_version",
   "created_by_device",
   "created_at",
 ] as const;
@@ -222,6 +223,7 @@ async function persist(
       business_id: ctx.businessId,
       document_no: await nextDocumentNo("purchase", ctx.deviceCode),
       status: "DRAFT" as const,
+      calc_version: CALC_VERSION,
       created_by_device: ctx.deviceCode,
       created_at: now,
     }),

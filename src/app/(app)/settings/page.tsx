@@ -13,6 +13,8 @@ export default function Page() {
         <li><Link href="/settings/templates">Servis şablonları (kontrol listesi)</Link></li>
         <li><Link href="/settings/pin">Cihaz PIN kodu</Link></li>
         <li><Link href="/settings/devices">Cihazlar (liste ve iptal)</Link></li>
+        <li><Link href="/settings/backup">Yedekleme ve geri yükleme</Link></li>
+        <li><Link href="/settings/history">Geçmiş (kritik işlem kayıtları)</Link></li>
         <li><Link href="/settings/data-check">Veri denetimi (stok özeti)</Link></li>
       </ul>
     </section>

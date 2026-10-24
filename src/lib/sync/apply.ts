@@ -1,3 +1,4 @@
+import { verifyLineTotal } from "@/lib/sync/verify";
 import { APPEND_ONLY_SYNC_TABLES } from "@/lib/sync/tables";
 import type { SyncTableName } from "@/lib/sync/tables";
 import type { SyncContext } from "@/lib/sync/server";
@@ -75,6 +76,10 @@ export async function applyPushItem(
       .eq("business_id", businessId);
     return error ? fail(item, error.message) : ok(item);
   }
+
+  // Satır toplamı, ortak hesaplama modülüyle doğrulanır (AC-026)
+  const lineError = verifyLineTotal(item.table_name, item.payload);
+  if (lineError) return fail(item, lineError);
 
   // version sunucuda yönetilir: eklemede varsayılan 1, güncellemede tetikleyici artırır.
   const { version, ...row } = item.payload;

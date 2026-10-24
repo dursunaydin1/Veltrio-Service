@@ -1,6 +1,6 @@
 import { db } from "@/lib/db";
 import type { Sale, SaleItem } from "@/lib/db";
-import { fromKurus, lineGross, toKurus } from "@/lib/calc";
+import { CALC_VERSION, fromKurus, lineGross, toKurus } from "@/lib/calc";
 import { getAllocatedKurus } from "@/lib/finance/allocated";
 import { recordDocumentPayment, reversePayment, reversedPaymentIds } from "@/lib/finance/service";
 import {
@@ -83,6 +83,7 @@ const SALE_COLUMNS = [
   "notes",
   "finalized_at",
   "due_date",
+  "calc_version",
   "created_by_device",
   "created_at",
 ] as const;
@@ -249,6 +250,7 @@ async function persist(ctx: SaleContext, input: SaleInput, existing?: Sale): Pro
       business_id: ctx.businessId,
       document_no: await nextDocumentNo("sale", ctx.deviceCode),
       status: "DRAFT" as const,
+      calc_version: CALC_VERSION,
       created_by_device: ctx.deviceCode,
       created_at: now,
     }),

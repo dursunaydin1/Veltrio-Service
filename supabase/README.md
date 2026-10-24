@@ -29,12 +29,13 @@ Bu dizin Supabase PostgreSQL migration dosyalarını içerir.
 | 021 | `021_catalogs_checklists.sql` | Arıza/işlem katalogları, servis şablonları, kontrol listesi, garanti alanları |
 | 022 | `022_photos.sql` | Müşteri / ürün / kabul fotoğrafı (JPEG data URL) |
 | 023 | `023_cancel_fee.sql` | İptal edilen serviste inceleme/teşhis ücreti |
+| 024 | `024_account_setup_devices.sql` | İlk kurulum fonksiyonu (`setup_business`), cihaz silme onayı, yedek kayıtları + depo, hesaplama sürümü |
 
 ## Supabase Dashboard'dan Uygulama
 
 1. [Supabase Dashboard](https://app.supabase.com) → Projenizi seçin
 2. **SQL Editor** sekmesine girin
-3. Migration dosyalarını **sırasıyla** çalıştırın (001 → 002 → 003 → 004 → 005 → 006 → 007 → 008 → 009 → 010 → 011 → 012 → 013 → 014 → 015 → 016 → 017 → 018 → 019 → 020 → 021 → 022 → 023)
+3. Migration dosyalarını **sırasıyla** çalıştırın (001 → 002 → 003 → 004 → 005 → 006 → 007 → 008 → 009 → 010 → 011 → 012 → 013 → 014 → 015 → 016 → 017 → 018 → 019 → 020 → 021 → 022 → 023 → 024)
 
 ## Supabase CLI ile Uygulama
 
@@ -74,3 +75,11 @@ npm run db:migrate -- --baseline 020   # SQL Editor'da elle çalıştırılmış
 npm run db:migrate -- --status         # uygulanmış / bekleyen
 npm run db:migrate                     # bekleyenleri sırayla çalıştır
 ```
+
+## Günlük otomatik yedek (sunucu görevi)
+
+`/api/cron/backup` her gün (vercel.json, 03:00) çalışır. Dağıtım ortamında şu değişkenler tanımlı olmalıdır
+(gizli, git'e girmez): `SUPABASE_SERVICE_ROLE_KEY`, `CRON_SECRET`; `NEXT_PUBLIC_SUPABASE_URL` zaten gerekir.
+Migration 024 `backups` deposunu ve `business_backups` tablosunu oluşturur.
+Supabase panelinde Authentication → URL Configuration: Site URL'e uygulama adresi, Redirect URLs'e
+`<adres>/auth/callback` eklenmelidir (e-posta doğrulama ve şifre sıfırlama bağlantıları için).

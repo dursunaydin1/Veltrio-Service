@@ -1,7 +1,7 @@
 "use client";
 
 import Link from "next/link";
-import { Menu } from "lucide-react";
+import { Menu, Search } from "lucide-react";
 import { BottomNav } from "@/components/layout/BottomNav";
 import { DeviceSetup } from "@/components/layout/DeviceSetup";
 import { PinGate } from "@/components/layout/PinGate";
@@ -41,6 +41,9 @@ export function AppShell({ children }: { children: React.ReactNode }) {
         <span className="app-title">{businessName ?? "Veltrio Servis"}</span>
         <div className="app-header-actions">
           <SyncStatus />
+          <Link href="/search" className="icon-btn" aria-label="Ara">
+            <Search size={22} aria-hidden="true" />
+          </Link>
           <Link href="/more" className="icon-btn" aria-label="Menü">
             <Menu size={22} aria-hidden="true" />
           </Link>

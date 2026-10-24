@@ -88,3 +88,45 @@ ALTER TABLE devices ADD COLUMN IF NOT EXISTS wipe_confirmed_at TIMESTAMPTZ;
 
 GRANT UPDATE (device_name, last_synced_at, is_active, revoked_at, wipe_confirmed_at)
   ON public.devices TO authenticated;
+
+-- ------------------------------------------------------------
+-- 3) Yedekleme kayıtları (Adım 1.11, K-040)
+--    Günlük otomatik yedek (sunucu görevi) ve elle alınan yedekler burada
+--    izlenir; dosyalar özel `backups` deposundadır.
+-- ------------------------------------------------------------
+CREATE TABLE IF NOT EXISTS business_backups (
+  id            UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
+  business_id   UUID NOT NULL REFERENCES businesses(id) ON DELETE CASCADE,
+  kind          TEXT NOT NULL CHECK (kind IN ('AUTO', 'MANUAL', 'PRE_RESTORE')),
+  status        TEXT NOT NULL CHECK (status IN ('OK', 'FAILED')),
+  file_path     TEXT,
+  size_bytes    BIGINT,
+  row_counts    JSONB,
+  error         TEXT,
+  created_by    TEXT,
+  created_at    TIMESTAMPTZ NOT NULL DEFAULT NOW()
+);
+
+CREATE INDEX IF NOT EXISTS idx_business_backups_business ON business_backups(business_id, created_at DESC);
+
+ALTER TABLE business_backups ENABLE ROW LEVEL SECURITY;
+
+-- İşletme sahibi yedek kayıtlarını görür ve elle yedek kaydı ekleyebilir;
+-- otomatik yedek kaydı sunucu görevi (servis anahtarı) tarafından yazılır.
+CREATE POLICY business_backups_select ON business_backups
+  FOR SELECT USING (business_id = public.current_business_id());
+CREATE POLICY business_backups_insert ON business_backups
+  FOR INSERT WITH CHECK (business_id = public.current_business_id() AND kind IN ('MANUAL', 'PRE_RESTORE'));
+
+INSERT INTO storage.buckets (id, name, public)
+VALUES ('backups', 'backups', FALSE)
+ON CONFLICT (id) DO NOTHING;
+
+-- ------------------------------------------------------------
+-- 4) Hesaplama sürümü (Adım 1.9, AC-026): belgeyi hesaplayan ortak modülün
+--    sürümü belgeyle birlikte saklanır; ileride yuvarlama kuralı değişirse
+--    eski belgelerin hangi kuralla hesaplandığı bilinir.
+-- ------------------------------------------------------------
+ALTER TABLE sales     ADD COLUMN IF NOT EXISTS calc_version SMALLINT;
+ALTER TABLE purchases ADD COLUMN IF NOT EXISTS calc_version SMALLINT;
+ALTER TABLE services  ADD COLUMN IF NOT EXISTS calc_version SMALLINT;

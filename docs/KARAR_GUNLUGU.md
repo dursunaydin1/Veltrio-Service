@@ -5,6 +5,18 @@
 
 ## 2026-10-22
 
+### K-039 · Hesap, kurulum ve cihaz güvenliği
+- **Hesap:** Kimlik doğrulama Supabase Auth'tadır (parola özeti, JWT/yenileme, e-posta doğrulama/kurtarma). Uygulama kayıt, şifre sıfırlama ve yeni şifre ekranlarını sağlar; şifre politikası istemcide (`validatePassword`) ve Supabase panelinde uygulanır. Girişten sonra `next` ile aynı sayfaya dönülür (QR); yalnızca uygulama içi yollar kabul edilir.
+- **İlk kurulum:** `setup_business` (SECURITY DEFINER) yalnızca oturum açmış ve işletmesi olmayan hesap için işletme + kullanıcı + varsayılan ayarları yazar; tarayıcı bu tablolara doğrudan ekleme yapamaz.
+- **PIN:** Oturum zaten açık cihazda hızlı kilit; PIN sunucuya gönderilmez, PBKDF2-SHA-256 ile özetlenir. Unutulursa şifreyle yeniden giriş yapılır.
+- **Cihaz iptali:** İptal çevrimiçi yapılır, geri alınamaz. İptal edilen cihaz bağlanınca (açılış, odak, internet, eşitleme 403) yerel veritabanını ve oturumu siler, `wipe_confirmed_at` yazar. Eşitlenmemiş bekleyen kayıtlar da silinir.
+- **Etki:** migration 024, `lib/auth/*`, `lib/pin/*`, `lib/device/*`, `SetupWizard`, `PinGate`, `useDeviceGuard`, `DeviceManager`.
+
+### K-040 · Arama ve yedekleme
+- **Arama:** Tüm veri cihaza eşitlendiğinden arama yerel yapılır (çevrimdışı da çalışır); ayrı sunucu arama uç noktası açılmadı. Çevrimdışıyken yalnızca eşitlenmiş kayıtların arandığı uyarılır.
+- **Yedekleme:** Elle yedek JSON dosyasıdır; geri yükleme ekleyicidir (var olanı ezmez), öncesinde otomatik ek yedek ve audit log vardır. Günlük otomatik yedek bir sunucu görevidir (`/api/cron/backup`, servis anahtarı ve `CRON_SECRET` gerekir); depo `backups`, durum `business_backups`. Görevin gerçek projede çalışması yapılandırma bekler (belge: supabase/README.md).
+- **Etki:** `lib/search/*`, `lib/backup/*`, `BackupManager`, `GlobalSearch`.
+
 ### K-038 · Stok bildirimleri ve bütünlük denetimi
 - **Karar:** Kritik stok bildirimi `LOW_STOCK:{ürün}:{n}` anahtarıyla üretilir: açık bildirim varken yenisi açılmaz, miktar toparlanınca çözülür, tekrar düşünce `n+1` ile yeni bildirim açılır (AC-028). Eksiye düşen stok için `SYNC_CONFLICT` türünde bildirim (`NEGATIVE_STOCK:{ürün}:{n}`) üretilir; hareketler silinmez, telafi stok düzeltmesi veya işlem iptaliyle yapılır (ST-003, AC-009). Bildirim kimlikleri anahtardan türetildiği için iki cihaz aynı olayı üretince sunucuda çakışmaz.
 - **Denetim:** Ürün stok özeti ile hareket defteri karşılaştırılır; fark varsa defter esas alınır, yerel özet düzeltilir, audit log yazılır (`Ayarlar → Veri denetimi`). Hareketler değiştirilmez.

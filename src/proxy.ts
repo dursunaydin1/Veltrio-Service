@@ -57,9 +57,11 @@ export async function proxy(request: NextRequest) {
     pathname.startsWith("/login") ||
     pathname.startsWith("/auth") ||
     pathname.startsWith("/register") ||
-    pathname.startsWith("/forgot-password");
+    pathname.startsWith("/forgot-password") ||
+    // Zamanlanmış görev: kendi gizli anahtarıyla doğrular (oturum çerezi yoktur)
+    pathname.startsWith("/api/cron/");
   // Giriş yapmış kullanıcı giriş/kayıt sayfalarında tutulmaz; e-posta bağlantı dönüşü hariç
-  const isAuthPage = isPublicPage && !pathname.startsWith("/auth/callback");
+  const isAuthPage = isPublicPage && !pathname.startsWith("/auth/callback") && !pathname.startsWith("/api/");
 
   if (!user && !isPublicPage) {
     const url = request.nextUrl.clone();

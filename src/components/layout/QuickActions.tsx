@@ -3,7 +3,6 @@ import { ScanLine, Search, ShoppingCart, Wrench } from "lucide-react";
 
 /**
  * Ana ekran hızlı eylemleri — PRD §4.7.
- * Ara henüz yok, bu yüzden devre dışı gösterilir.
  */
 export function QuickActions() {
   return (
@@ -16,11 +15,10 @@ export function QuickActions() {
         <ShoppingCart size={28} aria-hidden="true" />
         Yeni Satış
       </Link>
-      <span className="quick-action" aria-disabled="true">
+      <Link href="/search" className="quick-action">
         <Search size={28} aria-hidden="true" />
         Ara
-        <small>Yakında</small>
-      </span>
+      </Link>
       <Link href="/scan" className="quick-action">
         <ScanLine size={28} aria-hidden="true" />
         QR Tara
