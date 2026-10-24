@@ -30,3 +30,11 @@ Tarayıcı arayüzü (render, tıklama), `/api/sync/*` HTTP rotası, PWA/çevrim
 ## Bu düzenekle bulunan hatalar
 - Yeni servis kaydında `debt_acknowledged` null gidiyordu; migration 015'ten beri yeni servisler sunucuya yazılamıyordu → düzeltildi (K-033).
 - Eşitlenmemiş INSERT'e UPDATE birleşince kuyruk INSERT yükünü eziyordu (`document_no` kaybı) → internetsizken oluşturulup hemen teslim alınan alım/satış sunucuda reddedilirdi. Düzeltildi (K-029).
+
+## Faz 7 ile eklenen otomatik denetimler
+- `test/performance.test.ts`: büyük veri hacminde yerel arama/bakiye/rapor süreleri ve dokunma hedefi CSS denetimi.
+- `test/multidevice.test.ts`: iki cihaz son ürünü tüketir, aynı paket tekrar, hata kuyruğu, toplam uyuşmazlığı.
+- `test/security.test.ts`, `test/sw.test.ts`: güvenlik başlıkları, service worker kuralları, manifest.
+- e2e 7i (işletme izolasyonu, RLS), 7j (yedekten geri yükleme).
+- Migration doğrulaması: 001→024 gerçek PostgreSQL'e uygulanır (gömülü Postgres + Supabase stub'ları); kanıt `docs/KARAR_GUNLUGU.md` K-042.
+- Elle yapılacaklar: `docs/09`-`13`.

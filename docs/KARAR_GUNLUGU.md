@@ -12,6 +12,12 @@
 - **Cihaz iptali:** İptal çevrimiçi yapılır, geri alınamaz. İptal edilen cihaz bağlanınca (açılış, odak, internet, eşitleme 403) yerel veritabanını ve oturumu siler, `wipe_confirmed_at` yazar. Eşitlenmemiş bekleyen kayıtlar da silinir.
 - **Etki:** migration 024, `lib/auth/*`, `lib/pin/*`, `lib/device/*`, `SetupWizard`, `PinGate`, `useDeviceGuard`, `DeviceManager`.
 
+### K-042 · Sağlamlaştırma: PWA, performans ve migration doğrulaması
+- **PWA:** `public/sw.js` yerel service worker (next-pwa Turbopack'le uyumsuz). Giriş/API/kimlik yolları asla önbelleğe alınmaz; yalnızca yönlendirilmemiş HTML yanıtları sayfa önbelleğine girer. `public/icons` boş olduğundan uygulama kurulabilir değildi; simgeler üretildi.
+- **Performans:** `getBalances` imleç yerine toplu okuma kullanır (6.000 hareketle ~23 sn → <1 sn, taklit ortamda). Düğmeler ≥ 44 px.
+- **Doğrulama:** 001→024 migration'ları gerçek bir PostgreSQL 16'ya (gömülü, Supabase stub'larıyla) uygulanıp `setup_business` ve tabloların oluştuğu doğrulandı; migration'ları tek yapıştırmada çalıştırmak için `supabase/bundles/021-024.sql`.
+- **Bilinen sınır:** Cihaz, kamera, yazdırma ve hukuki maddeler otomatik test edilemez; `docs/09`-`13`'te ayrı listelendi ve Faz 7 kapanışına insan onayı gerekir.
+
 ### K-041 · Raporlar, dışa/içe aktarma ve bildirim merkezi
 - **Raporlar saf hesaptır** (`reports/calc.ts`, kuruş tam sayı, Europe/Istanbul takvimi) ve ayrı tanımlıdır: **satış** (kesinleşmiş belge; brüt KDV dahil, indirim/KDV bilgi sütunu, iade ve iptal kendi tarihinde düşer), **tahsilat** (fiilî ödeme hareketleri; veresiye girmez; müşteri iadeleri/ters kayıtlar ayrı sütun), **servis geliri** (tamamlanma tarihine göre tahakkuk; iade düşer; iptalde alınan inceleme ücreti eklenir).
 - **Dışa aktarma:** ekranda gösterilen sütun tanımı dosyada da kullanılır. Kimlik doğrulama: PIN varsa PIN, yoksa çevrimiçi hesap şifresi; çevrimdışı ve PIN yoksa uyarıyı onaylamak yeterlidir. Her dışa aktarma audit log'a yazılır.
