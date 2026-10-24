@@ -10,6 +10,7 @@ export default function Page() {
       <ul className="menu-list" aria-label="Ayarlar">
         <li><Link href="/settings/catalog">Arıza ve işlem katalogları</Link></li>
         <li><Link href="/settings/templates">Servis şablonları (kontrol listesi)</Link></li>
+        <li><Link href="/settings/data-check">Veri denetimi (stok özeti)</Link></li>
       </ul>
     </section>
   );

@@ -1,5 +1,6 @@
 "use client";
 
+import { OfflineStockNotice } from "@/components/layout/OfflineStockNotice";
 import { useState } from "react";
 import { useRouter } from "next/navigation";
 import { useServiceContext } from "@/hooks/useServiceContext";
@@ -226,6 +227,7 @@ export function SaleForm({
       }}
       noValidate
     >
+      <OfflineStockNotice />
       <ProductPicker key={pickerKey} value="" onChange={addProduct} label="Ürün ekle" includeSerial />
 
       {lines.length > 0 ? (

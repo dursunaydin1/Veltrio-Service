@@ -1,5 +1,6 @@
 "use client";
 
+import { OfflineStockNotice } from "@/components/layout/OfflineStockNotice";
 import { useState } from "react";
 import { useLiveQuery } from "dexie-react-hooks";
 import { db } from "@/lib/db";
@@ -43,6 +44,7 @@ export function StockPanel({ product }: { product: Product }) {
   return (
     <section className="card stack stack-md" aria-labelledby="stock-title">
       <h2 id="stock-title">Stok</h2>
+      <OfflineStockNotice always />
 
       <div className="tile-grid">
         <div className="tile">

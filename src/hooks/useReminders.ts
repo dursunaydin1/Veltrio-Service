@@ -2,6 +2,7 @@
 
 import { useEffect } from "react";
 import { syncPaymentDueNotifications } from "@/lib/notifications/paymentDue";
+import { syncStockNotifications } from "@/lib/notifications/stockAlerts";
 import { syncServiceNotifications } from "@/lib/notifications/serviceReminders";
 import { useSessionStore } from "@/stores/session";
 import { useBusinessContext } from "@/hooks/useBusinessContext";
@@ -22,6 +23,7 @@ export function useReminders(): void {
       // Hatırlatma üretimi başarısız olsa da uygulama çalışmaya devam eder.
       syncPaymentDueNotifications({ businessId, deviceCode }).catch(() => undefined);
       syncServiceNotifications({ businessId, deviceCode }, { reminderDays }).catch(() => undefined);
+      syncStockNotifications({ businessId, deviceCode }).catch(() => undefined);
     };
     run();
     window.addEventListener("focus", run);

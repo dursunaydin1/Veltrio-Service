@@ -3,6 +3,7 @@
 import Link from "next/link";
 import { useLiveQuery } from "dexie-react-hooks";
 import { db } from "@/lib/db";
+import { isLow, loadStockFacts } from "@/lib/notifications/stockAlerts";
 import { loadServiceFacts, summarizeServices } from "@/lib/notifications/serviceReminders";
 import { useSessionStore } from "@/stores/session";
 import { todayLocalDate } from "@/lib/utils";
@@ -19,6 +20,11 @@ export function TodayStatus() {
   const summary = useLiveQuery(
     async () => (businessId ? summarizeServices(await loadServiceFacts(businessId), todayLocalDate(), reminderDays) : undefined),
     [businessId, reminderDays]
+  );
+  const criticalStock = useLiveQuery(
+    async () => (businessId ? (await loadStockFacts(businessId)).filter(isLow).length : 0),
+    [businessId],
+    0
   );
   const dueReminders = useLiveQuery(
     () =>
@@ -39,6 +45,7 @@ export function TodayStatus() {
     { label: "Parça bekleyen", value: summary?.waitingParts ?? 0, href: "/services", warn: true },
     { label: "Teslimi yaklaşan", value: summary?.upcoming ?? 0, href: "/services", warn: true },
     { label: "Teslimi geçen", value: summary?.overdue ?? 0, href: "/services", warn: true },
+    { label: "Kritik stok", value: criticalStock, href: "/products", warn: true },
     { label: "Vadesi gelen alacak", value: dueReminders, href: "/reports/balances", warn: true },
   ];
 

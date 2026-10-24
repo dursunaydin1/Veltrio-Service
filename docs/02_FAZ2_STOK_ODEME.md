@@ -23,7 +23,7 @@ Servis ve satış modülleri bu fazda kurulan ürün kataloğu, stok hareketi ve
 - [x] Ürün oluşturma, düzenleme, pasifleştirme
 - [x] Ürün arama ve listeleme
 - [x] Başlangıç kategorileri hazır gelmeli (PRD §8.1): Makineler, Yağlar, Misina, Buji, Hava Filtresi, Yakıt Filtresi, Karbüratör, Marş Grubu, Debriyaj, Bıçak, Zincir, Pala, Aksesuar, Diğer
-- [ ] Ürün fotoğrafı isteğe bağlı; boyut küçültme uygulanır (FR-028)
+- [x] Ürün fotoğrafı isteğe bağlı — `PhotoField` ile istemcide 1600 px JPEG (migration 022, K-036); boyut küçültme uygulanır (FR-028)
 - [x] Raf/konum alanı isteğe bağlı metin
 - [x] Kritik stok seviyesi ürün bazında ayarlanabilir
 
@@ -64,8 +64,8 @@ Servis ve satış modülleri bu fazda kurulan ürün kataloğu, stok hareketi ve
   - unit_cost_snapshot, source_type, source_id, reason, occurred_at, device_id, reversal_of_id
 - [x] `movement_type` değerleri: PURCHASE_IN, SALE_OUT, SERVICE_USE, RETURN_IN, ADJUSTMENT, CANCEL_REVERSAL, DAMAGED_TRANSFER, DAMAGED_DISPOSE, OPENING
 - [x] Stok bakiyesi hareketlerden yeniden hesaplanabilir olmalı (ST-013)
-- [ ] Fark bulunursa hareketler esas alınır; audit log'a yazılır
-- [ ] **Zamanlar:**
+- [x] Fark bulunursa hareketler esas alınır; audit log'a yazılır — `stock/integrity.ts` + Ayarlar → Veri denetimi
+- [x] **Zamanlar:** (satış FINAL, servis `used_quantity`, alım RECEIVED; DRAFT hareket üretmez — testli)
   - Satış stoğu → satış FINAL olduğunda
   - Servis stoğu → ServicePart.used_quantity > 0 olduğunda
   - Satın alma stoğu → Purchase RECEIVED olduğunda
@@ -89,7 +89,7 @@ Servis ve satış modülleri bu fazda kurulan ürün kataloğu, stok hareketi ve
 - [x] Kullanılabilir stok = eşitlenmiş + yerel bekleyen hareketler dahil satılabilir miktar
 - [x] Negatif stok denemesinde: uyarı + işlem engeli
 - [x] İşletme ayarıyla negatif stoka izin verilirse: kullanıcı onayı + neden kaydı + kritik uyarı (ST-004)
-- [ ] **Kritik stok:** AVAILABLE miktar critical_stock_level'e eşit veya altına indiğinde bildirim oluştur (ST-009)
+- [x] **Kritik stok:** AVAILABLE miktar — `notifications/stockAlerts.ts` (çözülmeden yinelenmez, düşünce yeni; hasarlı sayılmaz) critical_stock_level'e eşit veya altına indiğinde bildirim oluştur (ST-009)
   - Çözülmeden tekrar bildirim oluşmaz
   - Stok tekrar düşerse yeni bildirim
   - Hasarlı stok kritik stok hesabına dahil edilmez
@@ -158,7 +158,7 @@ Servis ve satış modülleri bu fazda kurulan ürün kataloğu, stok hareketi ve
   - id, business_id, payment_id, target_type (SALE / SERVICE / PURCHASE / OPENING_BALANCE), target_id, amount
 - [x] Hatalı ödeme silinmez; ters Payment (REVERSED, reversal_of_id) ile düzeltilir (§9.4)
 - [x] CREDIT/VERESIYE geçerli tahsilat yöntemi değildir (§9.4)
-- [ ] Belgeden alınan ödeme otomatik o belgeye tahsis edilir
+- [x] Belgeden alınan ödeme otomatik o belgeye tahsis edilir — ödeme belgeye `source_id` ile bağlıdır
 
 > Uygulandı: `src/lib/finance/service.ts` (`recordCustomerPayment`, `reversePayment`), migration 011 (bir ödeme yalnızca bir kez ters kaydedilir). Ters kayıt = karşı yönlü yeni `Payment` (`status = REVERSED`, `reversal_of_id`); orijinal güncellenmez (K-019). Açık: belgeden alınan ödemenin otomatik tahsisi (satış/servis belgeleriyle), tedarikçiye ödeme (Faz 4).
 
@@ -178,9 +178,9 @@ Servis ve satış modülleri bu fazda kurulan ürün kataloğu, stok hareketi ve
                    - iade_tutarları
                    + müşteriye_yapılan_ödemeler (OUT)
   ```
-- [ ] Tedarikçi bakiyesi hesaplama formülünü kodla (§9.3)
+- [x] Tedarikçi bakiyesi hesaplama formülünü kodla — `calcSupplierBalance` (§9.3)
 - [x] Bakiye her zaman belgelerden hesaplanır; önbellekten değil
-- [ ] Belge bazlı açık tutara kırılım (hangi belge ne kadar açık)
+- [x] Belge bazlı açık tutara kırılım — müşteri: `getCustomerOpenItems`; tedarikçi: alım başına kalan (`getPurchaseBalance`) (hangi belge ne kadar açık)
 - [x] Pozitif bakiye = müşteri borçlu; negatif bakiye = işletme borçlu
 
 > Uygulandı: `src/lib/finance/balance.ts` (kuruş hesabı), `getCustomerBalance` ve müşteri sayfasındaki Bakiye bölümü. Satış (FINAL), tamamlanmış servis ve iade tutarları belgeler yazıldıkça formüle kendiliğinden girer (iade şimdilik boş). Açık: tedarikçi bakiyesi (Faz 4), belge bazlı açık tutar kırılımı ve yaşlandırma (Faz 5).
@@ -195,24 +195,24 @@ Servis ve satış modülleri bu fazda kurulan ürün kataloğu, stok hareketi ve
 ### ADIM 2.9 — Ürün ve Stok Ekranları (UI)
 
 **Görevler:**
-- [ ] Ürün listesi (ad, kategori, stok, kritik seviye durumu)
-- [ ] Ürün detay sekmeler: Hareketler, Alışlar, Satışlar, Hasarlı stok, Seri birimler
-- [ ] Stok hareketi geçmişi görüntüleme
-- [ ] Stok düzeltme ekranı (Adım 2.6)
-- [ ] Kritik stok uyarısı badge/göstergesi
-- [ ] Ana ekran "Kritik stok" metriği
+- [x] Ürün listesi (ad, kategori, stok, kritik seviye durumu)
+- [x] Ürün detay sekmeler: Hareketler, Alışlar, Satışlar, Hasarlı stok, Seri birimler
+- [x] Stok hareketi geçmişi görüntüleme
+- [x] Stok düzeltme ekranı (Adım 2.6)
+- [x] Kritik stok uyarısı badge/göstergesi
+- [x] Ana ekran "Kritik stok" metriği
 
 ---
 
 ### ADIM 2.10 — Çevrimdışı Stok Uyarısı
 
 **Görevler:**
-- [ ] Çevrimdışıyken stok = cihazın bildiği son stok + bekleyen yerel hareketler
-- [ ] İki cihaz çevrimdışı aynı son stoğu tüketirse:
+- [x] Çevrimdışıyken stok = cihazın bildiği son stok + bekleyen yerel hareketler
+- [x] İki cihaz çevrimdışı aynı son stoğu tüketirse:
   - Eşitlemede hareketler silinmez
   - Çakışma kuyruğu açılır (ST-003)
   - Kullanıcıya stok düzeltme/işlem iptali gibi telafi seçenekleri sunulur
-- [ ] Bu risk ve çözüm yolu arayüzde açıkça görünür (AC-009)
+- [x] Bu risk ve çözüm yolu arayüzde açıkça görünür (AC-009)
 
 **İlgili AC:** AC-009  
 **Test:** TC-012

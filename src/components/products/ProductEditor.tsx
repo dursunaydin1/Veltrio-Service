@@ -8,6 +8,7 @@ import { db } from "@/lib/db";
 import { useBusinessContext } from "@/hooks/useBusinessContext";
 import { ProductForm } from "@/components/products/ProductForm";
 import { SerialUnitsPanel } from "@/components/products/SerialUnitsPanel";
+import { ProductPurchases, ProductSales } from "@/components/products/ProductDocuments";
 import { StockPanel } from "@/components/products/StockPanel";
 import { setProductArchived } from "@/lib/products/service";
 import { getProductBalance } from "@/lib/stock/ledger";
@@ -23,6 +24,7 @@ export function ProductEditor({ id }: { id: string }) {
   // Dizi dönmesi, "yükleniyor" (undefined) ile "bulunamadı" ([]) ayrımını sağlar.
   const found = useLiveQuery(() => db.products.where("id").equals(id).toArray(), [id]);
   const balance = useLiveQuery(() => getProductBalance(id), [id]);
+  const [tab, setTab] = useState<"stock" | "purchases" | "sales" | "general">("stock");
 
   if (found === undefined) return null;
   if (found.length === 0) {
@@ -77,15 +79,40 @@ export function ProductEditor({ id }: { id: string }) {
       </div>
       <Link href={`/products/${product.id}/qr`} className="btn btn-secondary btn-full">QR etiketi göster / yazdır</Link>
 
-      {product.is_serial_tracked ? <SerialUnitsPanel product={product} /> : <StockPanel product={product} />}
+      <div className="row row-gap-sm" role="tablist" aria-label="Ürün bölümleri" style={{ flexWrap: "wrap" }}>
+        {([
+          ["stock", product.is_serial_tracked ? "Seri birimler" : "Stok ve hareketler"],
+          ["purchases", "Alışlar"],
+          ["sales", "Satışlar"],
+          ["general", "Ürün bilgileri"],
+        ] as const).map(([id, label]) => (
+          <button
+            key={id}
+            type="button"
+            role="tab"
+            aria-selected={tab === id}
+            className={`btn btn-sm ${tab === id ? "btn-primary" : "btn-secondary"}`}
+            onClick={() => setTab(id)}
+          >
+            {label}
+          </button>
+        ))}
+      </div>
 
-      <ProductForm key={`${product.id}:${product.version ?? 0}`} product={product} />
+      {tab === "stock" ? (product.is_serial_tracked ? <SerialUnitsPanel product={product} /> : <StockPanel product={product} />) : null}
+      {tab === "purchases" ? <ProductPurchases productId={product.id} /> : null}
+      {tab === "sales" ? <ProductSales productId={product.id} /> : null}
+      {tab === "general" ? (
+        <>
+          <ProductForm key={`${product.id}:${product.version ?? 0}`} product={product} />
 
-      {error ? <div className="alert alert-error" role="alert">{error}</div> : null}
+          {error ? <div className="alert alert-error" role="alert">{error}</div> : null}
 
-      <button type="button" className={`btn btn-full ${archived ? "btn-secondary" : "btn-danger"}`} onClick={toggleArchived}>
-        {archived ? "Yeniden etkinleştir" : "Pasifleştir"}
-      </button>
+          <button type="button" className={`btn btn-full ${archived ? "btn-secondary" : "btn-danger"}`} onClick={toggleArchived}>
+            {archived ? "Yeniden etkinleştir" : "Pasifleştir"}
+          </button>
+        </>
+      ) : null}
     </div>
   );
 }

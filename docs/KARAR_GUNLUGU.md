@@ -5,6 +5,10 @@
 
 ## 2026-10-22
 
+### K-038 · Stok bildirimleri ve bütünlük denetimi
+- **Karar:** Kritik stok bildirimi `LOW_STOCK:{ürün}:{n}` anahtarıyla üretilir: açık bildirim varken yenisi açılmaz, miktar toparlanınca çözülür, tekrar düşünce `n+1` ile yeni bildirim açılır (AC-028). Eksiye düşen stok için `SYNC_CONFLICT` türünde bildirim (`NEGATIVE_STOCK:{ürün}:{n}`) üretilir; hareketler silinmez, telafi stok düzeltmesi veya işlem iptaliyle yapılır (ST-003, AC-009). Bildirim kimlikleri anahtardan türetildiği için iki cihaz aynı olayı üretince sunucuda çakışmaz.
+- **Denetim:** Ürün stok özeti ile hareket defteri karşılaştırılır; fark varsa defter esas alınır, yerel özet düzeltilir, audit log yazılır (`Ayarlar → Veri denetimi`). Hareketler değiştirilmez.
+
 ### K-037 · İptalde inceleme / teşhis ücreti
 - **Karar:** İptal edilen servis normalde bakiyeye girmez. İnceleme/teşhis ücreti alınacaksa iptal formunda tutar girilir (`services.cancel_fee`, migration 023); servis iptal olarak kalır, `first_completed_at` boş kalır (sayaç artmaz), tutar servis ve müşteri bakiyesine borç olarak yazılır, açık kalem olarak tahsil edilir.
 - **Etki:** `services/service.ts` (`changeServiceStatus` seçeneği, `getServiceBalance`), `finance/service.ts`, `finance/openItems.ts`, servis iptal formu.
