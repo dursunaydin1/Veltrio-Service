@@ -1,5 +1,6 @@
 "use client";
 
+import { PhotoField } from "@/components/common/PhotoField";
 import { useState } from "react";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
@@ -23,6 +24,7 @@ function toFormInput(customer?: Customer): CustomerFormInput {
     village: customer?.village ?? "",
     address: customer?.address ?? "",
     notes: customer?.notes ?? "",
+    photo: customer?.photo ?? "",
   };
 }
 
@@ -198,6 +200,8 @@ export function CustomerForm({ customer }: { customer?: Customer }) {
         />
         {err("notes")}
       </div>
+
+      <PhotoField label="Müşteri fotoğrafı (isteğe bağlı)" value={values.photo || undefined} onChange={(photo) => set("photo", photo ?? "")} />
 
       {formError ? <div className="alert alert-error" role="alert">{formError}</div> : null}
 

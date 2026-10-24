@@ -80,6 +80,8 @@ export interface Service {
   /** Garanti kaynağı (üretici, bayi, satış garantisi…) ve kapsam açıklaması */
   warranty_source?: string;
   warranty_coverage?: string;
+  /** İsteğe bağlı kabul fotoğrafı (JPEG data URL, ≤1600px) */
+  intake_photo?: string;
   cancel_reason?: string;
   /** Kabulde belirtilen mevcut hasar / çizikler */
   existing_damage?: string;

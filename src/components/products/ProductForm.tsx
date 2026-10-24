@@ -1,5 +1,6 @@
 "use client";
 
+import { PhotoField } from "@/components/common/PhotoField";
 import { useState } from "react";
 import { useRouter } from "next/navigation";
 import { useBusinessContext } from "@/hooks/useBusinessContext";
@@ -34,6 +35,7 @@ function toFormInput(product: Product | undefined, taxMode: TaxMode, taxRate: nu
     criticalStockLevel: decimal(product?.critical_stock_level),
     compatibleModelsNote: product?.compatible_models_note ?? "",
     storageLocation: product?.storage_location ?? "",
+    photo: product?.photo ?? "",
   };
 }
 
@@ -226,6 +228,8 @@ export function ProductForm({ product }: { product?: Product }) {
         <label className="form-label" htmlFor="f-storageLocation">Raf / konum</label>
         <input {...field("storageLocation")} className="form-input" value={values.storageLocation} onChange={(e) => set("storageLocation", e.target.value)} />
       </div>
+
+      <PhotoField label="Ürün fotoğrafı (isteğe bağlı)" value={values.photo || undefined} onChange={(photo) => set("photo", photo ?? "")} />
 
       <div className="form-group">
         <label className="form-label" htmlFor="f-compatibleModelsNote">Uyumlu modeller (not)</label>

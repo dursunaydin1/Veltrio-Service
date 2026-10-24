@@ -48,6 +48,7 @@ export const productFormSchema = z.object({
   }),
   compatibleModelsNote: optionalText(500),
   storageLocation: optionalText(60),
+  photo: z.string().optional(),
 });
 
 export type ProductFormInput = z.input<typeof productFormSchema>;
@@ -68,6 +69,7 @@ export type ProductFields = {
   critical_stock_level?: number;
   compatible_models_note?: string;
   storage_location?: string;
+  photo?: string;
 };
 
 export type ProductFormResult =
@@ -111,6 +113,7 @@ export function parseProductForm(input: ProductFormInput): ProductFormResult {
       critical_stock_level: critical ?? undefined,
       compatible_models_note: v.compatibleModelsNote,
       storage_location: v.storageLocation,
+      photo: v.photo || undefined,
     },
   };
 }

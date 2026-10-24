@@ -2,6 +2,7 @@
 
 import { createClient } from "@/lib/supabase/server";
 import { redirect } from "next/navigation";
+import { safeNextPath } from "@/lib/auth/redirect";
 
 export async function loginAction(formData: FormData) {
   const email    = formData.get("email")    as string;
@@ -29,7 +30,7 @@ export async function loginAction(formData: FormData) {
     return { error: "Giriş yapılamadı. Lütfen tekrar deneyin." };
   }
 
-  redirect("/dashboard");
+  redirect(safeNextPath(formData.get("next") as string | null));
 }
 
 export async function logoutAction() {

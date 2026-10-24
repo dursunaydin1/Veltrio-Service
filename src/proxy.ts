@@ -56,7 +56,11 @@ export async function proxy(request: NextRequest) {
 
   if (!user && !isAuthPage) {
     const url = request.nextUrl.clone();
+    // QR ile açılan sayfaya, girişten sonra geri dönülebilsin
+    const target = pathname + request.nextUrl.search;
     url.pathname = "/login";
+    url.search = "";
+    if (pathname !== "/") url.searchParams.set("next", target);
     return NextResponse.redirect(url);
   }
 

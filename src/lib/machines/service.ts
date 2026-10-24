@@ -364,3 +364,76 @@ export async function attachSaleToMachine(
     return next;
   });
 }
+
+/**
+ * Geçici makine kaydını mevcut bir makineyle birleştirir (SR-016, AC-051).
+ * Geçici makinedeki servisler hedef makineye taşınır, geçici kayıt arşivlenir ve
+ * `merged_into_id` ile hedefe bağlanır; hiçbir kayıt silinmez. Aynı müşteriye ait
+ * olmayan veya geçici olmayan kayıtlar birleştirilmez. Nedenle birlikte audit log'a yazılır.
+ */
+export async function mergeTemporaryMachine(
+  ctx: BusinessContext,
+  temporaryId: string,
+  targetId: string,
+  reason: string
+): Promise<Machine> {
+  const why = reason.trim();
+  if (!why) throw new MachineRuleError("Birleştirme nedeni zorunludur.");
+  if (temporaryId === targetId) throw new MachineRuleError("Makine kendisiyle birleştirilemez.");
+
+  return db.transaction(
+    "rw",
+    [db.machines, db.services, db.sync_queue, db.audit_logs],
+    async () => {
+      const source = await db.machines.get(temporaryId);
+      const target = await db.machines.get(targetId);
+      if (!source || !target || source.business_id !== ctx.businessId || target.business_id !== ctx.businessId) {
+        throw new MachineRuleError("Makine bulunamadı.");
+      }
+      if (!source.is_temporary) throw new MachineRuleError("Yalnızca geçici makine kaydı birleştirilebilir.");
+      if (target.is_temporary) throw new MachineRuleError("Hedef makine de geçici; önce marka ve model bilgilerini tamamlayın.");
+      if (target.archived_at || target.merged_into_id) throw new MachineRuleError("Hedef makine arşivde veya başka bir makineyle birleştirilmiş.");
+      if (source.merged_into_id || source.archived_at) throw new MachineRuleError("Bu geçici kayıt zaten birleştirilmiş veya arşivlenmiş.");
+      if (source.customer_id !== target.customer_id) {
+        throw new MachineRuleError("Makineler aynı müşteriye ait olmalıdır.");
+      }
+
+      const now = nowISO();
+      const services = await db.services.where("machine_id").equals(temporaryId).toArray();
+      for (const service of services) {
+        const moved = { ...service, machine_id: targetId, updated_at: now };
+        await db.services.put(moved);
+        // Güncellemede makine alanı normalde gönderilmez (değişmez alan); birleştirme tek istisnadır.
+        await enqueue(
+          "services",
+          service.id,
+          "UPDATE",
+          { id: service.id, business_id: service.business_id, machine_id: targetId, version: service.version ?? 1 },
+          ctx.deviceCode
+        );
+      }
+
+      const merged: Machine = { ...source, merged_into_id: targetId, archived_at: now, updated_at: now };
+      await db.machines.put(merged);
+      await enqueue(
+        "machines",
+        temporaryId,
+        "UPDATE",
+        { ...editablePayload(merged), version: source.version ?? 1 },
+        ctx.deviceCode
+      );
+      await writeAuditLog({
+        businessId: ctx.businessId,
+        entityType: "machines",
+        entityId: temporaryId,
+        action: "STATE_CHANGE",
+        deviceCode: ctx.deviceCode,
+        actorId: ctx.actorId,
+        reason: why,
+        oldValue: { merged_into_id: null, services_moved: services.length },
+        newValue: { merged_into_id: targetId },
+      });
+      return merged;
+    }
+  );
+}

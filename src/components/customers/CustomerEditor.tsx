@@ -7,6 +7,7 @@ import { MessageCircle, Phone } from "lucide-react";
 import { db } from "@/lib/db";
 import { useBusinessContext } from "@/hooks/useBusinessContext";
 import { PartyBalancePanel } from "@/components/finance/PartyBalancePanel";
+import { CustomerHistory } from "@/components/customers/CustomerHistory";
 import { CustomerMachines } from "@/components/customers/CustomerMachines";
 import { CustomerForm } from "@/components/customers/CustomerForm";
 import { setCustomerArchived } from "@/lib/customers/service";
@@ -55,6 +56,11 @@ export function CustomerEditor({ id }: { id: string }) {
         {archived ? <span className="badge badge-gray">Arşivde</span> : null}
       </div>
 
+      {customer.photo ? (
+        // eslint-disable-next-line @next/next/no-img-element
+        <img src={customer.photo} alt="Müşteri fotoğrafı" style={{ maxWidth: 160, maxHeight: 160, borderRadius: 8, objectFit: "cover" }} />
+      ) : null}
+
       {tel || whatsapp ? (
         <div className="row row-gap-md">
           {tel ? (
@@ -71,6 +77,8 @@ export function CustomerEditor({ id }: { id: string }) {
           ) : null}
         </div>
       ) : null}
+
+      <CustomerHistory customer={customer} />
 
       <CustomerMachines customer={customer} />
 

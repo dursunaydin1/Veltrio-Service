@@ -1,6 +1,7 @@
 "use client";
 
 import { useState } from "react";
+import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { useLiveQuery } from "dexie-react-hooks";
 import { db } from "@/lib/db";
@@ -9,6 +10,9 @@ import { ProductForm } from "@/components/products/ProductForm";
 import { SerialUnitsPanel } from "@/components/products/SerialUnitsPanel";
 import { StockPanel } from "@/components/products/StockPanel";
 import { setProductArchived } from "@/lib/products/service";
+import { getProductBalance } from "@/lib/stock/ledger";
+import { formatCurrency, formatQuantity } from "@/lib/utils";
+import { unitLabel } from "@/lib/products/constants";
 
 /** Ürün düzenleme sayfasının içeriği: form + pasifleştirme / yeniden etkinleştirme. */
 export function ProductEditor({ id }: { id: string }) {
@@ -18,6 +22,7 @@ export function ProductEditor({ id }: { id: string }) {
 
   // Dizi dönmesi, "yükleniyor" (undefined) ile "bulunamadı" ([]) ayrımını sağlar.
   const found = useLiveQuery(() => db.products.where("id").equals(id).toArray(), [id]);
+  const balance = useLiveQuery(() => getProductBalance(id), [id]);
 
   if (found === undefined) return null;
   if (found.length === 0) {
@@ -50,6 +55,27 @@ export function ProductEditor({ id }: { id: string }) {
         <h1>{product.name}</h1>
         {archived ? <span className="badge badge-gray">Pasif</span> : null}
       </div>
+
+      {product.photo ? (
+        // eslint-disable-next-line @next/next/no-img-element
+        <img src={product.photo} alt="Ürün fotoğrafı" style={{ maxWidth: 160, maxHeight: 160, borderRadius: 8, objectFit: "cover" }} />
+      ) : null}
+
+      <div className="tile-grid" aria-label="Ürün özeti">
+        <div className="tile">
+          <div className="tile-label">Stok</div>
+          <div className="tile-value">{formatQuantity(balance?.available ?? 0)} {unitLabel(product.unit)}</div>
+        </div>
+        <div className="tile">
+          <div className="tile-label">Satış fiyatı</div>
+          <div className="tile-value">{formatCurrency(product.default_sale_price)}</div>
+        </div>
+        <div className="tile">
+          <div className="tile-label">Son alış fiyatı</div>
+          <div className="tile-value">{product.last_purchase_price != null ? formatCurrency(product.last_purchase_price) : "—"}</div>
+        </div>
+      </div>
+      <Link href={`/products/${product.id}/qr`} className="btn btn-secondary btn-full">QR etiketi göster / yazdır</Link>
 
       {product.is_serial_tracked ? <SerialUnitsPanel product={product} /> : <StockPanel product={product} />}
 

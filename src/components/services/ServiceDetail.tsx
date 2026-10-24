@@ -67,6 +67,10 @@ export function ServiceDetail({ id }: { id: string }) {
           {service.promised_date ? ` · Teslim sözü: ${formatDate(service.promised_date + "T00:00:00")}` : ""}
           {service.deposit_amount > 0 ? ` · Kapora: ${formatCurrency(service.deposit_amount)}` : ""}
         </small>
+        {service.intake_photo ? (
+          // eslint-disable-next-line @next/next/no-img-element
+          <img src={service.intake_photo} alt="Kabul fotoğrafı" style={{ maxWidth: 220, maxHeight: 220, borderRadius: 8, objectFit: "cover" }} />
+        ) : null}
         {service.status === "CANCELLED" && service.cancel_reason ? (
           <div className="alert alert-error" role="note">İptal nedeni: {service.cancel_reason}</div>
         ) : null}

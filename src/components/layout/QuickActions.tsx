@@ -3,8 +3,7 @@ import { ScanLine, Search, ShoppingCart, Wrench } from "lucide-react";
 
 /**
  * Ana ekran hızlı eylemleri — PRD §4.7.
- * Hedef ekranlar yazıldıkça `href` gerçek akışlara çevrilir; Ara ve QR Tara
- * henüz yok, bu yüzden devre dışı gösterilir.
+ * Ara henüz yok, bu yüzden devre dışı gösterilir.
  */
 export function QuickActions() {
   return (
@@ -22,11 +21,10 @@ export function QuickActions() {
         Ara
         <small>Yakında</small>
       </span>
-      <span className="quick-action" aria-disabled="true">
+      <Link href="/scan" className="quick-action">
         <ScanLine size={28} aria-hidden="true" />
         QR Tara
-        <small>Yakında</small>
-      </span>
+      </Link>
     </div>
   );
 }

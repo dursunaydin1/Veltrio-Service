@@ -27,12 +27,13 @@ Bu dizin Supabase PostgreSQL migration dosyalarını içerir.
 | 019 | `019_return_refund.sql` | Müşteri iadesi: para iadesi ödemesi bağlantısı, geri alma nedeni |
 | 020 | `020_due_dates.sql` | Vade tarihi: satış ve servis (borçlu teslim) |
 | 021 | `021_catalogs_checklists.sql` | Arıza/işlem katalogları, servis şablonları, kontrol listesi, garanti alanları |
+| 022 | `022_photos.sql` | Müşteri / ürün / kabul fotoğrafı (JPEG data URL) |
 
 ## Supabase Dashboard'dan Uygulama
 
 1. [Supabase Dashboard](https://app.supabase.com) → Projenizi seçin
 2. **SQL Editor** sekmesine girin
-3. Migration dosyalarını **sırasıyla** çalıştırın (001 → 002 → 003 → 004 → 005 → 006 → 007 → 008 → 009 → 010 → 011 → 012 → 013 → 014 → 015 → 016 → 017 → 018 → 019 → 020 → 021)
+3. Migration dosyalarını **sırasıyla** çalıştırın (001 → 002 → 003 → 004 → 005 → 006 → 007 → 008 → 009 → 010 → 011 → 012 → 013 → 014 → 015 → 016 → 017 → 018 → 019 → 020 → 021 → 022)
 
 ## Supabase CLI ile Uygulama
 

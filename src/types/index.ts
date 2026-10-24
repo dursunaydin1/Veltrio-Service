@@ -82,6 +82,8 @@ export interface Customer {
   village?: string;
   address?: string;
   notes?: string;
+  /** İsteğe bağlı fotoğraf (JPEG data URL, ≤1600px) */
+  photo?: string;
   /** Sunucu kayıt sürümü; güncellemede çakışma tespiti için gönderilir. */
   version?: number;
   archived_at?: ISODateTimeString;
@@ -186,6 +188,8 @@ export interface Product {
   stock_damaged: number;   // Hasarlı stok (satışa dahil değil)
   compatible_models_note?: string;
   storage_location?: string;
+  /** İsteğe bağlı ürün fotoğrafı (JPEG data URL, ≤1600px) */
+  photo?: string;
   /** Sunucu kayıt sürümü; güncellemede çakışma tespiti için gönderilir. */
   version?: number;
   archived_at?: ISODateTimeString;

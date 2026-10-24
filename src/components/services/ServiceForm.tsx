@@ -1,5 +1,6 @@
 "use client";
 
+import { PhotoField } from "@/components/common/PhotoField";
 import { useState } from "react";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
@@ -51,6 +52,7 @@ export function ServiceForm({
   const [promised, setPromised] = useState("");
   const [depositOn, setDepositOn] = useState(false);
   const [deposit, setDeposit] = useState("");
+  const [photo, setPhoto] = useState<string | undefined>(undefined);
   const [warrantyOn, setWarrantyOn] = useState(false);
   const [warrantySource, setWarrantySource] = useState("");
   const [warrantyCoverage, setWarrantyCoverage] = useState("");
@@ -118,6 +120,7 @@ export function ServiceForm({
         accessories,
         promisedDate: promised || undefined,
         deposit: depositInput,
+        photo,
         warranty: warrantyOn ? { source: warrantySource, coverage: warrantyCoverage } : undefined,
       });
       router.push(`/services/${service.id}`);
@@ -209,6 +212,8 @@ export function ServiceForm({
         <label className="form-label" htmlFor="sv-acc">Teslim alınan aksesuarlar</label>
         <input id="sv-acc" className="form-input" placeholder="Ör. zincir kılıfı, bıçak" value={accessories} onChange={(e) => setAccessories(e.target.value)} />
       </div>
+      <PhotoField label="Kabul fotoğrafı (isteğe bağlı)" value={photo} onChange={setPhoto} />
+
       <div className="form-group">
         <label className="form-label" htmlFor="sv-promised">Teslim sözü (tarih)</label>
         <input id="sv-promised" className="form-input" type="date" value={promised} onChange={(e) => setPromised(e.target.value)} />

@@ -21,6 +21,7 @@ export const customerFormSchema = z
     village: z.string().trim().min(1, "Köy / mahalle zorunludur.").max(120, "En fazla 120 karakter olabilir."),
     address: optionalText(300),
     notes: optionalText(1000),
+    photo: z.string().optional(),
   })
   .superRefine((value, ctx) => {
     if (value.noPhone) return;
@@ -42,6 +43,7 @@ export type CustomerFields = {
   village: string;
   address?: string;
   notes?: string;
+  photo?: string;
 };
 
 export type CustomerFormResult =
@@ -71,6 +73,7 @@ export function parseCustomerForm(input: CustomerFormInput): CustomerFormResult 
       village: v.village,
       address: v.address,
       notes: v.notes,
+      photo: v.photo || undefined,
     },
   };
 }

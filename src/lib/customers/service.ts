@@ -46,6 +46,7 @@ const EDITABLE_COLUMNS = [
   "village",
   "address",
   "notes",
+  "photo",
   "archived_at",
 ] as const;
 

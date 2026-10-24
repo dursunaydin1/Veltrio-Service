@@ -47,6 +47,7 @@ const EDITABLE_COLUMNS = [
   "critical_stock_level",
   "compatible_models_note",
   "storage_location",
+  "photo",
   "archived_at",
 ] as const;
 

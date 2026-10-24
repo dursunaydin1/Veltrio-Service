@@ -13,6 +13,7 @@ import { syncPaymentDueNotifications } from "@/lib/notifications/paymentDue";
 import { createIssueEntry, createOperationEntry, createTemplate, updateTemplate } from "@/lib/catalog/service";
 import { addChecklistItem, applyTemplate, setChecklistItemDone } from "@/lib/services/checklist";
 import { setPartSupply } from "@/lib/services/quote";
+import { mergeTemporaryMachine } from "@/lib/machines/service";
 import { createMachine } from "@/lib/machines/service";
 import { addOperation, addPart, recordApproval, setPartUsedQuantity } from "@/lib/services/quote";
 import { changeServiceStatus, deliverService, getServiceBalance, openService } from "@/lib/services/service";
@@ -65,6 +66,7 @@ let hasSerial = false;
 let hasReturns = false;
 let hasDue = false;
 let hasCatalog = false;
+let hasPhotos = false;
 
 const created: string[] = [];
 
@@ -159,6 +161,7 @@ describe.skipIf(!URL || !ANON || !EMAIL || !PASSWORD)("sunucuya karşı uçtan u
 
     hasDue = !(await supabase.from("sales").select("due_date").limit(1)).error;
     hasCatalog = !(await supabase.from("issue_catalog").select("id").limit(1)).error;
+    hasPhotos = !(await supabase.from("customers").select("photo").limit(1)).error;
     const probe = await supabase.from("product_serial_units").select("internal_number").limit(1);
     hasSerial = !probe.error;
     hasReturns = !(await supabase.from("return_transactions").select("refund_payment_id").limit(1)).error;
@@ -166,7 +169,7 @@ describe.skipIf(!URL || !ANON || !EMAIL || !PASSWORD)("sunucuya karşı uçtan u
 
   it("0) bağlantı: oturum, işletme ve migration durumu", () => {
     expect(ctx.businessId).toMatch(/^[0-9a-f-]{36}$/);
-    console.log(`[e2e] cihaz=${DEVICE} · 018 (seri birim): ${hasSerial ? "VAR" : "YOK"} · 019 (iade): ${hasReturns ? "VAR" : "YOK"} · 020 (vade): ${hasDue ? "VAR" : "YOK"} · 021 (katalog): ${hasCatalog ? "VAR" : "YOK"}`);
+    console.log(`[e2e] cihaz=${DEVICE} · 018 (seri birim): ${hasSerial ? "VAR" : "YOK"} · 019 (iade): ${hasReturns ? "VAR" : "YOK"} · 020 (vade): ${hasDue ? "VAR" : "YOK"} · 021 (katalog): ${hasCatalog ? "VAR" : "YOK"} · 022 (foto): ${hasPhotos ? "VAR" : "YOK"}`);
   });
 
   it("1) tedarikçi: açılış bakiyesi ve ödeme sunucuya gider, bakiye sunucu verisinden doğru çıkar", async () => {
@@ -571,6 +574,26 @@ describe.skipIf(!URL || !ANON || !EMAIL || !PASSWORD)("sunucuya karşı uçtan u
     await sync("şablon güncelleme");
     const { data: after } = await supabase.from("service_checklist_items").select("title_snapshot").eq("service_id", service.id);
     expect(after?.map((c) => c.title_snapshot).sort()).toEqual(["Ek madde", "Filtre", "Yağ"]);
+  });
+
+  it("7h) geçici makine birleştirme ve fotoğraf sunucuda doğru", async (ctxTest) => {
+    if (!hasCatalog || !hasPhotos) {
+      console.log("[e2e] migration 021/022 uygulanmamış: birleştirme/fotoğraf bölümü atlandı");
+      return ctxTest.skip();
+    }
+    const photo = "data:image/jpeg;base64,/9j/4AAQSkZJRgABAQAAAQABAAD/2wBD";
+    const real = await createMachine(ctx, { customer_id: customerId, type: "Testere", brand: "Stihl", model: "E2E-M", serial_number: `${TAG}-M`, is_temporary: false });
+    const temp = await createMachine(ctx, { customer_id: customerId, type: "Testere", is_temporary: true });
+    const service = await openService(ctx, { customerId, machineId: temp.id, complaint: "e2e", photo });
+    await sync("geçici makine ve servis");
+    expect((await one<{ intake_photo: string }>("services", service.id)).intake_photo).toBe(photo);
+
+    await mergeTemporaryMachine(ctx, temp.id, real.id, "e2e birleştirme");
+    await sync("makine birleştirme");
+    expect((await one<{ machine_id: string }>("services", service.id)).machine_id).toBe(real.id);
+    const merged = await one<{ merged_into_id: string; archived_at: string | null }>("machines", temp.id);
+    expect(merged.merged_into_id).toBe(real.id);
+    expect(merged.archived_at).toBeTruthy();
   });
 
   it("8) başka bir cihaz gibi çekme: yerel veri silinip sunucudan alınınca stok ve bakiyeler aynı çıkar", async () => {

@@ -40,12 +40,14 @@ Uygulamanın kalbi olan servis akışını hayata geçirmek: müşteri kabulünd
 - [x] Telefonu olmayan müşteri için `no_phone_flag = true`
 - [x] Gereksiz kişisel veri (T.C. kimlik no) istenmez
 - [x] Müşteri listesi: ad-soyad, telefon, açık bakiye göstergesi, hızlı arama
-- [ ] Müşteri profili: makineler, servis geçmişi, satışlar, ödemeler, bakiye, hızlı işlemler
+- [x] Müşteri profili: makineler, servis geçmişi, satışlar, ödemeler, bakiye, hızlı işlemler
 - [x] "Ara" ve "WhatsApp'ta aç" bağlantıları (elle açar, otomatik değil)
-- [ ] Müşteri fotoğrafı: istemci tarafında 1600px küçültme, JPEG/WebP (FR-028)
+- [x] Müşteri fotoğrafı: istemci tarafında 1600px küçültme, JPEG/WebP (FR-028)
 - [x] Müşteri arşivleme: açık servisi veya sıfır olmayan bakiyesi varsa engellenir (AC-030)
 
 > Uygulandı: migration 010 (`no_phone_flag`), `src/lib/customers/` (şema, servis), `src/components/customers/`, `/customers`, `/customers/new`, `/customers/[id]`. Mükerrer telefon yazarken uyarılır (AC-029), kullanıcı bilinçli olarak ayrı kayıt açabilir. Arşivleme açık servis varsa engellenir (AC-030); sıfırdan farklı bakiye de arşivlemeyi engeller. Açık: müşteri fotoğrafı (FR-028), müşteri profilindeki makine/servis/satış/ödeme/bakiye bölümleri (ilgili adımlarla). Köy/mahalle zorunlu, açık adres isteğe bağlı (K-018).
+
+> Uygulandı (3.2 kalanı): müşteri sayfasında hızlı işlemler (Yeni servis / Yeni satış), servis geçmişi, satışlar, makineler, bakiye ve açık kalemler; müşteri fotoğrafı (`PhotoField`, istemcide 1600 px JPEG, migration 022, K-036).
 
 **İlgili FR:** FR-003  
 **Test:** TC-031, TC-032
@@ -58,13 +60,15 @@ Uygulamanın kalbi olan servis akışını hayata geçirmek: müşteri kabulünd
 - [x] Makine oluşturma: tür, marka, model (zorunlu); seri numarası (isteğe bağlı)
 - [x] Seri numarası yoksa sistem benzersiz iç makine numarası üretir (MK-...)
 - [x] Aynı markada aynı seri numarası mevcutsa → uyarı; kullanıcı onayıyla devam (AC-029)
-- [ ] Makine profili: sahibi, seri/iç numara, tür/marka/model, satış bilgisi, garanti bitiş tarihi, servis sayısı, son servis tarihi, servis geçmişi, sahiplik geçmişi
-- [ ] İşlemler: Yeni Servis, QR göster/tara, Düzenle, Sahip değiştir, Birleştir
+- [x] Makine profili: sahibi, seri/iç numara, tür/marka/model, satış bilgisi, garanti bitiş tarihi, servis sayısı, son servis tarihi, servis geçmişi, sahiplik geçmişi
+- [x] İşlemler: Yeni Servis, QR göster/tara, Düzenle, Sahip değiştir, Birleştir
 - [x] **Makine sahipliği değişimi:** MachineOwnershipHistory kaydı oluşur; servis geçmişi korunur (AC-018, TC-020)
-- [ ] **Geçici makine kaydı (TEMPORARY):** Makine belirlenemiyorsa açılır; sonradan ACTIVE'e dönüştürülür veya mevcut makineyle birleştirilir (SR-016, AC-051)
+- [x] **Geçici makine kaydı (TEMPORARY):** Makine belirlenemiyorsa açılır; sonradan ACTIVE'e dönüştürülür veya mevcut makineyle birleştirilir (SR-016, AC-051)
 - [x] Makine arşivleme: açık servisi varsa engellenir (FR-033)
 
 > Uygulandı: migration 012 (`internal_number`, `machine_ownership_history`), `src/lib/machines/` (şema, servis), `/machines`, `/machines/new`, `/machines/[id]`, müşteri sayfasında Makineler bölümü, ortak `CustomerPicker`. Geçici kayıt açılır ve marka/model girilince etkin makineye dönüşür. **Açık:** makine profilindeki satış bilgisi / garanti / servis sayısı / son servis (servis akışıyla), "Yeni Servis" ve QR göster/tara eylemleri (3.4, 3.6), geçici makineyi mevcut makineyle **birleştirme** (AC-051; servisler yazılınca). `status` sütunu açılmadı: geçici = `is_temporary`, pasif = arşiv (K-020).
+
+> Uygulandı (3.3 kalanı): makine sayfasında tamamlanan servis sayısı, son servis, garanti bitişi (bilgi amaçlı), satış bilgisi, QR etiketi, **geçici makineyi mevcut makineyle birleştirme** (`mergeTemporaryMachine`: servisler taşınır, geçici kayıt arşivlenir, audit log; AC-051).
 
 **İlgili FR:** FR-004, FR-005  
 **Test:** TC-020, TC-052
@@ -74,12 +78,14 @@ Uygulamanın kalbi olan servis akışını hayata geçirmek: müşteri kabulünd
 ### ADIM 3.4 — QR Kodu Sistemi (Makine & Ürün)
 
 **Görevler:**
-- [ ] Makine QR kodu: yalnızca değişmeyen kayıt kimliği/URL içerir
-- [ ] QR ile makine açıldığında: oturum kontrolü → giriş ekranı (oturum yoksa) → makine özeti
-- [ ] Makine QR ekranı: makine özeti, sahibi, geçmiş servisler, "Yeni Servis Başlat" eylemi
-- [ ] Ürün QR ekranı: ad/kod, mevcut stok, satış fiyatı, son alış fiyatı
-- [ ] Etiket boyutu ayardan seçilebilir; QR + kısa kimlik/ürün adı + isteğe bağlı işletme adı
-- [ ] Ürün fiyatı/stoğu değiştiğinde QR yeniden basılmadan güncel veriyi gösterir (AC-035)
+- [x] Makine QR kodu: yalnızca değişmeyen kayıt kimliği/URL içerir
+- [x] QR ile makine açıldığında: oturum kontrolü → giriş ekranı (oturum yoksa) → makine özeti
+- [x] Makine QR ekranı: makine özeti, sahibi, geçmiş servisler, "Yeni Servis Başlat" eylemi
+- [x] Ürün QR ekranı: ad/kod, mevcut stok, satış fiyatı, son alış fiyatı
+- [x] Etiket boyutu ayardan seçilebilir; QR + kısa kimlik/ürün adı + isteğe bağlı işletme adı
+- [x] Ürün fiyatı/stoğu değiştiğinde QR yeniden basılmadan güncel veriyi gösterir (AC-035)
+
+> Uygulandı: `qrcode` ile QR üretimi (`QrLabel`), `/machines/[id]/qr` ve `/products/[id]/qr` (yazdırılabilir etiket; boyut seçimi ve işletme adı tercihi tarayıcıda hatırlanır), `/scan` kamerayla QR okuma (`html5-qrcode`) + elle adres girişi, oturum yoksa girişe yönlendirip **girişten sonra aynı sayfaya dönüş** (`next` parametresi, açık yönlendirme korumalı). QR yalnızca adres taşır; fiyat/stok okutulunca güncel gösterilir (AC-035). **Not:** etiket boyutu seçimi şimdilik cihazda saklanır (Ayarlar ekranı ile işletme ayarına taşınabilir).
 
 **İlgili FR:** FR-006  
 **İlgili AC:** AC-003, AC-035  

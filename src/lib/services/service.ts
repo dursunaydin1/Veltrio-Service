@@ -76,6 +76,7 @@ const INSERT_COLUMNS = [
   "delivery_balance",
   "debt_acknowledged",
   "due_date",
+  "intake_photo",
   "created_by_device",
   "created_at",
 ] as const;
@@ -83,7 +84,7 @@ const INSERT_COLUMNS = [
 /** Güncellemede belge no, müşteri, makine ve kabul bilgisi (değişmez alanlar) gönderilmez. */
 const UPDATE_COLUMNS = INSERT_COLUMNS.filter(
   (c) =>
-    !["customer_id", "machine_id", "document_no", "received_date", "created_by_device", "created_at"].includes(c)
+    !["customer_id", "machine_id", "document_no", "received_date", "intake_photo", "created_by_device", "created_at"].includes(c)
 );
 
 /** Boş alanlar `null` gönderilir; aksi halde sunucu eski değeri korur. */
@@ -152,6 +153,8 @@ export type OpenServiceParams = {
   promisedDate?: string;
   /** Kabulde alınan kapora */
   deposit?: { amountKurus: number; method: PaymentMethod };
+  /** Kabul fotoğrafı (JPEG data URL, ≤1600px) */
+  photo?: string;
   /** Garanti talebi (SR-011): kaynak ve kapsam açıklaması isteğe bağlı */
   warranty?: { source?: string; coverage?: string };
 };
@@ -227,6 +230,7 @@ export async function openService(ctx: BusinessContext, params: OpenServiceParam
         labor_fee: 0,
         total_amount: 0,
         received_date: now,
+        intake_photo: params.photo || undefined,
         is_warranty_claim: !!params.warranty,
         warranty_source: tidy(params.warranty?.source),
         warranty_coverage: tidy(params.warranty?.coverage),

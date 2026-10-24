@@ -11,6 +11,7 @@ export function LoginForm() {
     e.preventDefault();
     setError(null);
     const formData = new FormData(e.currentTarget);
+    formData.set("next", new URLSearchParams(window.location.search).get("next") ?? "");
 
     startTransition(async () => {
       const result = await loginAction(formData);

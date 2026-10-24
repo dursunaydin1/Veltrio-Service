@@ -5,6 +5,12 @@
 
 ## 2026-10-22
 
+### K-036 · Fotoğraflar, QR ve girişten sonra dönüş
+- **Fotoğraf (FR-028):** Fotoğraf istemcide 1600 px'e küçültülmüş JPEG olarak, kayıt üzerinde metin (data URL) sütununda saklanır (`customers.photo`, `products.photo`, `services.intake_photo`; migration 022). Çevrimdışı çalışma ve basit eşitleme için dosya depolaması yerine bu seçildi; yüksek hacimde Supabase Storage'a taşınması Faz 7'de değerlendirilir.
+- **QR:** QR yalnızca değişmeyen kayıt adresini taşır (AC-035). Giriş yoksa proxy `?next=` ile girişe yönlendirir; yalnızca uygulama içi yollar kabul edilir (`safeNextPath`).
+- **Geçici makine birleştirme:** aynı müşterinin etkin makinesiyle; servisler taşınır, kayıt silinmez (arşiv + `merged_into_id`).
+- **Etki:** migration 022, `images/resize.ts`, `qr/payload.ts`, `QrLabel`, `QrScanner`, `mergeTemporaryMachine`, `proxy.ts`, `login/actions.ts`.
+
 ### K-035 · Kataloglar, şablonlar, kontrol listesi, garanti
 - **Karar:** Arıza ve işlem katalogları, servis şablonları ve servis kontrol listesi yeni senkronize tablolardır (migration 021). Katalog yalnızca **kolay seçim** içindir: servise açıklama/fiyat kopyalanır, katalog değişse geçmiş satırlar değişmez. Şablon maddeleri servise kendi başlık kopyalarıyla yazılır (AC-005). Zorunlu madde uyarısı engel değil **uyarıdır**; kullanıcı onaylarsa tamamlanır.
 - **Sapma:** `ServiceIssue` ayrı tablo olarak açılmadı; şikâyet metni serviste, katalog seçimi hızlı düğme olarak kalır (ayrı tablo ek değer katmıyordu).
