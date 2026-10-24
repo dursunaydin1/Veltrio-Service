@@ -274,10 +274,12 @@ Uygulamanın kalbi olan servis akışını hayata geçirmek: müşteri kabulünd
 ### ADIM 3.14 — Parça Temin Durumu (Parça Bekleniyor)
 
 **Görevler:**
-- [ ] `ServicePart.supply_status`: IN_STOCK / TO_ORDER / ORDERED / ARRIVED
-- [ ] TO_ORDER veya ORDERED parça olan serviste "Parça Bekleniyor" durumunda kalabilir
-- [ ] Beklenen tarih (expected_at) ve isteğe bağlı sipariş/satın alma kalemi bağlantısı
-- [ ] Tüm parçalar ARRIVED/IN_STOCK olunca bekleme bildirimi çözülür (SR-019)
+- [x] `ServicePart.supply_status`: IN_STOCK / TO_ORDER / ORDERED / ARRIVED
+- [x] TO_ORDER veya ORDERED parça olan serviste "Parça Bekleniyor" durumunda kalabilir
+- [x] Beklenen tarih (expected_at) ve isteğe bağlı sipariş/satın alma kalemi bağlantısı
+- [x] Tüm parçalar ARRIVED/IN_STOCK olunca bekleme bildirimi çözülür (SR-019)
+
+> Uygulandı: `setPartSupply` (`services/quote.ts`), parça satırında temin durumu + beklenen tarih seçimi, `PART_WAITING` bildirimi (parça gelince çözülür). **Not:** sipariş/satın alma kalemi bağlantısı ileriye bırakıldı (isteğe bağlı madde); durum “Parça bekleniyor”a geçişi kullanıcı kararıdır.
 
 ---
 
@@ -301,10 +303,12 @@ Uygulamanın kalbi olan servis akışını hayata geçirmek: müşteri kabulünd
 ### ADIM 3.16 — Servis Teslim Tarihi Hatırlatmaları
 
 **Görevler:**
-- [ ] Teslim tarihi yaklaşma bildirimi: varsayılan 1 gün önce
-- [ ] Gecikme durumunda teslim kaydı oluşana kadar günde bir kez bildirim
-- [ ] Ana ekran "Teslim tarihi yaklaşan/geçen" metriği
+- [x] Teslim tarihi yaklaşma bildirimi: varsayılan 1 gün önce
+- [x] Gecikme durumunda teslim kaydı oluşana kadar günde bir kez bildirim
+- [x] Ana ekran "Teslim tarihi yaklaşan/geçen" metriği
 - [ ] Ayarlardan hatırlatma günü değiştirilebilir (SR-014)
+
+> Uygulandı: `notifications/serviceReminders.ts` (planlayıcı + `syncServiceNotifications`), gecikmede günde bir yeni bildirim (eskisi çözülür), teslim/iptalde hepsi çözülür; ana ekran kutuları. **Açık:** hatırlatma gününü değiştiren ayar ekranı (Ayarlar sayfasıyla, SR-014; değer `business.settings.default_service_reminder_days` olarak okunur).
 
 **İlgili AC:** AC-038
 
@@ -313,7 +317,7 @@ Uygulamanın kalbi olan servis akışını hayata geçirmek: müşteri kabulünd
 ### ADIM 3.17 — Servis Ekranı (UI)
 
 **Görevler:**
-- [ ] Servis listesi: aktif / tamamlanmış / iptal edilmiş sekmeleri; durum rozeti, vaat edilen teslim tarihi, bakiye göstergesi
+- [x] Servis listesi: aktif / tamamlanmış / iptal edilmiş sekmeleri; durum rozeti, vaat edilen teslim tarihi, bakiye göstergesi
 - [ ] Servis detayı sekmeleri:
   - Özet (müşteri, makine, durum, tarihler)
   - Arıza ve teşhis
@@ -322,7 +326,9 @@ Uygulamanın kalbi olan servis akışını hayata geçirmek: müşteri kabulünd
   - Kontrol listesi
   - Ödemeler
   - Geçmiş (durum geçmişi ve audit)
-- [ ] Ana ekran metrikleri: Aktif Servis, Onay Bekleyen, Parça Bekleyen, Teslim Tarihi Yaklaşan/Geçen
+- [x] Ana ekran metrikleri: Aktif Servis, Onay Bekleyen, Parça Bekleyen, Teslim Tarihi Yaklaşan/Geçen
+
+> Uygulandı: servis listesinde aktif/teslim/iptal sekmeleri, rozet, teslim sözü, kalan bakiye; ana ekranda Aktif, Onay bekleyen, Parça bekleyen, Teslimi yaklaşan/geçen. **Açık:** detay ekranının sekmeli düzeni (şu an tek sayfada bölümler halinde) ve kontrol listesi bölümü (3.10 ile).
 
 ---
 

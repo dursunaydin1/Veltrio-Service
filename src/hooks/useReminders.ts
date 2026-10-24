@@ -2,23 +2,26 @@
 
 import { useEffect } from "react";
 import { syncPaymentDueNotifications } from "@/lib/notifications/paymentDue";
+import { syncServiceNotifications } from "@/lib/notifications/serviceReminders";
+import { useSessionStore } from "@/stores/session";
 import { useBusinessContext } from "@/hooks/useBusinessContext";
 
 /**
- * Vade hatırlatmalarını açılışta, uygulamaya dönüldüğünde ve saatte bir günceller
+ * Vade ve servis hatırlatmalarını açılışta, uygulamaya dönüldüğünde ve saatte bir günceller
  * (AC-038). Yeni olay yoksa hiçbir şey üretmez; aynı olay tekrarlanmaz.
  */
-export function usePaymentDueReminders(): void {
+export function useReminders(): void {
   const ctx = useBusinessContext();
   const businessId = ctx?.businessId;
   const deviceCode = ctx?.deviceCode;
+  const reminderDays = useSessionStore((s) => s.business?.settings?.default_service_reminder_days);
 
   useEffect(() => {
     if (!businessId || !deviceCode) return;
     const run = () => {
-      syncPaymentDueNotifications({ businessId, deviceCode }).catch(() => {
-        // Hatırlatma üretimi başarısız olsa da uygulama çalışmaya devam eder.
-      });
+      // Hatırlatma üretimi başarısız olsa da uygulama çalışmaya devam eder.
+      syncPaymentDueNotifications({ businessId, deviceCode }).catch(() => undefined);
+      syncServiceNotifications({ businessId, deviceCode }, { reminderDays }).catch(() => undefined);
     };
     run();
     window.addEventListener("focus", run);
@@ -27,5 +30,5 @@ export function usePaymentDueReminders(): void {
       window.removeEventListener("focus", run);
       window.clearInterval(timer);
     };
-  }, [businessId, deviceCode]);
+  }, [businessId, deviceCode, reminderDays]);
 }

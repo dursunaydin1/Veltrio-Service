@@ -15,6 +15,7 @@ import {
   recordApproval,
   removeOperation,
   removePart,
+  setPartSupply,
   setPartUsedQuantity,
   updateOperation,
   type LineDecision,
@@ -192,6 +193,50 @@ export function ServiceLines({ service }: { service: Service }) {
   );
 }
 
+/** Parça temin durumu ve beklenen geliş tarihi (Adım 3.14, SR-019). */
+function SupplyControl({ part, run }: { part: ServicePart; run: (action: () => Promise<unknown>) => Promise<void> }) {
+  const ctx = useServiceContext();
+  const [status, setStatus] = useState<ServicePart["supply_status"]>(part.supply_status);
+  const [expected, setExpected] = useState(part.expected_at ?? "");
+  const waiting = status === "TO_ORDER" || status === "ORDERED";
+  const dirty = status !== part.supply_status || (waiting && expected !== (part.expected_at ?? ""));
+
+  return (
+    <span className="row row-gap-sm" style={{ flexWrap: "wrap", alignItems: "center" }}>
+      <select
+        className="form-input"
+        style={{ maxWidth: 170 }}
+        aria-label={`${part.description_snapshot} temin durumu`}
+        value={status}
+        onChange={(e) => setStatus(e.target.value as ServicePart["supply_status"])}
+      >
+        {(Object.keys(SUPPLY_LABEL) as (keyof typeof SUPPLY_LABEL)[]).map((k) => (
+          <option key={k} value={k}>{SUPPLY_LABEL[k]}</option>
+        ))}
+      </select>
+      {waiting ? (
+        <input
+          className="form-input"
+          style={{ maxWidth: 160 }}
+          type="date"
+          aria-label={`${part.description_snapshot} beklenen geliş tarihi`}
+          value={expected}
+          onChange={(e) => setExpected(e.target.value)}
+        />
+      ) : null}
+      {dirty ? (
+        <button
+          type="button"
+          className="btn btn-secondary btn-sm"
+          onClick={() => ctx && run(() => setPartSupply(ctx, part.id, status, waiting && expected ? expected : undefined))}
+        >
+          Temin durumunu kaydet
+        </button>
+      ) : null}
+    </span>
+  );
+}
+
 function PartRow({
   part,
   service,
@@ -239,6 +284,10 @@ function PartRow({
         ) : null}
         <span className="badge badge-gray">Kullanılan: {formatQuantity(part.used_quantity)} / {formatQuantity(part.quantity)}</span>
       </span>
+
+      {part.source_type !== "CUSTOMER_SUPPLIED" && !["DELIVERED", "CANCELLED"].includes(service.status) ? (
+        <SupplyControl part={part} run={run} />
+      ) : null}
 
       {canUse ? (
         <span className="row row-gap-sm">

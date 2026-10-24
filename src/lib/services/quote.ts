@@ -384,6 +384,36 @@ export async function updatePart(
   });
 }
 
+/**
+ * Parçanın temin durumunu ve beklenen geliş tarihini günceller (SR-019). Teklif
+ * tutarını değiştirmez; kapanmış (teslim/iptal) serviste yapılamaz.
+ */
+export async function setPartSupply(
+  ctx: ServiceContext,
+  partId: string,
+  supplyStatus: PartSupplyStatus,
+  expectedAt?: string
+): Promise<ServicePart> {
+  if (expectedAt && !/^\d{4}-\d{2}-\d{2}$/.test(expectedAt)) throw new ServiceRuleError("Beklenen tarih geçersiz.");
+  return db.transaction("rw", [...TABLES()], async () => {
+    const existing = await db.service_parts.get(partId);
+    if (!existing || existing.business_id !== ctx.businessId) throw new ServiceRuleError("Parça satırı bulunamadı.");
+    const service = await db.services.get(existing.service_id);
+    if (!service || ["DELIVERED", "CANCELLED"].includes(service.status)) {
+      throw new ServiceRuleError("Teslim edilmiş veya iptal edilmiş serviste temin durumu değiştirilemez.");
+    }
+    const next: ServicePart = {
+      ...existing,
+      supply_status: supplyStatus,
+      expected_at: supplyStatus === "TO_ORDER" || supplyStatus === "ORDERED" ? expectedAt : undefined,
+      updated_at: nowISO(),
+    };
+    await db.service_parts.put(next);
+    await enqueue("service_parts", next.id, "UPDATE", partPayload(next, false), ctx.deviceCode);
+    return next;
+  });
+}
+
 export async function removePart(ctx: ServiceContext, partId: string): Promise<void> {
   await db.transaction("rw", [...TABLES()], async () => {
     const existing = await db.service_parts.get(partId);

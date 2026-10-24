@@ -7,11 +7,12 @@ import { Plus } from "lucide-react";
 import { db } from "@/lib/db";
 import type { Service } from "@/lib/db";
 import { machineTitle } from "@/components/machines/MachineList";
+import { getServiceBalance } from "@/lib/services/service";
 import { StatusBadge } from "@/components/services/StatusBadge";
 import { useSessionStore } from "@/stores/session";
 import { isOpenStatus } from "@/lib/services/status";
 import { foldText } from "@/lib/utils/search";
-import { formatDate, todayLocalDate } from "@/lib/utils";
+import { formatCurrency, formatDate, todayLocalDate } from "@/lib/utils";
 
 type Tab = "active" | "delivered" | "cancelled";
 
@@ -52,7 +53,13 @@ export function ServiceList() {
       db.customers.where("business_id").equals(businessId).toArray(),
       db.machines.where("business_id").equals(businessId).toArray(),
     ]);
+    // Bakiye göstergesi: tamamlanmış (faturalanmış) servislerde kalan tutar
+    const balances = new Map<string, number>();
+    for (const s of services) {
+      if (s.first_completed_at && s.status !== "CANCELLED") balances.set(s.id, (await getServiceBalance(s.id)).remaining);
+    }
     return {
+      balances,
       services,
       customers: new Map(customers.map((c) => [c.id, c.name])),
       machines: new Map(
@@ -131,6 +138,11 @@ export function ServiceList() {
                       .filter(Boolean)
                       .join(" · ")}
                   </span>
+                  {(data.balances.get(s.id) ?? 0) > 0 ? (
+                    <small style={{ color: "var(--accent-warning)" }}>
+                      Kalan: {formatCurrency((data.balances.get(s.id) ?? 0) / 100)}
+                    </small>
+                  ) : null}
                   {s.promised_date ? (
                     <small style={{ color: overdue ? "var(--accent-danger)" : "var(--text-muted)" }}>
                       Teslim sözü: {formatDate(s.promised_date + "T00:00:00")}
