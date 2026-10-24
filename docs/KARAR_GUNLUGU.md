@@ -12,6 +12,13 @@
 - **Cihaz iptali:** İptal çevrimiçi yapılır, geri alınamaz. İptal edilen cihaz bağlanınca (açılış, odak, internet, eşitleme 403) yerel veritabanını ve oturumu siler, `wipe_confirmed_at` yazar. Eşitlenmemiş bekleyen kayıtlar da silinir.
 - **Etki:** migration 024, `lib/auth/*`, `lib/pin/*`, `lib/device/*`, `SetupWizard`, `PinGate`, `useDeviceGuard`, `DeviceManager`.
 
+### K-041 · Raporlar, dışa/içe aktarma ve bildirim merkezi
+- **Raporlar saf hesaptır** (`reports/calc.ts`, kuruş tam sayı, Europe/Istanbul takvimi) ve ayrı tanımlıdır: **satış** (kesinleşmiş belge; brüt KDV dahil, indirim/KDV bilgi sütunu, iade ve iptal kendi tarihinde düşer), **tahsilat** (fiilî ödeme hareketleri; veresiye girmez; müşteri iadeleri/ters kayıtlar ayrı sütun), **servis geliri** (tamamlanma tarihine göre tahakkuk; iade düşer; iptalde alınan inceleme ücreti eklenir).
+- **Dışa aktarma:** ekranda gösterilen sütun tanımı dosyada da kullanılır. Kimlik doğrulama: PIN varsa PIN, yoksa çevrimiçi hesap şifresi; çevrimdışı ve PIN yoksa uyarıyı onaylamak yeterlidir. Her dışa aktarma audit log'a yazılır.
+- **İçe aktarma:** doğrulama saf fonksiyonlar, uygulama tek Dexie işlemidir; hata olursa hiçbir kayıt yazılmaz. Aynı dosya SHA-256 özetiyle (yerel + sunucu `UNIQUE`) engellenir. `ImportBatch.row_count` uygulanan (eklenen + birleşen) satırdır.
+- **Çakışma çözümü:** bildirim merkezinde yeniden dene / “benim değişikliğimi uygula” (sunucudaki güncel sürüm numarasıyla yeniden gönder) / “sunucudaki sürümü al”. İkisi de çevrimiçi gerektirir; kayıt hiçbir zaman sessizce ezilmez.
+- **Bilinen sınır:** `xlsx` (SheetJS 0.18.5) paketi yalnızca kullanıcının kendi yüklediği dosyalar ve dışa aktarma için kullanılır; yükleme boyutu 5 MB ve 5.000 satırla sınırlıdır.
+
 ### K-040 · Arama ve yedekleme
 - **Arama:** Tüm veri cihaza eşitlendiğinden arama yerel yapılır (çevrimdışı da çalışır); ayrı sunucu arama uç noktası açılmadı. Çevrimdışıyken yalnızca eşitlenmiş kayıtların arandığı uyarılır.
 - **Yedekleme:** Elle yedek JSON dosyasıdır; geri yükleme ekleyicidir (var olanı ezmez), öncesinde otomatik ek yedek ve audit log vardır. Günlük otomatik yedek bir sunucu görevidir (`/api/cron/backup`, servis anahtarı ve `CRON_SECRET` gerekir); depo `backups`, durum `business_backups`. Görevin gerçek projede çalışması yapılandırma bekler (belge: supabase/README.md).

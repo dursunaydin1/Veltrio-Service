@@ -296,6 +296,8 @@ export async function setPartyOpeningBalance(
     asOfDate: string;
     note?: string;
     reason?: string;
+    /** İçe aktarmayla geliyorsa bağlı olduğu ImportBatch (Adım 6.5) */
+    importBatchId?: string;
   }
 ): Promise<OpeningBalance> {
   if (!Number.isInteger(params.amountKurus) || params.amountKurus < 0) {
@@ -336,6 +338,7 @@ export async function setPartyOpeningBalance(
           business_id: ctx.businessId,
           party_type: params.partyType,
           party_id: params.partyId,
+          import_batch_id: params.importBatchId,
           created_at: nowISO(),
           ...fields,
         };
@@ -353,6 +356,7 @@ export async function setPartyOpeningBalance(
             amount: created.amount,
             as_of_date: created.as_of_date,
             source_note: created.source_note ?? null,
+            import_batch_id: created.import_batch_id ?? null,
             created_at: created.created_at,
           },
           ctx.deviceCode
