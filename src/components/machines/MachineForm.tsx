@@ -24,6 +24,7 @@ function toFormInput(machine: Machine | undefined, customerId: string): MachineF
     serialNumber: machine?.serial_number ?? "",
     year: machine?.year ? String(machine.year) : "",
     notes: machine?.notes ?? "",
+    warrantyUntil: machine?.warranty_until ?? "",
     isTemporary: machine?.is_temporary ?? false,
   };
 }
@@ -156,6 +157,12 @@ export function MachineForm({
           <input {...field("year")} className="form-input" inputMode="numeric" maxLength={4} value={values.year} onChange={(e) => set("year", e.target.value)} />
           {err("year")}
         </div>
+      </div>
+      <div className="form-group">
+        <label className="form-label" htmlFor="m-warrantyUntil">Garanti bitiş tarihi</label>
+        <input {...field("warrantyUntil")} className="form-input" type="date" value={values.warrantyUntil ?? ""} onChange={(e) => set("warrantyUntil", e.target.value)} />
+        <small style={{ color: "var(--text-muted)" }}>Bilgi amaçlıdır; garanti kapsamını serviste siz doğrularsınız.</small>
+        {err("warrantyUntil")}
       </div>
       {!serial ? <p>Seri numarası yoksa makine sistemin atadığı iç numarayla (MK-…) tanınır.</p> : null}
 

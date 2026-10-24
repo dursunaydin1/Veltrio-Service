@@ -90,13 +90,15 @@ Uygulamanın kalbi olan servis akışını hayata geçirmek: müşteri kabulünd
 ### ADIM 3.5 — Kataloglar (Arıza, İşlem, Şablon)
 
 **Görevler:**
-- [ ] `OperationCatalog` (işlem kataloğu): ad, kategori, önerilen fiyat, varsayılan süre, aktif
-- [ ] `IssueCatalog` (arıza kataloğu): ad, kategori, aktif
-- [ ] `ServiceTemplate` ve `ServiceTemplateItem` (şablon ve şablon maddeleri)
-- [ ] Başlangıç işlem kategorileri (§8.1): Arıza Tespiti, Genel Bakım, Karbüratör, Filtre, Buji, Marş, Bıçak/Zincir/Pala, Montaj, İlk Çalıştırma, Motor Testi, Diğer
-- [ ] Başlangıç arıza kategorileri (§8.1): Çalışmıyor, Zor Çalışıyor, Güç Kaybı, Stop Ediyor, Yakıt Kaçağı, Yağlama Sorunu, Titreşim/Ses, Kesmiyor/Biçmiyor, Parça Kırığı/Hasarı, Bakım Talebi, Diğer
-- [ ] Katalog ekleme, düzenleme, pasifleştirme
-- [ ] Kullanılmış geçmiş satırların açıklamaları geriye dönük değişmez
+- [x] `OperationCatalog` (işlem kataloğu): ad, kategori, önerilen fiyat, varsayılan süre, aktif
+- [x] `IssueCatalog` (arıza kataloğu): ad, kategori, aktif
+- [x] `ServiceTemplate` ve `ServiceTemplateItem` (şablon ve şablon maddeleri)
+- [x] Başlangıç işlem kategorileri (§8.1): Arıza Tespiti, Genel Bakım, Karbüratör, Filtre, Buji, Marş, Bıçak/Zincir/Pala, Montaj, İlk Çalıştırma, Motor Testi, Diğer
+- [x] Başlangıç arıza kategorileri (§8.1): Çalışmıyor, Zor Çalışıyor, Güç Kaybı, Stop Ediyor, Yakıt Kaçağı, Yağlama Sorunu, Titreşim/Ses, Kesmiyor/Biçmiyor, Parça Kırığı/Hasarı, Bakım Talebi, Diğer
+- [x] Katalog ekleme, düzenleme, pasifleştirme
+- [x] Kullanılmış geçmiş satırların açıklamaları geriye dönük değişmez
+
+> Uygulandı: migration 021, `catalog/service.ts`, **Ayarlar → Kataloglar** (işlem ve arıza: ekle, düzenle, pasifleştir; aynı ad tekrar edilemez), servis kabulünde hızlı arıza seçimi ve işlem eklerken “Katalogdan seç” katalogdan beslenir; servise kopyalanan açıklama/fiyat sonradan değişmez. Kategoriler §8.1 listesinden sabittir (K-035).
 
 **İlgili FR:** FR-009, FR-011
 
@@ -106,7 +108,7 @@ Uygulamanın kalbi olan servis akışını hayata geçirmek: müşteri kabulünd
 
 **Görevler:**
 - [x] `ServiceOrder` tablosunu oluştur (PRD §7 tam alan listesi)
-- [ ] `ServiceIssue`, `ServiceOperation`, `ServicePart`, `ServiceApproval`, `ServiceStatusHistory`, `ServiceChecklistItem` tablolarını oluştur
+- [x] `ServiceIssue`, `ServiceOperation`, `ServicePart`, `ServiceApproval`, `ServiceStatusHistory`, `ServiceChecklistItem` tablolarını oluştur
 - [x] Yeni Servis akışı (§5.1) — kataloğun yerini şimdilik sabit arıza başlıkları (düğme) + serbest metin alıyor:
   1. Mevcut müşteri seçimi veya yeni müşteri oluşturma (mükerrer uyarısı çalışır)
   2. Müşterinin makineleri listelenir; seçim / QR / yeni makine açma
@@ -118,7 +120,7 @@ Uygulamanın kalbi olan servis akışını hayata geçirmek: müşteri kabulünd
 - [x] Başlangıç durumu: "Kabul edildi"
 - [x] Servis oluştuğunda UUID ve belge numarası oluşur (AC-001)
 
-> Uygulandı: migration 013, `src/lib/services/` (`openService`, `changeServiceStatus`, `updateServiceDetails`, `getMachineServiceSummary`), `/services` (liste), `/services/new` (kabul formu: müşteri → makine / geçici makine → şikâyet → hasar, aksesuar, teslim sözü, kapora), `/services/[id]`. Kapora servise bağlı tahsilat olarak yazılır (SR-018) ve müşteri bakiyesini düşürür. **Açık:** `ServiceIssue/Operation/Part/Approval/ChecklistItem` tabloları ve arıza/işlem kataloğu (3.5, 3.8-3.10), kabul fotoğrafı, kabul fişi (3.15).
+> Uygulandı: migration 013, `src/lib/services/` (`openService`, `changeServiceStatus`, `updateServiceDetails`, `getMachineServiceSummary`), `/services` (liste), `/services/new` (kabul formu: müşteri → makine / geçici makine → şikâyet → hasar, aksesuar, teslim sözü, kapora), `/services/[id]`. Kapora servise bağlı tahsilat olarak yazılır (SR-018) ve müşteri bakiyesini düşürür. **Not:** `ServiceIssue` ayrı tablo değildir; şikâyet metni serviste saklanır, katalog yalnızca hızlı seçimdir (K-035). **Açık:** kabul fotoğrafı.
 
 **İlgili FR:** FR-007  
 **İlgili AC:** AC-001, AC-002  
@@ -210,11 +212,13 @@ Uygulamanın kalbi olan servis akışını hayata geçirmek: müşteri kabulünd
 ### ADIM 3.10 — Şablon ve Kontrol Listesi
 
 **Görevler:**
-- [ ] Şablon uygulandığında her madde `ServiceChecklistItem` kaydı olarak kopyalanır
-- [ ] Şablon sonradan değişse açık servislerdeki kopya değişmez (AC-005)
-- [ ] Madde alanları: başlık, sıra, zorunlu/isteğe bağlı, tamamlandı durumu, tamamlayan kullanıcı/cihaz, zaman
-- [ ] Kullanıcı serviste adım ekleyebilir, kaldırabilir, tamamlandı işaretleyebilir
-- [ ] Zorunlu madde tamamlanmadan "İş Tamamlandı" geçişinde uyarı
+- [x] Şablon uygulandığında her madde `ServiceChecklistItem` kaydı olarak kopyalanır
+- [x] Şablon sonradan değişse açık servislerdeki kopya değişmez (AC-005)
+- [x] Madde alanları: başlık, sıra, zorunlu/isteğe bağlı, tamamlandı durumu, tamamlayan kullanıcı/cihaz, zaman
+- [x] Kullanıcı serviste adım ekleyebilir, kaldırabilir, tamamlandı işaretleyebilir
+- [x] Zorunlu madde tamamlanmadan "İş Tamamlandı" geçişinde uyarı
+
+> Uygulandı: `services/checklist.ts`, **Ayarlar → Servis şablonları**, servis sayfasında **Kontrol listesi** (şablon uygula, madde ekle/kaldır/tamamla, kim-hangi cihaz-ne zaman kaydı). Zorunlu madde açıkken “İş tamamlandı” geçişinde `ChecklistIncompleteError` uyarısı çıkar, kullanıcı “Yine de tamamla” diyebilir.
 
 **İlgili FR:** FR-009  
 **Test:** TC-008
@@ -224,12 +228,14 @@ Uygulamanın kalbi olan servis akışını hayata geçirmek: müşteri kabulünd
 ### ADIM 3.11 — Garanti İşlemleri
 
 **Görevler:**
-- [ ] `ServiceOrder.warranty_claim` bayrağı
-- [ ] Garanti kaynağı ve kapsam açıklaması alanları
-- [ ] Makine kartındaki garanti bitiş tarihi bilgi amaçlı gösterilir; kapsam kullanıcı tarafından doğrulanır
-- [ ] Garanti kapsamında müşteri ücreti sıfır olabilir
-- [ ] Kullanılan parça stok çıkışı ve unit_cost_snapshot yine kaydedilir (SR-011)
-- [ ] Kapora: servis kabulünde alınan ön ödeme; service_order_id bağlı Payment kaydı (SR-018)
+- [x] `ServiceOrder.warranty_claim` bayrağı
+- [x] Garanti kaynağı ve kapsam açıklaması alanları
+- [x] Makine kartındaki garanti bitiş tarihi bilgi amaçlı gösterilir; kapsam kullanıcı tarafından doğrulanır
+- [x] Garanti kapsamında müşteri ücreti sıfır olabilir
+- [x] Kullanılan parça stok çıkışı ve unit_cost_snapshot yine kaydedilir (SR-011)
+- [x] Kapora: servis kabulünde alınan ön ödeme; service_order_id bağlı Payment kaydı (SR-018)
+
+> Uygulandı: servis kabulünde ve servis bilgilerinde **Garanti talebi** (kaynak + kapsam), makine kartında garanti bitiş tarihi (bilgi amaçlı, kapsamı kullanıcı doğrular), fişte “Garanti kapsamında” satırı. Garanti kalemleri 0 ₺ girilebilir; kullanılan parça yine stoktan düşer ve maliyet kaydı tutulur (SR-011). Kapora zaten servise bağlı ödeme (SR-018).
 
 **İlgili AC:** AC-009 (garanti fişi TC-009)  
 **Test:** TC-009

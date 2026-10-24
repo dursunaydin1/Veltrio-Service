@@ -105,6 +105,11 @@ function ReceiptPaper({ model, size }: { model: ReceiptModel; size: PaperSize })
         {model.complaint ? <Row label="Şikâyet">{model.complaint}</Row> : null}
         {model.existingDamage ? <Row label="Mevcut hasar">{model.existingDamage}</Row> : null}
         {model.accessories ? <Row label="Teslim alınan aksesuar">{model.accessories}</Row> : null}
+        {model.warranty ? (
+          <Row label="Garanti">
+            Garanti kapsamında{[model.warranty.source, model.warranty.coverage].filter(Boolean).length > 0 ? ` — ${[model.warranty.source, model.warranty.coverage].filter(Boolean).join(" · ")}` : ""}
+          </Row>
+        ) : null}
         {model.promisedDate ? <Row label="Teslim sözü">{formatDate(model.promisedDate + "T00:00:00")}</Row> : null}
         {model.type === "intake" && model.deposit > 0 ? <Row label="Alınan kapora">{formatCurrency(model.deposit)}</Row> : null}
       </section>

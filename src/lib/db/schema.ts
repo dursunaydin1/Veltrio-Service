@@ -77,6 +77,9 @@ export interface Service {
   first_completed_at?: string;
   warranty_until?: string;
   is_warranty_claim: boolean;
+  /** Garanti kaynağı (üretici, bayi, satış garantisi…) ve kapsam açıklaması */
+  warranty_source?: string;
+  warranty_coverage?: string;
   cancel_reason?: string;
   /** Kabulde belirtilen mevcut hasar / çizikler */
   existing_damage?: string;
@@ -148,6 +151,74 @@ export interface ServiceOperation {
   /** Fiyat henüz belirlenmedi (SR-007); tamamlamayı engeller */
   price_pending: boolean;
   status: LineStatus;
+  version?: number;
+  created_at: string;
+  updated_at: string;
+}
+
+/** İşlem kataloğu — migration 021 (Adım 3.5) */
+export interface OperationCatalogEntry {
+  id: string;
+  business_id: string;
+  name: string;
+  category: string;
+  suggested_price?: number;
+  default_duration?: number;
+  active: boolean;
+  version?: number;
+  created_at: string;
+  updated_at: string;
+}
+
+/** Arıza kataloğu — migration 021 (Adım 3.5) */
+export interface IssueCatalogEntry {
+  id: string;
+  business_id: string;
+  name: string;
+  category: string;
+  active: boolean;
+  version?: number;
+  created_at: string;
+  updated_at: string;
+}
+
+export interface ServiceTemplate {
+  id: string;
+  business_id: string;
+  name: string;
+  machine_type?: string;
+  active: boolean;
+  version?: number;
+  created_at: string;
+  updated_at: string;
+}
+
+export interface ServiceTemplateItem {
+  id: string;
+  business_id: string;
+  template_id: string;
+  title: string;
+  required: boolean;
+  sort_order: number;
+  version?: number;
+  created_at: string;
+  updated_at: string;
+}
+
+/** Servise kopyalanan kontrol listesi maddesi (AC-005): şablon sonradan değişse de değişmez */
+export interface ServiceChecklistItem {
+  id: string;
+  business_id: string;
+  service_id: string;
+  template_item_id?: string;
+  title_snapshot: string;
+  required: boolean;
+  sort_order: number;
+  is_completed: boolean;
+  completed_at?: string;
+  completed_by?: string;
+  completed_by_device?: string;
+  note?: string;
   version?: number;
   created_at: string;
   updated_at: string;
@@ -340,6 +411,11 @@ export class VeltrioDatabase extends Dexie {
   service_status_history!: Table<ServiceStatusHistory>;
   service_operations!: Table<ServiceOperation>;
   service_approvals!: Table<ServiceApproval>;
+  operation_catalog!: Table<OperationCatalogEntry>;
+  issue_catalog!: Table<IssueCatalogEntry>;
+  service_templates!: Table<ServiceTemplate>;
+  service_template_items!: Table<ServiceTemplateItem>;
+  service_checklist_items!: Table<ServiceChecklistItem>;
 
   // FAZ 4 — Ticaret
   sales!: Table<Sale>;
@@ -418,6 +494,15 @@ export class VeltrioDatabase extends Dexie {
     this.version(4).stores({
       service_operations: "id, business_id, service_id",
       service_approvals: "id, business_id, service_id, decided_at",
+    });
+
+    // Şema sürüm 6: kataloglar, şablonlar ve servis kontrol listesi
+    this.version(6).stores({
+      operation_catalog: "id, business_id, category, active",
+      issue_catalog: "id, business_id, category, active",
+      service_templates: "id, business_id, active",
+      service_template_items: "id, business_id, template_id",
+      service_checklist_items: "id, business_id, service_id",
     });
 
     // Şema sürüm 5: iade satırları, orijinal satış satırına göre aranır

@@ -32,6 +32,14 @@ export type ServiceContext = BusinessContext & {
 
 export const DEFAULT_APPROVAL_THRESHOLD = 1000;
 
+/** İş tamamlanırken zorunlu kontrol listesi maddeleri açık: kullanıcı onaylarsa devam edilebilir. */
+export class ChecklistIncompleteError extends Error {
+  constructor(public readonly titles: string[]) {
+    super(`Tamamlanmamış zorunlu madde var: ${titles.join(", ")}`);
+    this.name = "ChecklistIncompleteError";
+  }
+}
+
 export class ServiceRuleError extends Error {
   constructor(message: string) {
     super(message);
@@ -59,6 +67,8 @@ const INSERT_COLUMNS = [
   "first_completed_at",
   "warranty_until",
   "is_warranty_claim",
+  "warranty_source",
+  "warranty_coverage",
   "cancel_reason",
   "existing_damage",
   "received_accessories",
@@ -142,6 +152,8 @@ export type OpenServiceParams = {
   promisedDate?: string;
   /** Kabulde alınan kapora */
   deposit?: { amountKurus: number; method: PaymentMethod };
+  /** Garanti talebi (SR-011): kaynak ve kapsam açıklaması isteğe bağlı */
+  warranty?: { source?: string; coverage?: string };
 };
 
 const tidy = (v?: string) => v?.trim() || undefined;
@@ -215,7 +227,9 @@ export async function openService(ctx: BusinessContext, params: OpenServiceParam
         labor_fee: 0,
         total_amount: 0,
         received_date: now,
-        is_warranty_claim: false,
+        is_warranty_claim: !!params.warranty,
+        warranty_source: tidy(params.warranty?.source),
+        warranty_coverage: tidy(params.warranty?.coverage),
         created_by_device: ctx.deviceCode,
         created_at: now,
         updated_at: now,
@@ -252,13 +266,15 @@ export async function changeServiceStatus(
   ctx: ServiceContext,
   serviceId: string,
   to: ServiceStatus,
-  note?: string
+  note?: string,
+  options: { ignoreChecklist?: boolean } = {}
 ): Promise<Service> {
   return db.transaction(
     "rw",
     [
       db.services,
       db.service_status_history,
+      db.service_checklist_items,
       db.service_operations,
       db.service_parts,
       db.sync_queue,
@@ -295,6 +311,12 @@ export async function changeServiceStatus(
             "Müşteri onayı gerekli: karar bekleyen kalemler var. Önce “Müşteri kararı”nı kaydedin."
           );
         }
+      }
+      if (to === "COMPLETED" && !options.ignoreChecklist) {
+        const open = (await db.service_checklist_items.where("service_id").equals(serviceId).toArray())
+          .filter((i) => i.required && !i.is_completed)
+          .sort((a, b) => a.sort_order - b.sort_order);
+        if (open.length > 0) throw new ChecklistIncompleteError(open.map((i) => i.title_snapshot));
       }
       if (to === "COMPLETED") {
         const summary = await loadQuoteSummary(serviceId);
@@ -361,6 +383,10 @@ export type ServiceDetails = {
   promised_date?: string;
   existing_damage?: string;
   received_accessories?: string;
+  /** Garanti talebi bayrağı, kaynağı ve kapsam açıklaması */
+  is_warranty_claim?: boolean;
+  warranty_source?: string;
+  warranty_coverage?: string;
 };
 
 /** Servis bilgilerini (şikâyet, teşhis, yapılan iş, teslim sözü…) günceller. */
@@ -392,6 +418,9 @@ export async function updateServiceDetails(
       promised_date: details.promised_date || undefined,
       existing_damage: tidy(details.existing_damage),
       received_accessories: tidy(details.received_accessories),
+      is_warranty_claim: details.is_warranty_claim ?? existing.is_warranty_claim,
+      warranty_source: details.is_warranty_claim === false ? undefined : tidy(details.warranty_source) ?? existing.warranty_source,
+      warranty_coverage: details.is_warranty_claim === false ? undefined : tidy(details.warranty_coverage) ?? existing.warranty_coverage,
       updated_at: nowISO(),
     };
     if (JSON.stringify(updatePayload(existing)) === JSON.stringify(updatePayload(next))) {
@@ -437,6 +466,7 @@ export async function refreshServiceTotals(ctx: ServiceContext, serviceId: strin
     "rw",
     [
       db.services,
+      db.service_checklist_items,
       db.service_operations,
       db.service_parts,
       db.service_status_history,
@@ -563,6 +593,7 @@ export async function deliverService(
       db.payments,
       db.payment_allocations,
       db.return_transactions,
+      db.service_checklist_items,
       db.service_operations,
       db.service_parts,
       db.service_status_history,

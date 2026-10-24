@@ -5,6 +5,12 @@
 
 ## 2026-10-22
 
+### K-035 · Kataloglar, şablonlar, kontrol listesi, garanti
+- **Karar:** Arıza ve işlem katalogları, servis şablonları ve servis kontrol listesi yeni senkronize tablolardır (migration 021). Katalog yalnızca **kolay seçim** içindir: servise açıklama/fiyat kopyalanır, katalog değişse geçmiş satırlar değişmez. Şablon maddeleri servise kendi başlık kopyalarıyla yazılır (AC-005). Zorunlu madde uyarısı engel değil **uyarıdır**; kullanıcı onaylarsa tamamlanır.
+- **Sapma:** `ServiceIssue` ayrı tablo olarak açılmadı; şikâyet metni serviste, katalog seçimi hızlı düğme olarak kalır (ayrı tablo ek değer katmıyordu).
+- **Garanti:** `services.warranty_source/warranty_coverage` ve `machines.warranty_until` (migration 021). Garanti bitişi yalnızca bilgidir; kapsamı kullanıcı doğrular.
+- **Etki:** migration 021, `catalog/service.ts`, `services/checklist.ts`, `ChecklistPanel`, `CatalogManager`, `TemplateManager`, `/settings/*`.
+
 ### K-034 · Vade tarihi belgede; belgesiz tahsilat tahsisi; bildirim kimliği
 - **Vade (plan sapması):** Plan vadeyi `Payment`'ta tutmayı söylüyordu. Ödenmemiş alacak henüz bir ödeme olmadığından vade **belgeye** yazılır: `sales.due_date`, borçlu teslimde `services.due_date` (migration 020). Boşsa vade yoktur: hatırlatma üretilmez, yaşlandırma belge tarihine göre yapılır.
 - **Tahsis:** Belgeden alınan ödeme `source_id` ile o belgeye bağlıdır. Belgesiz genel tahsilat `payment_allocations` ile açık kalemlere dağıtılır (varsayılan en eski kalem önce, kullanıcı değiştirebilir); dağıtılmayan kısım avans olarak kalır ve onayla mahsup edilir. Tahsisler ters kaydedilmiş ödemelerde sayılmaz. Net bakiye hesabı değişmedi (belgelerden hesaplanır); `creditKurus` = brüt açık borç − net bakiye.

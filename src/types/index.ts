@@ -111,6 +111,8 @@ export interface Machine {
   sale_id?: UUID;
   sale_date?: ISODateTimeString;
   sale_price?: number;
+  /** Garanti bitiş tarihi (YYYY-MM-DD); bilgi amaçlıdır, kapsamı kullanıcı doğrular */
+  warranty_until?: string;
   notes?: string;
   /** Sunucu kayıt sürümü; güncellemede çakışma tespiti için gönderilir. */
   version?: number;

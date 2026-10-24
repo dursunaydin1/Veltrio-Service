@@ -35,6 +35,7 @@ export const EDITABLE_STATUSES = [
 const TABLES = () =>
   [
     db.services,
+    db.service_checklist_items,
     db.service_operations,
     db.service_parts,
     db.service_approvals,

@@ -36,6 +36,8 @@ export type ReceiptModel = {
   existingDamage?: string;
   accessories?: string;
   promisedDate?: string;
+  /** Garanti talebi: kaynak ve kapsam açıklaması (fişte "Garanti kapsamında" olarak görünür) */
+  warranty?: { source?: string; coverage?: string };
   /** Kabulde alınan kapora (TL) */
   deposit: number;
   /** Yalnızca sonuç özetinde */
@@ -130,6 +132,9 @@ export function buildReceiptModel(type: ReceiptType, src: ReceiptSource): Receip
     existingDamage: orUndefined(service.existing_damage),
     accessories: orUndefined(service.received_accessories),
     promisedDate: service.promised_date || undefined,
+    warranty: service.is_warranty_claim
+      ? { source: orUndefined(service.warranty_source), coverage: orUndefined(service.warranty_coverage) }
+      : undefined,
     deposit: service.deposit_amount,
     diagnosis: type === "summary" ? orUndefined(service.diagnosis) : undefined,
     resolution: type === "summary" ? orUndefined(service.resolution) : undefined,

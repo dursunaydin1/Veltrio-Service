@@ -10,9 +10,10 @@ import { useServiceContext } from "@/hooks/useServiceContext";
 import { machineTitle } from "@/components/machines/MachineList";
 import { ServiceLines } from "@/components/services/ServiceLines";
 import { DeliveryPanel, ServicePayments } from "@/components/services/ServicePayments";
+import { ChecklistPanel } from "@/components/services/ChecklistPanel";
 import { ServiceReturnPanel } from "@/components/services/ServiceReturnPanel";
 import { StatusBadge } from "@/components/services/StatusBadge";
-import { changeServiceStatus, getServiceBalance, updateServiceDetails } from "@/lib/services/service";
+import { ChecklistIncompleteError, changeServiceStatus, getServiceBalance, updateServiceDetails } from "@/lib/services/service";
 import {
   SERVICE_TRANSITIONS,
   isReopen,
@@ -51,7 +52,10 @@ export function ServiceDetail({ id }: { id: string }) {
       <div className="stack stack-sm">
         <div className="row row-between">
           <h1>{service.document_no}</h1>
-          <StatusBadge status={service.status} />
+          <span className="row row-gap-sm">
+            {service.is_warranty_claim ? <span className="badge badge-yellow">Garanti</span> : null}
+            <StatusBadge status={service.status} />
+          </span>
         </div>
         <p>
           {related?.customer ? <Link href={`/customers/${related.customer.id}`}>{related.customer.name}</Link> : "—"}
@@ -80,6 +84,7 @@ export function ServiceDetail({ id }: { id: string }) {
       <StatusActions service={service} />
       <DeliveryPanel service={service} />
       <ServiceLines service={service} />
+      <ChecklistPanel service={service} />
       <ServicePayments service={service} />
       <ServiceReturnPanel service={service} />
       <DetailsForm key={`${service.id}:${service.version ?? 0}:${service.updated_at}`} service={service} />
@@ -94,6 +99,7 @@ function StatusActions({ service }: { service: Service }) {
   const [reason, setReason] = useState("");
   const [error, setError] = useState<string | null>(null);
   const [busy, setBusy] = useState(false);
+  const [checklistWarning, setChecklistWarning] = useState<{ to: ServiceStatus; titles: string[] } | null>(null);
   const paid = useLiveQuery(() => getServiceBalance(service.id), [service.id])?.paid ?? 0;
 
   if (!isServiceStatus(service.status)) return null;
@@ -102,16 +108,22 @@ function StatusActions({ service }: { service: Service }) {
   const options = SERVICE_TRANSITIONS[from].filter((to) => !(from === "COMPLETED" && to === "DELIVERED"));
   if (options.length === 0) return null;
 
-  async function go(to: ServiceStatus, note?: string) {
+  async function go(to: ServiceStatus, note?: string, ignoreChecklist = false) {
     if (!ctx) return setError("Cihaz bilgisi henüz yüklenmedi, lütfen tekrar deneyin.");
     setBusy(true);
     setError(null);
     try {
-      await changeServiceStatus(ctx, service.id, to, note);
+      await changeServiceStatus(ctx, service.id, to, note, { ignoreChecklist });
       setPending(null);
       setReason("");
+      setChecklistWarning(null);
     } catch (e) {
-      setError(e instanceof Error ? e.message : "Durum değiştirilemedi.");
+      if (e instanceof ChecklistIncompleteError) {
+        // Uyarı: kullanıcı onaylarsa zorunlu maddeler tamamlanmadan da devam edilir.
+        setChecklistWarning({ to, titles: e.titles });
+      } else {
+        setError(e instanceof Error ? e.message : "Durum değiştirilemedi.");
+      }
     }
     setBusy(false);
   }
@@ -128,6 +140,18 @@ function StatusActions({ service }: { service: Service }) {
   return (
     <section className="card stack stack-md" aria-labelledby="st-title">
       <h2 id="st-title">Durumu değiştir</h2>
+
+      {checklistWarning ? (
+        <div className="alert alert-warning" role="alert">
+          <p>Tamamlanmamış zorunlu kontrol maddesi var: <strong>{checklistWarning.titles.join(", ")}</strong></p>
+          <div className="row row-gap-md" style={{ marginTop: 8 }}>
+            <button type="button" className="btn btn-secondary btn-sm" onClick={() => setChecklistWarning(null)}>Geri dön</button>
+            <button type="button" className="btn btn-primary btn-sm" disabled={busy} onClick={() => void go(checklistWarning.to, undefined, true)}>
+              Yine de tamamla
+            </button>
+          </div>
+        </div>
+      ) : null}
 
       {pending ? (
         <form
@@ -190,6 +214,9 @@ function DetailsForm({ service }: { service: Service }) {
   const [promised, setPromised] = useState(service.promised_date ?? "");
   const [damage, setDamage] = useState(service.existing_damage ?? "");
   const [accessories, setAccessories] = useState(service.received_accessories ?? "");
+  const [warranty, setWarranty] = useState(service.is_warranty_claim);
+  const [wSource, setWSource] = useState(service.warranty_source ?? "");
+  const [wCoverage, setWCoverage] = useState(service.warranty_coverage ?? "");
   const [error, setError] = useState<string | null>(null);
   const [saved, setSaved] = useState(false);
   const [busy, setBusy] = useState(false);
@@ -210,6 +237,9 @@ function DetailsForm({ service }: { service: Service }) {
         promised_date: promised || undefined,
         existing_damage: damage,
         received_accessories: accessories,
+        is_warranty_claim: warranty,
+        warranty_source: wSource,
+        warranty_coverage: wCoverage,
       });
       setSaved(true);
     } catch (e) {
@@ -233,6 +263,22 @@ function DetailsForm({ service }: { service: Service }) {
         <label className="form-label" htmlFor="dt-resolution">Yapılan iş</label>
         <textarea id="dt-resolution" className="form-input" rows={3} value={resolution} onChange={(e) => setResolution(e.target.value)} disabled={locked} />
       </div>
+      <label className="row row-gap-sm" style={{ minHeight: 44 }}>
+        <input type="checkbox" checked={warranty} onChange={(e) => setWarranty(e.target.checked)} disabled={locked} />
+        Garanti talebi
+      </label>
+      {warranty ? (
+        <div className="row row-gap-md">
+          <div className="form-group" style={{ flex: 1 }}>
+            <label className="form-label" htmlFor="dt-wsource">Garanti kaynağı</label>
+            <input id="dt-wsource" className="form-input" value={wSource} onChange={(e) => setWSource(e.target.value)} disabled={locked} />
+          </div>
+          <div className="form-group" style={{ flex: 2 }}>
+            <label className="form-label" htmlFor="dt-wcoverage">Kapsam açıklaması</label>
+            <input id="dt-wcoverage" className="form-input" value={wCoverage} onChange={(e) => setWCoverage(e.target.value)} disabled={locked} />
+          </div>
+        </div>
+      ) : null}
       <div className="form-group">
         <label className="form-label" htmlFor="dt-promised">Teslim sözü</label>
         <input id="dt-promised" className="form-input" type="date" value={promised} onChange={(e) => setPromised(e.target.value)} disabled={locked} />

@@ -12,7 +12,7 @@ import { parseMoneyInput } from "@/lib/calc";
 import { PAYMENT_METHOD_LABELS } from "@/lib/finance/service";
 import { getMachineServiceSummary, openService } from "@/lib/services/service";
 import { statusLabel } from "@/lib/services/status";
-import { formatDate } from "@/lib/utils";
+import { formatDate, todayLocalDate } from "@/lib/utils";
 import type { PaymentMethod } from "@/types";
 
 /** Sık arıza başlıkları (PRD §8.1); dokunulunca şikâyet metnine eklenir. */
@@ -51,10 +51,19 @@ export function ServiceForm({
   const [promised, setPromised] = useState("");
   const [depositOn, setDepositOn] = useState(false);
   const [deposit, setDeposit] = useState("");
+  const [warrantyOn, setWarrantyOn] = useState(false);
+  const [warrantySource, setWarrantySource] = useState("");
+  const [warrantyCoverage, setWarrantyCoverage] = useState("");
   const [method, setMethod] = useState<PaymentMethod>("CASH");
   const [error, setError] = useState<string | null>(null);
   const [busy, setBusy] = useState(false);
 
+  // Hızlı arıza seçimi: etkin arıza kataloğu varsa o, yoksa varsayılan başlıklar (Adım 3.5)
+  const issueCatalog = useLiveQuery(
+    () => (ctx ? db.issue_catalog.where("business_id").equals(ctx.businessId).filter((i) => i.active).toArray() : []),
+    [ctx?.businessId]
+  );
+  const issueLabels = issueCatalog && issueCatalog.length > 0 ? issueCatalog.map((i) => i.name).sort((a, b) => a.localeCompare(b, "tr")) : ISSUE_CATEGORIES;
   const machines = useLiveQuery(
     () =>
       customerId
@@ -66,6 +75,7 @@ export function ServiceForm({
         : [],
     [customerId]
   );
+  const selectedMachine = machines?.find((m) => m.id === machineId);
   const summary = useLiveQuery(
     () => (machineId && machineId !== UNKNOWN_MACHINE ? getMachineServiceSummary(machineId) : undefined),
     [machineId]
@@ -108,6 +118,7 @@ export function ServiceForm({
         accessories,
         promisedDate: promised || undefined,
         deposit: depositInput,
+        warranty: warrantyOn ? { source: warrantySource, coverage: warrantyCoverage } : undefined,
       });
       router.push(`/services/${service.id}`);
     } catch (e) {
@@ -175,7 +186,7 @@ export function ServiceForm({
       <div className="form-group">
         <span className="form-label">Müşteri şikâyeti *</span>
         <div className="row row-gap-sm" style={{ flexWrap: "wrap" }}>
-          {ISSUE_CATEGORIES.map((label) => (
+          {issueLabels.map((label) => (
             <button key={label} type="button" className="btn btn-secondary btn-sm" onClick={() => addIssue(label)}>
               {label}
             </button>
@@ -202,6 +213,30 @@ export function ServiceForm({
         <label className="form-label" htmlFor="sv-promised">Teslim sözü (tarih)</label>
         <input id="sv-promised" className="form-input" type="date" value={promised} onChange={(e) => setPromised(e.target.value)} />
       </div>
+
+      <label className="row row-gap-sm" style={{ minHeight: 44 }}>
+        <input type="checkbox" checked={warrantyOn} onChange={(e) => setWarrantyOn(e.target.checked)} />
+        Garanti talebi
+      </label>
+      {warrantyOn ? (
+        <div className="stack stack-sm">
+          {selectedMachine?.warranty_until ? (
+            <div className={`alert ${selectedMachine.warranty_until < todayLocalDate() ? "alert-warning" : "alert-success"}`} role="note">
+              Makine kartında garanti bitişi: {formatDate(selectedMachine.warranty_until + "T00:00:00")}
+              {selectedMachine.warranty_until < todayLocalDate() ? " (süresi geçmiş görünüyor)" : ""}. Bu bilgi yalnızca bilgilendirmedir; kapsamı siz doğrulayın.
+            </div>
+          ) : null}
+          <div className="form-group">
+            <label className="form-label" htmlFor="sv-wsource">Garanti kaynağı</label>
+            <input id="sv-wsource" className="form-input" placeholder="Ör. üretici, bayi, satış garantisi" value={warrantySource} onChange={(e) => setWarrantySource(e.target.value)} />
+          </div>
+          <div className="form-group">
+            <label className="form-label" htmlFor="sv-wcoverage">Kapsam açıklaması</label>
+            <input id="sv-wcoverage" className="form-input" value={warrantyCoverage} onChange={(e) => setWarrantyCoverage(e.target.value)} />
+          </div>
+          <small style={{ color: "var(--text-muted)" }}>Garanti kapsamındaki kalemlerin fiyatını 0 girebilirsiniz; kullanılan parça yine stoktan düşer ve maliyeti kaydedilir.</small>
+        </div>
+      ) : null}
 
       <label className="row row-gap-sm" style={{ minHeight: 44 }}>
         <input type="checkbox" checked={depositOn} onChange={(e) => setDepositOn(e.target.checked)} />

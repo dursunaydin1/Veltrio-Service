@@ -45,6 +45,7 @@ const EDITABLE_COLUMNS = [
   "sale_id",
   "sale_date",
   "sale_price",
+  "warranty_until",
   "notes",
   "archived_at",
 ] as const;

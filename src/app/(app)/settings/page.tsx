@@ -1,8 +1,16 @@
 import type { Metadata } from "next";
-import { ComingSoon } from "@/components/layout/ComingSoon";
+import Link from "next/link";
 
 export const metadata: Metadata = { title: "Ayarlar" };
 
 export default function Page() {
-  return <ComingSoon title="Ayarlar" phase="FAZ 6" />;
+  return (
+    <section className="stack stack-md">
+      <h1>Ayarlar</h1>
+      <ul className="menu-list" aria-label="Ayarlar">
+        <li><Link href="/settings/catalog">Arıza ve işlem katalogları</Link></li>
+        <li><Link href="/settings/templates">Servis şablonları (kontrol listesi)</Link></li>
+      </ul>
+    </section>
+  );
 }

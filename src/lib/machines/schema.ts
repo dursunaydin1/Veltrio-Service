@@ -32,12 +32,16 @@ export const machineFormSchema = z
     serialNumber: optionalText(60),
     year: z.string().trim(),
     notes: optionalText(1000),
+    warrantyUntil: z.string().trim().optional().default(""),
     isTemporary: z.boolean(),
   })
   .superRefine((value, ctx) => {
     if (!value.isTemporary) {
       if (!value.brand) ctx.addIssue({ code: "custom", path: ["brand"], message: "Marka zorunludur (bilinmiyorsa geçici kayıt işaretleyin)." });
       if (!value.model) ctx.addIssue({ code: "custom", path: ["model"], message: "Model zorunludur (bilinmiyorsa geçici kayıt işaretleyin)." });
+    }
+    if (value.warrantyUntil !== "" && !/^\d{4}-\d{2}-\d{2}$/.test(value.warrantyUntil)) {
+      ctx.addIssue({ code: "custom", path: ["warrantyUntil"], message: "Garanti bitiş tarihi geçersiz." });
     }
     if (value.year !== "") {
       const year = Number(value.year);
@@ -58,6 +62,7 @@ export type MachineFields = {
   serial_number?: string;
   year?: number;
   notes?: string;
+  warranty_until?: string;
   is_temporary: boolean;
 };
 
@@ -87,6 +92,7 @@ export function parseMachineForm(input: MachineFormInput): MachineFormResult {
       serial_number: v.serialNumber,
       year: v.year === "" ? undefined : Number(v.year),
       notes: v.notes,
+      warranty_until: v.warrantyUntil === "" ? undefined : v.warrantyUntil,
       is_temporary: v.isTemporary,
     },
   };

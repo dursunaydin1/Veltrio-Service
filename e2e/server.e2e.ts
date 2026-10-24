@@ -10,6 +10,9 @@ import { createProduct } from "@/lib/products/service";
 import { createPurchase, getPurchaseItems } from "@/lib/purchases/service";
 import { recordCustomerCollection, getCustomerOpenItems } from "@/lib/finance/openItems";
 import { syncPaymentDueNotifications } from "@/lib/notifications/paymentDue";
+import { createIssueEntry, createOperationEntry, createTemplate, updateTemplate } from "@/lib/catalog/service";
+import { addChecklistItem, applyTemplate, setChecklistItemDone } from "@/lib/services/checklist";
+import { setPartSupply } from "@/lib/services/quote";
 import { createMachine } from "@/lib/machines/service";
 import { addOperation, addPart, recordApproval, setPartUsedQuantity } from "@/lib/services/quote";
 import { changeServiceStatus, deliverService, getServiceBalance, openService } from "@/lib/services/service";
@@ -61,6 +64,7 @@ let ctx: { businessId: string; deviceCode: string; actorId?: string };
 let hasSerial = false;
 let hasReturns = false;
 let hasDue = false;
+let hasCatalog = false;
 
 const created: string[] = [];
 
@@ -154,6 +158,7 @@ describe.skipIf(!URL || !ANON || !EMAIL || !PASSWORD)("sunucuya karşı uçtan u
     pullCursor = (last?.[0]?.id as number | undefined) ?? 0;
 
     hasDue = !(await supabase.from("sales").select("due_date").limit(1)).error;
+    hasCatalog = !(await supabase.from("issue_catalog").select("id").limit(1)).error;
     const probe = await supabase.from("product_serial_units").select("internal_number").limit(1);
     hasSerial = !probe.error;
     hasReturns = !(await supabase.from("return_transactions").select("refund_payment_id").limit(1)).error;
@@ -161,7 +166,7 @@ describe.skipIf(!URL || !ANON || !EMAIL || !PASSWORD)("sunucuya karşı uçtan u
 
   it("0) bağlantı: oturum, işletme ve migration durumu", () => {
     expect(ctx.businessId).toMatch(/^[0-9a-f-]{36}$/);
-    console.log(`[e2e] cihaz=${DEVICE} · 018 (seri birim): ${hasSerial ? "VAR" : "YOK"} · 019 (iade): ${hasReturns ? "VAR" : "YOK"} · 020 (vade): ${hasDue ? "VAR" : "YOK"}`);
+    console.log(`[e2e] cihaz=${DEVICE} · 018 (seri birim): ${hasSerial ? "VAR" : "YOK"} · 019 (iade): ${hasReturns ? "VAR" : "YOK"} · 020 (vade): ${hasDue ? "VAR" : "YOK"} · 021 (katalog): ${hasCatalog ? "VAR" : "YOK"}`);
   });
 
   it("1) tedarikçi: açılış bakiyesi ve ödeme sunucuya gider, bakiye sunucu verisinden doğru çıkar", async () => {
@@ -523,6 +528,49 @@ describe.skipIf(!URL || !ANON || !EMAIL || !PASSWORD)("sunucuya karşı uçtan u
     await db.sync_queue.clear();
     await syncPaymentDueNotifications({ ...ctx, deviceCode: "DEMO-ZZ99" }, "2026-03-01");
     await sync("ikinci cihaz bildirimleri");
+  });
+
+  it("7g) katalog, şablon, kontrol listesi, garanti ve parça temini sunucuda doğru", async (ctxTest) => {
+    if (!hasCatalog) {
+      console.log("[e2e] migration 021 uygulanmamış: katalog bölümü atlandı");
+      return ctxTest.skip();
+    }
+    const op = await createOperationEntry(ctx, { name: `${TAG} İşlem`, category: "Genel Bakım", suggestedPriceKurus: 25000, defaultDuration: 20 });
+    const issue = await createIssueEntry(ctx, { name: `${TAG} Arıza`, category: "Çalışmıyor" });
+    const template = await createTemplate(ctx, {
+      name: `${TAG} Şablon`, machineType: "Testere",
+      items: [{ title: "Filtre", required: true }, { title: "Yağ", required: false }],
+    });
+    const machineId = (await createMachine(ctx, { customer_id: customerId, type: "Testere", brand: "Stihl", model: "E2E-G", is_temporary: false, warranty_until: "2027-06-01" })).id;
+    const service = await openService(ctx, { customerId, machineId, complaint: "e2e", warranty: { source: "Üretici", coverage: "Motor" } });
+    const copied = await applyTemplate(ctx, service.id, template.id);
+    const extra = await addChecklistItem(ctx, service.id, { title: "Ek madde", required: false });
+    await setChecklistItemDone(ctx, copied[0].id, true);
+    const part = await addPart(ctx, service.id, { sourceType: "NON_STOCK_PURCHASE", description: "Conta", quantity: 1, unitPriceKurus: 1000 });
+    await setPartSupply(ctx, part.id, "ORDERED", "2027-01-05");
+    await sync("katalog ve kontrol listesi");
+
+    expect(await one<{ suggested_price: number; active: boolean }>("operation_catalog", op.id)).toMatchObject({ active: true });
+    near((await one<{ suggested_price: number }>("operation_catalog", op.id)).suggested_price, 250);
+    expect((await one<{ name: string }>("issue_catalog", issue.id)).name).toContain(TAG);
+    const { data: titems } = await supabase.from("service_template_items").select("title,required,sort_order").eq("template_id", template.id).order("sort_order");
+    expect(titems?.map((i) => i.title)).toEqual(["Filtre", "Yağ"]);
+
+    const svc = await one<{ is_warranty_claim: boolean; warranty_source: string; warranty_coverage: string }>("services", service.id);
+    expect(svc).toMatchObject({ is_warranty_claim: true, warranty_source: "Üretici", warranty_coverage: "Motor" });
+    expect((await one<{ warranty_until: string }>("machines", machineId)).warranty_until).toBe("2027-06-01");
+
+    const { data: checklist } = await supabase.from("service_checklist_items").select("id,title_snapshot,is_completed,completed_by_device").eq("service_id", service.id);
+    expect(checklist).toHaveLength(3);
+    expect(checklist?.find((c) => c.id === copied[0].id)).toMatchObject({ is_completed: true, completed_by_device: DEVICE });
+    expect(checklist?.find((c) => c.id === extra.id)?.is_completed).toBe(false);
+    expect(await one<{ supply_status: string; expected_at: string }>("service_parts", part.id)).toMatchObject({ supply_status: "ORDERED", expected_at: "2027-01-05" });
+
+    // Şablon sonradan değişince servisteki kopya sunucuda da değişmez (AC-005)
+    await updateTemplate(ctx, template.id, { name: `${TAG} Şablon`, items: [{ title: "Yeni madde", required: true }] });
+    await sync("şablon güncelleme");
+    const { data: after } = await supabase.from("service_checklist_items").select("title_snapshot").eq("service_id", service.id);
+    expect(after?.map((c) => c.title_snapshot).sort()).toEqual(["Ek madde", "Filtre", "Yağ"]);
   });
 
   it("8) başka bir cihaz gibi çekme: yerel veri silinip sunucudan alınınca stok ve bakiyeler aynı çıkar", async () => {

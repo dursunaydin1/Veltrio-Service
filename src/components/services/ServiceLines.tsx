@@ -337,6 +337,18 @@ function OperationForm({
   const [taxRate, setTaxRate] = useState(String(edit?.tax_rate ?? defaultTax.rate).replace(".", ","));
   const [error, setError] = useState<string | null>(null);
   const [busy, setBusy] = useState(false);
+  const catalog = useLiveQuery(
+    () => db.operation_catalog.where("business_id").equals(service.business_id).filter((o) => o.active).toArray(),
+    [service.business_id]
+  );
+
+  /** Katalogtan seçim açıklamayı ve önerilen fiyatı forma kopyalar; sonradan değişse satır değişmez. */
+  function pickFromCatalog(id: string) {
+    const entry = catalog?.find((o) => o.id === id);
+    if (!entry) return;
+    setDescription(entry.name);
+    if (entry.suggested_price !== undefined) setPrice(priceText(entry.suggested_price));
+  }
 
   async function submit(event: React.FormEvent) {
     event.preventDefault();
@@ -369,6 +381,14 @@ function OperationForm({
     <form className="stack stack-md" onSubmit={submit} noValidate>
       <h3>{edit ? "İşlemi düzenle" : "İşlem ekle"}</h3>
       <div className="form-group">
+        {!edit && catalog && catalog.length > 0 ? (
+          <select className="form-input" aria-label="Katalogdan işlem seç" value="" onChange={(e) => pickFromCatalog(e.target.value)} style={{ marginBottom: 8 }}>
+            <option value="">Katalogdan seç…</option>
+            {catalog.map((o) => (
+              <option key={o.id} value={o.id}>{o.name}{o.suggested_price !== undefined ? ` — ${priceText(o.suggested_price)} ₺` : ""}</option>
+            ))}
+          </select>
+        ) : null}
         <label className="form-label" htmlFor="op-desc">Açıklama *</label>
         <input id="op-desc" className="form-input" placeholder="Ör. karbüratör ayarı" value={description} onChange={(e) => setDescription(e.target.value)} autoFocus />
       </div>

@@ -25,4 +25,9 @@ export type {
   PurchaseItem,
   ReturnTransaction,
   ReturnItem,
+  OperationCatalogEntry,
+  IssueCatalogEntry,
+  ServiceTemplate,
+  ServiceTemplateItem,
+  ServiceChecklistItem,
 } from "./schema";
