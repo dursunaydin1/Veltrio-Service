@@ -15,7 +15,7 @@ const SUPABASE_CONFIGURED =
  * Root layout'ta bir kez kullanılmalıdır.
  */
 export function useAuthSync() {
-  const { setUser, setBusiness, setDevice, clearSession, setSessionLoaded } =
+  const { setUser, setBusiness, setDevice, clearSession, setSessionLoaded, setAuthInfo } =
     useSessionStore();
 
   const loadSession = useCallback(async () => {
@@ -45,12 +45,16 @@ export function useAuthSync() {
       .eq("id", authUser.id)
       .single();
 
+    const emailConfirmed = !!authUser.email_confirmed_at;
     if (!dbUser) {
+      // Hesap var ama işletme yok → ilk kurulum sihirbazı (FR-002)
       clearSession();
+      setAuthInfo({ needsSetup: true, email: authUser.email ?? null, emailConfirmed });
       setSessionLoaded(true);
       return;
     }
 
+    setAuthInfo({ needsSetup: false, email: authUser.email ?? null, emailConfirmed });
     setUser(dbUser as User);
 
     // İşletme bilgisini çek
@@ -72,14 +76,15 @@ export function useAuthSync() {
         .from("devices")
         .select("*")
         .eq("device_code", storedCode)
-        .eq("is_active", true)
         .maybeSingle();
 
-      activeDevice = (device as Device | null) ?? null;
+      // İptal edilmiş cihaz etkin sayılmaz; yerel veriyi silme işini cihaz bekçisi yapar (AC-045)
+      const row = (device as Device | null) ?? null;
+      activeDevice = row && row.is_active && !row.revoked_at ? row : null;
     }
     setDevice(activeDevice);
     setSessionLoaded(true);
-  }, [setUser, setBusiness, setDevice, clearSession, setSessionLoaded]);
+  }, [setUser, setBusiness, setDevice, clearSession, setSessionLoaded, setAuthInfo]);
 
   useEffect(() => {
     if (!SUPABASE_CONFIGURED) return;

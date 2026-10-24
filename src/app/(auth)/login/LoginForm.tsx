@@ -1,10 +1,11 @@
 "use client";
 
+import Link from "next/link";
 import { useState, useTransition } from "react";
 import { loginAction } from "./actions";
 
-export function LoginForm() {
-  const [error, setError]       = useState<string | null>(null);
+export function LoginForm({ notice }: { notice?: string }) {
+  const [error, setError]       = useState<string | null>(notice ?? null);
   const [isPending, startTransition] = useTransition();
 
   function handleSubmit(e: React.FormEvent<HTMLFormElement>) {
@@ -76,6 +77,11 @@ export function LoginForm() {
       >
         {isPending ? "Giriş yapılıyor…" : "Giriş Yap"}
       </button>
+
+      <div className="stack stack-sm" style={{ alignItems: "center" }}>
+        <Link href="/forgot-password">Şifremi unuttum</Link>
+        <Link href="/register">Hesap oluştur</Link>
+      </div>
     </form>
   );
 }

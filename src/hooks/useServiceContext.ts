@@ -13,6 +13,7 @@ export function useServiceContext(): ServiceContext | null {
   const deviceCode = useSessionStore((s) => s.device?.device_code);
   const actorId = useSessionStore((s) => s.user?.id);
   const threshold = useSessionStore((s) => s.business?.settings?.service_approval_threshold);
+  const tolerance = useSessionStore((s) => s.business?.settings?.service_approval_tolerance);
   const allowNegative = useSessionStore((s) => s.business?.settings?.allow_negative_stock);
 
   return useMemo(
@@ -23,9 +24,10 @@ export function useServiceContext(): ServiceContext | null {
             deviceCode,
             actorId,
             approvalThreshold: typeof threshold === "number" ? threshold : DEFAULT_APPROVAL_THRESHOLD,
+            approvalTolerance: typeof tolerance === "number" ? tolerance : 0,
             allowNegativeStock: allowNegative === true,
           }
         : null,
-    [businessId, deviceCode, actorId, threshold, allowNegative]
+    [businessId, deviceCode, actorId, threshold, tolerance, allowNegative]
   );
 }

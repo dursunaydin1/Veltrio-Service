@@ -1,7 +1,11 @@
 "use client";
 
+import { useEffect } from "react";
 import { useAuthSync, useOnlineStatus } from "@/hooks/useAuth";
+import { configureOfflineLimit } from "@/lib/sync/offlineLimit";
+import { useSessionStore } from "@/stores/session";
 import { useReminders } from "@/hooks/useReminders";
+import { useDeviceGuard } from "@/hooks/useDeviceGuard";
 import { useSync } from "@/hooks/useSync";
 
 /**
@@ -15,6 +19,16 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
   useAuthSync();
   useOnlineStatus();
   useSync();
+  useDeviceGuard();
+  useEffect(() => {
+    // Çevrimdışı azami gün kuralı için güncel oturum durumunu okur (AC-045)
+    configureOfflineLimit({
+      getLastSyncedAt: () => useSessionStore.getState().lastSyncedAt,
+      getMaxDays: () => useSessionStore.getState().business?.settings?.max_offline_days,
+      getIsOnline: () => useSessionStore.getState().isOnline,
+    });
+    return () => configureOfflineLimit(null);
+  }, []);
   useReminders();
   return <>{children}</>;
 }

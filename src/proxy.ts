@@ -51,10 +51,17 @@ export async function proxy(request: NextRequest) {
 
   const { pathname } = request.nextUrl;
 
-  const isAuthPage =
-    pathname.startsWith("/login") || pathname.startsWith("/auth");
+  // Oturumsuz erişilebilen sayfalar: giriş, kayıt, şifre sıfırlama isteği, e-posta bağlantı dönüşü.
+  // /reset-password oturum ister: bağlantıyla açılan oturumda yeni şifre belirlenir.
+  const isPublicPage =
+    pathname.startsWith("/login") ||
+    pathname.startsWith("/auth") ||
+    pathname.startsWith("/register") ||
+    pathname.startsWith("/forgot-password");
+  // Giriş yapmış kullanıcı giriş/kayıt sayfalarında tutulmaz; e-posta bağlantı dönüşü hariç
+  const isAuthPage = isPublicPage && !pathname.startsWith("/auth/callback");
 
-  if (!user && !isAuthPage) {
+  if (!user && !isPublicPage) {
     const url = request.nextUrl.clone();
     // QR ile açılan sayfaya, girişten sonra geri dönülebilsin
     const target = pathname + request.nextUrl.search;

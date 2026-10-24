@@ -21,6 +21,11 @@ interface SessionState {
   lastSyncedAt: string | null;
   // Oturum sunucudan en az bir kez yüklendi mi? (kalıcı değil)
   sessionLoaded: boolean;
+  // Hesap açık ama işletme kurulmamış → ilk kurulum sihirbazı (kalıcı değil)
+  needsSetup: boolean;
+  // Giriş yapan hesabın e-postası ve doğrulanma durumu (kalıcı değil)
+  authEmail: string | null;
+  emailConfirmed: boolean;
 
   // Actions
   setUser: (user: User | null) => void;
@@ -29,6 +34,7 @@ interface SessionState {
   setIsOnline: (online: boolean) => void;
   setLastSyncedAt: (at: string) => void;
   setSessionLoaded: (loaded: boolean) => void;
+  setAuthInfo: (info: { needsSetup: boolean; email: string | null; emailConfirmed: boolean }) => void;
   clearSession: () => void;
 }
 
@@ -41,6 +47,9 @@ export const useSessionStore = create<SessionState>()(
       isOnline: true,
       lastSyncedAt: null,
       sessionLoaded: false,
+      needsSetup: false,
+      authEmail: null,
+      emailConfirmed: false,
 
       setUser: (user) => set({ user }),
       setBusiness: (business) => set({ business }),
@@ -48,6 +57,7 @@ export const useSessionStore = create<SessionState>()(
       setIsOnline: (isOnline) => set({ isOnline }),
       setLastSyncedAt: (lastSyncedAt) => set({ lastSyncedAt }),
       setSessionLoaded: (sessionLoaded) => set({ sessionLoaded }),
+      setAuthInfo: ({ needsSetup, email, emailConfirmed }) => set({ needsSetup, authEmail: email, emailConfirmed }),
 
       clearSession: () =>
         set({
@@ -55,6 +65,9 @@ export const useSessionStore = create<SessionState>()(
           business: null,
           device: null,
           lastSyncedAt: null,
+          needsSetup: false,
+          authEmail: null,
+          emailConfirmed: false,
         }),
     }),
     {

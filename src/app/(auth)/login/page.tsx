@@ -6,7 +6,13 @@ export const metadata: Metadata = {
   description: "Veltrio Servis yönetim paneline giriş yapın.",
 };
 
-export default function LoginPage() {
+const NOTICES: Record<string, string> = {
+  revoked: "Bu cihaz iptal edildi; yerel veriler silindi. Yeniden kullanmak için cihazı yeniden kaydedin.",
+  link: "Bağlantı geçersiz veya süresi dolmuş. Lütfen yeniden deneyin.",
+};
+
+export default async function LoginPage({ searchParams }: { searchParams: Promise<{ error?: string }> }) {
+  const { error } = await searchParams;
   return (
     <div className="container" style={{ width: "100%", maxWidth: 420 }}>
       {/* Kart */}
@@ -68,7 +74,7 @@ export default function LoginPage() {
         <hr className="divider" style={{ marginBottom: 28 }} />
 
         {/* Form */}
-        <LoginForm />
+        <LoginForm notice={error ? NOTICES[error] : undefined} />
 
         {/* Alt bilgi */}
         <p

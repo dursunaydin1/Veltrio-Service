@@ -20,6 +20,14 @@ type PullResponse = {
   hasMore: boolean;
 };
 
+/**
+ * Sunucu 403 döndürdüyse cihaz iptal edilmiş olabilir: cihaz denetimini tetikler
+ * (iptal edilmişse yerel veri silinir, AC-045).
+ */
+function requestDeviceCheck(): void {
+  if (typeof window !== "undefined") window.dispatchEvent(new Event("veltrio:device-check"));
+}
+
 export type SyncSummary = {
   pushed: number;
   pulled: number;
@@ -67,6 +75,7 @@ async function pushPending(
       results?: PushResult[];
     };
     if (!response.ok || !body.results) {
+      if (response.status === 403) requestDeviceCheck();
       throw new Error(body.error ?? "Eşitleme paketi gönderilemedi.");
     }
 
@@ -102,6 +111,7 @@ async function pullChanges(
     const response = await fetch(`/api/sync/pull?${query.toString()}`);
     const body = (await response.json()) as PullResponse & { error?: string };
     if (!response.ok || !Array.isArray(body.changes) || !body.nextCursor) {
+      if (response.status === 403) requestDeviceCheck();
       throw new Error(body.error ?? "Sunucu değişiklikleri alınamadı.");
     }
 

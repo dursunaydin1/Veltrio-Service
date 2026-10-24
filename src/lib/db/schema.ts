@@ -2,7 +2,6 @@ import Dexie, { type Table } from "dexie";
 import type {
   MachineOwnershipChange,
   Business,
-  BusinessSettings,
   User,
   Device,
   Customer,

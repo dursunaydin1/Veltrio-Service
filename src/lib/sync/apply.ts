@@ -16,11 +16,29 @@ export type PushResult = {
   /** true: kayıt başka bir cihazda değişmiş; kuyrukta CONFLICT olarak bekler */
   conflict?: boolean;
   error?: string;
+  /** Numara çakışması nedeniyle sunucuda yeniden numaralandı */
+  renumbered?: { from: string; to: string };
 };
 
 type ApplyContext = Pick<SyncContext, "supabase" | "businessId">;
 
 const UNIQUE_VIOLATION = "23505";
+
+/**
+ * Sunucuda benzersiz olması gereken numara sütunları (işletme içinde). İki cihaz
+ * aynı numarayı üretirse (ör. tarayıcı verisi silinip sayaç sıfırlanınca) kayıt
+ * reddedilmez: sonuna `-R1`, `-R2`… eklenerek yeniden numaralanır ve audit log'a
+ * yazılır (PRD §7.3, AC-016). Kayıt kimliği değişmez, ilişkiler bozulmaz.
+ */
+const NUMBER_COLUMNS: Partial<Record<string, string>> = {
+  services: "document_no",
+  sales: "document_no",
+  purchases: "document_no",
+  return_transactions: "document_no",
+  machines: "internal_number",
+  product_serial_units: "internal_number",
+};
+const MAX_RENUMBER_TRIES = 9;
 
 /**
  * Kuyruktaki tek bir değişikliği sunucuya uygular.
@@ -74,7 +92,32 @@ export async function applyPushItem(
       .maybeSingle();
     if (lookupError) return fail(item, lookupError.message);
     // Kimlik başka bir kayıtla değil, aynı kayıtla çakışıyorsa → daha önce eklenmiş.
-    return existing ? ok(item) : fail(item, error.message);
+    if (existing) return ok(item);
+
+    // Kimlik yeni, ama numara başka bir kayıtta var → yeniden numarala.
+    const column = NUMBER_COLUMNS[item.table_name];
+    const original = column ? row[column] : undefined;
+    if (!column || typeof original !== "string" || !original) return fail(item, error.message);
+    for (let n = 1; n <= MAX_RENUMBER_TRIES; n++) {
+      const renumbered = `${original}-R${n}`;
+      const retry = await table.insert({ ...row, [column]: renumbered });
+      if (!retry.error) {
+        await supabase.from("audit_logs").insert({
+          id: crypto.randomUUID(),
+          business_id: businessId,
+          entity_type: item.table_name,
+          entity_id: item.record_id,
+          action: "UPDATE",
+          old_value: { [column]: original },
+          new_value: { [column]: renumbered },
+          changed_by_device: typeof row.created_by_device === "string" ? row.created_by_device : "SUNUCU",
+          reason: "Numara çakışması: kayıt yeniden numaralandı",
+        });
+        return { id: item.id, success: true, renumbered: { from: original, to: renumbered } };
+      }
+      if (retry.error.code !== UNIQUE_VIOLATION) return fail(item, retry.error.message);
+    }
+    return fail(item, `${error.message} (yeniden numaralama başarısız)`);
   }
 
   // UPDATE

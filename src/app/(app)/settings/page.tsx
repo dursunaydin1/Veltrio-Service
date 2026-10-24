@@ -8,8 +8,11 @@ export default function Page() {
     <section className="stack stack-md">
       <h1>Ayarlar</h1>
       <ul className="menu-list" aria-label="Ayarlar">
+        <li><Link href="/settings/business">İşletme bilgileri ve ayarlar (onay eşiği, hatırlatma, stok…)</Link></li>
         <li><Link href="/settings/catalog">Arıza ve işlem katalogları</Link></li>
         <li><Link href="/settings/templates">Servis şablonları (kontrol listesi)</Link></li>
+        <li><Link href="/settings/pin">Cihaz PIN kodu</Link></li>
+        <li><Link href="/settings/devices">Cihazlar (liste ve iptal)</Link></li>
         <li><Link href="/settings/data-check">Veri denetimi (stok özeti)</Link></li>
       </ul>
     </section>

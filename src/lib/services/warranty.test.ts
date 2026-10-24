@@ -89,3 +89,15 @@ describe("iptalde inceleme / teşhis ücreti (SR-009)", () => {
     expect(await getServiceBalance(a.id)).toMatchObject({ total: 0, remaining: 0 });
   });
 });
+
+describe("onay toleransı (SR-005)", () => {
+  it("onaylı satırda artış toleransı aşmazsa onay korunur, aşarsa yeniden onay istenir", async () => {
+    const { nextStatus } = await import("./quote");
+    expect(nextStatus("APPROVED", 100, 100)).toBe("APPROVED");
+    expect(nextStatus("APPROVED", 100, 100.01)).toBe("PENDING"); // tolerans 0
+    expect(nextStatus("APPROVED", 100, 105, 5)).toBe("APPROVED"); // tolerans dahil
+    expect(nextStatus("APPROVED", 100, 105.01, 5)).toBe("PENDING");
+    expect(nextStatus("APPROVED", 100, 80, 0)).toBe("APPROVED"); // azalma yeni onay istemez
+    expect(nextStatus("PENDING", 100, 500, 5)).toBe("PENDING");
+  });
+});

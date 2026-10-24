@@ -27,6 +27,8 @@ import {
  */
 export type ServiceContext = BusinessContext & {
   approvalThreshold?: number;
+  /** Onaylı satırda bu tutara (TL) kadar artış yeniden onay istemez; varsayılan 0 */
+  approvalTolerance?: number;
   allowNegativeStock?: boolean;
 };
 

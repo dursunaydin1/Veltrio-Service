@@ -28,6 +28,8 @@ export interface BusinessSettings {
   default_tax_rate: number; // 0-100
   currency: "TRY";
   service_approval_threshold: number; // Onay gerektiren üst limit (TL)
+  /** Onaylı satırda bu tutara (TL) kadar artış yeniden onay istemez (varsayılan 0, SR-005) */
+  service_approval_tolerance?: number;
   default_service_reminder_days: number; // Teslim hatırlatması
   /** Stoktan fazla çıkışa izin verilsin mi? Varsayılan false (ST-002). */
   allow_negative_stock?: boolean;

@@ -1,4 +1,5 @@
 import { db } from "@/lib/db";
+import { assertWriteAllowed } from "@/lib/sync/offlineLimit";
 import { pushRank } from "@/lib/sync/tables";
 import { generateId, nowISO } from "@/lib/utils";
 import type { SyncQueueItem } from "@/types";
@@ -20,6 +21,7 @@ export async function enqueue(
   payload: Record<string, unknown>,
   deviceCode: string
 ): Promise<void> {
+  assertWriteAllowed();
   if (await mergeIntoPending(tableName, recordId, operation, payload)) {
     notifySyncRequested();
     return;

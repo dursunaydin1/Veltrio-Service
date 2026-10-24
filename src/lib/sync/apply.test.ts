@@ -11,7 +11,7 @@ class FakeQuery implements PromiseLike<{ data?: unknown; error: { code?: string;
   private filters: Filter[] = [];
   private single = false;
 
-  constructor(private rows: Row[]) {}
+  constructor(private rows: Row[], private uniqueColumn?: string) {}
 
   select() { return this; }
   insert(p: Row) { this.op = "insert"; this.payload = p; return this; }
@@ -36,6 +36,10 @@ class FakeQuery implements PromiseLike<{ data?: unknown; error: { code?: string;
       if (this.rows.some((r) => r.id === this.payload.id)) {
         return { error: { code: "23505", message: "duplicate key" } };
       }
+      const col = this.uniqueColumn;
+      if (col && this.rows.some((r) => r[col] === this.payload[col])) {
+        return { error: { code: "23505", message: `duplicate key value violates unique constraint on ${col}` } };
+      }
       this.rows.push({ version: 1, ...this.payload });
       return { error: null };
     }
@@ -58,11 +62,12 @@ const BUSINESS = "00000000-0000-0000-0000-000000000001";
 const ID = "11111111-1111-4111-8111-111111111111";
 
 let db: Record<string, Row[]>;
+const UNIQUE: Record<string, string> = { sales: "document_no", services: "document_no", machines: "internal_number" };
 
 function context() {
   return {
     businessId: BUSINESS,
-    supabase: { from: (t: string) => new FakeQuery((db[t] ??= [])) } as never,
+    supabase: { from: (t: string) => new FakeQuery((db[t] ??= []), UNIQUE[t]) } as never,
   };
 }
 
@@ -169,5 +174,46 @@ describe("applyPushItem — kurallar", () => {
     const r = await applyPushItem(context(), item({ operation: "DELETE" }));
     expect(r.success).toBe(true);
     expect(db.customers).toHaveLength(0);
+  });
+});
+
+describe("applyPushItem — numara çakışması (AC-016)", () => {
+  const SALE_A = "aaaaaaaa-aaaa-4aaa-8aaa-aaaaaaaaaaaa";
+  const SALE_B = "bbbbbbbb-bbbb-4bbb-8bbb-bbbbbbbbbbbb";
+  const sale = (id: string, docNo: string) =>
+    item({
+      table_name: "sales",
+      record_id: id,
+      payload: { id, business_id: BUSINESS, document_no: docNo, created_by_device: "DEMO-ZZ99", total_amount: 10 },
+    });
+
+  it("aynı belge numarasıyla gelen farklı kayıt reddedilmez; -R1 ile yeniden numaralanır ve audit log yazılır", async () => {
+    expect((await applyPushItem(context(), sale(SALE_A, "SAT-X-2026-00001"))).success).toBe(true);
+    const r = await applyPushItem(context(), sale(SALE_B, "SAT-X-2026-00001"));
+    expect(r).toMatchObject({ success: true, renumbered: { from: "SAT-X-2026-00001", to: "SAT-X-2026-00001-R1" } });
+    expect(db.sales.map((s) => s.document_no)).toEqual(["SAT-X-2026-00001", "SAT-X-2026-00001-R1"]);
+    expect(db.audit_logs).toHaveLength(1);
+    expect(db.audit_logs[0]).toMatchObject({
+      entity_type: "sales", entity_id: SALE_B, changed_by_device: "DEMO-ZZ99",
+      old_value: { document_no: "SAT-X-2026-00001" }, new_value: { document_no: "SAT-X-2026-00001-R1" },
+    });
+  });
+
+  it("üçüncü çakışma -R2 alır; aynı kayıt tekrar gelirse kopya oluşmaz", async () => {
+    await applyPushItem(context(), sale(SALE_A, "S-1"));
+    await applyPushItem(context(), sale(SALE_B, "S-1"));
+    const C = "cccccccc-cccc-4ccc-8ccc-cccccccccccc";
+    const r = await applyPushItem(context(), sale(C, "S-1"));
+    expect(r.renumbered?.to).toBe("S-1-R2");
+    const again = await applyPushItem(context(), sale(SALE_B, "S-1"));
+    expect(again.success).toBe(true);
+    expect(again.renumbered).toBeUndefined();
+    expect(db.sales).toHaveLength(3);
+  });
+
+  it("numara sütunu olmayan tabloda benzersizlik hatası reddedilir", async () => {
+    db.customers.push({ id: "other", business_id: BUSINESS, name: "Ali" });
+    const r = await applyPushItem(context(), item({ payload: { id: ID, name: "Ali" } }));
+    expect(r.success).toBe(true); // farklı kimlik, benzersiz sütun tanımlı değil
   });
 });

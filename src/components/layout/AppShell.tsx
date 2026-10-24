@@ -4,6 +4,8 @@ import Link from "next/link";
 import { Menu } from "lucide-react";
 import { BottomNav } from "@/components/layout/BottomNav";
 import { DeviceSetup } from "@/components/layout/DeviceSetup";
+import { PinGate } from "@/components/layout/PinGate";
+import { SetupWizard } from "@/components/layout/SetupWizard";
 import { SyncStatus } from "@/components/layout/SyncStatus";
 import { useSessionStore } from "@/stores/session";
 
@@ -17,6 +19,7 @@ export function AppShell({ children }: { children: React.ReactNode }) {
   const sessionLoaded = useSessionStore((s) => s.sessionLoaded);
   const hasUser = useSessionStore((s) => !!s.user);
   const hasDevice = useSessionStore((s) => !!s.device);
+  const needsSetup = useSessionStore((s) => s.needsSetup);
 
   if (!sessionLoaded) {
     return (
@@ -25,9 +28,11 @@ export function AppShell({ children }: { children: React.ReactNode }) {
       </div>
     );
   }
+  if (needsSetup) return <SetupWizard />;
   if (hasUser && !hasDevice) return <DeviceSetup />;
 
   return (
+    <PinGate>
     <div className="app-shell">
       <a href="#main" className="skip-link">
         İçeriğe geç
@@ -46,5 +51,6 @@ export function AppShell({ children }: { children: React.ReactNode }) {
       </main>
       <BottomNav />
     </div>
+    </PinGate>
   );
 }

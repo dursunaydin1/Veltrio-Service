@@ -8,7 +8,7 @@ import type {
   ServiceOperation,
   ServicePart,
 } from "@/lib/db";
-import { calcLine, fromKurus } from "@/lib/calc";
+import { calcLine, fromKurus, toKurus } from "@/lib/calc";
 import { getProductBalance } from "@/lib/stock/ledger";
 import { recordMovement } from "@/lib/stock/service";
 import { enqueue } from "@/lib/sync/queue";
@@ -79,9 +79,12 @@ function totalKurus(m: Money): number {
   }).total;
 }
 
-/** Onaylanmış satırın tutarı artarsa yeniden onay gerekir (SR-005, tolerans 0). */
-function nextStatus(current: LineStatus, oldTotal: number, newTotal: number): LineStatus {
-  return current === "APPROVED" && newTotal > oldTotal ? "PENDING" : current;
+/**
+ * Onaylanmış satırın tutarı artarsa yeniden onay gerekir (SR-005). Artış,
+ * işletme ayarındaki toleransı (TL, varsayılan 0) aşmıyorsa onay korunur.
+ */
+export function nextStatus(current: LineStatus, oldTotal: number, newTotal: number, toleranceTL = 0): LineStatus {
+  return current === "APPROVED" && toKurus(newTotal) - toKurus(oldTotal) > toKurus(toleranceTL) ? "PENDING" : current;
 }
 
 // ---------------------------------------------------------------- İşlem satırları
@@ -183,7 +186,7 @@ export async function updateOperation(
     const next: ServiceOperation = {
       ...existing,
       ...values,
-      status: nextStatus(existing.status, existing.line_total, values.line_total),
+      status: nextStatus(existing.status, existing.line_total, values.line_total, ctx.approvalTolerance),
       updated_at: nowISO(),
     };
     await db.service_operations.put(next);
@@ -375,7 +378,7 @@ export async function updatePart(
       discount_amount: fromKurus(discountKurus),
       line_total: fromKurus(lineKurus),
       supply_status: patch.supplyStatus ?? existing.supply_status,
-      status: nextStatus(existing.status, existing.line_total, fromKurus(lineKurus)),
+      status: nextStatus(existing.status, existing.line_total, fromKurus(lineKurus), ctx.approvalTolerance),
       updated_at: nowISO(),
     };
     await db.service_parts.put(next);
