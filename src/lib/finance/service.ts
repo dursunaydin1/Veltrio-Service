@@ -464,7 +464,7 @@ export async function getCustomerBalance(
     db.services
       .where("customer_id")
       .equals(customerId)
-      .filter((s) => s.business_id === businessId && !!s.first_completed_at && s.status !== "CANCELLED")
+      .filter((s) => s.business_id === businessId && ((!!s.first_completed_at && s.status !== "CANCELLED") || (s.status === "CANCELLED" && (s.cancel_fee ?? 0) > 0)))
       .toArray(),
   ]);
 
@@ -477,7 +477,7 @@ export async function getCustomerBalance(
 
   return calcCustomerBalance({
     openingBalances,
-    charges: [...sales.map((s) => s.total_amount), ...services.map((s) => s.total_amount)],
+    charges: [...sales.map((s) => s.total_amount), ...services.map((s) => (s.status === "CANCELLED" ? s.cancel_fee ?? 0 : s.total_amount))],
     payments,
     // Geçerli (geri alınmamış) satış iadeleri; para iadesi ayrıca OUT ödeme olarak sayılır.
     returns: returnAmounts,

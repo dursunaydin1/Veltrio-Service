@@ -10,6 +10,7 @@ import { useServiceContext } from "@/hooks/useServiceContext";
 import { machineTitle } from "@/components/machines/MachineList";
 import { ServiceLines } from "@/components/services/ServiceLines";
 import { DeliveryPanel, ServicePayments } from "@/components/services/ServicePayments";
+import { parseMoneyInput } from "@/lib/calc";
 import { ChecklistPanel } from "@/components/services/ChecklistPanel";
 import { ServiceReturnPanel } from "@/components/services/ServiceReturnPanel";
 import { StatusBadge } from "@/components/services/StatusBadge";
@@ -26,6 +27,7 @@ import { formatCurrency, formatDate, formatDateTime } from "@/lib/utils";
 
 /** Servis detayı: özet, durum geçişleri, bilgiler (şikâyet / teşhis / yapılan iş) ve durum geçmişi (Adım 3.7, 3.17). */
 export function ServiceDetail({ id }: { id: string }) {
+  const [tab, setTab] = useState<DetailTab>("summary");
   const found = useLiveQuery(() => db.services.where("id").equals(id).toArray(), [id]);
   const related = useLiveQuery(async () => {
     const s = found?.[0];
@@ -85,17 +87,54 @@ export function ServiceDetail({ id }: { id: string }) {
         </Link>
       </div>
 
-      <StatusActions service={service} />
-      <DeliveryPanel service={service} />
-      <ServiceLines service={service} />
-      <ChecklistPanel service={service} />
-      <ServicePayments service={service} />
-      <ServiceReturnPanel service={service} />
-      <DetailsForm key={`${service.id}:${service.version ?? 0}:${service.updated_at}`} service={service} />
-      <History serviceId={service.id} />
+      <div className="row row-gap-sm" role="tablist" aria-label="Servis bölümleri" style={{ flexWrap: "wrap" }}>
+        {DETAIL_TABS.map((t) => (
+          <button
+            key={t.id}
+            type="button"
+            role="tab"
+            aria-selected={tab === t.id}
+            className={`btn btn-sm ${tab === t.id ? "btn-primary" : "btn-secondary"}`}
+            onClick={() => setTab(t.id)}
+          >
+            {t.label}
+          </button>
+        ))}
+      </div>
+
+      {tab === "summary" ? (
+        <>
+          <StatusActions service={service} />
+          <DeliveryPanel service={service} />
+        </>
+      ) : null}
+      {tab === "details" ? (
+        <DetailsForm key={`${service.id}:${service.version ?? 0}:${service.updated_at}`} service={service} />
+      ) : null}
+      {tab === "lines" ? <ServiceLines service={service} /> : null}
+      {tab === "checklist" ? <ChecklistPanel service={service} /> : null}
+      {tab === "payments" ? (
+        <>
+          <ServicePayments service={service} />
+          <ServiceReturnPanel service={service} />
+        </>
+      ) : null}
+      {tab === "history" ? <History serviceId={service.id} /> : null}
     </div>
   );
 }
+
+type DetailTab = "summary" | "details" | "lines" | "checklist" | "payments" | "history";
+
+/** Servis detayı sekmeleri (Adım 3.17): onaylar “İşlemler ve parçalar” içinde, geçmiş ayrı sekmede. */
+const DETAIL_TABS: { id: DetailTab; label: string }[] = [
+  { id: "summary", label: "Özet" },
+  { id: "details", label: "Arıza ve teşhis" },
+  { id: "lines", label: "İşlemler, parçalar ve onaylar" },
+  { id: "checklist", label: "Kontrol listesi" },
+  { id: "payments", label: "Ödemeler" },
+  { id: "history", label: "Geçmiş" },
+];
 
 function StatusActions({ service }: { service: Service }) {
   const ctx = useServiceContext();
@@ -103,6 +142,7 @@ function StatusActions({ service }: { service: Service }) {
   const [reason, setReason] = useState("");
   const [error, setError] = useState<string | null>(null);
   const [busy, setBusy] = useState(false);
+  const [fee, setFee] = useState("");
   const [checklistWarning, setChecklistWarning] = useState<{ to: ServiceStatus; titles: string[] } | null>(null);
   const paid = useLiveQuery(() => getServiceBalance(service.id), [service.id])?.paid ?? 0;
 
@@ -114,12 +154,19 @@ function StatusActions({ service }: { service: Service }) {
 
   async function go(to: ServiceStatus, note?: string, ignoreChecklist = false) {
     if (!ctx) return setError("Cihaz bilgisi henüz yüklenmedi, lütfen tekrar deneyin.");
+    let diagnosticFeeKurus: number | undefined;
+    if (to === "CANCELLED" && fee.trim() !== "") {
+      const kurus = parseMoneyInput(fee);
+      if (kurus === null || kurus < 0) return setError("İnceleme ücreti geçerli bir tutar olmalıdır.");
+      diagnosticFeeKurus = kurus;
+    }
     setBusy(true);
     setError(null);
     try {
-      await changeServiceStatus(ctx, service.id, to, note, { ignoreChecklist });
+      await changeServiceStatus(ctx, service.id, to, note, { ignoreChecklist, diagnosticFeeKurus });
       setPending(null);
       setReason("");
+      setFee("");
       setChecklistWarning(null);
     } catch (e) {
       if (e instanceof ChecklistIncompleteError) {
@@ -180,6 +227,13 @@ function StatusActions({ service }: { service: Service }) {
             </label>
             <input id="st-reason" className="form-input" value={reason} onChange={(e) => setReason(e.target.value)} autoFocus />
           </div>
+          {pending === "CANCELLED" ? (
+            <div className="form-group">
+              <label className="form-label" htmlFor="st-fee">İnceleme / teşhis ücreti (₺, isteğe bağlı)</label>
+              <input id="st-fee" className="form-input" inputMode="decimal" placeholder="0,00" value={fee} onChange={(e) => setFee(e.target.value)} />
+              <small style={{ color: "var(--text-muted)" }}>Girilirse servis iptal olarak kalır ve sayaç artmaz; ücret müşteri bakiyesine yazılır.</small>
+            </div>
+          ) : null}
           {error ? <div className="alert alert-error" role="alert">{error}</div> : null}
           <div className="row row-gap-md">
             <button type="button" className="btn btn-secondary" style={{ flex: 1 }} onClick={() => setPending(null)} disabled={busy}>Vazgeç</button>

@@ -70,6 +70,7 @@ const INSERT_COLUMNS = [
   "warranty_source",
   "warranty_coverage",
   "cancel_reason",
+  "cancel_fee",
   "existing_damage",
   "received_accessories",
   "delivered_to",
@@ -271,7 +272,7 @@ export async function changeServiceStatus(
   serviceId: string,
   to: ServiceStatus,
   note?: string,
-  options: { ignoreChecklist?: boolean } = {}
+  options: { ignoreChecklist?: boolean; diagnosticFeeKurus?: number } = {}
 ): Promise<Service> {
   return db.transaction(
     "rw",
@@ -349,7 +350,14 @@ export async function changeServiceStatus(
         next.first_completed_at = existing.first_completed_at ?? now;
       }
       if (to === "DELIVERED") next.delivered_date = now;
-      if (to === "CANCELLED") next.cancel_reason = why;
+      if (to === "CANCELLED") {
+        next.cancel_reason = why;
+        const fee = options.diagnosticFeeKurus;
+        if (fee !== undefined) {
+          if (!Number.isInteger(fee) || fee < 0) throw new ServiceRuleError("İnceleme ücreti geçersiz.");
+          next.cancel_fee = fee > 0 ? fromKurus(fee) : undefined;
+        }
+      }
       if (isReopen(from, to)) {
         next.completed_date = undefined;
         next.delivered_date = undefined;
@@ -552,8 +560,10 @@ export async function getServiceBalance(serviceId: string): Promise<ServiceBalan
       .toArray(),
   ]);
   const returned = returns.reduce((acc, r) => acc + toKurus(r.total_amount), 0);
-  // İptal edilmiş servis müşteriye yazılmaz (bakiyeye girmez); alınan kapora fazla ödeme olarak kalır.
-  const total = service?.status === "CANCELLED" ? 0 : toKurus(service?.total_amount ?? 0) - returned;
+  // İptal edilmiş servis müşteriye yazılmaz; yalnızca iptalde alınan inceleme/teşhis ücreti borç olur.
+  // Alınan kapora fazla ödeme olarak kalır.
+  const total =
+    service?.status === "CANCELLED" ? toKurus(service.cancel_fee ?? 0) - returned : toKurus(service?.total_amount ?? 0) - returned;
   const paid =
     payments.reduce((acc, p) => acc + (p.direction === "IN" ? 1 : -1) * toKurus(p.amount), 0) +
     (await getAllocatedKurus("SERVICE", serviceId));

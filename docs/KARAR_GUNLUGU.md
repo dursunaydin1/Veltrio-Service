@@ -5,6 +5,10 @@
 
 ## 2026-10-22
 
+### K-037 · İptalde inceleme / teşhis ücreti
+- **Karar:** İptal edilen servis normalde bakiyeye girmez. İnceleme/teşhis ücreti alınacaksa iptal formunda tutar girilir (`services.cancel_fee`, migration 023); servis iptal olarak kalır, `first_completed_at` boş kalır (sayaç artmaz), tutar servis ve müşteri bakiyesine borç olarak yazılır, açık kalem olarak tahsil edilir.
+- **Etki:** `services/service.ts` (`changeServiceStatus` seçeneği, `getServiceBalance`), `finance/service.ts`, `finance/openItems.ts`, servis iptal formu.
+
 ### K-036 · Fotoğraflar, QR ve girişten sonra dönüş
 - **Fotoğraf (FR-028):** Fotoğraf istemcide 1600 px'e küçültülmüş JPEG olarak, kayıt üzerinde metin (data URL) sütununda saklanır (`customers.photo`, `products.photo`, `services.intake_photo`; migration 022). Çevrimdışı çalışma ve basit eşitleme için dosya depolaması yerine bu seçildi; yüksek hacimde Supabase Storage'a taşınması Faz 7'de değerlendirilir.
 - **QR:** QR yalnızca değişmeyen kayıt adresini taşır (AC-035). Giriş yoksa proxy `?next=` ile girişe yönlendirir; yalnızca uygulama içi yollar kabul edilir (`safeNextPath`).

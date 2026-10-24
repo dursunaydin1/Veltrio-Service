@@ -82,6 +82,8 @@ export interface Service {
   warranty_coverage?: string;
   /** İsteğe bağlı kabul fotoğrafı (JPEG data URL, ≤1600px) */
   intake_photo?: string;
+  /** İptal edilen serviste alınan inceleme / teşhis ücreti (TL) */
+  cancel_fee?: number;
   cancel_reason?: string;
   /** Kabulde belirtilen mevcut hasar / çizikler */
   existing_damage?: string;

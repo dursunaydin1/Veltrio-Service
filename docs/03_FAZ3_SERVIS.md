@@ -175,7 +175,7 @@ Uygulamanın kalbi olan servis akışını hayata geçirmek: müşteri kabulünd
   - 0 = her ücretli işte onay
   - Onay gereken serviste onay kaydı olmadan "Teşhis Tamamlandı" → "İşlemde" geçişi engellenir
 - [x] Teklif tutarı artar → yeni onay gerekir → servis "Müşteri Onayı Bekleniyor"a alınır (SR-005)
-- [ ] Onaylananın üstünde işlem yapılmaz; ayarlanabilir tolerans (varsayılan 0)
+- [x] Onaylananın üstünde işlem yapılmaz; ayarlanabilir tolerans (varsayılan 0) — tolerans 0 olarak uygulanır (onaylı tutarın üzerindeki her artış yeni onay ister); toleransı değiştiren ayar, Ayarlar ekranıyla gelir
 - [x] Onay yöntemi: yüz yüze / telefon / diğer
 - [x] Her kalem: onaylandı / reddedildi / ertelendi (SR-006)
 - [x] Reddedilen/ertelenen kalem toplam tutara girmez (TC-004)
@@ -274,7 +274,7 @@ Uygulamanın kalbi olan servis akışını hayata geçirmek: müşteri kabulünd
 **Görevler:**
 - [x] Servis iptali: gerekçe + onay zorunlu (SR-017)
 - [x] Kullanılmış parça stoğu otomatik geri eklenmez; fiziksel durum ayrıca değerlendirilir
-- [ ] İsteğe bağlı "inceleme/teşhis ücreti" kalemi eklenebilir; servis iptal olarak kalır; sayaç artmaz
+- [x] İsteğe bağlı "inceleme/teşhis ücreti" kalemi eklenebilir; servis iptal olarak kalır; sayaç artmaz — iptal formundaki ücret alanı (`services.cancel_fee`, migration 023, K-037); servis/müşteri bakiyesine yazılır
 - [x] Alınmış ön ödeme/kapora: iade edilir veya müşteri alacağına yazılır (§9.7) — tutar müşteri alacağı olarak kalır, iade "Müşteriye ödeme" ile; iptal ekranı bunu hatırlatır
 - [x] Teslim edilmiş servis iptal edilemez → ücret düzeltmesi iade akışıyla yapılır
 
@@ -330,7 +330,7 @@ Uygulamanın kalbi olan servis akışını hayata geçirmek: müşteri kabulünd
 
 **Görevler:**
 - [x] Servis listesi: aktif / tamamlanmış / iptal edilmiş sekmeleri; durum rozeti, vaat edilen teslim tarihi, bakiye göstergesi
-- [ ] Servis detayı sekmeleri:
+- [x] Servis detayı sekmeleri:
   - Özet (müşteri, makine, durum, tarihler)
   - Arıza ve teşhis
   - İşlemler ve parçalar
@@ -340,7 +340,7 @@ Uygulamanın kalbi olan servis akışını hayata geçirmek: müşteri kabulünd
   - Geçmiş (durum geçmişi ve audit)
 - [x] Ana ekran metrikleri: Aktif Servis, Onay Bekleyen, Parça Bekleyen, Teslim Tarihi Yaklaşan/Geçen
 
-> Uygulandı: servis listesinde aktif/teslim/iptal sekmeleri, rozet, teslim sözü, kalan bakiye; ana ekranda Aktif, Onay bekleyen, Parça bekleyen, Teslimi yaklaşan/geçen. **Açık:** detay ekranının sekmeli düzeni (şu an tek sayfada bölümler halinde) ve kontrol listesi bölümü (3.10 ile).
+> Uygulandı: servis listesinde aktif/teslim/iptal sekmeleri, rozet, teslim sözü, kalan bakiye; ana ekranda Aktif, Onay bekleyen, Parça bekleyen, Teslimi yaklaşan/geçen. Servis detayı sekmelidir: Özet, Arıza ve teşhis, İşlemler-parçalar-onaylar, Kontrol listesi, Ödemeler, Geçmiş.
 
 ---
 

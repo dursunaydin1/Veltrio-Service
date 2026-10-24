@@ -66,3 +66,26 @@ describe("garanti işlemleri (SR-011, TC-009)", () => {
     expect(movement).toMatchObject({ quantity: -1, unit_cost: 300 });
   });
 });
+
+describe("iptalde inceleme / teşhis ücreti (SR-009)", () => {
+  it("servis iptal kalır, sayaç artmaz; ücret servis ve müşteri bakiyesine yazılır, tahsil edilince kapanır", async () => {
+    const s = await openService(ctx, { customerId, machineId, complaint: "x" });
+    await changeServiceStatus(ctx, s.id, "CANCELLED", "Müşteri vazgeçti", { diagnosticFeeKurus: 15000 });
+
+    const cancelled = await db.services.get(s.id);
+    expect(cancelled).toMatchObject({ status: "CANCELLED", cancel_fee: 150 });
+    expect(cancelled?.first_completed_at).toBeUndefined();
+    expect(await getServiceBalance(s.id)).toMatchObject({ total: 15000, paid: 0, remaining: 15000 });
+    const { getCustomerBalance } = await import("@/lib/finance/service");
+    expect((await getCustomerBalance(ctx.businessId, customerId)).balance).toBe(15000);
+    const { getMachineServiceSummary } = await import("./service");
+    expect((await getMachineServiceSummary(machineId)).completedCount).toBe(0);
+  });
+
+  it("ücret girilmezse iptal servis müşteriye yazılmaz; geçersiz ücret reddedilir", async () => {
+    const a = await openService(ctx, { customerId, machineId, complaint: "x" });
+    await expect(changeServiceStatus(ctx, a.id, "CANCELLED", "x", { diagnosticFeeKurus: -5 })).rejects.toThrow(/geçersiz/);
+    await changeServiceStatus(ctx, a.id, "CANCELLED", "x");
+    expect(await getServiceBalance(a.id)).toMatchObject({ total: 0, remaining: 0 });
+  });
+});
