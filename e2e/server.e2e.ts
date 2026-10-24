@@ -9,7 +9,6 @@ import { getSupplierBalance, recordSupplierPayment, setSupplierOpeningBalance } 
 import { createProduct } from "@/lib/products/service";
 import { createPurchase, getPurchaseItems } from "@/lib/purchases/service";
 import { recordCustomerCollection, getCustomerOpenItems } from "@/lib/finance/openItems";
-import { fifoAllocate } from "@/lib/finance/aging";
 import { syncPaymentDueNotifications } from "@/lib/notifications/paymentDue";
 import { createMachine } from "@/lib/machines/service";
 import { addOperation, addPart, recordApproval, setPartUsedQuantity } from "@/lib/services/quote";
@@ -497,14 +496,13 @@ describe.skipIf(!URL || !ANON || !EMAIL || !PASSWORD)("sunucuya karşı uçtan u
     await sync("vadeli veresiye satışlar");
     expect((await one<{ due_date: string }>("sales", a.id)).due_date).toBe(dueDate);
 
-    // Genel tahsilat: en eski borçtan başlayarak 250 TL dağıt
+    // Genel tahsilat: kullanıcı dağılımı elle verir (a'ya 200 TL, b'ye 50 TL)
     const open = await getCustomerOpenItems(ctx.businessId, customerId);
-    const mine = open.items.filter((i) => i.id === a.id || i.id === b.id);
-    const parts = fifoAllocate(mine.map((i) => ({ key: i.key, refDate: i.refDate, remainingKurus: i.remainingKurus })), 25000);
-    const allocations = parts.map((p) => {
-      const item = mine.find((i) => i.key === p.key)!;
-      return { kind: item.kind, id: item.id, amountKurus: p.amountKurus };
-    });
+    expect(open.items.map((i) => i.id)).toEqual(expect.arrayContaining([a.id, b.id]));
+    const allocations = [
+      { kind: "SALE" as const, id: a.id, amountKurus: 20000 },
+      { kind: "SALE" as const, id: b.id, amountKurus: 5000 },
+    ];
     const payment = await recordCustomerCollection(ctx, { customerId, method: "CASH", amountKurus: 25000, allocations });
     await sync("genel tahsilat");
     const { data: allocs } = await supabase.from("payment_allocations").select("source_id,allocated_amount").eq("payment_id", payment.id);
