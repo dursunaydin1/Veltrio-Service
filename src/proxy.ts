@@ -8,6 +8,10 @@ type CookieOption = {
 };
 
 export async function proxy(request: NextRequest) {
+  // Service worker ve çevrimdışı sayfası oturumsuz da erişilebilir olmalıdır (uygulama kabuğu)
+  const early = request.nextUrl.pathname;
+  if (early === "/sw.js" || early === "/offline") return NextResponse.next({ request });
+
   // Supabase henüz yapılandırılmamışsa auth kontrolünü atla (geliştirme)
   if (
     !process.env.NEXT_PUBLIC_SUPABASE_URL ||

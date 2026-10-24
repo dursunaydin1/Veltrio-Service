@@ -4,6 +4,7 @@ import Link from "next/link";
 import { Menu, Search } from "lucide-react";
 import { BottomNav } from "@/components/layout/BottomNav";
 import { DeviceSetup } from "@/components/layout/DeviceSetup";
+import { PwaBanner } from "@/components/layout/PwaBanner";
 import { NotificationBell } from "@/components/layout/NotificationBell";
 import { PinGate } from "@/components/layout/PinGate";
 import { SetupWizard } from "@/components/layout/SetupWizard";
@@ -52,6 +53,7 @@ export function AppShell({ children }: { children: React.ReactNode }) {
         </div>
       </header>
       <main id="main" className="app-main">
+        <PwaBanner />
         {children}
       </main>
       <BottomNav />

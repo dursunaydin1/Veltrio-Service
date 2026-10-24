@@ -5,6 +5,7 @@ import { useAuthSync, useOnlineStatus } from "@/hooks/useAuth";
 import { configureOfflineLimit } from "@/lib/sync/offlineLimit";
 import { useSessionStore } from "@/stores/session";
 import { useReminders } from "@/hooks/useReminders";
+import { usePwa } from "@/hooks/usePwa";
 import { useDeviceGuard } from "@/hooks/useDeviceGuard";
 import { useSync } from "@/hooks/useSync";
 
@@ -20,6 +21,7 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
   useOnlineStatus();
   useSync();
   useDeviceGuard();
+  usePwa();
   useEffect(() => {
     // Çevrimdışı azami gün kuralı için güncel oturum durumunu okur (AC-045)
     configureOfflineLimit({

@@ -2,12 +2,15 @@
   "name": "Veltrio Servis",
   "short_name": "Veltrio",
   "description": "Tarım Makineleri Servis, Satış ve Stok Yönetimi",
-  "start_url": "/",
+  "id": "/",
+  "start_url": "/dashboard",
+  "scope": "/",
   "display": "standalone",
   "background_color": "#141414",
   "theme_color": "#1c1c1e",
   "orientation": "portrait",
   "lang": "tr",
+  "categories": ["business", "productivity"],
   "icons": [
     {
       "src": "/icons/icon-192x192.png",
