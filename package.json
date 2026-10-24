@@ -9,7 +9,8 @@
     "lint": "eslint",
     "test": "vitest run",
     "test:watch": "vitest",
-    "test:e2e": "vitest run --config vitest.e2e.config.mts"
+    "test:e2e": "vitest run --config vitest.e2e.config.mts",
+    "db:migrate": "node scripts/migrate.mjs"
   },
   "dependencies": {
     "@hookform/resolvers": "^5.0.1",
@@ -40,6 +41,7 @@
     "eslint": "^9",
     "eslint-config-next": "16.4.1",
     "fake-indexeddb": "^6.2.6",
+    "pg": "^8.23.1",
     "typescript": "^5",
     "vitest": "^5.0.5"
   }

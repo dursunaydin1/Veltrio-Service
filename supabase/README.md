@@ -60,3 +60,14 @@ Eşitleme API'si oturum açmış Supabase kullanıcısını ve aktif cihaz kayd�
 - **decimal(15,4)**: Tüm para ve miktar alanları bu hassasiyetle saklanır.
 - **UTC**: Tüm timestamp'ler UTC olarak saklanır.
 - **Seed**: `seed/` klasörü yalnızca geliştirme ortamı içindir.
+
+## Migration'ları komutla çalıştırma
+
+`.env.local` içine `SUPABASE_DB_URL=<Supabase → Project Settings → Database → Connection string (URI)>` ekleyin
+(gizlidir, commit edilmez). Sonra:
+
+```bash
+npm run db:migrate -- --baseline 020   # SQL Editor'da elle çalıştırılmış olanları bir kez işaretle
+npm run db:migrate -- --status         # uygulanmış / bekleyen
+npm run db:migrate                     # bekleyenleri sırayla çalıştır
+```

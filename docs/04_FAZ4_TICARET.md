@@ -105,7 +105,7 @@
 
 **Görevler:**
 - [x] `Supplier` tablosu: id, business_id, name, phone, address, notes, archived_at
-- [ ] Tedarikçi profili: satın alma geçmişi, yapılan ödemeler, iadeler, açılış bakiyesi, kalan borç
+- [x] Tedarikçi profili: satın alma geçmişi, yapılan ödemeler, iadeler, açılış bakiyesi, kalan borç
 - [x] Tedarikçi bakiyesi hesabı (§9.3)
 - [x] Tedarikçi arşivleme
 
@@ -148,7 +148,7 @@
 - [x] Tedarikçi bakiyesi = açılış bakiyesi + RECEIVED satın alma tutarları - tedarikçiye ödemeler - tedarikçi iadeleri + tedarikçiden alınan iadeler
 - [x] Tedarikçiye ödeme: Payment (direction=OUT, supplier_id dolu)
 - [x] Borç azaltma ödeme hareketiyle olur
-- [ ] Tedarikçi borcu raporlanır (§15)
+- [x] Tedarikçi borcu raporlanır (§15)
 
 > Uygulandı: `calcSupplierBalance` (kuruş), `getSupplierBalance`, `recordSupplierPayment`, ters kayıt müşteriyle ortak. Tedarikçi iadeleri Faz 5'te formüle eklenecek. **Açık:** tedarikçi borç raporu (Faz 6).
 
