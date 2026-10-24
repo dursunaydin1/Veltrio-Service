@@ -2,6 +2,7 @@
 
 import { useEffect } from "react";
 import { syncPaymentDueNotifications } from "@/lib/notifications/paymentDue";
+import { syncIssueNotifications } from "@/lib/notifications/center";
 import { syncStockNotifications } from "@/lib/notifications/stockAlerts";
 import { syncServiceNotifications } from "@/lib/notifications/serviceReminders";
 import { useSessionStore } from "@/stores/session";
@@ -24,6 +25,7 @@ export function useReminders(): void {
       syncPaymentDueNotifications({ businessId, deviceCode }).catch(() => undefined);
       syncServiceNotifications({ businessId, deviceCode }, { reminderDays }).catch(() => undefined);
       syncStockNotifications({ businessId, deviceCode }).catch(() => undefined);
+      syncIssueNotifications({ businessId, deviceCode }).catch(() => undefined);
     };
     run();
     window.addEventListener("focus", run);

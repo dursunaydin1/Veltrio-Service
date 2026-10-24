@@ -318,7 +318,7 @@ Uygulamanın kalbi olan servis akışını hayata geçirmek: müşteri kabulünd
 - [x] Teslim tarihi yaklaşma bildirimi: varsayılan 1 gün önce
 - [x] Gecikme durumunda teslim kaydı oluşana kadar günde bir kez bildirim
 - [x] Ana ekran "Teslim tarihi yaklaşan/geçen" metriği
-- [ ] Ayarlardan hatırlatma günü değiştirilebilir (SR-014)
+- [x] Ayarlardan hatırlatma günü değiştirilebilir (SR-014) — Ayarlar → İşletme ayarları
 
 > Uygulandı: `notifications/serviceReminders.ts` (planlayıcı + `syncServiceNotifications`), gecikmede günde bir yeni bildirim (eskisi çözülür), teslim/iptalde hepsi çözülür; ana ekran kutuları. **Açık:** hatırlatma gününü değiştiren ayar ekranı (Ayarlar sayfasıyla, SR-014; değer `business.settings.default_service_reminder_days` olarak okunur).
 
