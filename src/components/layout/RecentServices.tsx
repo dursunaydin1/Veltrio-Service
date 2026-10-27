@@ -62,7 +62,7 @@ export function RecentServices() {
       {data.items.length === 0 ? (
         <div className="empty-state">
           <strong>Açık servis yok</strong>
-          <span>Yeni bir makine geldiğinde aşağıdaki + düğmesiyle kaydı açın.</span>
+          <span>Makine geldiğinde “Servis aç” ile kaydı açın.</span>
         </div>
       ) : (
         <ul className="card-list" aria-label="Devam eden servisler">

@@ -17,15 +17,14 @@ export function greetingFor(hour: number): string {
   return "İyi akşamlar";
 }
 
-/** Ana ekran başlığı: günün saatine göre selam ve bugünün tarihi (İstanbul saati). */
+/** Üst çubukta işletme adının altındaki küçük satır: selam ve bugünün tarihi (İstanbul saati). */
 export function Greeting() {
   const [now, setNow] = useState<Date | null>(null);
   useEffect(() => setNow(new Date()), []); // eslint-disable-line react-hooks/set-state-in-effect
-
+  if (!now) return null;
   return (
-    <header className="page-head">
-      <h1>{now ? greetingFor(Number(HOUR_FORMATTER.format(now))) : "Ana Sayfa"}</h1>
-      <p>{now ? DATE_FORMATTER.format(now) : " "}</p>
-    </header>
+    <span className="app-subtitle">
+      {greetingFor(Number(HOUR_FORMATTER.format(now)))} · {DATE_FORMATTER.format(now)}
+    </span>
   );
 }

@@ -4,6 +4,7 @@ import Link from "next/link";
 import { usePathname } from "next/navigation";
 import { Search } from "lucide-react";
 import { BottomNav } from "@/components/layout/BottomNav";
+import { Greeting } from "@/components/layout/Greeting";
 import { LogoMark } from "@/components/layout/Logo";
 import { DeviceSetup } from "@/components/layout/DeviceSetup";
 import { PwaBanner } from "@/components/layout/PwaBanner";
@@ -24,7 +25,7 @@ export function AppShell({ children }: { children: React.ReactNode }) {
   const hasUser = useSessionStore((s) => !!s.user);
   const hasDevice = useSessionStore((s) => !!s.device);
   const needsSetup = useSessionStore((s) => s.needsSetup);
-  // Ana sayfada büyük arama kutusu olduğu için üst çubuktaki arama simgesi orada gösterilmez
+  // Ana sayfada: büyük arama kutusu olduğu için üstteki arama simgesi gizlenir, selam işletme adının altına gelir
   const onHome = usePathname() === "/dashboard";
 
   if (!sessionLoaded) {
@@ -45,8 +46,11 @@ export function AppShell({ children }: { children: React.ReactNode }) {
       </a>
       <header className="app-header">
         <Link href="/dashboard" className="app-brand" aria-label="Ana sayfa">
-          <LogoMark size={32} />
-          <span className="app-title">{businessName ?? "Veltrio Servis"}</span>
+          <LogoMark size={36} />
+          <span className="app-brand-text">
+            <span className="app-title">{businessName ?? "Veltrio Servis"}</span>
+            {onHome ? <Greeting /> : null}
+          </span>
         </Link>
         <div className="app-header-actions">
           <SyncStatus />

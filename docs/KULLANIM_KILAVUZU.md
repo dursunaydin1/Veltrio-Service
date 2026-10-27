@@ -34,7 +34,7 @@ Bu kılavuz günlük kullanım içindir. Uygulama içindeki **Menü → Yardım*
 - Tüm kritik işlemler **Ayarlar → Geçmiş**'te eski/yeni değer, tarih ve gerekçeyle görünür.
 
 ## 4. Çevrimdışı çalışma ve sınırlar
-- İnternet olmadan kayıt yapabilirsiniz; kayıtlar önce cihazda tutulur, internet gelince otomatik gönderilir. Üstteki simge bekleyen kayıt sayısını gösterir; zil simgesi sorun ve bildirimleri.
+- İnternet olmadan kayıt yapabilirsiniz; kayıtlar önce cihazda tutulur, internet gelince otomatik gönderilir. Eşitleme otomatiktir; üst çubukta yalnızca çevrimdışıyken, bir sorun olduğunda veya kayıtlar uzun süre gönderilemezse bir gösterge çıkar. Zil simgesi sorun ve bildirimleri gösterir.
 - **Sınırlar:** (1) Çevrimdışıyken görülen stok bu cihazın bildiği stoktur; başka cihaz aynı ürünü sattıysa eşitlemede stok eksiye düşebilir (bildirim gelir, düzeltme yaparsınız). (2) Bir cihaz 30 günden uzun süre eşitlenmezse yeni kayıt yapılamaz; internete bağlanıp eşitleyin. (3) İlk kurulum, içe aktarma, ayar kaydı, cihaz iptali ve şifre işlemleri internet ister.
 - **Çakışma:** iki cihaz aynı kaydı değiştirirse *Eşitleme ve bildirimler* ekranında seçenek sunulur: *sunucudaki sürümü al* veya *benim değişikliğimi uygula*. Hiçbir şey sessizce ezilmez.
 - Tarayıcı verisini silerseniz kayıtlar sunucudan geri iner; eşitlenmemiş kayıtlar kaybolur — bu yüzden bekleyen kayıt varken tarayıcı verisini silmeyin.

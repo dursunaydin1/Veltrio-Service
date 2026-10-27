@@ -17,17 +17,11 @@ export function QuickActions() {
       <div className="quick-grid">
         <Link href="/services/new" className="quick-action quick-action-primary">
           <span className="qa-icon"><Wrench size={22} aria-hidden="true" /></span>
-          <span className="qa-text">
-            Yeni servis
-            <small>Makine kabulü</small>
-          </span>
+          Servis aç
         </Link>
         <Link href="/sales/new" className="quick-action">
           <span className="qa-icon"><ShoppingCart size={22} aria-hidden="true" /></span>
-          <span className="qa-text">
-            Yeni satış
-            <small>Peşin veya veresiye</small>
-          </span>
+          Satış yap
         </Link>
       </div>
     </div>

@@ -12,6 +12,11 @@
 - **Cihaz iptali:** İptal çevrimiçi yapılır, geri alınamaz. İptal edilen cihaz bağlanınca (açılış, odak, internet, eşitleme 403) yerel veritabanını ve oturumu siler, `wipe_confirmed_at` yazar. Eşitlenmemiş bekleyen kayıtlar da silinir.
 - **Etki:** migration 024, `lib/auth/*`, `lib/pin/*`, `lib/device/*`, `SetupWizard`, `PinGate`, `useDeviceGuard`, `DeviceManager`.
 
+### K-045 · Ana ekranın sadeleştirilmesi ve sessiz eşitleme göstergesi
+- **Eşitleme göstergesi:** Eşitleme otomatik olduğundan (açılış, internet gelince, uygulamaya dönünce, her kayıttan sonra) üst çubukta yalnızca dikkat gereken durumda görünür: çevrimdışı, sorun (hata/çakışma) veya **15 saniyeden uzun** gönderilemeyen kayıt. Her kayıttan sonra kısa süre çıkan "1 bekliyor" artık görünmez. (K-012'deki "her zaman görünen gösterge" kuralı bu şekilde güncellendi.) Son eşitleme zamanı Menü'dedir.
+- **Ana ekran:** selam ve tarih üst çubukta işletme adının altında küçük satır; üstteki arama simgesi yalnızca ana sayfada gizli (büyük arama kutusu var); "Bugün yapılacaklar" iş yokken hiç görünmez; devam eden servislerde en acil 3 kayıt ve başlıkta "Tümü (n)"; uyarılar tek satırlık, X ile bir hafta kapanan şerit.
+- **Düğme adları:** "Yeni …" yerine eylem fiilleri: **Servis aç**, **Satış yap**, **Müşteri ekle**, **Ürün ekle**.
+
 ### K-044 · Telefon uygulaması düzeni (tek görünüm)
 - **Neden:** İşletme sahibi v2 tasarımı "ERP gibi" buldu; telefon uygulaması gibi sade bir düzen ve bilgisayarda da **aynı** görünümü istedi.
 - **Alt menü:** Ana Sayfa · Servisler · **+** · Müşteriler · Menü. "+" alttan sade bir liste açar (yeni servis, satış, müşteri, ürün, satın alma). Satışlar ve Stok Menü'de en üstte (PRD §4.7'deki beş sekmeden sapma: + paneli ve Menü ile aynı yerlere bir dokunuşla erişilir).

@@ -6,10 +6,10 @@ import { Package, ShoppingBag, ShoppingCart, UserPlus, Wrench, X } from "lucide-
 
 /** "+" düğmesinin açtığı eylemler (sade liste; QR tarama ana sayfadaki arama satırındadır). */
 const ACTIONS = [
-  { href: "/services/new", label: "Yeni servis", Icon: Wrench, tone: "accent" },
-  { href: "/sales/new", label: "Yeni satış", Icon: ShoppingCart, tone: "green" },
-  { href: "/customers/new", label: "Yeni müşteri", Icon: UserPlus, tone: "blue" },
-  { href: "/products/new", label: "Yeni ürün", Icon: Package, tone: "violet" },
+  { href: "/services/new", label: "Servis aç", Icon: Wrench, tone: "accent" },
+  { href: "/sales/new", label: "Satış yap", Icon: ShoppingCart, tone: "green" },
+  { href: "/customers/new", label: "Müşteri ekle", Icon: UserPlus, tone: "blue" },
+  { href: "/products/new", label: "Ürün ekle", Icon: Package, tone: "violet" },
   { href: "/purchases/new", label: "Satın alma", Icon: ShoppingBag, tone: "yellow" },
 ] as const;
 

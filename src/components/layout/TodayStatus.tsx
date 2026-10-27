@@ -2,7 +2,7 @@
 
 import Link from "next/link";
 import { useLiveQuery } from "dexie-react-hooks";
-import { AlarmClock, CalendarClock, CircleCheck, CircleDollarSign, ClipboardCheck, PackageOpen, PackageX, type LucideIcon } from "lucide-react";
+import { AlarmClock, CalendarClock, CircleDollarSign, ClipboardCheck, PackageOpen, PackageX, type LucideIcon } from "lucide-react";
 import { db } from "@/lib/db";
 import { isLow, loadStockFacts } from "@/lib/notifications/stockAlerts";
 import { loadServiceFacts, summarizeServices } from "@/lib/notifications/serviceReminders";
@@ -12,7 +12,7 @@ import { todayLocalDate } from "@/lib/utils";
 /**
  * "Bugün yapılacaklar" — işletmeyle ilgili canlı sayılar (yerel veritabanından) cümle olarak:
  * teslimi geçen / yaklaşan, onay / parça bekleyen servis (Adım 3.17), kritik stok, vadesi gelen alacak.
- * Yalnızca sıfırdan büyük olanlar gösterilir; hiçbiri yoksa "her şey yolunda".
+ * Yalnızca sıfırdan büyük olanlar gösterilir; hiçbiri yoksa bölüm hiç görünmez.
  * Eşitleme bilgisi burada değil, üst çubuktadır (K-013).
  */
 export function TodayStatus() {
@@ -53,37 +53,29 @@ export function TodayStatus() {
   ];
   const visible = tasks.filter((t) => t.count > 0);
 
-  if (visible.length === 0) {
-    return (
-      <div className="item-card" data-static="">
-        <span className="avatar" data-tone="green" aria-hidden="true">
-          <CircleCheck size={20} />
-        </span>
-        <span className="item-main">
-          <span className="item-title">Her şey yolunda</span>
-          <span className="item-sub">Bekleyen ya da geciken iş yok.</span>
-        </span>
-      </div>
-    );
-  }
+  // Yapılacak iş yokken bölüm hiç gösterilmez (ana ekran sade kalsın)
+  if (visible.length === 0) return null;
 
   return (
-    <ul className="card-list" aria-label="Bugün yapılacaklar">
-      {visible.map(({ count, title, hint, href, Icon, tone }) => (
-        <li key={title}>
-          <Link href={href} className="item-card">
-            <span className="avatar" data-tone={tone} aria-hidden="true">
-              <Icon size={20} />
-            </span>
-            <span className="item-main">
-              <span className="item-title">
-                <span className="count" data-tone={tone}>{count}</span> {title}
+    <section className="stack stack-sm" aria-labelledby="today-title">
+      <h2 id="today-title" className="section-title">Bugün yapılacaklar</h2>
+      <ul className="card-list" aria-label="Bugün yapılacaklar">
+        {visible.map(({ count, title, hint, href, Icon, tone }) => (
+          <li key={title}>
+            <Link href={href} className="item-card">
+              <span className="avatar" data-tone={tone} aria-hidden="true">
+                <Icon size={20} />
               </span>
-              <span className="item-sub">{hint}</span>
-            </span>
-          </Link>
-        </li>
-      ))}
-    </ul>
+              <span className="item-main">
+                <span className="item-title">
+                  <span className="count" data-tone={tone}>{count}</span> {title}
+                </span>
+                <span className="item-sub">{hint}</span>
+              </span>
+            </Link>
+          </li>
+        ))}
+      </ul>
+    </section>
   );
 }

@@ -2,6 +2,7 @@
 
 import { useEffect, useState } from "react";
 import { useLiveQuery } from "dexie-react-hooks";
+import { X } from "lucide-react";
 import { getIssueCount } from "@/lib/sync/queue";
 import { getStorageHealth, installHint, storageWarning, type InstallHint, type StorageHealth } from "@/lib/pwa";
 import { useSessionStore } from "@/stores/session";
@@ -79,31 +80,35 @@ export function PwaBanner() {
   if (!warning && !showInstall) return null;
   return (
     <div className="stack stack-sm no-print pwa-banner" style={{ marginBottom: 12 }}>
-      {warning ? (
-        <div className={`alert ${softWarning ? "alert-info" : "alert-warning"}`} role="status">
+      {warning && !softWarning ? (
+        <div className="alert alert-warning" role="status">
           <p>{warning}</p>
-          {softWarning ? (
-            <div className="row">
-              <button type="button" className="btn btn-ghost btn-sm" style={{ marginLeft: -10, color: "inherit" }} onClick={dismissStorage}>
-                Anladım
-              </button>
-            </div>
-          ) : null}
+        </div>
+      ) : null}
+      {warning && softWarning ? (
+        // Bilgi amaçlı: tek satır, kapatılabilir
+        <div className="notice" role="status">
+          <span>Tarayıcı verileri silebilir; uygulamayı ana ekrana ekleyin.</span>
+          <button type="button" className="icon-btn" aria-label="Kapat (bir hafta gösterme)" onClick={dismissStorage}>
+            <X size={18} aria-hidden="true" />
+          </button>
         </div>
       ) : null}
       {showInstall ? (
-        <div className="alert alert-success" role="note">
-          <p>
+        <div className="notice" role="note">
+          <span>
             {hint === "ios"
-              ? "Uygulamayı ana ekrana ekleyin: Safari’de Paylaş düğmesine, ardından “Ana Ekrana Ekle”ye dokunun. Böylece çevrimdışı da açılır."
-              : "Uygulamayı ana ekrana ekleyin; çevrimdışı da açılır ve daha hızlıdır."}
-          </p>
-          <div className="row row-gap-sm">
-            {hint === "prompt" && prompt ? (
-              <button type="button" className="btn btn-primary btn-sm" onClick={() => void prompt.prompt().then(() => setPrompt(null))}>Ana ekrana ekle</button>
-            ) : null}
-            <button type="button" className="btn btn-ghost btn-sm" onClick={dismiss}>Sonra</button>
-          </div>
+              ? "Ana ekrana ekleyin: Paylaş → “Ana Ekrana Ekle”."
+              : "Uygulamayı ana ekrana ekleyin, çevrimdışı da açılır."}
+          </span>
+          {hint === "prompt" && prompt ? (
+            <button type="button" className="btn btn-primary btn-sm" onClick={() => void prompt.prompt().then(() => setPrompt(null))}>
+              Ekle
+            </button>
+          ) : null}
+          <button type="button" className="icon-btn" aria-label="Kapat (bir hafta gösterme)" onClick={dismiss}>
+            <X size={18} aria-hidden="true" />
+          </button>
         </div>
       ) : null}
     </div>

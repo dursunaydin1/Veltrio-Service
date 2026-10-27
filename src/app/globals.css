@@ -397,6 +397,21 @@ details[open] > summary::after { transform: rotate(225deg); margin-top: 10px; }
 .alert-warning { background: var(--warning-soft); border-color: color-mix(in srgb, var(--accent-warning) 30%, transparent); border-left-color: var(--accent-warning); color: var(--warning-fg); }
 .alert-info    { background: var(--info-soft);    border-color: color-mix(in srgb, var(--info-fg) 30%, transparent);        border-left-color: var(--info-fg);        color: var(--info-fg); }
 
+/* Tek satırlık kapatılabilir bilgi şeridi (ana ekrana ekle vb.) */
+.notice {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  min-height: 52px;
+  padding: 4px 4px 4px 14px;
+  border-radius: var(--radius-md);
+  background: var(--bg-surface);
+  border: 1px solid var(--border-subtle);
+  font-size: 0.875rem;
+  color: var(--text-secondary);
+}
+.notice > span { flex: 1; min-width: 0; line-height: 1.4; }
+
 /* ============================================================
    LAYOUT YARDIMCILARI
    ============================================================ */
@@ -602,6 +617,9 @@ section > .row.row-between:first-child > h1 { flex: 1; min-width: 0; }
   text-overflow: ellipsis;
   white-space: nowrap;
 }
+
+.app-brand-text { display: flex; flex-direction: column; min-width: 0; line-height: 1.25; }
+.app-subtitle { font-size: 0.75rem; font-weight: 500; color: var(--text-muted); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
 
 .app-header-actions { display: flex; align-items: center; gap: 2px; flex: 0 0 auto; }
 
@@ -1053,6 +1071,8 @@ input[type="checkbox"].switch:focus-visible { outline: 2px solid var(--border-fo
 }
 .page-head p { font-size: 0.9375rem; color: var(--text-muted); }
 .page-head h1 { font-size: 1.75rem; }
+.greeting { font-size: 1rem; font-weight: 700; letter-spacing: -0.01em; color: var(--text-primary); }
+.greeting span { font-weight: 500; color: var(--text-muted); }
 
 .section-title {
   display: flex;
@@ -1088,18 +1108,18 @@ input[type="checkbox"].switch:focus-visible { outline: 2px solid var(--border-fo
 
 .quick-action {
   display: flex;
-  flex-direction: column;
-  align-items: flex-start;
-  justify-content: space-between;
-  gap: 14px;
-  min-height: 104px;
-  padding: 16px;
+  flex-direction: row;
+  align-items: center;
+  gap: 12px;
+  min-height: 72px;
+  padding: 14px;
   border-radius: var(--radius-lg);
   background: var(--bg-surface);
   border: 1px solid var(--border-subtle);
   box-shadow: var(--shadow-sm);
   color: var(--text-primary);
-  font-weight: 650;
+  font-size: 1rem;
+  font-weight: 700;
   text-align: left;
   transition: transform var(--transition-fast), border-color var(--transition-fast), background var(--transition-fast);
 }

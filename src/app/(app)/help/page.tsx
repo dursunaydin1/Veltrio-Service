@@ -22,7 +22,7 @@ const TOPICS: { title: string; body: string }[] = [
   },
   {
     title: "İnternet yokken çalışır mı?",
-    body: "Evet. Kayıtlar önce cihazda tutulur, internet gelince otomatik eşitlenir. Üstteki göstergeden bekleyen kayıt sayısını görürsünüz. Çevrimdışıyken stok bilgisi bu cihazın bildiği son stoktur.",
+    body: "Evet. Kayıtlar önce cihazda tutulur, internet gelince otomatik eşitlenir. Çevrimdışıyken ya da kayıtlar uzun süre gönderilemezse üst çubukta bir gösterge çıkar. Çevrimdışıyken stok bilgisi bu cihazın bildiği son stoktur.",
   },
   {
     title: "Telefonumu kaybettim",
