@@ -1065,6 +1065,18 @@ input[type="checkbox"].switch:focus-visible { outline: 2px solid var(--border-fo
   margin: 4px 0 2px;
 }
 .section-title a { font-size: 0.875rem; font-weight: 600; }
+/* Başlık yanındaki düğme: 44 px dokunma alanı */
+.section-title .section-action {
+  display: inline-flex;
+  align-items: center;
+  min-height: var(--touch-min);
+  padding: 0 16px;
+  margin-right: -4px;
+  border-radius: var(--radius-full);
+  background: var(--accent-soft);
+  color: var(--accent-light);
+}
+.section-title .section-action:hover { background: color-mix(in srgb, var(--accent-primary) 22%, transparent); }
 
 /* Hızlı eylemler */
 .quick-grid {

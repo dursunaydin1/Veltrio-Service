@@ -1,6 +1,7 @@
 "use client";
 
 import Link from "next/link";
+import { usePathname } from "next/navigation";
 import { Search } from "lucide-react";
 import { BottomNav } from "@/components/layout/BottomNav";
 import { LogoMark } from "@/components/layout/Logo";
@@ -23,6 +24,8 @@ export function AppShell({ children }: { children: React.ReactNode }) {
   const hasUser = useSessionStore((s) => !!s.user);
   const hasDevice = useSessionStore((s) => !!s.device);
   const needsSetup = useSessionStore((s) => s.needsSetup);
+  // Ana sayfada büyük arama kutusu olduğu için üst çubuktaki arama simgesi orada gösterilmez
+  const onHome = usePathname() === "/dashboard";
 
   if (!sessionLoaded) {
     return (
@@ -48,9 +51,11 @@ export function AppShell({ children }: { children: React.ReactNode }) {
         <div className="app-header-actions">
           <SyncStatus />
           <NotificationBell />
-          <Link href="/search" className="icon-btn" aria-label="Ara">
-            <Search size={22} aria-hidden="true" />
-          </Link>
+          {onHome ? null : (
+            <Link href="/search" className="icon-btn" aria-label="Ara">
+              <Search size={22} aria-hidden="true" />
+            </Link>
+          )}
         </div>
       </header>
       <main id="main" className="app-main">
