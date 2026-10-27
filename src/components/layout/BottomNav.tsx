@@ -1,56 +1,53 @@
 "use client";
 
+import { useCallback, useState } from "react";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
-import { ChartColumn, Cog, House, Menu, Package, Settings, ShoppingBag, ShoppingCart, Truck, Users, Wrench } from "lucide-react";
-import { LogoMark } from "@/components/layout/Logo";
+import { House, LayoutGrid, Plus, Users, Wrench } from "lucide-react";
+import { CreateSheet } from "@/components/layout/CreateSheet";
 
-/** Alt gezinme — PRD §4.7: Ana Sayfa, Servisler, Satışlar, Stok, Müşteriler */
-const ITEMS = [
+/**
+ * Dört sekme + ortada "+" (yeni kayıt paneli) — K-044. Her ekran boyutunda aynıdır.
+ * Satışlar ve Stok "Menü" ile + panelinden erişilir.
+ */
+const MOBILE_LEFT = [
   { href: "/dashboard", label: "Ana Sayfa", Icon: House },
   { href: "/services", label: "Servisler", Icon: Wrench },
-  { href: "/sales", label: "Satışlar", Icon: ShoppingCart },
-  { href: "/products", label: "Stok", Icon: Package },
+] as const;
+const MOBILE_RIGHT = [
   { href: "/customers", label: "Müşteriler", Icon: Users },
+  { href: "/more", label: "Menü", Icon: LayoutGrid },
 ] as const;
 
-/** Yalnızca geniş ekranda (kenar çubuğu) görünen ikincil bağlantılar; mobilde Menü sayfasındadır. */
-const EXTRA_ITEMS = [
-  { href: "/machines", label: "Makineler", Icon: Cog },
-  { href: "/suppliers", label: "Tedarikçiler", Icon: Truck },
-  { href: "/purchases", label: "Satın Almalar", Icon: ShoppingBag },
-  { href: "/reports", label: "Raporlar", Icon: ChartColumn },
-  { href: "/settings", label: "Ayarlar", Icon: Settings },
-  { href: "/more", label: "Menü", Icon: Menu },
-] as const;
+type Item = { href: string; label: string; Icon: typeof House };
 
 export function BottomNav() {
   const pathname = usePathname();
+  const [sheetOpen, setSheetOpen] = useState(false);
+  const closeSheet = useCallback(() => setSheetOpen(false), []);
   const isActive = (href: string) => pathname === href || pathname.startsWith(`${href}/`);
 
-  return (
-    <nav className="bottom-nav" aria-label="Ana gezinme">
-      <span className="nav-brand" aria-hidden="true">
-        <LogoMark size={30} />
-        Veltrio
+  const tab = ({ href, label, Icon }: Item) => (
+    <Link key={href} href={href} aria-current={isActive(href) ? "page" : undefined}>
+      <span className="nav-icon">
+        <Icon size={22} strokeWidth={isActive(href) ? 2.4 : 2} aria-hidden="true" />
       </span>
-      {ITEMS.map(({ href, label, Icon }) => (
-        <Link key={href} href={href} aria-current={isActive(href) ? "page" : undefined}>
-          <span className="nav-icon">
-            <Icon size={22} strokeWidth={isActive(href) ? 2.4 : 2} aria-hidden="true" />
-          </span>
-          {label}
-        </Link>
-      ))}
-      <span className="nav-extra nav-sep" aria-hidden="true" />
-      {EXTRA_ITEMS.map(({ href, label, Icon }) => (
-        <Link key={href} href={href} className="nav-extra" aria-current={isActive(href) ? "page" : undefined}>
-          <span className="nav-icon">
-            <Icon size={20} aria-hidden="true" />
-          </span>
-          {label}
-        </Link>
-      ))}
-    </nav>
+      {label}
+    </Link>
+  );
+
+  return (
+    <>
+      <nav className="bottom-nav" aria-label="Ana gezinme">
+        <div className="nav-mobile">
+          {MOBILE_LEFT.map(tab)}
+          <button type="button" className="nav-fab" aria-label="Yeni kayıt ekle" aria-haspopup="dialog" onClick={() => setSheetOpen(true)}>
+            <Plus size={28} strokeWidth={2.6} aria-hidden="true" />
+          </button>
+          {MOBILE_RIGHT.map(tab)}
+        </div>
+      </nav>
+      <CreateSheet open={sheetOpen} onClose={closeSheet} />
+    </>
   );
 }

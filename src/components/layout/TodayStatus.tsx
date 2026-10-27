@@ -2,7 +2,7 @@
 
 import Link from "next/link";
 import { useLiveQuery } from "dexie-react-hooks";
-import { AlarmClock, CalendarClock, CircleDollarSign, ClipboardCheck, PackageOpen, PackageX, Wrench, type LucideIcon } from "lucide-react";
+import { AlarmClock, CalendarClock, CircleCheck, CircleDollarSign, ClipboardCheck, PackageOpen, PackageX, type LucideIcon } from "lucide-react";
 import { db } from "@/lib/db";
 import { isLow, loadStockFacts } from "@/lib/notifications/stockAlerts";
 import { loadServiceFacts, summarizeServices } from "@/lib/notifications/serviceReminders";
@@ -10,9 +10,10 @@ import { useSessionStore } from "@/stores/session";
 import { todayLocalDate } from "@/lib/utils";
 
 /**
- * "Bugünün Durumu" — işletmeyle ilgili canlı sayılar (yerel veritabanından):
- * aktif servis, onay / parça bekleyen, teslim tarihi yaklaşan ve geçen (Adım 3.17),
- * vadesi gelen alacak. Eşitleme bilgisi burada değil, üst çubuktadır (K-013).
+ * "Bugün yapılacaklar" — işletmeyle ilgili canlı sayılar (yerel veritabanından) cümle olarak:
+ * teslimi geçen / yaklaşan, onay / parça bekleyen servis (Adım 3.17), kritik stok, vadesi gelen alacak.
+ * Yalnızca sıfırdan büyük olanlar gösterilir; hiçbiri yoksa "her şey yolunda".
+ * Eşitleme bilgisi burada değil, üst çubuktadır (K-013).
  */
 export function TodayStatus() {
   const businessId = useSessionStore((s) => s.business?.id);
@@ -40,31 +41,49 @@ export function TodayStatus() {
     0
   );
 
-  const tiles: { label: string; value: number; href: string; Icon: LucideIcon; tone?: "warn" | "danger" }[] = [
-    { label: "Aktif servis", value: summary?.active ?? 0, href: "/services", Icon: Wrench },
-    { label: "Onay bekleyen", value: summary?.waitingApproval ?? 0, href: "/services", Icon: ClipboardCheck, tone: "warn" },
-    { label: "Parça bekleyen", value: summary?.waitingParts ?? 0, href: "/services", Icon: PackageOpen, tone: "warn" },
-    { label: "Teslimi yaklaşan", value: summary?.upcoming ?? 0, href: "/services", Icon: CalendarClock, tone: "warn" },
-    { label: "Teslimi geçen", value: summary?.overdue ?? 0, href: "/services", Icon: AlarmClock, tone: "danger" },
-    { label: "Kritik stok", value: criticalStock, href: "/products", Icon: PackageX, tone: "warn" },
-    { label: "Vadesi gelen alacak", value: dueReminders, href: "/reports/balances", Icon: CircleDollarSign, tone: "warn" },
+  if (summary === undefined) return null;
+
+  const tasks: { count: number; title: string; hint: string; href: string; Icon: LucideIcon; tone: "danger" | "warn" | "accent" }[] = [
+    { count: summary.overdue, title: "servisin teslim tarihi geçti", hint: "Müşteriyi arayıp bilgi verin", href: "/services", Icon: AlarmClock, tone: "danger" },
+    { count: summary.upcoming, title: "servisin teslimi yaklaştı", hint: "Hazır olup olmadığına bakın", href: "/services", Icon: CalendarClock, tone: "warn" },
+    { count: summary.waitingApproval, title: "servis müşteri onayı bekliyor", hint: "Fiyatı müşteriye iletin", href: "/services", Icon: ClipboardCheck, tone: "warn" },
+    { count: summary.waitingParts, title: "servis parça bekliyor", hint: "Siparişleri kontrol edin", href: "/services", Icon: PackageOpen, tone: "accent" },
+    { count: criticalStock, title: "üründe stok azaldı", hint: "Sipariş vermeyi düşünün", href: "/products", Icon: PackageX, tone: "warn" },
+    { count: dueReminders, title: "alacağın vadesi geldi", hint: "Tahsilat için müşteriyi arayın", href: "/reports/balances", Icon: CircleDollarSign, tone: "danger" },
   ];
+  const visible = tasks.filter((t) => t.count > 0);
+
+  if (visible.length === 0) {
+    return (
+      <div className="item-card" data-static="">
+        <span className="avatar" data-tone="green" aria-hidden="true">
+          <CircleCheck size={20} />
+        </span>
+        <span className="item-main">
+          <span className="item-title">Her şey yolunda</span>
+          <span className="item-sub">Bekleyen ya da geciken iş yok.</span>
+        </span>
+      </div>
+    );
+  }
 
   return (
-    <div className="tile-grid">
-      {tiles
-        .filter((t) => t.value > 0 || t.label === "Aktif servis")
-        .map(({ label, value, href, Icon, tone }) => (
-          <Link key={label} href={href} className="tile" data-tone={value > 0 ? tone ?? "accent" : undefined} aria-label={`${label}: ${value}`}>
-            <span className="tile-head">
-              <span className="tile-value">{value}</span>
-              <span className="tile-icon">
-                <Icon size={17} aria-hidden="true" />
-              </span>
+    <ul className="card-list" aria-label="Bugün yapılacaklar">
+      {visible.map(({ count, title, hint, href, Icon, tone }) => (
+        <li key={title}>
+          <Link href={href} className="item-card">
+            <span className="avatar" data-tone={tone} aria-hidden="true">
+              <Icon size={20} />
             </span>
-            <span className="tile-label">{label}</span>
+            <span className="item-main">
+              <span className="item-title">
+                <span className="count" data-tone={tone}>{count}</span> {title}
+              </span>
+              <span className="item-sub">{hint}</span>
+            </span>
           </Link>
-        ))}
-    </div>
+        </li>
+      ))}
+    </ul>
   );
 }

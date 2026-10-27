@@ -11,20 +11,22 @@ export const metadata: Metadata = {
 
 export default function DashboardPage() {
   return (
-    <>
+    <div className="stack stack-lg">
       <Greeting />
-
-      <h2 className="section-title">Hızlı eylemler</h2>
       <QuickActions />
 
-      <h2 className="section-title">Bugünün durumu</h2>
-      <TodayStatus />
+      <section className="stack stack-sm" aria-labelledby="today-title">
+        <h2 id="today-title" className="section-title">Bugün yapılacaklar</h2>
+        <TodayStatus />
+      </section>
 
-      <h2 className="section-title">
-        Devam eden servisler
-        <Link href="/services">Tümü</Link>
-      </h2>
-      <RecentServices />
-    </>
+      <section className="stack stack-sm" aria-labelledby="ongoing-title">
+        <h2 id="ongoing-title" className="section-title">
+          Devam eden servisler
+          <Link href="/services">Tümü</Link>
+        </h2>
+        <RecentServices />
+      </section>
+    </div>
   );
 }

@@ -1,30 +1,35 @@
 import Link from "next/link";
 import { ScanLine, Search, ShoppingCart, Wrench } from "lucide-react";
 
-/**
- * Ana ekran hızlı eylemleri — PRD §4.7. En sık iş (servis açma) öne çıkarılır.
- */
-const ACTIONS = [
-  { href: "/services/new", label: "Yeni Servis", hint: "Makine kabulü", Icon: Wrench, primary: true },
-  { href: "/sales/new", label: "Yeni Satış", hint: "Peşin veya veresiye", Icon: ShoppingCart },
-  { href: "/search", label: "Ara", hint: "Müşteri, makine, ürün", Icon: Search },
-  { href: "/scan", label: "QR Tara", hint: "Etiketi okut", Icon: ScanLine },
-] as const;
-
+/** Ana ekran üst bölümü: büyük arama kutusu (QR ile) ve en sık iki iş — PRD §4.7. */
 export function QuickActions() {
   return (
-    <div className="quick-grid">
-      {ACTIONS.map(({ href, label, hint, Icon, ...rest }) => (
-        <Link key={href} href={href} className={`quick-action${"primary" in rest ? " quick-action-primary" : ""}`}>
-          <span className="qa-icon">
-            <Icon size={22} aria-hidden="true" />
-          </span>
+    <div className="stack stack-md">
+      <div className="search-pill">
+        <Link href="/search" className="search-pill-input">
+          <Search size={20} aria-hidden="true" />
+          Müşteri, makine veya ürün ara
+        </Link>
+        <Link href="/scan" className="search-pill-qr" aria-label="QR tara">
+          <ScanLine size={22} aria-hidden="true" />
+        </Link>
+      </div>
+      <div className="quick-grid">
+        <Link href="/services/new" className="quick-action quick-action-primary">
+          <span className="qa-icon"><Wrench size={22} aria-hidden="true" /></span>
           <span className="qa-text">
-            {label}
-            <small>{hint}</small>
+            Yeni servis
+            <small>Makine kabulü</small>
           </span>
         </Link>
-      ))}
+        <Link href="/sales/new" className="quick-action">
+          <span className="qa-icon"><ShoppingCart size={22} aria-hidden="true" /></span>
+          <span className="qa-text">
+            Yeni satış
+            <small>Peşin veya veresiye</small>
+          </span>
+        </Link>
+      </div>
     </div>
   );
 }

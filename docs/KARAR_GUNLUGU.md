@@ -12,10 +12,18 @@
 - **Cihaz iptali:** İptal çevrimiçi yapılır, geri alınamaz. İptal edilen cihaz bağlanınca (açılış, odak, internet, eşitleme 403) yerel veritabanını ve oturumu siler, `wipe_confirmed_at` yazar. Eşitlenmemiş bekleyen kayıtlar da silinir.
 - **Etki:** migration 024, `lib/auth/*`, `lib/pin/*`, `lib/device/*`, `SetupWizard`, `PinGate`, `useDeviceGuard`, `DeviceManager`.
 
+### K-044 · Telefon uygulaması düzeni (tek görünüm)
+- **Neden:** İşletme sahibi v2 tasarımı "ERP gibi" buldu; telefon uygulaması gibi sade bir düzen ve bilgisayarda da **aynı** görünümü istedi.
+- **Alt menü:** Ana Sayfa · Servisler · **+** · Müşteriler · Menü. "+" alttan sade bir liste açar (yeni servis, satış, müşteri, ürün, satın alma). Satışlar ve Stok Menü'de en üstte (PRD §4.7'deki beş sekmeden sapma: + paneli ve Menü ile aynı yerlere bir dokunuşla erişilir).
+- **Tek görünüm:** Geniş ekranda kenar çubuğu yok; uygulama ortada telefon genişliğinde (560 px) bir sütun olarak açılır.
+- **Ana sayfa:** selam, tek satırda arama + QR, iki büyük kutu (yeni servis / satış), "Bugün yapılacaklar" cümleleri, teslim tarihine göre sıralı servis kartları ("Yarın teslim", "2 gün gecikti").
+- **Yeni servis adım adım:** Müşteri → Makine → Şikâyet → Ek bilgiler (hepsi isteğe bağlı) + özet; seçim adımları dokununca ilerler, QR/makine sayfasından gelindiğinde doğrudan şikâyet adımı açılır. Bu ekranda alt menü gizlenir.
+- **Kaldırılanlar:** Menü'deki tema seçici (yalnızca koyu tema; K-043'teki açık tema geri alındı), üst çubuktaki menü simgesi (alt menüdeki "Menü" ile aynıydı).
+
 ### K-043 · Arayüz yenilemesi (tasarım sistemi v2)
 - **Neden:** İşletme sahibi tasarımı eski ve telefonda kullanışsız buldu; daha modern ve kullanıcı dostu bir görünüm istedi.
 - **Ne değişti:** `globals.css` yeniden yazıldı (renk değişkenleri, kartlar, gruplanmış listeler, kaydırılabilir sekmeler, rozetler, uyarılar, form alanları). Bileşenler zaten yalnızca ortak sınıf ve değişkenleri kullandığı için değişiklik tüm ekranlara yansır. Yeni: logo işareti, bulanık üst çubuk, etkin öğesi vurgulu alt menü, geniş ekranda sol kenar çubuğu, ana sayfada karşılama + öne çıkan "Yeni Servis" + simgeli durum kutuları + devam eden servisler, servis detayında özet kartı + 5 adımlı ilerleme çubuğu + tek birincil "sonraki adım" düğmesi.
-- **Tema:** Koyu tema varsayılan kalır (önceki kural). Menü → Görünüm'den **Açık** (güneş altında daha okunaklı) veya **Cihaz** seçilebilir; seçim yalnızca o cihazın tarayıcısında tutulur, sayfa boyanmadan önce uygulanır.
+- **Tema:** Koyu tema varsayılan kalır (önceki kural). İlk sürümde eklenen açık tema seçici K-044 ile kaldırıldı.
 - **Uyarılar:** "Tarayıcı verileri silebilir" bilgisi kapatılabilir (bir hafta) ve ana ekrana ekleme önerisi görünürken ayrıca gösterilmez; depolama dolu/desteklenmiyor uyarıları kalıcıdır.
 - **Geri dönüş:** Önceki tasarım GitHub'da `tasarim-oncesi` etiketiyle saklanır.
 

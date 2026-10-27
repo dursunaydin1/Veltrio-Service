@@ -9,10 +9,5 @@ export default async function NewServicePage({
   searchParams: Promise<{ customer?: string; machine?: string }>;
 }) {
   const { customer, machine } = await searchParams;
-  return (
-    <section className="stack stack-md">
-      <h1>Yeni servis</h1>
-      <ServiceForm initialCustomerId={customer} initialMachineId={machine} />
-    </section>
-  );
+  return <ServiceForm initialCustomerId={customer} initialMachineId={machine} />;
 }

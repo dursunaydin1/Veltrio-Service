@@ -78,7 +78,7 @@ export function PwaBanner() {
 
   if (!warning && !showInstall) return null;
   return (
-    <div className="stack stack-sm no-print" style={{ marginBottom: 12 }}>
+    <div className="stack stack-sm no-print pwa-banner" style={{ marginBottom: 12 }}>
       {warning ? (
         <div className={`alert ${softWarning ? "alert-info" : "alert-warning"}`} role="status">
           <p>{warning}</p>
