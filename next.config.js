@@ -16,6 +16,8 @@ const nextConfig = {
   // Turbopack etkin (Next.js 16 varsayılanı). next-pwa Turbopack ile uyumsuz olduğundan
   // çevrimdışı çalışma public/sw.js ile (yerel service worker) sağlanır.
   turbopack: {},
+  // Geliştirmede sol altta çıkan Next.js "N" göstergesini kapatır
+  devIndicators: false,
   async headers() {
     return [
       { source: "/:path*", headers: securityHeaders },
