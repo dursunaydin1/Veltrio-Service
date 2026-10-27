@@ -3,6 +3,7 @@ import Link from "next/link";
 import { ChartColumn, CircleHelp, Cog, DatabaseBackup, LogOut, Settings, ShoppingBag, Truck } from "lucide-react";
 import { logoutAction } from "@/app/(auth)/login/actions";
 import { LastSyncInfo } from "@/components/layout/LastSyncInfo";
+import { ThemeSwitcher } from "@/components/layout/ThemeSwitcher";
 
 export const metadata: Metadata = { title: "Menü" };
 
@@ -26,7 +27,9 @@ export default function MorePage() {
         {LINKS.map(({ href, label, Icon }) => (
           <li key={href}>
             <Link href={href}>
-              <Icon size={20} aria-hidden="true" />
+              <span className="menu-icon">
+                <Icon size={18} aria-hidden="true" />
+              </span>
               {label}
             </Link>
           </li>
@@ -34,12 +37,17 @@ export default function MorePage() {
         <li>
           <form action={logoutAction}>
             <button type="submit">
-              <LogOut size={20} aria-hidden="true" />
+              <span className="menu-icon">
+                <LogOut size={18} aria-hidden="true" />
+              </span>
               Çıkış yap
             </button>
           </form>
         </li>
       </ul>
+      <div className="card">
+        <ThemeSwitcher />
+      </div>
     </section>
   );
 }

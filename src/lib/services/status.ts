@@ -42,6 +42,43 @@ export const SERVICE_TRANSITIONS: Record<ServiceStatus, readonly ServiceStatus[]
   CANCELLED: [],
 };
 
+/**
+ * Ekranda öne çıkarılan "olağan sonraki adım" (birincil düğme). Diğer geçişler ikincil görünür.
+ * İş tamamlandıktan sonraki adım (teslim) teslim panelindedir.
+ */
+export const SERVICE_MAIN_NEXT: Partial<Record<ServiceStatus, ServiceStatus>> = {
+  RECEIVED: "DIAGNOSED",
+  WAITING_DIAGNOSIS: "DIAGNOSED",
+  DIAGNOSED: "IN_PROGRESS",
+  WAITING_CUSTOMER_APPROVAL: "IN_PROGRESS",
+  IN_PROGRESS: "COMPLETED",
+  WAITING_PARTS: "IN_PROGRESS",
+};
+
+/** İlerleme çubuğu aşamaları (bekleme durumları ait oldukları aşamada gösterilir). */
+export const SERVICE_STAGES = ["Kabul", "Teşhis", "İşlemde", "Hazır", "Teslim"] as const;
+
+/** Durumun ilerleme çubuğundaki aşaması (0-4); iptal için -1. */
+export function serviceStage(status: string): number {
+  switch (status) {
+    case "RECEIVED":
+    case "WAITING_DIAGNOSIS":
+      return 0;
+    case "DIAGNOSED":
+    case "WAITING_CUSTOMER_APPROVAL":
+      return 1;
+    case "IN_PROGRESS":
+    case "WAITING_PARTS":
+      return 2;
+    case "COMPLETED":
+      return 3;
+    case "DELIVERED":
+      return 4;
+    default:
+      return -1;
+  }
+}
+
 export function isServiceStatus(value: string): value is ServiceStatus {
   return (SERVICE_STATUSES as readonly string[]).includes(value);
 }
@@ -66,12 +103,12 @@ export function isOpenStatus(status: string): boolean {
 }
 
 /** Rozet rengi: ekranda durum türünü ayırt etmek için. */
-export function statusTone(status: string): "gray" | "yellow" | "green" | "red" | "accent" {
+export function statusTone(status: string): "gray" | "blue" | "yellow" | "green" | "red" | "accent" {
   switch (status) {
     case "RECEIVED":
     case "WAITING_DIAGNOSIS":
     case "DIAGNOSED":
-      return "gray";
+      return "blue";
     case "WAITING_CUSTOMER_APPROVAL":
     case "WAITING_PARTS":
       return "yellow";

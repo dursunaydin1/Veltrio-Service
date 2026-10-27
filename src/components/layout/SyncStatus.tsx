@@ -28,24 +28,29 @@ export function SyncStatus() {
   const problems = (counts?.errors ?? 0) + (counts?.conflicts ?? 0);
   const pending = counts?.pending ?? 0;
 
-  let tone: "ok" | "pending" | "problem" | "offline" = "ok";
+  let tone: "ok" | "idle" | "pending" | "problem" | "offline" = lastSyncedAt ? "ok" : "idle";
   let label = lastSyncedAt ? "Eşitlendi" : "Henüz eşitlenmedi";
+  /** Dar ekranda gösterilen kısa metin (yalnızca sayı) */
+  let short: string | null = null;
   let Icon = RefreshCw;
 
   if (!isOnline) {
     tone = "offline";
     label = pending > 0 ? `Çevrimdışı · ${pending} bekliyor` : "Çevrimdışı";
+    short = pending > 0 ? String(pending) : null;
     Icon = CloudOff;
   } else if (problems > 0) {
     tone = "problem";
     label = `${problems} sorun`;
+    short = String(problems);
     Icon = TriangleAlert;
   } else if (pending > 0) {
     tone = "pending";
     label = `${pending} bekliyor`;
+    short = String(pending);
   }
 
-  const showLabel = tone !== "ok" || !lastSyncedAt;
+  const showLabel = tone !== "ok" && tone !== "idle";
   const hint = lastSyncedAt
     ? `Son eşitleme: ${formatDateTime(lastSyncedAt)}. Şimdi eşitlemek için dokunun.`
     : "Şimdi eşitlemek için dokunun.";
@@ -58,11 +63,12 @@ export function SyncStatus() {
       role="status"
       aria-live="polite"
       disabled={!isOnline}
-      title={hint}
+      title={`${label}. ${hint}`}
       onClick={() => window.dispatchEvent(new Event(SYNC_REQUEST_EVENT))}
     >
       <Icon size={16} aria-hidden="true" />
-      <span className={showLabel ? undefined : "sr-only"}>{label}</span>
+      {short ? <span className="sync-short" aria-hidden="true">{short}</span> : null}
+      <span className={showLabel ? "sync-label" : "sr-only"}>{label}</span>
     </button>
   );
 }

@@ -2,6 +2,7 @@ import { statusLabel, statusTone } from "@/lib/services/status";
 
 const TONE_CLASS = {
   gray: "badge-gray",
+  blue: "badge-blue",
   yellow: "badge-yellow",
   green: "badge-green",
   red: "badge-red",

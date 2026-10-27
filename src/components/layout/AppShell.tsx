@@ -3,6 +3,7 @@
 import Link from "next/link";
 import { Menu, Search } from "lucide-react";
 import { BottomNav } from "@/components/layout/BottomNav";
+import { LogoMark } from "@/components/layout/Logo";
 import { DeviceSetup } from "@/components/layout/DeviceSetup";
 import { PwaBanner } from "@/components/layout/PwaBanner";
 import { NotificationBell } from "@/components/layout/NotificationBell";
@@ -40,14 +41,17 @@ export function AppShell({ children }: { children: React.ReactNode }) {
         İçeriğe geç
       </a>
       <header className="app-header">
-        <span className="app-title">{businessName ?? "Veltrio Servis"}</span>
+        <Link href="/dashboard" className="app-brand" aria-label="Ana sayfa">
+          <LogoMark size={32} />
+          <span className="app-title">{businessName ?? "Veltrio Servis"}</span>
+        </Link>
         <div className="app-header-actions">
           <SyncStatus />
           <NotificationBell />
           <Link href="/search" className="icon-btn" aria-label="Ara">
             <Search size={22} aria-hidden="true" />
           </Link>
-          <Link href="/more" className="icon-btn" aria-label="Menü">
+          <Link href="/more" className="icon-btn header-menu" aria-label="Menü">
             <Menu size={22} aria-hidden="true" />
           </Link>
         </div>

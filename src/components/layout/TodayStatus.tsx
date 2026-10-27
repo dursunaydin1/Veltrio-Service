@@ -2,6 +2,7 @@
 
 import Link from "next/link";
 import { useLiveQuery } from "dexie-react-hooks";
+import { AlarmClock, CalendarClock, CircleDollarSign, ClipboardCheck, PackageOpen, PackageX, Wrench, type LucideIcon } from "lucide-react";
 import { db } from "@/lib/db";
 import { isLow, loadStockFacts } from "@/lib/notifications/stockAlerts";
 import { loadServiceFacts, summarizeServices } from "@/lib/notifications/serviceReminders";
@@ -39,24 +40,29 @@ export function TodayStatus() {
     0
   );
 
-  const tiles: { label: string; value: number; href: string; warn?: boolean }[] = [
-    { label: "Aktif servis", value: summary?.active ?? 0, href: "/services" },
-    { label: "Onay bekleyen", value: summary?.waitingApproval ?? 0, href: "/services", warn: true },
-    { label: "Parça bekleyen", value: summary?.waitingParts ?? 0, href: "/services", warn: true },
-    { label: "Teslimi yaklaşan", value: summary?.upcoming ?? 0, href: "/services", warn: true },
-    { label: "Teslimi geçen", value: summary?.overdue ?? 0, href: "/services", warn: true },
-    { label: "Kritik stok", value: criticalStock, href: "/products", warn: true },
-    { label: "Vadesi gelen alacak", value: dueReminders, href: "/reports/balances", warn: true },
+  const tiles: { label: string; value: number; href: string; Icon: LucideIcon; tone?: "warn" | "danger" }[] = [
+    { label: "Aktif servis", value: summary?.active ?? 0, href: "/services", Icon: Wrench },
+    { label: "Onay bekleyen", value: summary?.waitingApproval ?? 0, href: "/services", Icon: ClipboardCheck, tone: "warn" },
+    { label: "Parça bekleyen", value: summary?.waitingParts ?? 0, href: "/services", Icon: PackageOpen, tone: "warn" },
+    { label: "Teslimi yaklaşan", value: summary?.upcoming ?? 0, href: "/services", Icon: CalendarClock, tone: "warn" },
+    { label: "Teslimi geçen", value: summary?.overdue ?? 0, href: "/services", Icon: AlarmClock, tone: "danger" },
+    { label: "Kritik stok", value: criticalStock, href: "/products", Icon: PackageX, tone: "warn" },
+    { label: "Vadesi gelen alacak", value: dueReminders, href: "/reports/balances", Icon: CircleDollarSign, tone: "warn" },
   ];
 
   return (
     <div className="tile-grid">
       {tiles
         .filter((t) => t.value > 0 || t.label === "Aktif servis")
-        .map((t) => (
-          <Link key={t.label} href={t.href} className="tile" aria-label={t.label}>
-            <div className="tile-label">{t.label}</div>
-            <div className="tile-value" style={{ color: t.warn && t.value > 0 ? "var(--accent-warning)" : undefined }}>{t.value}</div>
+        .map(({ label, value, href, Icon, tone }) => (
+          <Link key={label} href={href} className="tile" data-tone={value > 0 ? tone ?? "accent" : undefined} aria-label={`${label}: ${value}`}>
+            <span className="tile-head">
+              <span className="tile-value">{value}</span>
+              <span className="tile-icon">
+                <Icon size={17} aria-hidden="true" />
+              </span>
+            </span>
+            <span className="tile-label">{label}</span>
           </Link>
         ))}
     </div>

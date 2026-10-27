@@ -12,6 +12,13 @@
 - **Cihaz iptali:** İptal çevrimiçi yapılır, geri alınamaz. İptal edilen cihaz bağlanınca (açılış, odak, internet, eşitleme 403) yerel veritabanını ve oturumu siler, `wipe_confirmed_at` yazar. Eşitlenmemiş bekleyen kayıtlar da silinir.
 - **Etki:** migration 024, `lib/auth/*`, `lib/pin/*`, `lib/device/*`, `SetupWizard`, `PinGate`, `useDeviceGuard`, `DeviceManager`.
 
+### K-043 · Arayüz yenilemesi (tasarım sistemi v2)
+- **Neden:** İşletme sahibi tasarımı eski ve telefonda kullanışsız buldu; daha modern ve kullanıcı dostu bir görünüm istedi.
+- **Ne değişti:** `globals.css` yeniden yazıldı (renk değişkenleri, kartlar, gruplanmış listeler, kaydırılabilir sekmeler, rozetler, uyarılar, form alanları). Bileşenler zaten yalnızca ortak sınıf ve değişkenleri kullandığı için değişiklik tüm ekranlara yansır. Yeni: logo işareti, bulanık üst çubuk, etkin öğesi vurgulu alt menü, geniş ekranda sol kenar çubuğu, ana sayfada karşılama + öne çıkan "Yeni Servis" + simgeli durum kutuları + devam eden servisler, servis detayında özet kartı + 5 adımlı ilerleme çubuğu + tek birincil "sonraki adım" düğmesi.
+- **Tema:** Koyu tema varsayılan kalır (önceki kural). Menü → Görünüm'den **Açık** (güneş altında daha okunaklı) veya **Cihaz** seçilebilir; seçim yalnızca o cihazın tarayıcısında tutulur, sayfa boyanmadan önce uygulanır.
+- **Uyarılar:** "Tarayıcı verileri silebilir" bilgisi kapatılabilir (bir hafta) ve ana ekrana ekleme önerisi görünürken ayrıca gösterilmez; depolama dolu/desteklenmiyor uyarıları kalıcıdır.
+- **Geri dönüş:** Önceki tasarım GitHub'da `tasarim-oncesi` etiketiyle saklanır.
+
 ### K-042 · Sağlamlaştırma: PWA, performans ve migration doğrulaması
 - **PWA:** `public/sw.js` yerel service worker (next-pwa Turbopack'le uyumsuz). Giriş/API/kimlik yolları asla önbelleğe alınmaz; yalnızca yönlendirilmemiş HTML yanıtları sayfa önbelleğine girer. `public/icons` boş olduğundan uygulama kurulabilir değildi; simgeler üretildi.
 - **Performans:** `getBalances` imleç yerine toplu okuma kullanır (6.000 hareketle ~23 sn → <1 sn, taklit ortamda). Düğmeler ≥ 44 px.

@@ -1,8 +1,12 @@
 import { describe, expect, it } from "vitest";
 import {
+  SERVICE_MAIN_NEXT,
+  SERVICE_STAGES,
   SERVICE_STATUSES,
   SERVICE_TRANSITIONS,
   canTransition,
+  serviceStage,
+  type ServiceStatus,
   isOpenStatus,
   isReopen,
   isServiceStatus,
@@ -57,5 +61,21 @@ describe("durum makinesi (PRD §6.1)", () => {
     expect(isOpenStatus("DELIVERED")).toBe(false);
     expect(isOpenStatus("CANCELLED")).toBe(false);
     expect(isServiceStatus("READY_FOR_DELIVERY")).toBe(false);
+  });
+});
+
+describe("ilerleme ve önerilen adım", () => {
+  it("bekleme durumları ait oldukları aşamada görünür, iptal aşama dışıdır", () => {
+    expect(serviceStage("RECEIVED")).toBe(0);
+    expect(serviceStage("WAITING_CUSTOMER_APPROVAL")).toBe(1);
+    expect(serviceStage("WAITING_PARTS")).toBe(2);
+    expect(serviceStage("DELIVERED")).toBe(SERVICE_STAGES.length - 1);
+    expect(serviceStage("CANCELLED")).toBe(-1);
+  });
+
+  it("önerilen sonraki adım her zaman izin verilen bir geçiştir", () => {
+    for (const [from, to] of Object.entries(SERVICE_MAIN_NEXT)) {
+      expect(canTransition(from as ServiceStatus, to as ServiceStatus)).toBe(true);
+    }
   });
 });

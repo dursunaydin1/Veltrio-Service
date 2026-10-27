@@ -130,14 +130,14 @@ export function ServiceList() {
               <li key={s.id}>
                 <Link href={`/services/${s.id}`} style={{ alignItems: "flex-start", flexDirection: "column", gap: 4 }}>
                   <span className="row row-between" style={{ width: "100%", gap: 8 }}>
-                    <span>{s.document_no}</span>
+                    <span style={{ minWidth: 0, overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap" }}>
+                      {data.customers.get(s.customer_id ?? "") ?? "Müşterisiz"}
+                    </span>
                     <StatusBadge status={s.status} />
                   </span>
-                  <span style={{ fontWeight: 500, color: "var(--text-secondary)" }}>
-                    {[data.customers.get(s.customer_id ?? ""), data.machines.get(s.machine_id ?? "")?.title]
-                      .filter(Boolean)
-                      .join(" · ")}
-                  </span>
+                  <small style={{ fontWeight: 500, color: "var(--text-muted)" }}>
+                    {[s.document_no, data.machines.get(s.machine_id ?? "")?.title].filter(Boolean).join(" · ")}
+                  </small>
                   {(data.balances.get(s.id) ?? 0) > 0 ? (
                     <small style={{ color: "var(--accent-warning)" }}>
                       Kalan: {formatCurrency((data.balances.get(s.id) ?? 0) / 100)}

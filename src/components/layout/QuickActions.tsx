@@ -2,27 +2,29 @@ import Link from "next/link";
 import { ScanLine, Search, ShoppingCart, Wrench } from "lucide-react";
 
 /**
- * Ana ekran hızlı eylemleri — PRD §4.7.
+ * Ana ekran hızlı eylemleri — PRD §4.7. En sık iş (servis açma) öne çıkarılır.
  */
+const ACTIONS = [
+  { href: "/services/new", label: "Yeni Servis", hint: "Makine kabulü", Icon: Wrench, primary: true },
+  { href: "/sales/new", label: "Yeni Satış", hint: "Peşin veya veresiye", Icon: ShoppingCart },
+  { href: "/search", label: "Ara", hint: "Müşteri, makine, ürün", Icon: Search },
+  { href: "/scan", label: "QR Tara", hint: "Etiketi okut", Icon: ScanLine },
+] as const;
+
 export function QuickActions() {
   return (
     <div className="quick-grid">
-      <Link href="/services/new" className="quick-action">
-        <Wrench size={28} aria-hidden="true" />
-        Yeni Servis
-      </Link>
-      <Link href="/sales/new" className="quick-action">
-        <ShoppingCart size={28} aria-hidden="true" />
-        Yeni Satış
-      </Link>
-      <Link href="/search" className="quick-action">
-        <Search size={28} aria-hidden="true" />
-        Ara
-      </Link>
-      <Link href="/scan" className="quick-action">
-        <ScanLine size={28} aria-hidden="true" />
-        QR Tara
-      </Link>
+      {ACTIONS.map(({ href, label, hint, Icon, ...rest }) => (
+        <Link key={href} href={href} className={`quick-action${"primary" in rest ? " quick-action-primary" : ""}`}>
+          <span className="qa-icon">
+            <Icon size={22} aria-hidden="true" />
+          </span>
+          <span className="qa-text">
+            {label}
+            <small>{hint}</small>
+          </span>
+        </Link>
+      ))}
     </div>
   );
 }

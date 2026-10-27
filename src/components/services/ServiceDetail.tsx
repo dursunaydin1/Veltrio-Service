@@ -2,6 +2,7 @@
 
 import { useState } from "react";
 import Link from "next/link";
+import { ArrowRight, FileText, Printer } from "lucide-react";
 import { useLiveQuery } from "dexie-react-hooks";
 import { db } from "@/lib/db";
 import type { Service } from "@/lib/db";
@@ -16,8 +17,11 @@ import { ServiceReturnPanel } from "@/components/services/ServiceReturnPanel";
 import { StatusBadge } from "@/components/services/StatusBadge";
 import { ChecklistIncompleteError, changeServiceStatus, getServiceBalance, updateServiceDetails } from "@/lib/services/service";
 import {
+  SERVICE_MAIN_NEXT,
+  SERVICE_STAGES,
   SERVICE_TRANSITIONS,
   isReopen,
+  serviceStage,
   isServiceStatus,
   requiresReason,
   statusLabel,
@@ -51,40 +55,54 @@ export function ServiceDetail({ id }: { id: string }) {
 
   return (
     <div className="stack stack-lg">
-      <div className="stack stack-sm">
-        <div className="row row-between">
-          <h1>{service.document_no}</h1>
-          <span className="row row-gap-sm">
-            {service.is_warranty_claim ? <span className="badge badge-yellow">Garanti</span> : null}
-            <StatusBadge status={service.status} />
-          </span>
+      <div className="card stack stack-md">
+        <div className="stack" style={{ gap: 4 }}>
+          <div className="row row-between" style={{ gap: 8 }}>
+            <small style={{ color: "var(--text-muted)", fontWeight: 600, letterSpacing: "0.02em" }}>{service.document_no}</small>
+            <span className="row row-gap-sm">
+              {service.is_warranty_claim ? <span className="badge badge-yellow">Garanti</span> : null}
+              <StatusBadge status={service.status} />
+            </span>
+          </div>
+          <h1 style={{ fontSize: "1.375rem" }}>
+            {related?.customer ? (
+              <Link href={`/customers/${related.customer.id}`} style={{ color: "inherit" }}>{related.customer.name}</Link>
+            ) : (
+              "Müşterisiz servis"
+            )}
+          </h1>
+          <p style={{ fontWeight: 500 }}>
+            {related?.machine ? <Link href={`/machines/${related.machine.id}`}>{machineTitle(related.machine)}</Link> : "Makine bilgisi yok"}
+          </p>
+          <small style={{ color: "var(--text-muted)" }}>
+            Kabul: {formatDateTime(service.received_date)}
+            {service.promised_date ? ` · Teslim sözü: ${formatDate(service.promised_date + "T00:00:00")}` : ""}
+            {service.deposit_amount > 0 ? ` · Kapora: ${formatCurrency(service.deposit_amount)}` : ""}
+          </small>
         </div>
-        <p>
-          {related?.customer ? <Link href={`/customers/${related.customer.id}`}>{related.customer.name}</Link> : "—"}
-          {" · "}
-          {related?.machine ? <Link href={`/machines/${related.machine.id}`}>{machineTitle(related.machine)}</Link> : "—"}
-        </p>
-        <small style={{ color: "var(--text-muted)" }}>
-          Kabul: {formatDateTime(service.received_date)}
-          {service.promised_date ? ` · Teslim sözü: ${formatDate(service.promised_date + "T00:00:00")}` : ""}
-          {service.deposit_amount > 0 ? ` · Kapora: ${formatCurrency(service.deposit_amount)}` : ""}
-        </small>
+        <ServiceProgress status={service.status} />
         {service.intake_photo ? (
           // eslint-disable-next-line @next/next/no-img-element
-          <img src={service.intake_photo} alt="Kabul fotoğrafı" style={{ maxWidth: 220, maxHeight: 220, borderRadius: 8, objectFit: "cover" }} />
+          <img
+            src={service.intake_photo}
+            alt="Kabul fotoğrafı"
+            style={{ maxWidth: 220, maxHeight: 220, borderRadius: 12, objectFit: "cover" }}
+            onError={(e) => (e.currentTarget.style.display = "none")}
+          />
         ) : null}
         {service.status === "CANCELLED" && service.cancel_reason ? (
           <div className="alert alert-error" role="note">İptal nedeni: {service.cancel_reason}</div>
         ) : null}
-      </div>
-
-      <div className="row row-gap-sm" style={{ flexWrap: "wrap" }}>
-        <Link href={`/services/${service.id}/receipt?type=intake`} className="btn btn-secondary btn-sm">
-          Kabul fişi
-        </Link>
-        <Link href={`/services/${service.id}/receipt?type=summary`} className="btn btn-secondary btn-sm">
-          Sonuç özeti
-        </Link>
+        <div className="row row-gap-sm" style={{ flexWrap: "wrap" }}>
+          <Link href={`/services/${service.id}/receipt?type=intake`} className="btn btn-secondary btn-sm">
+            <Printer size={16} aria-hidden="true" />
+            Kabul fişi
+          </Link>
+          <Link href={`/services/${service.id}/receipt?type=summary`} className="btn btn-secondary btn-sm">
+            <FileText size={16} aria-hidden="true" />
+            Sonuç özeti
+          </Link>
+        </div>
       </div>
 
       <div className="row row-gap-sm" role="tablist" aria-label="Servis bölümleri" style={{ flexWrap: "wrap" }}>
@@ -130,7 +148,7 @@ type DetailTab = "summary" | "details" | "lines" | "checklist" | "payments" | "h
 const DETAIL_TABS: { id: DetailTab; label: string }[] = [
   { id: "summary", label: "Özet" },
   { id: "details", label: "Arıza ve teşhis" },
-  { id: "lines", label: "İşlemler, parçalar ve onaylar" },
+  { id: "lines", label: "İşlemler ve onay" },
   { id: "checklist", label: "Kontrol listesi" },
   { id: "payments", label: "Ödemeler" },
   { id: "history", label: "Geçmiş" },
@@ -151,6 +169,10 @@ function StatusActions({ service }: { service: Service }) {
   // "İş tamamlandı" → "Teslim edildi" geçişi teslim paneliyle (kalan bakiye, tahsilat) yapılır.
   const options = SERVICE_TRANSITIONS[from].filter((to) => !(from === "COMPLETED" && to === "DELIVERED"));
   if (options.length === 0) return null;
+  const suggested = SERVICE_MAIN_NEXT[from];
+  const main = suggested && options.includes(suggested) ? suggested : undefined;
+  // İptal her zaman en sonda
+  const others = options.filter((to) => to !== main).sort((a, b) => Number(a === "CANCELLED") - Number(b === "CANCELLED"));
 
   async function go(to: ServiceStatus, note?: string, ignoreChecklist = false) {
     if (!ctx) return setError("Cihaz bilgisi henüz yüklenmedi, lütfen tekrar deneyin.");
@@ -190,7 +212,7 @@ function StatusActions({ service }: { service: Service }) {
 
   return (
     <section className="card stack stack-md" aria-labelledby="st-title">
-      <h2 id="st-title">Durumu değiştir</h2>
+      <h2 id="st-title">Sonraki adım</h2>
 
       {checklistWarning ? (
         <div className="alert alert-warning" role="alert">
@@ -244,19 +266,28 @@ function StatusActions({ service }: { service: Service }) {
         </form>
       ) : (
         <>
-          <div className="row row-gap-sm" style={{ flexWrap: "wrap" }}>
-            {options.map((to) => (
-              <button
-                key={to}
-                type="button"
-                className={`btn btn-sm ${to === "CANCELLED" ? "btn-danger" : isReopen(from, to) ? "btn-secondary" : "btn-primary"}`}
-                onClick={() => choose(to)}
-                disabled={busy}
-              >
-                {isReopen(from, to) ? "Yeniden aç" : to === "CANCELLED" ? "İptal et" : statusLabel(to)}
-              </button>
-            ))}
-          </div>
+          {main ? (
+            <button type="button" className="btn btn-primary btn-lg btn-full" onClick={() => choose(main)} disabled={busy}>
+              {statusLabel(main)}
+              <ArrowRight size={18} aria-hidden="true" />
+            </button>
+          ) : null}
+          {others.length > 0 ? (
+            <div className="row row-gap-sm" style={{ flexWrap: "wrap" }}>
+              {others.map((to) => (
+                <button
+                  key={to}
+                  type="button"
+                  className={`btn btn-sm ${to === "CANCELLED" ? "btn-ghost" : "btn-secondary"}`}
+                  style={to === "CANCELLED" ? { color: "var(--danger-fg)" } : undefined}
+                  onClick={() => choose(to)}
+                  disabled={busy}
+                >
+                  {isReopen(from, to) ? "Yeniden aç" : to === "CANCELLED" ? "İptal et" : statusLabel(to)}
+                </button>
+              ))}
+            </div>
+          ) : null}
           {error ? <div className="alert alert-error" role="alert">{error}</div> : null}
         </>
       )}
@@ -386,5 +417,21 @@ function History({ serviceId }: { serviceId: string }) {
         </ul>
       )}
     </section>
+  );
+}
+
+/** Servisin hangi aşamada olduğunu gösteren beş adımlı ilerleme çubuğu. */
+function ServiceProgress({ status }: { status: string }) {
+  const stage = serviceStage(status);
+  if (stage < 0) return null;
+  return (
+    <ol className="progress-steps" aria-label={`Aşama: ${SERVICE_STAGES[stage]}`}>
+      {SERVICE_STAGES.map((label, i) => (
+        <li key={label} data-state={i < stage ? "done" : i === stage ? "current" : "todo"} aria-current={i === stage ? "step" : undefined}>
+          <span className="progress-bar" aria-hidden="true" />
+          <span className="progress-label">{label}</span>
+        </li>
+      ))}
+    </ol>
   );
 }

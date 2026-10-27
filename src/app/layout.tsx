@@ -1,5 +1,6 @@
 import type { Metadata, Viewport } from "next";
 import { AppProvider } from "@/components/layout/AppProvider";
+import { THEME_INIT_SCRIPT } from "@/lib/theme";
 import "./globals.css";
 
 
@@ -20,7 +21,7 @@ export const metadata: Metadata = {
 };
 
 export const viewport: Viewport = {
-  themeColor: "#1c1c1e",
+  themeColor: "#0f0f11",
   width: "device-width",
   initialScale: 1,
   maximumScale: 1,
@@ -33,8 +34,10 @@ export default function RootLayout({
   children: React.ReactNode;
 }) {
   return (
-    <html lang="tr" data-scroll-behavior="smooth">
+    <html lang="tr" data-scroll-behavior="smooth" data-theme="dark" suppressHydrationWarning>
       <head>
+        {/* Tema seçimini boyamadan önce uygula (yanıp sönme olmasın) */}
+        <script dangerouslySetInnerHTML={{ __html: THEME_INIT_SCRIPT }} />
         <link rel="apple-touch-icon" href="/icons/icon-192x192.png" />
       </head>
       <body>

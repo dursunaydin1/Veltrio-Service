@@ -18,7 +18,7 @@
 9. **Yapılanlar dokümana işlenir:** İlgili faz dosyasındaki kutucuklar işaretlenir; eksik kalan kısım açıkça yazılır. `00_GENEL_PLAN.md` ilerleme tablosu güncel tutulur.
 
 ## Git
-10. Anlamlı bir adım tamamlandıkça (testler ve tip kontrolü geçtikten sonra) uygun bir commit mesajıyla (`feat(phase-1): ...`, `docs: ...`, `chore: ...`) commit atılır ve **GitHub'a push edilir**.
+10. Anlamlı bir adım tamamlandıkça (testler ve tip kontrolü geçtikten sonra) uygun bir commit mesajıyla (`feat(phase-1): ...`, `docs: ...`, `chore: ...`) commit atılır ve **GitHub'a push edilir**. Commit mesajları **İngilizce** yazılır (kod içi metinler ve dokümanlar Türkçe kalır).
 11. Kullanıcıya neyin gönderildiği kısaca söylenir.
 
 ## Tasarım tercihleri

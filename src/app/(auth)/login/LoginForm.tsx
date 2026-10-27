@@ -25,8 +25,7 @@ export function LoginForm({ notice }: { notice?: string }) {
       {/* Hata mesajı */}
       {error && (
         <div className="alert alert-error" role="alert">
-          <span style={{ fontSize: "1.1em" }}>⚠</span>
-          <span>{error}</span>
+          {error}
         </div>
       )}
 
