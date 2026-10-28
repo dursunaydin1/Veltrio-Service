@@ -4,7 +4,7 @@ import { LoginForm } from "./LoginForm";
 
 export const metadata: Metadata = {
   title: "Giriş Yap",
-  description: "Veltrio Servis yönetim paneline giriş yapın.",
+  description: "Veltrio Service yönetim paneline giriş yapın.",
 };
 
 const NOTICES: Record<string, string> = {
@@ -20,7 +20,7 @@ export default async function LoginPage({ searchParams }: { searchParams: Promis
         <div className="auth-brand">
           <LogoMark size={60} />
           <div>
-            <h1>Veltrio Servis</h1>
+            <h1>Veltrio Service</h1>
             <p>Servis, satış ve stok yönetimi</p>
           </div>
         </div>
@@ -34,7 +34,7 @@ export default async function LoginPage({ searchParams }: { searchParams: Promis
       </div>
 
       <p style={{ textAlign: "center", marginTop: 20, fontSize: "0.75rem", color: "var(--text-muted)", opacity: 0.7 }}>
-        Veltrio Servis v0.1.0 · MVP
+        Veltrio Service v0.1.0 · MVP
       </p>
     </div>
   );

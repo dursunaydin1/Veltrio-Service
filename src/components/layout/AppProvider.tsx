@@ -34,3 +34,4 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
   useReminders();
   return <>{children}</>;
 }
+

@@ -102,13 +102,13 @@ export function isOpenStatus(status: string): boolean {
   return status !== "DELIVERED" && status !== "CANCELLED";
 }
 
-/** Rozet rengi: ekranda durum türünü ayırt etmek için. */
-export function statusTone(status: string): "gray" | "blue" | "yellow" | "green" | "red" | "accent" {
+/** Rozet rengi: ekranda durum türünü ayırt etmek için (mavi düğmelere ayrıldığı için başlangıç durumları mor-gri, K-046). */
+export function statusTone(status: string): "gray" | "violet" | "yellow" | "green" | "red" | "accent" {
   switch (status) {
     case "RECEIVED":
     case "WAITING_DIAGNOSIS":
     case "DIAGNOSED":
-      return "blue";
+      return "violet";
     case "WAITING_CUSTOMER_APPROVAL":
     case "WAITING_PARTS":
       return "yellow";

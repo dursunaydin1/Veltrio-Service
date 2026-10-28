@@ -19,7 +19,8 @@ export function RecentServices() {
   const businessId = useSessionStore((s) => s.business?.id);
 
   const data = useLiveQuery(async () => {
-    if (!businessId) return { total: 0, items: [] };
+    // Oturum yüklenmeden "Açık servis yok" denmesin: veri hazır olana kadar hiçbir şey gösterilmez
+    if (!businessId) return undefined;
     const open = await db.services
       .where("business_id")
       .equals(businessId)

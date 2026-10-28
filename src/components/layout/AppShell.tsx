@@ -20,7 +20,6 @@ import { useSessionStore } from "@/stores/session";
  * uygulama yerine "Bu cihazı kaydet" ekranını gösterir (FR-002).
  */
 export function AppShell({ children }: { children: React.ReactNode }) {
-  const businessName = useSessionStore((s) => s.business?.name);
   const sessionLoaded = useSessionStore((s) => s.sessionLoaded);
   const hasUser = useSessionStore((s) => !!s.user);
   const hasDevice = useSessionStore((s) => !!s.device);
@@ -48,7 +47,7 @@ export function AppShell({ children }: { children: React.ReactNode }) {
         <Link href="/dashboard" className="app-brand" aria-label="Ana sayfa">
           <LogoMark size={36} />
           <span className="app-brand-text">
-            <span className="app-title">{businessName ?? "Veltrio Servis"}</span>
+            <span className="app-title">Veltrio Service</span>
             {onHome ? <Greeting /> : null}
           </span>
         </Link>

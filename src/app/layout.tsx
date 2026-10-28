@@ -5,12 +5,17 @@ import "./globals.css";
 
 export const metadata: Metadata = {
   title: {
-    default: "Veltrio Servis",
-    template: "%s | Veltrio Servis",
+    default: "Veltrio Service",
+    template: "%s | Veltrio Service",
   },
   description: "Tarım ve Ağaç Makineleri Servis, Satış ve Stok Yönetimi",
   manifest: "/manifest.json",
-  icons: { icon: [{ url: "/icons/icon-192x192.png", sizes: "192x192", type: "image/png" }] },
+  icons: {
+    icon: [
+      { url: "/icons/favicon.svg", type: "image/svg+xml" },
+      { url: "/icons/icon-192x192.png", sizes: "192x192", type: "image/png" },
+    ],
+  },
   appleWebApp: {
     capable: true,
     statusBarStyle: "black-translucent",
@@ -20,7 +25,7 @@ export const metadata: Metadata = {
 };
 
 export const viewport: Viewport = {
-  themeColor: "#0f0f11",
+  themeColor: "#0b1120",
   width: "device-width",
   initialScale: 1,
   maximumScale: 1,

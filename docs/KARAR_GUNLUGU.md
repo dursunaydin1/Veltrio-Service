@@ -12,6 +12,13 @@
 - **Cihaz iptali:** İptal çevrimiçi yapılır, geri alınamaz. İptal edilen cihaz bağlanınca (açılış, odak, internet, eşitleme 403) yerel veritabanını ve oturumu siler, `wipe_confirmed_at` yazar. Eşitlenmemiş bekleyen kayıtlar da silinir.
 - **Etki:** migration 024, `lib/auth/*`, `lib/pin/*`, `lib/device/*`, `SetupWizard`, `PinGate`, `useDeviceGuard`, `DeviceManager`.
 
+### K-046 · Lacivert palet, yeni logo ve "Veltrio Service" adı
+- **Seçim:** İşletme sahibi dört koyu paleti (lacivert, turkuaz, arduvaz, turuncu) gerçek ana ekran üzerinde karşılaştırdı ve **lacivert**i seçti. Çalışma kuralı 14 buna göre güncellendi (eski "gri + turuncu, mavi/lacivert yok" kuralının yerini aldı).
+- **Neden lacivert:** Mavi vurgu, durum renkleriyle (kırmızı = gecikme/sorun, sarı = bekliyor, yeşil = tamam) çakışmaz; turuncu sarıya, turkuaz yeşile yakındı. Lacivert zemin saf siyahtan yumuşaktır; mavi düğmede beyaz yazı güneş altında okunur.
+- **Uygulama:** Zemin #0b1120, vurgu #3b82f6 (beyaz yazı), logo kırmızı #dc2626. Kural 14 gereği gradyan ve parlama kaldırıldı; renkler düz. Mavi düğmelere ayrıldığı için başlangıç servis durumları (kabul, teşhis) mor-gri rozetle gösterilir.
+- **Logo:** Kırmızı zeminde beyaz **dişli** (servis/tamir) ve içinde **onay işareti biçiminde V** (iş tamam). Uygulama simgeleri ve tarayıcı sekmesi simgesi (`public/icons/favicon.svg`) `scripts/make-icons.mjs` ile aynı geometriden üretilir.
+- **Ad:** Üst çubukta işletme adı yerine **Veltrio Service** yazar (giriş ekranı, sekme başlığı ve manifest de). İşletme adı Menü sayfasının başında görünür.
+
 ### K-045 · Ana ekranın sadeleştirilmesi ve sessiz eşitleme göstergesi
 - **Eşitleme göstergesi:** Eşitleme otomatik olduğundan (açılış, internet gelince, uygulamaya dönünce, her kayıttan sonra) üst çubukta yalnızca dikkat gereken durumda görünür: çevrimdışı, sorun (hata/çakışma) veya **15 saniyeden uzun** gönderilemeyen kayıt. Her kayıttan sonra kısa süre çıkan "1 bekliyor" artık görünmez. (K-012'deki "her zaman görünen gösterge" kuralı bu şekilde güncellendi.) Son eşitleme zamanı Menü'dedir.
 - **Ana ekran:** selam ve tarih üst çubukta işletme adının altında küçük satır; üstteki arama simgesi yalnızca ana sayfada gizli (büyük arama kutusu var); "Bugün yapılacaklar" iş yokken hiç görünmez; devam eden servislerde en acil 3 kayıt ve başlıkta "Tümü (n)"; uyarılar tek satırlık, X ile bir hafta kapanan şerit.
