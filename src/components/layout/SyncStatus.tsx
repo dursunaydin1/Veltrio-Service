@@ -15,7 +15,8 @@ const PENDING_GRACE_MS = 15_000;
 /**
  * Eşitleme göstergesi (Adım 1.12, K-012 → K-045).
  * Eşitleme otomatiktir; gösterge yalnızca dikkat gereken durumda görünür:
- * çevrimdışı, sorun (hata/çakışma) veya 15 saniyeden uzun gönderilemeyen kayıt.
+ * çevrimdışı, sorun (hata/çakışma), eşitleme başarısız (dokununca yeniden dener),
+ * ilk indirme sürüyor veya 15 saniyeden uzun gönderilemeyen kayıt.
  * Her şey yolundayken hiçbir şey çizilmez. Son eşitleme zamanı Menü sayfasındadır.
  * Dokunulunca eşitlemeyi hemen başlatır.
  */
@@ -23,6 +24,8 @@ export function SyncStatus() {
   const business = useSessionStore((s) => s.business);
   const isOnline = useSessionStore((s) => s.isOnline);
   const lastSyncedAt = useSessionStore((s) => s.lastSyncedAt);
+  const syncStatus = useSessionStore((s) => s.syncStatus);
+  const pullingAll = useSessionStore((s) => s.pullingAll);
 
   const counts = useLiveQuery(
     () => (business ? getIssueCount(business.id) : undefined),
@@ -43,7 +46,7 @@ export function SyncStatus() {
     return () => window.clearTimeout(timer);
   }, [pending > 0]); // eslint-disable-line react-hooks/exhaustive-deps
 
-  const tone = syncIndicatorTone({ isOnline, problems, pending, pendingLong });
+  const tone = syncIndicatorTone({ isOnline, problems, pending, pendingLong, syncStatus, pullingAll });
   if (tone === "hidden") return null;
 
   let label: string;
@@ -53,6 +56,13 @@ export function SyncStatus() {
     label = pending > 0 ? `Çevrimdışı · ${pending} bekliyor` : "Çevrimdışı";
     short = pending > 0 ? String(pending) : null;
     Icon = CloudOff;
+  } else if (tone === "failed") {
+    label = "Eşitlenemedi";
+    short = "Eşitlenemedi";
+    Icon = TriangleAlert;
+  } else if (tone === "loading") {
+    label = "Veriler yükleniyor";
+    short = "Yükleniyor";
   } else if (tone === "problem") {
     label = `${problems} sorun`;
     short = String(problems);

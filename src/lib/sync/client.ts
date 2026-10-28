@@ -50,6 +50,22 @@ function storeCursor(businessId: string, deviceCode: string, cursor: string): vo
   window.localStorage.setItem(cursorStorageKey(businessId, deviceCode), cursor);
 }
 
+/**
+ * Kendini onarma: imleç ilerlemiş (daha önce veri inmiş) ama cihazda bu işletmeye ait hiç
+ * müşteri, servis veya ürün yoksa yerel veri bir şekilde kaybolmuştur (ör. tarayıcı veriyi
+ * temizledi, imleç kaldı). Bu durumda imleç sıfırlanır ve her şey baştan indirilir.
+ * Kayıtlar `put` ile yazıldığı için kopya oluşmaz.
+ */
+export async function shouldRepullEverything(businessId: string, cursor: string): Promise<boolean> {
+  if (cursor === "0") return false;
+  const [customers, services, products] = await Promise.all([
+    db.customers.where("business_id").equals(businessId).count(),
+    db.services.where("business_id").equals(businessId).count(),
+    db.products.where("business_id").equals(businessId).count(),
+  ]);
+  return customers + services + products === 0;
+}
+
 async function pushPending(
   items: SyncQueueItem[],
   businessId: string,
@@ -104,36 +120,44 @@ async function pullChanges(
   deviceCode: string
 ): Promise<number> {
   let cursor = getCursor(businessId, deviceCode);
+  if (await shouldRepullEverything(businessId, cursor)) cursor = "0";
   let pulled = 0;
+  // Baştan indirme sürerken ekranlar "boş" yerine "yükleniyor" der
+  const { setPullingAll } = useSessionStore.getState();
+  if (cursor === "0") setPullingAll(true);
 
-  do {
-    const query = new URLSearchParams({ cursor, deviceCode });
-    const response = await fetch(`/api/sync/pull?${query.toString()}`);
-    const body = (await response.json()) as PullResponse & { error?: string };
-    if (!response.ok || !Array.isArray(body.changes) || !body.nextCursor) {
-      if (response.status === 403) requestDeviceCheck();
-      throw new Error(body.error ?? "Sunucu değişiklikleri alınamadı.");
-    }
-
-    for (const change of body.changes) {
-      if (!isSyncTableName(change.table_name)) {
-        throw new Error(`Bilinmeyen eşitleme tablosu: ${change.table_name}`);
+  try {
+    do {
+      const query = new URLSearchParams({ cursor, deviceCode });
+      const response = await fetch(`/api/sync/pull?${query.toString()}`);
+      const body = (await response.json()) as PullResponse & { error?: string };
+      if (!response.ok || !Array.isArray(body.changes) || !body.nextCursor) {
+        if (response.status === 403) requestDeviceCheck();
+        throw new Error(body.error ?? "Sunucu değişiklikleri alınamadı.");
       }
-      const table = db.table(change.table_name);
-      if (change.operation === "DELETE") {
-        await table.delete(change.record_id);
-      } else if (change.record) {
-        await table.put(change.record);
-      } else {
-        throw new Error(`Eşitleme kaydında içerik eksik: ${change.record_id}`);
-      }
-      pulled += 1;
-    }
 
-    cursor = body.nextCursor;
-    storeCursor(businessId, deviceCode, cursor);
-    if (!body.hasMore) break;
-  } while (true);
+      for (const change of body.changes) {
+        if (!isSyncTableName(change.table_name)) {
+          throw new Error(`Bilinmeyen eşitleme tablosu: ${change.table_name}`);
+        }
+        const table = db.table(change.table_name);
+        if (change.operation === "DELETE") {
+          await table.delete(change.record_id);
+        } else if (change.record) {
+          await table.put(change.record);
+        } else {
+          throw new Error(`Eşitleme kaydında içerik eksik: ${change.record_id}`);
+        }
+        pulled += 1;
+      }
+
+      cursor = body.nextCursor;
+      storeCursor(businessId, deviceCode, cursor);
+      if (!body.hasMore) break;
+    } while (true);
+  } finally {
+    setPullingAll(false);
+  }
 
   return pulled;
 }

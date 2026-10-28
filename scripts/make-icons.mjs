@@ -1,6 +1,6 @@
 #!/usr/bin/env node
 /**
- * PWA simgelerini üretir (public/icons): kırmızı zemin üzerinde beyaz dişli ve "V" (K-046).
+ * PWA simgelerini üretir (public/icons): koyu mavi zemin üzerinde beyaz dişli ve onay biçiminde "V" (K-046).
  * Harici görsel kütüphanesi gerektirmez; PNG, Node'un yerleşik zlib'i ile yazılır.
  *   node scripts/make-icons.mjs
  */
@@ -12,7 +12,7 @@ import { fileURLToPath } from "node:url";
 const out = path.resolve(path.dirname(fileURLToPath(import.meta.url)), "..", "public", "icons");
 fs.mkdirSync(out, { recursive: true });
 
-const BG = [220, 38, 38];
+const BG = [29, 78, 216];
 const FG = [255, 255, 255];
 
 // Logo geometrisi (src/components/layout/Logo.tsx ile aynı, 48 birimlik alan):

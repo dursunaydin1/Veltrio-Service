@@ -22,7 +22,7 @@
 11. Kullanıcıya neyin gönderildiği kısaca söylenir.
 
 ## Tasarım tercihleri
-14. **Koyu lacivert tema, mavi vurgu, kırmızı logo** (2026-10-28'de işletme sahibi dört palet arasından seçti; önceki "gri + turuncu" kuralının yerini aldı, K-046). Parlama ve gradyan efektlerinden kaçınılır; renkler düz kullanılır. Ekranlar sade tutulur, her zaman görünen bilgiler azaltılır; ayrıntı ilgili sayfaya konur.
+14. **Koyu lacivert tema, mavi vurgu, koyu mavi logo** (kırmızı yalnızca uyarılarda) (2026-10-28'de işletme sahibi dört palet arasından seçti; önceki "gri + turuncu" kuralının yerini aldı, K-046). Parlama ve gradyan efektlerinden kaçınılır; renkler düz kullanılır. Ekranlar sade tutulur, her zaman görünen bilgiler azaltılır; ayrıntı ilgili sayfaya konur.
 
 ## Teknik tercihler (kullanıcı onaylı)
 12. Para tutarları veritabanında `DECIMAL(15,4)`, kodda **kuruş cinsinden tam sayı** (`src/lib/calc.ts`).

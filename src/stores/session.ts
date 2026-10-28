@@ -19,6 +19,10 @@ interface SessionState {
   isOnline: boolean;
   // Son başarılı eşitleme
   lastSyncedAt: string | null;
+  // Son eşitleme denemesinin durumu (kalıcı değil): göstergede "yükleniyor / eşitlenemedi"
+  syncStatus: "idle" | "running" | "failed";
+  // Sunucudan tüm veri baştan iniyor mu (ilk açılış veya kendini onarma; kalıcı değil)
+  pullingAll: boolean;
   // Oturum sunucudan en az bir kez yüklendi mi? (kalıcı değil)
   sessionLoaded: boolean;
   // Hesap açık ama işletme kurulmamış → ilk kurulum sihirbazı (kalıcı değil)
@@ -33,6 +37,8 @@ interface SessionState {
   setDevice: (device: Device | null) => void;
   setIsOnline: (online: boolean) => void;
   setLastSyncedAt: (at: string) => void;
+  setSyncStatus: (status: "idle" | "running" | "failed") => void;
+  setPullingAll: (pullingAll: boolean) => void;
   setSessionLoaded: (loaded: boolean) => void;
   setAuthInfo: (info: { needsSetup: boolean; email: string | null; emailConfirmed: boolean }) => void;
   clearSession: () => void;
@@ -46,6 +52,8 @@ export const useSessionStore = create<SessionState>()(
       device: null,
       isOnline: true,
       lastSyncedAt: null,
+      syncStatus: "idle",
+      pullingAll: false,
       sessionLoaded: false,
       needsSetup: false,
       authEmail: null,
@@ -56,6 +64,8 @@ export const useSessionStore = create<SessionState>()(
       setDevice: (device) => set({ device }),
       setIsOnline: (isOnline) => set({ isOnline }),
       setLastSyncedAt: (lastSyncedAt) => set({ lastSyncedAt }),
+      setSyncStatus: (syncStatus) => set({ syncStatus }),
+      setPullingAll: (pullingAll) => set({ pullingAll }),
       setSessionLoaded: (sessionLoaded) => set({ sessionLoaded }),
       setAuthInfo: ({ needsSetup, email, emailConfirmed }) => set({ needsSetup, authEmail: email, emailConfirmed }),
 

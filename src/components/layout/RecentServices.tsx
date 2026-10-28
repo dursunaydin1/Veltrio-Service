@@ -17,6 +17,7 @@ import { useSessionStore } from "@/stores/session";
  */
 export function RecentServices() {
   const businessId = useSessionStore((s) => s.business?.id);
+  const pullingAll = useSessionStore((s) => s.pullingAll);
 
   const data = useLiveQuery(async () => {
     // Oturum yüklenmeden "Açık servis yok" denmesin: veri hazır olana kadar hiçbir şey gösterilmez
@@ -60,7 +61,12 @@ export function RecentServices() {
           </Link>
         ) : null}
       </h2>
-      {data.items.length === 0 ? (
+      {data.items.length === 0 && pullingAll ? (
+        <div className="empty-state" role="status">
+          <strong>Veriler yükleniyor…</strong>
+          <span>Kayıtlar sunucudan bu cihaza indiriliyor.</span>
+        </div>
+      ) : data.items.length === 0 ? (
         <div className="empty-state">
           <strong>Açık servis yok</strong>
           <span>Makine geldiğinde “Servis aç” ile kaydı açın.</span>

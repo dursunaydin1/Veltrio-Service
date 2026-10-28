@@ -5,10 +5,14 @@ import { useSessionStore } from "@/stores/session";
 import { syncNow, type SyncSummary } from "@/lib/sync/client";
 
 const SYNC_REQUEST_EVENT = "veltrio:sync-requested";
+/** Başarısız eşitlemeden sonra yeniden deneme aralıkları (ms); son değer tekrar eder. */
+const RETRY_DELAYS = [15_000, 30_000, 60_000, 120_000];
 
 export function useSync() {
   const { business, device, isOnline } = useSessionStore();
   const runningSync = useRef<Promise<SyncSummary> | null>(null);
+  const retryTimer = useRef<number | null>(null);
+  const failures = useRef(0);
 
   const runSync = useCallback((): Promise<SyncSummary> => {
     if (!business || !device) {
@@ -16,9 +20,26 @@ export function useSync() {
     }
     if (runningSync.current) return runningSync.current;
 
-    const task = syncNow(business.id, device.device_code).finally(() => {
-      if (runningSync.current === task) runningSync.current = null;
-    });
+    const { setSyncStatus } = useSessionStore.getState();
+    setSyncStatus("running");
+    const task = syncNow(business.id, device.device_code)
+      .then((summary) => {
+        failures.current = 0;
+        setSyncStatus("idle");
+        return summary;
+      })
+      .catch((error: unknown) => {
+        // Başarısız eşitleme kendiliğinden yeniden denenir (internet/sunucu geçici olarak yoksa)
+        setSyncStatus("failed");
+        const delay = RETRY_DELAYS[Math.min(failures.current, RETRY_DELAYS.length - 1)];
+        failures.current += 1;
+        if (retryTimer.current) window.clearTimeout(retryTimer.current);
+        retryTimer.current = window.setTimeout(() => window.dispatchEvent(new Event(SYNC_REQUEST_EVENT)), delay);
+        throw error;
+      })
+      .finally(() => {
+        if (runningSync.current === task) runningSync.current = null;
+      });
     runningSync.current = task;
     return task;
   }, [business, device]);
@@ -38,6 +59,7 @@ export function useSync() {
     window.addEventListener(SYNC_REQUEST_EVENT, handleSyncRequest);
 
     return () => {
+      if (retryTimer.current) window.clearTimeout(retryTimer.current);
       window.removeEventListener("online", handleSyncRequest);
       window.removeEventListener("focus", handleSyncRequest);
       window.removeEventListener(SYNC_REQUEST_EVENT, handleSyncRequest);

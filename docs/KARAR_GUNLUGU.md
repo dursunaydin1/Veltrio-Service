@@ -12,11 +12,18 @@
 - **Cihaz iptali:** İptal çevrimiçi yapılır, geri alınamaz. İptal edilen cihaz bağlanınca (açılış, odak, internet, eşitleme 403) yerel veritabanını ve oturumu siler, `wipe_confirmed_at` yazar. Eşitlenmemiş bekleyen kayıtlar da silinir.
 - **Etki:** migration 024, `lib/auth/*`, `lib/pin/*`, `lib/device/*`, `SetupWizard`, `PinGate`, `useDeviceGuard`, `DeviceManager`.
 
+### K-047 · Kendini onaran eşitleme ve görünür yükleme durumu
+- **Sorun:** İşletme sahibinin tarayıcısında ana sayfa "Açık servis yok" gösterdi; sunucuda veriler yerindeydi (26 müşteri, 19 servis…). Yerel veritabanı boştu ama eşitleme imleci ilerlemiş olduğundan eksik kayıtlar bir daha inmiyordu. Ayrıca K-045'teki sessiz gösterge, başarısız indirmeyi hiç göstermiyordu.
+- **Kendini onarma:** İmleç ilerlemiş ama cihazda bu işletmeye ait hiç müşteri/servis/ürün yoksa eşitleme her şeyi kendiliğinden baştan indirir (`shouldRepullEverything`; `put` ile yazıldığından kopya oluşmaz). Elle "yeniden indir" düğmesi eklenmedi (işletme sahibinin isteği: otomatik olmalı).
+- **Yeniden deneme:** Başarısız eşitleme 15 sn, 30 sn, 1 dk, 2 dk aralıklarla kendiliğinden tekrar denenir.
+- **Gösterge:** "Eşitlenemedi" (dokununca yeniden dener) ve tüm veri baştan inerken "Yükleniyor" görünür; ana sayfa listesi o sırada "Veriler yükleniyor…" der, "Açık servis yok" demez.
+- **Logo ve sekme:** Logo koyu maviye alındı (kırmızı lacivert ekranda sırıtıyordu); sekmede tüm sayfalarda logo ve "Veltrio Service" yazar; simge adresine sürüm eklendi ve çevrimdışı önbellek sürümü artırıldı ki tarayıcı eski simgeyi bıraksın.
+
 ### K-046 · Lacivert palet, yeni logo ve "Veltrio Service" adı
 - **Seçim:** İşletme sahibi dört koyu paleti (lacivert, turkuaz, arduvaz, turuncu) gerçek ana ekran üzerinde karşılaştırdı ve **lacivert**i seçti. Çalışma kuralı 14 buna göre güncellendi (eski "gri + turuncu, mavi/lacivert yok" kuralının yerini aldı).
 - **Neden lacivert:** Mavi vurgu, durum renkleriyle (kırmızı = gecikme/sorun, sarı = bekliyor, yeşil = tamam) çakışmaz; turuncu sarıya, turkuaz yeşile yakındı. Lacivert zemin saf siyahtan yumuşaktır; mavi düğmede beyaz yazı güneş altında okunur.
-- **Uygulama:** Zemin #0b1120, vurgu #3b82f6 (beyaz yazı), logo kırmızı #dc2626. Kural 14 gereği gradyan ve parlama kaldırıldı; renkler düz. Mavi düğmelere ayrıldığı için başlangıç servis durumları (kabul, teşhis) mor-gri rozetle gösterilir.
-- **Logo:** Kırmızı zeminde beyaz **dişli** (servis/tamir) ve içinde **onay işareti biçiminde V** (iş tamam). Uygulama simgeleri ve tarayıcı sekmesi simgesi (`public/icons/favicon.svg`) `scripts/make-icons.mjs` ile aynı geometriden üretilir.
+- **Uygulama:** Zemin #0b1120, vurgu #3b82f6 (beyaz yazı), logo koyu mavi #1d4ed8 (önce kırmızı denendi; lacivert ekranda sırıttığı için işletme sahibinin isteğiyle maviye alındı, kırmızı yalnızca uyarılarda). Kural 14 gereği gradyan ve parlama kaldırıldı; renkler düz. Mavi düğmelere ayrıldığı için başlangıç servis durumları (kabul, teşhis) mor-gri rozetle gösterilir.
+- **Logo:** Koyu mavi zeminde beyaz **dişli** (servis/tamir) ve içinde **onay işareti biçiminde V** (iş tamam). Uygulama simgeleri ve tarayıcı sekmesi simgesi (`public/icons/favicon.svg`) `scripts/make-icons.mjs` ile aynı geometriden üretilir.
 - **Ad:** Üst çubukta işletme adı yerine **Veltrio Service** yazar (giriş ekranı, sekme başlığı ve manifest de). İşletme adı Menü sayfasının başında görünür.
 
 ### K-045 · Ana ekranın sadeleştirilmesi ve sessiz eşitleme göstergesi

@@ -16,4 +16,11 @@ describe("eşitleme göstergesi", () => {
     // Çevrimdışılık sorundan önce gelir (önce bağlantı gerekir)
     expect(syncIndicatorTone({ ...base, isOnline: false, problems: 1 })).toBe("offline");
   });
+
+  it("başarısız eşitleme ve ilk indirme görünür; sonraki eşitlemeler sessizdir", () => {
+    expect(syncIndicatorTone({ ...base, syncStatus: "failed" })).toBe("failed");
+    expect(syncIndicatorTone({ ...base, syncStatus: "running", pullingAll: true })).toBe("loading");
+    expect(syncIndicatorTone({ ...base, syncStatus: "running", pullingAll: false })).toBe("hidden");
+    expect(syncIndicatorTone({ ...base, problems: 1, syncStatus: "failed" })).toBe("problem");
+  });
 });

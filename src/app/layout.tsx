@@ -4,16 +4,17 @@ import "./globals.css";
 
 
 export const metadata: Metadata = {
+  // Sekmede tüm sayfalarda logo ve "Veltrio Service" (sayfa adı eklenmez; üst çubukla aynı ad)
   title: {
     default: "Veltrio Service",
-    template: "%s | Veltrio Service",
+    template: "Veltrio Service",
   },
   description: "Tarım ve Ağaç Makineleri Servis, Satış ve Stok Yönetimi",
   manifest: "/manifest.json",
   icons: {
     icon: [
-      { url: "/icons/favicon.svg", type: "image/svg+xml" },
-      { url: "/icons/icon-192x192.png", sizes: "192x192", type: "image/png" },
+      { url: "/icons/favicon.svg?v=3", type: "image/svg+xml" },
+      { url: "/icons/icon-192x192.png?v=3", sizes: "192x192", type: "image/png" },
     ],
   },
   appleWebApp: {
@@ -40,7 +41,7 @@ export default function RootLayout({
   return (
     <html lang="tr" data-scroll-behavior="smooth">
       <head>
-        <link rel="apple-touch-icon" href="/icons/icon-192x192.png" />
+        <link rel="apple-touch-icon" href="/icons/apple-touch-icon.png?v=3" />
       </head>
       <body>
         <AppProvider>{children}</AppProvider>

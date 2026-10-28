@@ -6,7 +6,7 @@ const HOLE = "M36 24 A12 12 0 1 0 12 24 A12 12 0 1 0 36 24 Z";
 const CHECK_V = "M16.8 23.6 L22.2 29.6 L31 18";
 
 /**
- * Veltrio logo işareti (K-046): kırmızı zeminde beyaz dişli (servis/tamir) ve içinde
+ * Veltrio logo işareti (K-046): koyu mavi zeminde beyaz dişli (servis/tamir) ve içinde
  * onay işareti biçiminde "V" (iş tamam).
  * Küçük boyutta da okunacak kadar sade tutulur.
  */

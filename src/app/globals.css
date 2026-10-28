@@ -31,8 +31,8 @@
   --accent-grad:    #3b82f6;
   --accent-grad-hover: #2f6fdb;
   --accent-glow:    rgba(0, 0, 0, 0.25);
-  /* Logo işareti: kırmızı */
-  --brand-grad:     #dc2626;
+  /* Logo işareti: koyu mavi (düğme mavisinden ayrışır, paletle uyumlu) */
+  --brand-grad:     #1d4ed8;
   --on-brand:       #ffffff;
 
   /* Durum renkleri: düz renk, yazı rengi, yumuşak zemin */
@@ -1065,6 +1065,9 @@ input[type="checkbox"].switch:focus-visible { outline: 2px solid var(--border-fo
 .sync-pill[data-tone="pending"] svg { animation: spin 1.4s linear infinite; }
 .sync-pill[data-tone="problem"] { color: var(--danger-fg); background: var(--danger-soft); border-color: color-mix(in srgb, var(--accent-danger) 35%, transparent); }
 .sync-pill[data-tone="offline"] { color: var(--text-muted); }
+.sync-pill[data-tone="failed"]  { color: var(--danger-fg); background: var(--danger-soft); }
+.sync-pill[data-tone="loading"] { color: var(--accent-light); background: var(--accent-soft); }
+.sync-pill[data-tone="loading"] svg { animation: spin 1.2s linear infinite; }
 .sync-pill[data-tone="idle"]    { color: var(--text-muted); background: transparent; min-width: var(--touch-min); justify-content: center; padding: 4px; }
 /* Yalnızca simge + sayı; açıklama ekran okuyucu ve ipucu içindir */
 .sync-pill .sync-label { display: none; }
