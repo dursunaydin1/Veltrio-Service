@@ -12,6 +12,11 @@
 - **Cihaz iptali:** İptal çevrimiçi yapılır, geri alınamaz. İptal edilen cihaz bağlanınca (açılış, odak, internet, eşitleme 403) yerel veritabanını ve oturumu siler, `wipe_confirmed_at` yazar. Eşitlenmemiş bekleyen kayıtlar da silinir.
 - **Etki:** migration 024, `lib/auth/*`, `lib/pin/*`, `lib/device/*`, `SetupWizard`, `PinGate`, `useDeviceGuard`, `DeviceManager`.
 
+### K-049 · Hızlı seçimde "Diğer" kaldırıldı
+- **Sorun:** "Diğer" alttan bir panel açıyordu; panelde hızlı seçimdeki üç seçenek (servis, satış, müşteri) yeniden listeleniyordu. İşletme sahibi bunu gereksiz buldu.
+- **Çözüm:** "Diğer" ve alttan açılan panel (`CreateSheet`) kaldırıldı. Ürün ekle ve Satın alma doğrudan hızlı seçime eklendi; tüm "yeni kayıt" işleri tek dokunuşla açılır.
+- **İkon satırı:** Alt alta liste yerine düğmenin üstünde tek satır yuvarlak ikonlar (Müşteri, Satış, Servis, Ürün, Satın al); Servis ortada, logolu düğmenin tam üstünde. Telefonda "üzerine gelme" olmadığından yalnızca ipucunda görünen ad işe yaramaz; bu yüzden her ikonun altında tek kelimelik kısa ad hep görünür, bilgisayarda üzerine gelince tam ad da çıkar.
+
 ### K-048 · Alt çubuk: yüzen çubuk, logolu düğme ve hızlı seçim
 - **Neden:** Ortadaki "+" her uygulamada olan sıradan bir işaretti; işletme sahibi daha özgün ve işlevsel bir alt menü istedi, seçimi bana bıraktı.
 - **Yapılanlar:** (1) Ortadaki düğme Veltrio logosu (dişli + onay); basınca logo dönerek × olur. (2) "+" paneli yerine düğmenin üstünde hızlı seçim: Servis aç (düğmeye en yakın), Satış yap, Müşteri ekle, Diğer (tam listeyi açar). (3) Çubuk kenarlardan boşluklu, yuvarlak köşeli yüzen bir kart. (4) Servisler sekmesinde teslimi geçen + onay bekleyen servis sayısı rozeti. (5) Açık sekmeye yeniden dokununca sayfanın başına dönülür. (6) Dokunuşta kısa titreşim (yalnızca destekleyen Android tarayıcıları).

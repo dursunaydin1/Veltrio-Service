@@ -5,7 +5,6 @@ import Link from "next/link";
 import { usePathname } from "next/navigation";
 import { useLiveQuery } from "dexie-react-hooks";
 import { House, LayoutGrid, Users, Wrench, X } from "lucide-react";
-import { CreateSheet } from "@/components/layout/CreateSheet";
 import { LogoGlyph } from "@/components/layout/Logo";
 import { QuickDial, haptic } from "@/components/layout/QuickDial";
 import { loadServiceFacts, summarizeServices } from "@/lib/notifications/serviceReminders";
@@ -14,7 +13,7 @@ import { useSessionStore } from "@/stores/session";
 
 /**
  * Yüzen alt çubuk (K-048): dört sekme + ortada logolu düğme. Her ekran boyutunda aynıdır.
- * Logolu düğme hızlı seçimi açar (servis, satış, müşteri, diğer); Satışlar ve Stok Menü'dedir.
+ * Logolu düğme hızlı seçimi açar (servis, satış, müşteri, ürün, satın alma); Satışlar ve Stok Menü'dedir.
  * Servisler sekmesinde dikkat isteyen servis sayısı (teslimi geçen + onay bekleyen) rozetle görünür.
  * Açık sekmeye yeniden dokununca sayfanın başına dönülür.
  */
@@ -34,13 +33,7 @@ export function BottomNav() {
   const businessId = useSessionStore((s) => s.business?.id);
   const reminderDays = useSessionStore((s) => s.business?.settings?.default_service_reminder_days);
   const [dialOpen, setDialOpen] = useState(false);
-  const [sheetOpen, setSheetOpen] = useState(false);
   const closeDial = useCallback(() => setDialOpen(false), []);
-  const closeSheet = useCallback(() => setSheetOpen(false), []);
-  const openMore = useCallback(() => {
-    setDialOpen(false);
-    setSheetOpen(true);
-  }, []);
   const isActive = (href: string) => pathname === href || pathname.startsWith(`${href}/`);
 
   const attention = useLiveQuery(
@@ -82,7 +75,7 @@ export function BottomNav() {
 
   return (
     <>
-      <QuickDial open={dialOpen} onClose={closeDial} onMore={openMore} />
+      <QuickDial open={dialOpen} onClose={closeDial} />
       <nav className="bottom-nav" aria-label="Ana gezinme">
         <div className="nav-mobile">
           {LEFT.map(tab)}
@@ -104,7 +97,6 @@ export function BottomNav() {
           {RIGHT.map(tab)}
         </div>
       </nav>
-      <CreateSheet open={sheetOpen} onClose={closeSheet} />
     </>
   );
 }
