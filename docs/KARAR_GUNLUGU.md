@@ -12,6 +12,11 @@
 - **Cihaz iptali:** İptal çevrimiçi yapılır, geri alınamaz. İptal edilen cihaz bağlanınca (açılış, odak, internet, eşitleme 403) yerel veritabanını ve oturumu siler, `wipe_confirmed_at` yazar. Eşitlenmemiş bekleyen kayıtlar da silinir.
 - **Etki:** migration 024, `lib/auth/*`, `lib/pin/*`, `lib/device/*`, `SetupWizard`, `PinGate`, `useDeviceGuard`, `DeviceManager`.
 
+### K-048 · Alt çubuk: yüzen çubuk, logolu düğme ve hızlı seçim
+- **Neden:** Ortadaki "+" her uygulamada olan sıradan bir işaretti; işletme sahibi daha özgün ve işlevsel bir alt menü istedi, seçimi bana bıraktı.
+- **Yapılanlar:** (1) Ortadaki düğme Veltrio logosu (dişli + onay); basınca logo dönerek × olur. (2) "+" paneli yerine düğmenin üstünde hızlı seçim: Servis aç (düğmeye en yakın), Satış yap, Müşteri ekle, Diğer (tam listeyi açar). (3) Çubuk kenarlardan boşluklu, yuvarlak köşeli yüzen bir kart. (4) Servisler sekmesinde teslimi geçen + onay bekleyen servis sayısı rozeti. (5) Açık sekmeye yeniden dokununca sayfanın başına dönülür. (6) Dokunuşta kısa titreşim (yalnızca destekleyen Android tarayıcıları).
+- **Yapılmayanlar:** Düğme için çubukta oyuk (yüzen çubukla kalabalık, kural 14'teki efekt kısıtı), kaydırınca çubuğu gizleme (kafa karıştırıcı), sekmeler arası kayan vurgu (katkısı az).
+
 ### K-047 · Kendini onaran eşitleme ve görünür yükleme durumu
 - **Sorun:** İşletme sahibinin tarayıcısında ana sayfa "Açık servis yok" gösterdi; sunucuda veriler yerindeydi (26 müşteri, 19 servis…). Yerel veritabanı boştu ama eşitleme imleci ilerlemiş olduğundan eksik kayıtlar bir daha inmiyordu. Ayrıca K-045'teki sessiz gösterge, başarısız indirmeyi hiç göstermiyordu.
 - **Kendini onarma:** İmleç ilerlemiş ama cihazda bu işletmeye ait hiç müşteri/servis/ürün yoksa eşitleme her şeyi kendiliğinden baştan indirir (`shouldRepullEverything`; `put` ile yazıldığından kopya oluşmaz). Elle "yeniden indir" düğmesi eklenmedi (işletme sahibinin isteği: otomatik olmalı).

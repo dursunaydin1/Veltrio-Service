@@ -5,6 +5,16 @@ const HOLE = "M36 24 A12 12 0 1 0 12 24 A12 12 0 1 0 36 24 Z";
 /** Onay işareti biçiminde "V": kısa sol kol, uzun ve yukarı kalkık sağ kol. */
 const CHECK_V = "M16.8 23.6 L22.2 29.6 L31 18";
 
+/** Zeminsiz logo çizimi (dişli + onay biçiminde V); rengi `currentColor`. */
+export function LogoGlyph({ size }: { size: number }) {
+  return (
+    <svg width={size} height={size} viewBox="0 0 48 48" fill="none" aria-hidden="true">
+      <path d={`${GEAR} ${HOLE}`} fill="currentColor" fillRule="evenodd" />
+      <path d={CHECK_V} stroke="currentColor" strokeWidth="4" strokeLinecap="round" strokeLinejoin="round" />
+    </svg>
+  );
+}
+
 /**
  * Veltrio logo işareti (K-046): koyu mavi zeminde beyaz dişli (servis/tamir) ve içinde
  * onay işareti biçiminde "V" (iş tamam).
@@ -13,10 +23,7 @@ const CHECK_V = "M16.8 23.6 L22.2 29.6 L31 18";
 export function LogoMark({ size = 32 }: { size?: number }) {
   return (
     <span className="logo-mark" style={{ width: size, height: size }} aria-hidden="true">
-      <svg width={size * 0.8} height={size * 0.8} viewBox="0 0 48 48" fill="none">
-        <path d={`${GEAR} ${HOLE}`} fill="currentColor" fillRule="evenodd" />
-        <path d={CHECK_V} stroke="currentColor" strokeWidth="4" strokeLinecap="round" strokeLinejoin="round" />
-      </svg>
+      <LogoGlyph size={size * 0.8} />
     </span>
   );
 }
