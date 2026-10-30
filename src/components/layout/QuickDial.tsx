@@ -2,14 +2,15 @@
 
 import { useEffect, useRef } from "react";
 import Link from "next/link";
-import { Package, ShoppingBag, ShoppingCart, UserPlus, Wrench } from "lucide-react";
+import { Package, Plus, ShoppingBag, ShoppingCart, User, Wrench } from "lucide-react";
 
 /**
  * Hızlı seçim: tüm "yeni kayıt" işleri tek satırda ikon olarak. En sık iş (Servis aç) ortada, logolu düğmenin üstünde.
+ * Her ikonda küçük "+" vardır: alt çubuktaki aynı simgeli sekmeler listeyi açar, bunlar yeni kayıt (K-050).
  * `short` ikonun altında görünür (telefonda üzerine gelme olmadığından yazı hep görünür); `label` tam addır (ipucu/ekran okuyucu).
  */
 const ACTIONS = [
-  { href: "/customers/new", short: "Müşteri", label: "Müşteri ekle", Icon: UserPlus, tone: "blue" },
+  { href: "/customers/new", short: "Müşteri", label: "Müşteri ekle", Icon: User, tone: "blue" },
   { href: "/sales/new", short: "Satış", label: "Satış yap", Icon: ShoppingCart, tone: "green" },
   { href: "/services/new", short: "Servis", label: "Servis aç", Icon: Wrench, tone: "accent" },
   { href: "/products/new", short: "Ürün", label: "Ürün ekle", Icon: Package, tone: "violet" },
@@ -58,7 +59,10 @@ export function QuickDial({ open, onClose }: { open: boolean; onClose: () => voi
                 onClose();
               }}
             >
-              <span className="avatar" data-tone={tone} aria-hidden="true"><Icon size={22} /></span>
+              <span className="avatar" data-tone={tone} aria-hidden="true">
+                <Icon size={22} />
+                <span className="dial-plus"><Plus size={11} strokeWidth={3.5} /></span>
+              </span>
               <span className="dial-label" aria-hidden="true">{short}</span>
             </Link>
           </li>

@@ -11,7 +11,7 @@ Bu kılavuz günlük kullanım içindir. Uygulama içindeki **Menü → Yardım*
 
 ## 2. Günlük işler
 
-**Servis açma:** Ana ekran → *Yeni Servis* → müşteriyi seçin (yoksa ekleyin) → makineyi seçin (bilinmiyorsa “geçici kayıt”) → şikâyet → *kaydet*. Kabul fişini yazdırın. Makine QR etiketi okutarak da başlayabilirsiniz.
+**Servis açma:** Alttaki ortadaki logolu düğme → *Servis* → müşteriyi seçin (yoksa ekleyin) → makineyi seçin (bilinmiyorsa “geçici kayıt”) → şikâyet → *kaydet*. Kabul fişini yazdırın. Makine QR etiketi okutarak da başlayabilirsiniz.
 
 **Servis ilerletme:** Servis sayfasındaki sekmeler: *Özet* (durum değiştir, teslim), *Arıza ve teşhis*, *İşlemler, parçalar ve onaylar* (kalem ekle, müşteri kararı), *Kontrol listesi*, *Ödemeler*, *Geçmiş*. Teklif onay eşiğini aşarsa işe başlamadan müşterinin kararı kaydedilir. Stoktan parça kullanıldığında “Kullanımı kaydet” ile stok düşer.
 

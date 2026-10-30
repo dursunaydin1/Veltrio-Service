@@ -12,6 +12,12 @@
 - **Cihaz iptali:** İptal çevrimiçi yapılır, geri alınamaz. İptal edilen cihaz bağlanınca (açılış, odak, internet, eşitleme 403) yerel veritabanını ve oturumu siler, `wipe_confirmed_at` yazar. Eşitlenmemiş bekleyen kayıtlar da silinir.
 - **Etki:** migration 024, `lib/auth/*`, `lib/pin/*`, `lib/device/*`, `SetupWizard`, `PinGate`, `useDeviceGuard`, `DeviceManager`.
 
+### K-050 · Yeni kayıt tek yerden: ana sayfa kutuları kaldırıldı, hızlı seçime "+" işareti
+- **Sorun:** Ana sayfadaki "Servis aç" ve "Satış yap" kutuları, hemen alttaki logolu düğmenin hızlı seçimini tekrar ediyordu. Ayrıca hızlı seçimdeki Servis/Müşteri simgeleri alt çubuktaki Servisler/Müşteriler sekmeleriyle aynıydı; ikisi aynı işmiş gibi görünüyordu.
+- **Değerlendirme:** Kutular tek dokunuş, hızlı seçim iki dokunuştur. Ama uygulamayı tek kullanıcı kullanıyor ve düğmeyi biliyor. Logolu düğme her sayfada aynı yerde; "yeni kayıt hep ortadan açılır" tek alışkanlıktır. Ana sayfanın işi "şu an ne yapmalıyım?" sorusunu yanıtlamaktır (bugünkü işler, geciken servisler).
+- **Yapılanlar:** (1) Ana sayfa kutuları kaldırıldı; arama ve QR kaldı (hızlı seçimde yoklar). (2) Hızlı seçim ikonlarına küçük mavi "+" eklendi: sekmeler listeyi açar, bunlar yeni kayıt. (3) Açık servis yokken boş liste "Servis aç" düğmesi gösterir (yalnızca o durumda, bağlama uygun). (4) Yardım ve kullanım kılavuzu güncellendi.
+- **Geri dönüş koşulu:** Servis açarken iki dokunuş yavaşlatırsa ana sayfaya tek bir "Servis aç" düğmesi geri getirilir.
+
 ### K-049 · Hızlı seçimde "Diğer" kaldırıldı
 - **Sorun:** "Diğer" alttan bir panel açıyordu; panelde hızlı seçimdeki üç seçenek (servis, satış, müşteri) yeniden listeleniyordu. İşletme sahibi bunu gereksiz buldu.
 - **Çözüm:** "Diğer" ve alttan açılan panel (`CreateSheet`) kaldırıldı. Ürün ekle ve Satın alma doğrudan hızlı seçime eklendi; tüm "yeni kayıt" işleri tek dokunuşla açılır.

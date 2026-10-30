@@ -69,7 +69,8 @@ export function RecentServices() {
       ) : data.items.length === 0 ? (
         <div className="empty-state">
           <strong>Açık servis yok</strong>
-          <span>Makine geldiğinde “Servis aç” ile kaydı açın.</span>
+          <span>Makine geldiğinde servis kaydını açın.</span>
+          <Link href="/services/new" className="btn btn-primary btn-sm">Servis aç</Link>
         </div>
       ) : (
         <ul className="card-list" aria-label="Devam eden servisler">

@@ -6,7 +6,7 @@ export const metadata: Metadata = { title: "Yardım" };
 const TOPICS: { title: string; body: string }[] = [
   {
     title: "Yeni servis nasıl açılır?",
-    body: "Ana ekranda “Yeni Servis”e dokunun; müşteriyi ve makineyi seçin (yoksa yeni ekleyin), şikâyeti yazın ve kaydedin. Makine QR etiketini okutarak da başlayabilirsiniz.",
+    body: "Alttaki ortadaki logolu düğmeye, sonra “Servis”e dokunun; müşteriyi ve makineyi seçin (yoksa yeni ekleyin), şikâyeti yazın ve kaydedin. Makine QR etiketini okutarak da başlayabilirsiniz.",
   },
   {
     title: "Müşteri onayı ne zaman gerekir?",
