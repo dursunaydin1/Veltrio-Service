@@ -5,7 +5,7 @@ import { usePathname } from "next/navigation";
 import { Search } from "lucide-react";
 import { BottomNav } from "@/components/layout/BottomNav";
 import { Greeting } from "@/components/layout/Greeting";
-import { LogoMark } from "@/components/layout/Logo";
+import { LogoMark, Wordmark } from "@/components/layout/Logo";
 import { DeviceSetup } from "@/components/layout/DeviceSetup";
 import { PwaBanner } from "@/components/layout/PwaBanner";
 import { NotificationBell } from "@/components/layout/NotificationBell";
@@ -47,7 +47,7 @@ export function AppShell({ children }: { children: React.ReactNode }) {
         <Link href="/dashboard" className="app-brand" aria-label="Ana sayfa">
           <LogoMark size={36} />
           <span className="app-brand-text">
-            <span className="app-title">Veltrio Service</span>
+            <span className="app-title"><Wordmark /></span>
             {onHome ? <Greeting /> : null}
           </span>
         </Link>

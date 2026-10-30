@@ -1,10 +1,10 @@
 /* ============================================================
-   Veltrio Servis — Tasarım sistemi (v2, K-043; lacivert palet K-046)
+   Veltrio Service — Tasarım sistemi (v2, K-043; lacivert palet K-046; pirinç vurgu K-051)
    Mobil öncelikli, dış mekânda okunabilir, yüksek kontrast.
    PRD NFR-001, NFR-013
    ============================================================ */
 
-@import url("https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap");
+@import url("https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=Sora:wght@600&display=swap");
 
 /* ============================================================
    CSS TOKENS — koyu tema
@@ -21,27 +21,31 @@
   --bg-hover:     #1d2a45;
   --bg-overlay:   rgba(11, 17, 32, 0.88);
 
-  /* Vurgu (mavi) — düz renk; gradyan ve parlama kullanılmaz (çalışma kuralı 14) */
-  --accent-primary: #3b82f6;
-  --accent-hover:   #2f6fdb;
-  --accent-light:   #7aa7f8;
-  --accent-soft:    rgba(59, 130, 246, 0.16);
-  --accent-ring:    rgba(59, 130, 246, 0.4);
-  --on-accent:      #ffffff;
-  --accent-grad:    #3b82f6;
-  --accent-grad-hover: #2f6fdb;
+  /* Vurgu (pirinç, K-051) — düz renk; gradyan ve parlama kullanılmaz (çalışma kuralı 14).
+     Pirinç zeminde yazı koyu (--on-accent). */
+  --accent-primary: #c8a464;
+  --accent-hover:   #b8924f;
+  --accent-light:   #dcc08a;
+  --accent-soft:    rgba(200, 164, 100, 0.15);
+  --accent-ring:    rgba(200, 164, 100, 0.45);
+  --on-accent:      #1a1408;
+  --accent-grad:    #c8a464;
+  --accent-grad-hover: #b8924f;
   --accent-glow:    rgba(0, 0, 0, 0.25);
-  /* Logo işareti: koyu mavi (düğme mavisinden ayrışır, paletle uyumlu) */
-  --brand-grad:     #1d4ed8;
+  /* Logo işareti: gece mavisi zemin, beyaz onay, pirinç parça ve halka */
+  --brand-grad:     #121d38;
   --on-brand:       #ffffff;
+  --brand-border:   rgba(200, 164, 100, 0.35);
+  --font-brand:     "Sora", "Inter", system-ui, sans-serif;
 
   /* Durum renkleri: düz renk, yazı rengi, yumuşak zemin */
   --accent-success: #22c55e;
   --success-fg:     #4ade80;
   --success-soft:   rgba(34, 197, 94, 0.14);
-  --accent-warning: #f59e0b;
-  --warning-fg:     #fbbf24;
-  --warning-soft:   rgba(245, 158, 11, 0.14);
+  /* Uyarı turuncu: pirinç vurguyla karışmasın (K-051) */
+  --accent-warning: #f97316;
+  --warning-fg:     #fb923c;
+  --warning-soft:   rgba(249, 115, 22, 0.15);
   --accent-danger:  #ef4444;
   --danger-fg:      #f87171;
   --danger-soft:    rgba(239, 68, 68, 0.14);
@@ -60,7 +64,7 @@
   /* Kenarlık */
   --border-subtle:  #1e2a44;
   --border-default: #2b3b5e;
-  --border-focus:   #3b82f6;
+  --border-focus:   #c8a464;
 
   /* Gölge */
   --shadow-sm:  0 1px 2px rgba(0, 0, 0, 0.4);
@@ -343,7 +347,7 @@ input[type="file"]::file-selector-button:hover { background: var(--bg-hover); }
   content: "";
   width: 16px;
   height: 16px;
-  border: 2px solid rgba(255, 255, 255, 0.3);
+  border: 2px solid color-mix(in srgb, currentColor 30%, transparent);
   border-top-color: currentColor;
   border-radius: 50%;
   animation: spin 0.7s linear infinite;
@@ -650,8 +654,21 @@ section > .row.row-between:first-child > h1 { flex: 1; min-width: 0; }
   border-radius: 28%;
   background: var(--brand-grad);
   color: var(--on-brand);
-  box-shadow: none;
+  box-shadow: inset 0 0 0 1px var(--brand-border);
 }
+
+/* Yazılı marka (K-051): "Veltrio" iri, "SERVICE" küçük, harf aralıklı, pirinç */
+.wordmark { display: inline-flex; align-items: baseline; gap: 7px; font-family: var(--font-brand); line-height: 1; }
+.wordmark-name { font-weight: 600; letter-spacing: -0.01em; color: var(--text-primary); }
+.wordmark-tag {
+  font-size: 0.62em;
+  font-weight: 600;
+  letter-spacing: 0.34em;
+  text-transform: uppercase;
+  color: var(--accent-primary);
+}
+.wordmark-stacked { flex-direction: column; align-items: center; gap: 8px; }
+.wordmark-stacked .wordmark-tag { font-size: 0.42em; letter-spacing: 0.5em; margin-right: -0.5em; }
 
 .icon-btn {
   position: relative;
@@ -769,12 +786,12 @@ section > .row.row-between:first-child > h1 { flex: 1; min-width: 0; }
   border-radius: 50%;
   background: var(--brand-grad);
   color: #fff;
-  box-shadow: 0 6px 16px rgba(0, 0, 0, 0.4);
+  box-shadow: inset 0 0 0 1.5px var(--accent-primary), 0 6px 16px rgba(0, 0, 0, 0.4);
   cursor: pointer;
   transition: transform var(--transition-fast), background var(--transition-normal);
 }
 .nav-fab:active { transform: scale(0.94); }
-.nav-fab[data-open] { background: var(--bg-elevated); color: var(--text-primary); }
+.nav-fab[data-open] { background: var(--bg-elevated); color: var(--text-primary); box-shadow: 0 6px 16px rgba(0, 0, 0, 0.4); }
 .fab-glyph {
   position: absolute;
   inset: 0;

@@ -1,29 +1,52 @@
-/** Dişli dış hattı (8 diş) — scripts/make-icons.mjs ile aynı geometri. */
-const GEAR =
-  "M19.96 8.93 L20.77 4.67 L27.23 4.67 L28.04 8.93 L31.80 10.49 L35.38 8.04 L39.96 12.62 L37.51 16.20 L39.07 19.96 L43.33 20.77 L43.33 27.23 L39.07 28.04 L37.51 31.80 L39.96 35.38 L35.38 39.96 L31.80 37.51 L28.04 39.07 L27.23 43.33 L20.77 43.33 L19.96 39.07 L16.20 37.51 L12.62 39.96 L8.04 35.38 L10.49 31.80 L8.93 28.04 L4.67 27.23 L4.67 20.77 L8.93 19.96 L10.49 16.20 L8.04 12.62 L12.62 8.04 L16.20 10.49 Z";
-const HOLE = "M36 24 A12 12 0 1 0 12 24 A12 12 0 1 0 36 24 Z";
-/** Onay işareti biçiminde "V": kısa sol kol, uzun ve yukarı kalkık sağ kol. */
-const CHECK_V = "M16.8 23.6 L22.2 29.6 L31 18";
+/**
+ * Logo geometrisi (K-051) — scripts/make-icons.mjs ile aynı, 64 birimlik alan.
+ * Kıvrımlı onay işareti: ayrı duran kısa parça (pirinç) + kıvrılarak yukarıda sivrilen uzun kol (beyaz).
+ */
+const SWOOSH =
+  "M21.5 31.2 L25.2 30.6 C26.5 30.5 27.6 31.3 28.3 32.6 L30.6 37.6 C34.5 28.8 40 21.8 47.5 16 C40.5 23.5 35.5 31.5 31.8 43.6 C31.3 45.3 29 45.6 28.2 44 Z";
+const CHIP = "M17.8 22.2 L23.4 22.2 L26.6 28.4 L21.2 28.8 Z";
 
-/** Zeminsiz logo çizimi (dişli + onay biçiminde V); rengi `currentColor`. */
-export function LogoGlyph({ size }: { size: number }) {
+/**
+ * Zeminsiz logo çizimi. Uzun kol `currentColor`, kısa parça pirinç (`--accent-primary`).
+ * `ring` ince halkayı ekler (büyük boyutlar için; küçükte halka kaybolur, onay büyütülür).
+ */
+export function LogoGlyph({ size, ring = false }: { size: number; ring?: boolean }) {
   return (
-    <svg width={size} height={size} viewBox="0 0 48 48" fill="none" aria-hidden="true">
-      <path d={`${GEAR} ${HOLE}`} fill="currentColor" fillRule="evenodd" />
-      <path d={CHECK_V} stroke="currentColor" strokeWidth="4" strokeLinecap="round" strokeLinejoin="round" />
+    <svg width={size} height={size} viewBox="0 0 64 64" fill="none" aria-hidden="true">
+      {ring ? (
+        <>
+          <circle cx="32" cy="31.5" r="25" stroke="var(--accent-primary)" strokeWidth="2.2" />
+          <path d={CHIP} fill="var(--accent-primary)" />
+          <path d={SWOOSH} fill="currentColor" />
+        </>
+      ) : (
+        <g transform="translate(-6.4 -6.2) scale(1.2)">
+          <path d={CHIP} fill="var(--accent-primary)" />
+          <path d={SWOOSH} fill="currentColor" />
+        </g>
+      )}
     </svg>
   );
 }
 
 /**
- * Veltrio logo işareti (K-046): koyu mavi zeminde beyaz dişli (servis/tamir) ve içinde
- * onay işareti biçiminde "V" (iş tamam).
- * Küçük boyutta da okunacak kadar sade tutulur.
+ * Veltrio logo işareti (K-051): gece mavisi kare zemin, pirinç halka ve kıvrımlı onay işareti (iş tamam).
+ * 40 px'ten küçükte halka çizilmez.
  */
 export function LogoMark({ size = 32 }: { size?: number }) {
   return (
     <span className="logo-mark" style={{ width: size, height: size }} aria-hidden="true">
-      <LogoGlyph size={size * 0.8} />
+      <LogoGlyph size={size} ring={size >= 40} />
+    </span>
+  );
+}
+
+/** Yazılı marka: "Veltrio" iri, "SERVICE" küçük, harf aralıklı ve pirinç. */
+export function Wordmark({ stacked = false }: { stacked?: boolean }) {
+  return (
+    <span className={stacked ? "wordmark wordmark-stacked" : "wordmark"}>
+      <span className="wordmark-name">Veltrio</span>{" "}
+      <span className="wordmark-tag">Service</span>
     </span>
   );
 }

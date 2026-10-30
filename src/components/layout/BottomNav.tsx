@@ -91,7 +91,7 @@ export function BottomNav() {
               setDialOpen((o) => !o);
             }}
           >
-            <span className="fab-glyph fab-logo"><LogoGlyph size={30} /></span>
+            <span className="fab-glyph fab-logo"><LogoGlyph size={40} /></span>
             <span className="fab-glyph fab-close"><X size={26} strokeWidth={2.6} aria-hidden="true" /></span>
           </button>
           {RIGHT.map(tab)}

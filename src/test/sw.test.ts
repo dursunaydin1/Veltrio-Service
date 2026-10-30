@@ -31,7 +31,7 @@ describe("PWA bildirimi (manifest)", () => {
     const sizes = manifest.icons.map((i: { sizes: string }) => i.sizes);
     expect(sizes).toEqual(expect.arrayContaining(["192x192", "512x512"]));
     for (const icon of manifest.icons) {
-      expect(fs.existsSync(path.resolve(__dirname, "../../public", icon.src.replace(/^\//, "")))).toBe(true);
+      expect(fs.existsSync(path.resolve(__dirname, "../../public", icon.src.replace(/^\//, "").replace(/\?.*$/, "")))).toBe(true);
     }
   });
 });

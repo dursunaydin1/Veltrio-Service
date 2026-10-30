@@ -1,5 +1,5 @@
 import type { Metadata } from "next";
-import { LogoMark } from "@/components/layout/Logo";
+import { LogoMark, Wordmark } from "@/components/layout/Logo";
 import { LoginForm } from "./LoginForm";
 
 export const metadata: Metadata = {
@@ -20,7 +20,7 @@ export default async function LoginPage({ searchParams }: { searchParams: Promis
         <div className="auth-brand">
           <LogoMark size={60} />
           <div>
-            <h1>Veltrio Service</h1>
+            <h1><Wordmark stacked /></h1>
             <p>Servis, satış ve stok yönetimi</p>
           </div>
         </div>

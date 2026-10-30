@@ -3,6 +3,16 @@
 > Plandan (docs/00–07) veya PRD'den sapmaların, düzeltmelerin ve yeni çözümlerin kaydı. Yeni kayıtlar en üste eklenir.
 > Biçim: **Ne değişti → Neden → Sonuç / etkilenen dosyalar**
 
+## 2026-10-30
+
+### K-051 · Premium kimlik: pirinç vurgu ve kıvrımlı onay logosu
+- **Neden:** İşletme sahibi premium bir görünüm istedi. Vurgu mavisi (#3b82f6) hazır kütüphanelerin varsayılanıydı; pek çok SaaS uygulamasıyla aynı görünüyordu. Başka bir araçla üretilen tabela görselindeki kıvrımlı onay işaretini beğendi.
+- **Seçim:** Üç vurgu (mevcut mavi, pirinç, buz beyazı) aynı mini ekranda karşılaştırıldı; işletme sahibi seçimi bana bıraktı, **lacivert + pirinç** seçildi. Saat, kalem, özel bankacılık gibi premium markaların klasik eşleşmesi; motor ve usta işi dünyasına uygun; SaaS'ta nadir. Görseldeki turkuaz alınmadı ("tamam" yeşiliyle karışır).
+- **Logo:** Görseldeki onay işareti düz renkle yeniden çizildi (ayrı kısa parça pirinç, kıvrılarak sivrilen uzun kol beyaz), gece mavisi kare zemin, ince pirinç halka. 40 px altında halka çizilmez, onay büyütülür (sekme simgesi dahil). 3B parlama/kabartma alınmadı (kural 14; küçük boyutta bulanıklaşır).
+- **Renkler:** Vurgu #c8a464, pirinç düğmede yazı koyu. Uyarı sarısı pirinçle karışmasın diye turuncuya alındı (#f97316). Bilgi rozetleri mavi kaldı.
+- **Yazı:** "Veltrio" iri (Sora), "SERVICE" küçük, harf aralıklı, pirinç; üst çubukta yan yana, giriş ekranında alt alta.
+- **Etki:** `globals.css` (jetonlar, `.wordmark`, logo düğmesi), `Logo.tsx` (`LogoGlyph`, `LogoMark`, `Wordmark`), `scripts/make-icons.mjs` (eğri desteği, iki renk), `public/icons/*`; simge adresleri `?v=4`, çevrimdışı önbellek `v3` (tarayıcı sekmesi ve ana ekran simgesi yenilensin). Kural 14 güncellendi.
+
 ## 2026-10-22
 
 ### K-039 · Hesap, kurulum ve cihaz güvenliği

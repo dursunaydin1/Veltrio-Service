@@ -1,6 +1,6 @@
 #!/usr/bin/env node
 /**
- * PWA simgelerini üretir (public/icons): koyu mavi zemin üzerinde beyaz dişli ve onay biçiminde "V" (K-046).
+ * PWA simgelerini üretir (public/icons): gece mavisi zemin, pirinç halka ve kıvrımlı onay işareti (K-051).
  * Harici görsel kütüphanesi gerektirmez; PNG, Node'un yerleşik zlib'i ile yazılır.
  *   node scripts/make-icons.mjs
  */
@@ -12,20 +12,43 @@ import { fileURLToPath } from "node:url";
 const out = path.resolve(path.dirname(fileURLToPath(import.meta.url)), "..", "public", "icons");
 fs.mkdirSync(out, { recursive: true });
 
-const BG = [29, 78, 216];
-const FG = [255, 255, 255];
+const BG = [18, 29, 56];
+const WHITE = [255, 255, 255];
+const BRASS = [200, 164, 100];
 
-// Logo geometrisi (src/components/layout/Logo.tsx ile aynı, 48 birimlik alan):
-// 8 dişli dişli + ortada delik + içinde "V".
-const GEAR = [];
-for (let i = 0; i < 8; i++) {
-  for (const [d, r] of [[-15, 15.6], [-9.5, 19.6], [9.5, 19.6], [15, 15.6]]) {
-    const t = ((i * 45 + d - 90) * Math.PI) / 180;
-    GEAR.push([24 + r * Math.cos(t), 24 + r * Math.sin(t)]);
+// Logo geometrisi (src/components/layout/Logo.tsx ile aynı, 64 birimlik alan)
+const SWOOSH_D =
+  "M21.5 31.2 L25.2 30.6 C26.5 30.5 27.6 31.3 28.3 32.6 L30.6 37.6 C34.5 28.8 40 21.8 47.5 16 C40.5 23.5 35.5 31.5 31.8 43.6 C31.3 45.3 29 45.6 28.2 44 Z";
+const CHIP_D = "M17.8 22.2 L23.4 22.2 L26.6 28.4 L21.2 28.8 Z";
+const RING = { cx: 32, cy: 31.5, r: 25, w: 2.2 };
+
+/** Yalnızca M, L, C, Z içeren yolu çokgene çevirir (eğriler 24 parçaya bölünür). */
+function toPolygon(d) {
+  const tokens = d.match(/[MLCZ]|-?[\d.]+/g);
+  const pts = [];
+  let i = 0;
+  let cmd = "";
+  const num = () => Number(tokens[i++]);
+  while (i < tokens.length) {
+    if (/[MLCZ]/.test(tokens[i])) cmd = tokens[i++];
+    if (cmd === "Z") continue;
+    if (cmd === "M" || cmd === "L") pts.push([num(), num()]);
+    else if (cmd === "C") {
+      const [x0, y0] = pts[pts.length - 1];
+      const c = [num(), num(), num(), num(), num(), num()];
+      for (let k = 1; k <= 24; k++) {
+        const t = k / 24, u = 1 - t;
+        pts.push([
+          u * u * u * x0 + 3 * u * u * t * c[0] + 3 * u * t * t * c[2] + t * t * t * c[4],
+          u * u * u * y0 + 3 * u * u * t * c[1] + 3 * u * t * t * c[3] + t * t * t * c[5],
+        ]);
+      }
+    }
   }
+  return pts;
 }
-// Onay işareti biçiminde "V"
-const V = [[16.8, 23.6], [22.2, 29.6], [31, 18]];
+const SWOOSH = toPolygon(SWOOSH_D);
+const CHIP = toPolygon(CHIP_D);
 
 function inPolygon(x, y, poly) {
   let inside = false;
@@ -37,40 +60,31 @@ function inPolygon(x, y, poly) {
   return inside;
 }
 
-function distToSegment(x, y, [ax, ay], [bx, by]) {
-  const dx = bx - ax;
-  const dy = by - ay;
-  const t = Math.max(0, Math.min(1, ((x - ax) * dx + (y - ay) * dy) / (dx * dx + dy * dy)));
-  return Math.hypot(x - (ax + t * dx), y - (ay + t * dy));
-}
-
-/** Logo alanında (0-48) nokta beyaz mı? */
-function onMark(x, y) {
-  const r = Math.hypot(x - 24, y - 24);
-  if (r > 12 && inPolygon(x, y, GEAR)) return true;
-  return distToSegment(x, y, V[0], V[1]) <= 2 || distToSegment(x, y, V[1], V[2]) <= 2;
+/** Logo alanında (0-64) noktanın rengi. */
+function colorAt(x, y) {
+  if (inPolygon(x, y, SWOOSH)) return WHITE;
+  if (inPolygon(x, y, CHIP)) return BRASS;
+  if (Math.abs(Math.hypot(x - RING.cx, y - RING.cy) - RING.r) <= RING.w / 2) return BRASS;
+  return BG;
 }
 
 function render(size) {
   const raw = Buffer.alloc((size * 3 + 1) * size);
-  // Maskable güvenli alan: işaret ortadaki ~%64'e sığar
-  const scale = (size * 0.64) / 48;
-  const offset = (size - 48 * scale) / 2;
+  // Maskable güvenli alan: halka (yarıçap 25/64) ortadaki %80'lik dairenin içinde kalır
+  const scale = size / 64;
   const SS = 4; // kenar yumuşatma için piksel başına 4x4 örnek
   for (let y = 0; y < size; y++) {
     const row = y * (size * 3 + 1);
     raw[row] = 0;
     for (let x = 0; x < size; x++) {
-      let hits = 0;
+      const sum = [0, 0, 0];
       for (let sy = 0; sy < SS; sy++) {
         for (let sx = 0; sx < SS; sx++) {
-          const lx = (x + (sx + 0.5) / SS - offset) / scale;
-          const ly = (y + (sy + 0.5) / SS - offset) / scale;
-          if (onMark(lx, ly)) hits++;
+          const c = colorAt((x + (sx + 0.5) / SS) / scale, (y + (sy + 0.5) / SS) / scale);
+          for (let k = 0; k < 3; k++) sum[k] += c[k];
         }
       }
-      const a = hits / (SS * SS);
-      for (let k = 0; k < 3; k++) raw[row + 1 + x * 3 + k] = Math.round(BG[k] * (1 - a) + FG[k] * a);
+      for (let k = 0; k < 3; k++) raw[row + 1 + x * 3 + k] = Math.round(sum[k] / (SS * SS));
     }
   }
   return raw;
@@ -109,13 +123,13 @@ function png(size) {
   ]);
 }
 
-// Tarayıcı sekmesi için vektör simge (her boyutta net)
-const gearPath = "M" + GEAR.map(([x, y]) => `${x.toFixed(2)} ${y.toFixed(2)}`).join(" L") + " Z";
-const svg = `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 48 48">
-<rect width="48" height="48" rx="11" fill="rgb(${BG.join(",")})"/>
-<g transform="translate(4.8 4.8) scale(0.8)" fill="none">
-<path d="${gearPath} M36 24 A12 12 0 1 0 12 24 A12 12 0 1 0 36 24 Z" fill="#fff" fill-rule="evenodd"/>
-<path d="M${V.map((p) => p.join(" ")).join(" L")}" stroke="#fff" stroke-width="4" stroke-linecap="round" stroke-linejoin="round"/>
+// Tarayıcı sekmesi için vektör simge: küçük boyutta halka çizilmez, onay büyütülür
+const rgb = (c) => `rgb(${c.join(",")})`;
+const svg = `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 64 64">
+<rect width="64" height="64" rx="15" fill="${rgb(BG)}"/>
+<g transform="translate(-6.4 -6.2) scale(1.2)">
+<path d="${CHIP_D}" fill="${rgb(BRASS)}"/>
+<path d="${SWOOSH_D}" fill="#fff"/>
 </g>
 </svg>
 `;

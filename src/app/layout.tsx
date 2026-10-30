@@ -13,8 +13,8 @@ export const metadata: Metadata = {
   manifest: "/manifest.json",
   icons: {
     icon: [
-      { url: "/icons/favicon.svg?v=3", type: "image/svg+xml" },
-      { url: "/icons/icon-192x192.png?v=3", sizes: "192x192", type: "image/png" },
+      { url: "/icons/favicon.svg?v=4", type: "image/svg+xml" },
+      { url: "/icons/icon-192x192.png?v=4", sizes: "192x192", type: "image/png" },
     ],
   },
   appleWebApp: {
@@ -41,7 +41,7 @@ export default function RootLayout({
   return (
     <html lang="tr" data-scroll-behavior="smooth">
       <head>
-        <link rel="apple-touch-icon" href="/icons/apple-touch-icon.png?v=3" />
+        <link rel="apple-touch-icon" href="/icons/apple-touch-icon.png?v=4" />
       </head>
       <body>
         <AppProvider>{children}</AppProvider>
