@@ -4,7 +4,7 @@ import { useCallback, useState } from "react";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
 import { useLiveQuery } from "dexie-react-hooks";
-import { House, LayoutGrid, Users, Wrench, X } from "lucide-react";
+import { House, Users, Wrench, X, type LucideProps } from "lucide-react";
 import { LogoGlyph } from "@/components/layout/Logo";
 import { QuickDial, haptic } from "@/components/layout/QuickDial";
 import { loadServiceFacts, summarizeServices } from "@/lib/notifications/serviceReminders";
@@ -21,12 +21,23 @@ const LEFT = [
   { href: "/dashboard", label: "Ana Sayfa", Icon: House },
   { href: "/services", label: "Servisler", Icon: Wrench },
 ] as const;
+
+/** Menü simgesi (K-052): biri kısa iki çizgi; sıradan üç çizgiden ayrışır, çubuktaki en hafif simgedir. */
+function MenuLines({ size = 24, strokeWidth = 2, ...rest }: LucideProps) {
+  return (
+    <svg width={size} height={size} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={strokeWidth} strokeLinecap="round" {...rest}>
+      <path d="M4 9h16" />
+      <path d="M4 15h10" />
+    </svg>
+  );
+}
+
 const RIGHT = [
   { href: "/customers", label: "Müşteriler", Icon: Users },
-  { href: "/more", label: "Menü", Icon: LayoutGrid },
+  { href: "/more", label: "Menü", Icon: MenuLines },
 ] as const;
 
-type Item = { href: string; label: string; Icon: typeof House };
+type Item = { href: string; label: string; Icon: React.ComponentType<LucideProps> };
 
 export function BottomNav() {
   const pathname = usePathname();

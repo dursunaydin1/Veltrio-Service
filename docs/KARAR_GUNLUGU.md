@@ -5,6 +5,11 @@
 
 ## 2026-10-30
 
+### K-052 · Menü simgesi: iki çizgi
+- **Neden:** Dört kare simgesi "uygulamalar/panel" anlamı taşıyordu ve köşeli, kalabalık biçimiyle çubukta dikkati ortadaki logodan çekiyordu.
+- **Seçim:** Dört seçenek (dört kare, iki çizgi, işletme rozeti, üç nokta) aynı çubukta karşılaştırıldı; işletme sahibi önerimi onayladı: biri kısa iki yatay çizgi, adı "Menü" kaldı. Herkes menü diye okur, sıradan üç çizgiden ayrışır, çubuğun en hafif simgesidir.
+- **Etki:** `BottomNav.tsx` (`MenuLines`).
+
 ### K-051 · Premium kimlik: pirinç vurgu ve kıvrımlı onay logosu
 - **Neden:** İşletme sahibi premium bir görünüm istedi. Vurgu mavisi (#3b82f6) hazır kütüphanelerin varsayılanıydı; pek çok SaaS uygulamasıyla aynı görünüyordu. Başka bir araçla üretilen tabela görselindeki kıvrımlı onay işaretini beğendi.
 - **Seçim:** Üç vurgu (mevcut mavi, pirinç, buz beyazı) aynı mini ekranda karşılaştırıldı; işletme sahibi seçimi bana bıraktı, **lacivert + pirinç** seçildi. Saat, kalem, özel bankacılık gibi premium markaların klasik eşleşmesi; motor ve usta işi dünyasına uygun; SaaS'ta nadir. Görseldeki turkuaz alınmadı ("tamam" yeşiliyle karışır).
