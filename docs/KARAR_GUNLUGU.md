@@ -5,6 +5,15 @@
 
 ## 2026-10-30
 
+### K-053 · Canlıya hazırlık: hata ekranları, hata kaydı, kendi yazı tiplerimiz, CSP, sade menü ve fiş
+- **Neden:** Canlıya çıkış analizi (2026-10-30) koddaki eksikleri çıkardı; işletme sahibi B ve C maddelerinin hızlıca bitirilmesini istedi. Demo veriler şimdilik yerinde kalır.
+- **Hata ekranları:** `not-found.tsx`, `error.tsx`, `global-error.tsx`; Next.js'in İngilizce varsayılan ekranları yerine Türkçe, logolu ekranlar ("Tekrar dene", "Ana sayfaya dön").
+- **Hata kaydı:** Migration 025 `client_errors` (yalnızca ekleme; kullanıcı kendi işletmesi için yazar ve okur). Hata ekranları ve yakalanmamış hatalar `reportError` ile yazılır; çevrimdışıyken vazgeçilir, aynı hata dakikada bir, oturumda en çok 20 kayıt.
+- **Yazı tipleri:** Google Fonts bağlantısı kaldırıldı; Inter ve Sora `next/font` ile derlemede indirilip uygulamayla sunulur (latin-ext: ğ, ş, ı, İ). Tarayıcı Google'a istek atmaz (KVKK); çevrimdışıyken de doğru yazı tipi.
+- **Yeni sürüm uyarısı:** Yeni service worker devreye girince "Uygulamanın yeni sürümü hazır · Yenile". Güncelleme odaklanınca ve yarım saatte bir denetlenir; her yayında `sw.js` VERSION artırılır.
+- **CSP:** Üretimde içerik güvenlik politikası: yalnızca kendi sunucumuz ve Supabase; çerçeveye gömme yok.
+- **Görünüm:** Giriş ekranındaki "v0.1.0 · MVP" kaldırıldı. Menü sayfası renkli kutular yerine tek ton (pirinç simge, sakin zemin; Çıkış kırmızı). Fiş başlığı: işletme adı iri, altında ince çizgi, belge adı küçük harf aralıklı; altta küçük "Veltrio Service ile hazırlandı".
+
 ### K-052 · Menü simgesi: iki çizgi
 - **Neden:** Dört kare simgesi "uygulamalar/panel" anlamı taşıyordu ve köşeli, kalabalık biçimiyle çubukta dikkati ortadaki logodan çekiyordu.
 - **Seçim:** Dört seçenek (dört kare, iki çizgi, işletme rozeti, üç nokta) aynı çubukta karşılaştırıldı; işletme sahibi önerimi onayladı: biri kısa iki yatay çizgi, adı "Menü" kaldı. Herkes menü diye okur, sıradan üç çizgiden ayrışır, çubuğun en hafif simgesidir.

@@ -32,10 +32,6 @@ export default async function LoginPage({ searchParams }: { searchParams: Promis
           <a href="mailto:destek@veltrio.com">Yardım alın</a>
         </p>
       </div>
-
-      <p style={{ textAlign: "center", marginTop: 20, fontSize: "0.75rem", color: "var(--text-muted)", opacity: 0.7 }}>
-        Veltrio Service v0.1.0 · MVP
-      </p>
     </div>
   );
 }

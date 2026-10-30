@@ -8,6 +8,7 @@ import { useReminders } from "@/hooks/useReminders";
 import { usePwa } from "@/hooks/usePwa";
 import { useDeviceGuard } from "@/hooks/useDeviceGuard";
 import { useSync } from "@/hooks/useSync";
+import { reportError } from "@/lib/errors/report";
 
 /**
  * Uygulama genelinde hook'ları tek yerden başlatır.
@@ -30,6 +31,17 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
       getIsOnline: () => useSessionStore.getState().isOnline,
     });
     return () => configureOfflineLimit(null);
+  }, []);
+  useEffect(() => {
+    // Ekran dışında kalan beklenmeyen hatalar da sunucuya kaydedilir (K-053)
+    const onError = (e: ErrorEvent) => void reportError(e.error ?? e.message);
+    const onRejection = (e: PromiseRejectionEvent) => void reportError(e.reason);
+    window.addEventListener("error", onError);
+    window.addEventListener("unhandledrejection", onRejection);
+    return () => {
+      window.removeEventListener("error", onError);
+      window.removeEventListener("unhandledrejection", onRejection);
+    };
   }, []);
   useReminders();
   return <>{children}</>;

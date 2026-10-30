@@ -176,6 +176,7 @@ function ReceiptPaper({ model, size }: { model: ReceiptModel; size: PaperSize })
           </div>
         ) : null}
         <p className="muted receipt-disclaimer">{model.disclaimer}</p>
+        <p className="receipt-brand">Veltrio Service ile hazırlandı</p>
       </footer>
     </article>
   );

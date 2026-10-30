@@ -8,6 +8,7 @@ import { Greeting } from "@/components/layout/Greeting";
 import { LogoMark, Wordmark } from "@/components/layout/Logo";
 import { DeviceSetup } from "@/components/layout/DeviceSetup";
 import { PwaBanner } from "@/components/layout/PwaBanner";
+import { UpdateNotice } from "@/components/layout/UpdateNotice";
 import { NotificationBell } from "@/components/layout/NotificationBell";
 import { PinGate } from "@/components/layout/PinGate";
 import { SetupWizard } from "@/components/layout/SetupWizard";
@@ -62,6 +63,7 @@ export function AppShell({ children }: { children: React.ReactNode }) {
         </div>
       </header>
       <main id="main" className="app-main">
+        <UpdateNotice />
         <PwaBanner />
         {children}
       </main>

@@ -48,11 +48,13 @@ Durum: ✅ otomatik kanıt var · 🖐 elle yapılacak · ⚖ hukuk danışmanı
 | UAT tamamlandı; kısıtlar ve kılavuz teslim edildi | 🖐 | bölüm 1 + `docs/KULLANIM_KILAVUZU.md` |
 
 ### Canlıya çıkıştan önce yapılacaklar (teknik)
-1. Supabase'te `supabase/migrations` 001→024 uygulanmış olmalı (`npm run db:migrate -- --status`).
+1. Supabase'te `supabase/migrations` 001→025 uygulanmış olmalı (`npm run db:migrate -- --status`).
 2. Supabase → Authentication: Site URL ve `/auth/callback` yönlendirmesi; şifre en az 10 karakter; e-posta doğrulama açık; kendi SMTP'niz (üretimde Supabase'in varsayılan e-postası sınırlıdır).
 3. Barındırmada ortam değişkenleri: `NEXT_PUBLIC_SUPABASE_URL`, `NEXT_PUBLIC_SUPABASE_ANON_KEY`, `SUPABASE_SERVICE_ROLE_KEY`, `CRON_SECRET`.
 4. `npm run build` ve `npm test`, `npm run test:e2e` yeşil.
 5. İlk gece yedeğinin `business_backups` tablosunda “Başarılı” göründüğünü doğrulayın.
+6. Yayından sonra `client_errors` tablosunu ilk hafta her gün kontrol edin (telefonda oluşan beklenmeyen hatalar buraya düşer, K-053).
+7. Her yeni yayında `public/sw.js` içindeki `VERSION` artırılır; açık uygulamalarda “Yeni sürüm hazır” uyarısı çıkar.
 
 ### MVP dışı (sonraki sürüm)
 Otomatik WhatsApp/SMS, telefon anlık bildirimi, çok kullanıcı/rol, e-fatura/e-arşiv entegrasyonu, banka mutabakatı, fotoğrafların nesne depolamaya taşınması, sunucu tarafı tam metin arama.
