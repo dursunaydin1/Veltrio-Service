@@ -2,6 +2,7 @@
 
 import { useMemo, useState } from "react";
 import Link from "next/link";
+import { ListSkeleton } from "@/components/common/ListSkeleton";
 import { useLiveQuery } from "dexie-react-hooks";
 import { Plus } from "lucide-react";
 import { db } from "@/lib/db";
@@ -46,9 +47,8 @@ export function ProductList() {
     <section className="stack stack-md">
       <div className="row row-between">
         <h1>Stok</h1>
-        <Link href="/products/new" className="btn btn-primary btn-sm">
-          <Plus size={18} aria-hidden="true" />
-          Yeni ürün
+        <Link href="/products/new" className="icon-btn icon-btn-add" aria-label="Ürün ekle" title="Ürün ekle">
+          <Plus size={22} aria-hidden="true" />
         </Link>
       </div>
 
@@ -70,10 +70,10 @@ export function ProductList() {
         Pasif ürünleri de göster
       </label>
 
-      {products === undefined ? null : visible.length === 0 ? (
-        <div className="alert alert-warning" role="note">
+      {products === undefined ? <ListSkeleton /> : visible.length === 0 ? (
+        <div className="empty-state" role="note">
           {products.length === 0
-            ? "Henüz ürün eklenmemiş. “Yeni ürün” ile ilk ürünü ekleyin."
+            ? "Henüz ürün eklenmemiş. Sağ üstteki + ile ilkini ekleyin."
             : "Aramanıza uyan ürün yok."}
         </div>
       ) : (

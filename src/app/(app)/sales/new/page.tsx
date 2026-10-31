@@ -11,7 +11,7 @@ export default async function NewSalePage({
   const { customer } = await searchParams;
   return (
     <section className="stack stack-md">
-      <h1>Yeni satış</h1>
+      <h1>Satış yap</h1>
       <SaleForm initialCustomerId={customer} />
     </section>
   );

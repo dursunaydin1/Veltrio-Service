@@ -51,7 +51,7 @@ export function AuditHistory() {
       </div>
 
       {logs === undefined ? null : filtered.length === 0 ? (
-        <div className="alert alert-warning" role="note">{logs.length === 0 ? "Henüz geçmiş kaydı yok." : "Aramanıza uyan kayıt yok."}</div>
+        <div className="empty-state" role="note">{logs.length === 0 ? "Henüz geçmiş kaydı yok." : "Aramanıza uyan kayıt yok."}</div>
       ) : (
         <>
           <ul className="menu-list" aria-label="Geçmiş kayıtları">

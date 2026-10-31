@@ -40,14 +40,13 @@ export function CatalogManager() {
   return (
     <section className="stack stack-md">
       <h1>Kataloglar</h1>
-      <div className="row row-gap-sm" role="tablist" aria-label="Katalog türü">
+      <div role="tablist" aria-label="Katalog türü">
         {([["OPERATION", "İşlemler"], ["ISSUE", "Arızalar"]] as const).map(([id, label]) => (
           <button
             key={id}
             type="button"
             role="tab"
             aria-selected={kind === id}
-            className={`btn btn-sm ${kind === id ? "btn-primary" : "btn-secondary"}`}
             onClick={() => {
               setKind(id);
               setEditing(null);
@@ -71,7 +70,7 @@ export function CatalogManager() {
       )}
 
       {entries === undefined ? null : entries.length === 0 ? (
-        <div className="alert alert-warning" role="note">Henüz kayıt yok.</div>
+        <div className="empty-state" role="note">Henüz kayıt yok.</div>
       ) : (
         <ul className="menu-list" aria-label="Katalog kayıtları">
           {entries.map((e) => (

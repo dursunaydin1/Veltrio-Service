@@ -105,14 +105,13 @@ export function ServiceDetail({ id }: { id: string }) {
         </div>
       </div>
 
-      <div className="row row-gap-sm" role="tablist" aria-label="Servis bölümleri" style={{ flexWrap: "wrap" }}>
+      <div role="tablist" aria-label="Servis bölümleri">
         {DETAIL_TABS.map((t) => (
           <button
             key={t.id}
             type="button"
             role="tab"
             aria-selected={tab === t.id}
-            className={`btn btn-sm ${tab === t.id ? "btn-primary" : "btn-secondary"}`}
             onClick={() => setTab(t.id)}
           >
             {t.label}

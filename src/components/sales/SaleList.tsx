@@ -2,6 +2,7 @@
 
 import { useMemo, useState } from "react";
 import Link from "next/link";
+import { ListSkeleton } from "@/components/common/ListSkeleton";
 import { useLiveQuery } from "dexie-react-hooks";
 import { Plus } from "lucide-react";
 import { db } from "@/lib/db";
@@ -63,20 +64,18 @@ export function SaleList() {
     <section className="stack stack-md">
       <div className="row row-between">
         <h1>Satışlar</h1>
-        <Link href="/sales/new" className="btn btn-primary btn-sm">
-          <Plus size={18} aria-hidden="true" />
-          Yeni satış
+        <Link href="/sales/new" className="icon-btn icon-btn-add" aria-label="Satış yap" title="Satış yap">
+          <Plus size={22} aria-hidden="true" />
         </Link>
       </div>
 
-      <div className="row row-gap-sm" role="tablist" aria-label="Satış durumu">
+      <div role="tablist" aria-label="Satış durumu">
         {TABS.map((t) => (
           <button
             key={t.id}
             type="button"
             role="tab"
             aria-selected={tab === t.id}
-            className={`btn btn-sm ${tab === t.id ? "btn-primary" : "btn-secondary"}`}
             onClick={() => setTab(t.id)}
           >
             {t.label}
@@ -93,9 +92,9 @@ export function SaleList() {
         onChange={(e) => setQuery(e.target.value)}
       />
 
-      {data === undefined ? null : visible.length === 0 ? (
-        <div className="alert alert-warning" role="note">
-          {data.sales.length === 0 ? "Henüz satış yok. “Yeni satış” ile ilkini yapın." : "Bu sekmede / aramada satış yok."}
+      {data === undefined ? <ListSkeleton /> : visible.length === 0 ? (
+        <div className="empty-state" role="note">
+          {data.sales.length === 0 ? "Henüz satış yok. Sağ üstteki + ile ilkini yapın." : "Bu sekmede / aramada satış yok."}
         </div>
       ) : (
         <ul className="menu-list" aria-label="Satışlar">

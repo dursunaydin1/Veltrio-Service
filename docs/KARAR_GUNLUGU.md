@@ -5,6 +5,16 @@
 
 ## 2026-10-31
 
+### K-065 · Liste ve form ekranları ana sayfanın diline getirildi
+- **Neden:** Ana sayfa yenilendikten sonra diğer ekranlar geride kalmıştı; işletme sahibi tüm iyileştirmeleri onayladı.
+- **Boş durumlar:** "Henüz kayıt yok" türü mesajlar turuncu uyarı kutusu yerine sakin, kesik çizgili kutuda (14 ekran). Gerçek uyarılar (iptal, hassas veri, stok girişi yok…) turuncu kaldı.
+- **Sekmeler:** Dolu pirinç düğmeler yerine tek parça ince sekme çubuğu (7 ekran).
+- **Arama kutuları:** Ana sayfadaki gibi yuvarlak ve büyüteç simgeli (tüm `type="search"` alanları).
+- **Ekle düğmeleri:** Liste başlıklarındaki "+ Yeni …" düğmeleri zil gibi yuvarlak "+" simgesi oldu (ad: "Servis aç", "Müşteri ekle"…). Form başlıkları hızlı seçimle aynı: "Müşteri ekle", "Satış yap", "Satın alma"… Müşteri sayfasında "Servis aç / Satış yap".
+- **Liste satırları:** Müşteri ve tedarikçilerde baş harf rozeti ("DA"), servislerde durum renginde anahtar simgesi; ana sayfadaki kartlarla aynı düzen.
+- **Yükleniyor:** Listeler yüklenirken soluk yer tutucu satırlar. "Arşivlenmişleri de göster" açma-kapama anahtarı oldu.
+- **Giriş ekranı:** Gerçek olmayan `destek@veltrio.com` bağlantısı kaldırıldı ("Şifremi unuttum" zaten formda).
+
 ### K-064 · Ana sayfa kartında kişisel selam
 - İşletme sahibi profesyonel bir karşılama istedi. Tarih satırı: solda saate göre selam ve kullanıcının ilk adı ("İyi akşamlar, Dursun"; kullanıcı adı yoksa işletme sahibinin adı, o da yoksa yalnızca selam), sağda zilin altında küçük ve sönük tarih ("31 Ekim Cumartesi").
 

@@ -11,7 +11,7 @@ export default async function NewPurchasePage({
   const { supplier } = await searchParams;
   return (
     <section className="stack stack-md">
-      <h1>Yeni alım</h1>
+      <h1>Satın alma</h1>
       <PurchaseForm initialSupplierId={supplier} />
     </section>
   );

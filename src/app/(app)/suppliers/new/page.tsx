@@ -6,7 +6,7 @@ export const metadata: Metadata = { title: "Yeni tedarikçi" };
 export default function NewSupplierPage() {
   return (
     <section className="stack stack-md">
-      <h1>Yeni tedarikçi</h1>
+      <h1>Tedarikçi ekle</h1>
       <SupplierForm />
     </section>
   );

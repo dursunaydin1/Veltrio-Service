@@ -26,11 +26,6 @@ export default async function LoginPage({ searchParams }: { searchParams: Promis
         </div>
 
         <LoginForm notice={error ? NOTICES[error] : undefined} />
-
-        <p style={{ textAlign: "center", fontSize: "0.8125rem", color: "var(--text-muted)" }}>
-          Hesabınızı mı unuttunuz?{" "}
-          <a href="mailto:destek@veltrio.com">Yardım alın</a>
-        </p>
       </div>
     </div>
   );

@@ -79,7 +79,7 @@ export function ProductEditor({ id }: { id: string }) {
       </div>
       <Link href={`/products/${product.id}/qr`} className="btn btn-secondary btn-full">QR etiketi göster / yazdır</Link>
 
-      <div className="row row-gap-sm" role="tablist" aria-label="Ürün bölümleri" style={{ flexWrap: "wrap" }}>
+      <div role="tablist" aria-label="Ürün bölümleri">
         {([
           ["stock", product.is_serial_tracked ? "Seri birimler" : "Stok ve hareketler"],
           ["purchases", "Alışlar"],
@@ -91,7 +91,6 @@ export function ProductEditor({ id }: { id: string }) {
             type="button"
             role="tab"
             aria-selected={tab === id}
-            className={`btn btn-sm ${tab === id ? "btn-primary" : "btn-secondary"}`}
             onClick={() => setTab(id)}
           >
             {label}

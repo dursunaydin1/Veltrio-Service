@@ -2,6 +2,7 @@
 
 import { useMemo, useState } from "react";
 import Link from "next/link";
+import { ListSkeleton, initials } from "@/components/common/ListSkeleton";
 import { useLiveQuery } from "dexie-react-hooks";
 import { Plus } from "lucide-react";
 import { db } from "@/lib/db";
@@ -46,9 +47,8 @@ export function SupplierList() {
     <section className="stack stack-md">
       <div className="row row-between">
         <h1>Tedarikçiler</h1>
-        <Link href="/suppliers/new" className="btn btn-primary btn-sm">
-          <Plus size={18} aria-hidden="true" />
-          Yeni tedarikçi
+        <Link href="/suppliers/new" className="icon-btn icon-btn-add" aria-label="Tedarikçi ekle" title="Tedarikçi ekle">
+          <Plus size={22} aria-hidden="true" />
         </Link>
       </div>
 
@@ -61,28 +61,31 @@ export function SupplierList() {
         onChange={(e) => setQuery(e.target.value)}
       />
 
-      <label className="row row-gap-sm" style={{ minHeight: 44 }}>
-        <input type="checkbox" checked={showArchived} onChange={(e) => setShowArchived(e.target.checked)} />
-        Arşivlenmiş tedarikçileri de göster
+      <label className="toggle-row toggle-inline">
+        <span>Arşivlenmiş tedarikçileri de göster</span>
+        <input type="checkbox" className="switch" checked={showArchived} onChange={(e) => setShowArchived(e.target.checked)} />
       </label>
 
-      {suppliers === undefined ? null : visible.length === 0 ? (
-        <div className="alert alert-warning" role="note">
+      {suppliers === undefined ? <ListSkeleton /> : visible.length === 0 ? (
+        <div className="empty-state" role="note">
           {suppliers.length === 0
-            ? "Henüz tedarikçi eklenmemiş. “Yeni tedarikçi” ile ilkini ekleyin."
+            ? "Henüz tedarikçi eklenmemiş. Sağ üstteki + ile ilkini ekleyin."
             : "Aramanıza uyan tedarikçi yok."}
         </div>
       ) : (
         <ul className="menu-list" aria-label="Tedarikçiler">
           {visible.map((s) => (
             <li key={s.id}>
-              <Link href={`/suppliers/${s.id}`} style={{ alignItems: "flex-start", flexDirection: "column", gap: 4 }}>
-                <span className="row row-between" style={{ width: "100%", gap: 8 }}>
+              <Link href={`/suppliers/${s.id}`}>
+                <span className="avatar avatar-sm menu-avatar monogram" aria-hidden="true">{initials(s.name)}</span>
+                <span className="list-main">
+                <span className="list-title">
                   <span>{s.name}</span>
                   {s.archived_at ? <span className="badge badge-gray">Arşivde</span> : null}
                 </span>
-                <span style={{ fontWeight: 500, color: "var(--text-secondary)" }}>
+                <span className="list-sub">
                   {s.phone ? formatPhone(s.phone) : "Telefon yok"}
+                </span>
                 </span>
               </Link>
             </li>

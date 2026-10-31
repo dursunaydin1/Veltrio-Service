@@ -2,6 +2,7 @@
 
 import { useMemo, useState } from "react";
 import Link from "next/link";
+import { ListSkeleton, initials } from "@/components/common/ListSkeleton";
 import { useLiveQuery } from "dexie-react-hooks";
 import { Plus } from "lucide-react";
 import { db } from "@/lib/db";
@@ -48,9 +49,8 @@ export function CustomerList() {
     <section className="stack stack-md">
       <div className="row row-between">
         <h1>Müşteriler</h1>
-        <Link href="/customers/new" className="btn btn-primary btn-sm">
-          <Plus size={18} aria-hidden="true" />
-          Yeni müşteri
+        <Link href="/customers/new" className="icon-btn icon-btn-add" aria-label="Müşteri ekle" title="Müşteri ekle">
+          <Plus size={22} aria-hidden="true" />
         </Link>
       </div>
 
@@ -63,28 +63,31 @@ export function CustomerList() {
         onChange={(e) => setQuery(e.target.value)}
       />
 
-      <label className="row row-gap-sm" style={{ minHeight: 44 }}>
-        <input type="checkbox" checked={showArchived} onChange={(e) => setShowArchived(e.target.checked)} />
-        Arşivlenmiş müşterileri de göster
+      <label className="toggle-row toggle-inline">
+        <span>Arşivlenmiş müşterileri de göster</span>
+        <input type="checkbox" className="switch" checked={showArchived} onChange={(e) => setShowArchived(e.target.checked)} />
       </label>
 
-      {customers === undefined ? null : visible.length === 0 ? (
-        <div className="alert alert-warning" role="note">
+      {customers === undefined ? <ListSkeleton /> : visible.length === 0 ? (
+        <div className="empty-state" role="note">
           {customers.length === 0
-            ? "Henüz müşteri eklenmemiş. “Yeni müşteri” ile ilk müşteriyi ekleyin."
+            ? "Henüz müşteri eklenmemiş. Sağ üstteki + ile ilkini ekleyin."
             : "Aramanıza uyan müşteri yok."}
         </div>
       ) : (
         <ul className="menu-list" aria-label="Müşteriler">
           {visible.map((c) => (
             <li key={c.id}>
-              <Link href={`/customers/${c.id}`} style={{ alignItems: "flex-start", flexDirection: "column", gap: 4 }}>
-                <span className="row row-between" style={{ width: "100%", gap: 8 }}>
+              <Link href={`/customers/${c.id}`}>
+                <span className="avatar avatar-sm menu-avatar monogram" aria-hidden="true">{initials(c.name)}</span>
+                <span className="list-main">
+                <span className="list-title">
                   <span>{c.name}</span>
                   {c.archived_at ? <span className="badge badge-gray">Arşivde</span> : null}
                 </span>
-                <span style={{ fontWeight: 500, color: "var(--text-secondary)" }}>
+                <span className="list-sub">
                   {[c.village, c.phone ? formatPhone(c.phone) : "Telefon yok"].filter(Boolean).join(" · ")}
+                </span>
                 </span>
               </Link>
             </li>

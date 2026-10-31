@@ -2,15 +2,16 @@
 
 import { useMemo, useState } from "react";
 import Link from "next/link";
+import { ListSkeleton } from "@/components/common/ListSkeleton";
 import { useLiveQuery } from "dexie-react-hooks";
-import { Plus } from "lucide-react";
+import { Plus, Wrench } from "lucide-react";
 import { db } from "@/lib/db";
 import type { Service } from "@/lib/db";
 import { machineTitle } from "@/components/machines/MachineList";
 import { getServiceBalance } from "@/lib/services/service";
 import { StatusBadge } from "@/components/services/StatusBadge";
 import { useSessionStore } from "@/stores/session";
-import { isOpenStatus } from "@/lib/services/status";
+import { isOpenStatus, statusTone } from "@/lib/services/status";
 import { foldText } from "@/lib/utils/search";
 import { formatCurrency, formatDate, todayLocalDate } from "@/lib/utils";
 
@@ -86,20 +87,18 @@ export function ServiceList() {
     <section className="stack stack-md">
       <div className="row row-between">
         <h1>Servisler</h1>
-        <Link href="/services/new" className="btn btn-primary btn-sm">
-          <Plus size={18} aria-hidden="true" />
-          Yeni servis
+        <Link href="/services/new" className="icon-btn icon-btn-add" aria-label="Servis aç" title="Servis aç">
+          <Plus size={22} aria-hidden="true" />
         </Link>
       </div>
 
-      <div className="row row-gap-sm" role="tablist" aria-label="Servis durumu">
+      <div role="tablist" aria-label="Servis durumu">
         {TABS.map((t) => (
           <button
             key={t.id}
             type="button"
             role="tab"
             aria-selected={tab === t.id}
-            className={`btn btn-sm ${tab === t.id ? "btn-primary" : "btn-secondary"}`}
             onClick={() => setTab(t.id)}
           >
             {t.label}
@@ -116,10 +115,10 @@ export function ServiceList() {
         onChange={(e) => setQuery(e.target.value)}
       />
 
-      {data === undefined ? null : visible.length === 0 ? (
-        <div className="alert alert-warning" role="note">
+      {data === undefined ? <ListSkeleton /> : visible.length === 0 ? (
+        <div className="empty-state" role="note">
           {data.services.length === 0
-            ? "Henüz servis kaydı yok. “Yeni servis” ile ilk kaydı açın."
+            ? "Henüz servis kaydı yok. Sağ üstteki + ile ilkini açın."
             : "Bu sekmede / aramada servis yok."}
         </div>
       ) : (
@@ -128,14 +127,18 @@ export function ServiceList() {
             const overdue = isOverdue(s, today);
             return (
               <li key={s.id}>
-                <Link href={`/services/${s.id}`} style={{ alignItems: "flex-start", flexDirection: "column", gap: 4 }}>
-                  <span className="row row-between" style={{ width: "100%", gap: 8 }}>
-                    <span style={{ minWidth: 0, overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap" }}>
+                <Link href={`/services/${s.id}`}>
+                  <span className="avatar avatar-sm" data-tone={statusTone(s.status)} aria-hidden="true">
+                    <Wrench size={18} />
+                  </span>
+                  <span className="list-main">
+                  <span className="list-title">
+                    <span className="list-name">
                       {data.customers.get(s.customer_id ?? "") ?? "Müşterisiz"}
                     </span>
                     <StatusBadge status={s.status} />
                   </span>
-                  <small style={{ fontWeight: 500, color: "var(--text-muted)" }}>
+                  <small className="list-sub">
                     {[s.document_no, data.machines.get(s.machine_id ?? "")?.title].filter(Boolean).join(" · ")}
                   </small>
                   {(data.balances.get(s.id) ?? 0) > 0 ? (
@@ -149,6 +152,7 @@ export function ServiceList() {
                       {overdue ? " (gecikmiş)" : ""}
                     </small>
                   ) : null}
+                  </span>
                 </Link>
               </li>
             );

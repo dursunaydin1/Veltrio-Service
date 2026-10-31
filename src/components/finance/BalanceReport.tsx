@@ -70,14 +70,13 @@ export function BalanceReport() {
   return (
     <section className="stack stack-md">
       <h1>Bakiyeler</h1>
-      <div className="row row-gap-sm" role="tablist" aria-label="Bakiye türü">
+      <div role="tablist" aria-label="Bakiye türü">
         {([["CUSTOMERS", "Müşteriler"], ["SUPPLIERS", "Tedarikçiler"]] as const).map(([id, label]) => (
           <button
             key={id}
             type="button"
             role="tab"
             aria-selected={tab === id}
-            className={`btn btn-sm ${tab === id ? "btn-primary" : "btn-secondary"}`}
             onClick={() => setTab(id)}
           >
             {label}
@@ -106,7 +105,7 @@ export function BalanceReport() {
             ))}
           </div>
           {customers === undefined ? null : customers.length === 0 ? (
-            <div className="alert alert-warning" role="note">Bakiyesi olan müşteri yok.</div>
+            <div className="empty-state" role="note">Bakiyesi olan müşteri yok.</div>
           ) : (
             <ul className="menu-list" aria-label="Müşteri bakiyeleri">
               {customers.map((r) => (
@@ -140,7 +139,7 @@ export function BalanceReport() {
             </div>
           </div>
           {suppliers === undefined ? null : suppliers.length === 0 ? (
-            <div className="alert alert-warning" role="note">Bakiyesi olan tedarikçi yok.</div>
+            <div className="empty-state" role="note">Bakiyesi olan tedarikçi yok.</div>
           ) : (
             <ul className="menu-list" aria-label="Tedarikçi bakiyeleri">
               {suppliers.map((r) => (

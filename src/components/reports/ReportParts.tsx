@@ -73,7 +73,7 @@ export function ReportTable<T extends Record<string, unknown>>({
   empty?: string;
   rowKey: (row: T, index: number) => string;
 }) {
-  if (rows.length === 0) return <div className="alert alert-warning" role="note">{empty}</div>;
+  if (rows.length === 0) return <div className="empty-state" role="note">{empty}</div>;
   const numeric = (t?: string) => t === "money" || t === "number";
   return (
     <div style={{ overflowX: "auto" }}>

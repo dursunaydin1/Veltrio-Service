@@ -2,6 +2,7 @@
 
 import { useMemo, useState } from "react";
 import Link from "next/link";
+import { ListSkeleton } from "@/components/common/ListSkeleton";
 import { useLiveQuery } from "dexie-react-hooks";
 import { Plus } from "lucide-react";
 import { db } from "@/lib/db";
@@ -56,9 +57,8 @@ export function MachineList() {
     <section className="stack stack-md">
       <div className="row row-between">
         <h1>Makineler</h1>
-        <Link href="/machines/new" className="btn btn-primary btn-sm">
-          <Plus size={18} aria-hidden="true" />
-          Yeni makine
+        <Link href="/machines/new" className="icon-btn icon-btn-add" aria-label="Makine ekle" title="Makine ekle">
+          <Plus size={22} aria-hidden="true" />
         </Link>
       </div>
 
@@ -76,10 +76,10 @@ export function MachineList() {
         Arşivlenmiş makineleri de göster
       </label>
 
-      {data === undefined ? null : visible.length === 0 ? (
-        <div className="alert alert-warning" role="note">
+      {data === undefined ? <ListSkeleton /> : visible.length === 0 ? (
+        <div className="empty-state" role="note">
           {data.machines.length === 0
-            ? "Henüz makine eklenmemiş. “Yeni makine” ile ilk makineyi ekleyin."
+            ? "Henüz makine eklenmemiş. Sağ üstteki + ile ilkini ekleyin."
             : "Aramanıza uyan makine yok."}
         </div>
       ) : (

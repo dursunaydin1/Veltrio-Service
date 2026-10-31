@@ -11,7 +11,7 @@ export default async function NewMachinePage({
   const { customer } = await searchParams;
   return (
     <section className="stack stack-md">
-      <h1>Yeni makine</h1>
+      <h1>Makine ekle</h1>
       <MachineForm initialCustomerId={customer} />
     </section>
   );

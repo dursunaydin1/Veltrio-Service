@@ -48,7 +48,7 @@ export function GlobalSearch() {
       {!ready ? (
         <p>Aramak için en az {MIN_QUERY_LENGTH} karakter yazın.</p>
       ) : hits === undefined ? null : grouped.length === 0 ? (
-        <div className="alert alert-warning" role="note">“{query.trim()}” için sonuç bulunamadı.</div>
+        <div className="empty-state" role="note">“{query.trim()}” için sonuç bulunamadı.</div>
       ) : (
         grouped.map((g) => (
           <section key={g.kind} className="stack stack-sm" aria-label={SEARCH_KIND_LABEL[g.kind]}>

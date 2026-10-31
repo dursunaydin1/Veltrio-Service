@@ -51,7 +51,7 @@ export function TemplateManager() {
       )}
 
       {templates === undefined ? null : templates.length === 0 ? (
-        <div className="alert alert-warning" role="note">Henüz şablon yok.</div>
+        <div className="empty-state" role="note">Henüz şablon yok.</div>
       ) : (
         <ul className="menu-list" aria-label="Şablonlar">
           {templates.map(({ template: t, count }) => (

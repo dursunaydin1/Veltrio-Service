@@ -26,8 +26,8 @@ export function CustomerHistory({ customer }: { customer: Customer }) {
     <>
       {!archived ? (
         <div className="row row-gap-md" aria-label="Hızlı işlemler">
-          <Link href={`/services/new?customer=${customer.id}`} className="btn btn-primary" style={{ flex: 1 }}>Yeni servis</Link>
-          <Link href={`/sales/new?customer=${customer.id}`} className="btn btn-secondary" style={{ flex: 1 }}>Yeni satış</Link>
+          <Link href={`/services/new?customer=${customer.id}`} className="btn btn-primary" style={{ flex: 1 }}>Servis aç</Link>
+          <Link href={`/sales/new?customer=${customer.id}`} className="btn btn-secondary" style={{ flex: 1 }}>Satış yap</Link>
         </div>
       ) : null}
 
