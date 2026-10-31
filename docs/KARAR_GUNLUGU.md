@@ -5,6 +5,9 @@
 
 ## 2026-10-31
 
+### K-062 · Zilin altında saat
+- İşletme sahibi "Eşitlendi" bilgisini istemedi, daha premium bir şey istedi. Tarih satırının sağına pirinç renkli saat ("14:32") kondu: soldaki tarihle birlikte saat kadranı gibi okunur, dakika başında güncellenir. Eşitleme sorunu olursa üst çubuktaki gösterge yine çıkar.
+
 ### K-061 · Ana sayfa kartı: eşitleme bilgisi, büyük yazı, çerçevesiz logo
 - Zilin altı boş kalıyordu: tarih satırının sağına sessiz eşitleme bilgisi eklendi ("● Eşitlendi · 14:32"; internet yoksa turuncu noktalı "Çevrimdışı"). Çevrimdışı çalışan bir uygulamada verinin güncel olduğunu tek bakışta gösterir; sorun anında üst çubuktaki gösterge yine çıkar.
 - "Veltrio" yazısı büyütüldü (21 px). Üst çubuktaki logo kare çerçevesiz: yalnızca pirinç halka ve onay.
