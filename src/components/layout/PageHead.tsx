@@ -15,11 +15,11 @@ export const PageHeadSlot = createContext<HTMLElement | null>(null);
 export function PageHead({ title, addHref, addLabel }: { title: string; addHref?: string; addLabel?: string }) {
   const slot = useContext(PageHeadSlot);
   const head = (
-    <div className="page-head">
+    <div className="card-row">
       <h1>{title}</h1>
       {addHref && addLabel ? (
         <Link href={addHref} className="btn-add">
-          <Plus size={18} strokeWidth={2.5} aria-hidden="true" />
+          <span className="btn-add-plus" aria-hidden="true"><Plus size={16} strokeWidth={2.75} /></span>
           {addLabel}
         </Link>
       ) : null}

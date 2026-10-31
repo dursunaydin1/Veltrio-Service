@@ -702,27 +702,50 @@ section > .row.row-between:first-child > h1 { flex: 1; min-width: 0; }
 .app-header .app-header-actions .icon-btn { background: var(--bg-elevated); }
 .page-head-slot { flex-basis: 100%; }
 .page-head-slot:empty { display: none; }
-.page-head { display: flex; align-items: center; justify-content: space-between; gap: 12px; min-width: 0; }
-.page-head h1 { min-width: 0; font-family: var(--font-brand); font-size: 1.25rem; letter-spacing: -0.01em; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
-/* Liste ekranındaki "ekle" düğmesi: dolu pirinç, yazılı; ilk bakışta bulunur */
+/* Kartın alt satırı (K-067): solda sayfa adı (selamla aynı yazı), sağda ilgili işlem */
+.card-row { display: flex; align-items: center; justify-content: space-between; gap: 12px; min-width: 0; }
+.card-row h1 {
+  min-width: 0;
+  font-family: var(--font-brand);
+  font-size: 1.0625rem;
+  font-weight: 600;
+  letter-spacing: -0.01em;
+  line-height: 1.2;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+/* "Ekle" düğmesi: ince pirinç çerçeveli hap; "+" küçük dolu pirinç dairede */
 .btn-add {
   display: inline-flex;
   align-items: center;
-  gap: 6px;
+  gap: 8px;
   flex: 0 0 auto;
-  min-height: 40px;
-  padding: 0 16px 0 12px;
+  min-height: 36px;
+  padding: 0 14px 0 5px;
+  border: 1px solid var(--accent-ring);
   border-radius: var(--radius-full);
+  background: var(--accent-soft);
+  color: var(--accent-light);
+  font-size: 0.8125rem;
+  font-weight: 600;
+  letter-spacing: 0.01em;
+  white-space: nowrap;
+  transition: border-color var(--transition-fast), color var(--transition-fast);
+}
+.btn-add-plus {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 26px;
+  height: 26px;
+  border-radius: 50%;
   background: var(--accent-primary);
   color: var(--on-accent);
-  font-size: 0.875rem;
-  font-weight: 700;
-  white-space: nowrap;
-  transition: background var(--transition-fast);
 }
-.btn-add:hover { background: var(--accent-hover); color: var(--on-accent); }
+.btn-add:hover { border-color: var(--accent-primary); color: var(--text-primary); }
 .app-today { position: relative; flex-basis: 100%; display: flex; align-items: baseline; justify-content: space-between; gap: 12px; }
-/* Soluk logo: kartın tam ortasında (alttaki logolu düğmeyle aynı dikey eksen), kart yüksekliğinin %80'i */
+/* Soluk logo (her ekranda, K-067): kartın tam ortasında (alttaki logolu düğmeyle aynı dikey eksen), kart yüksekliğinin %80'i */
 .home-hero-mark {
   position: absolute;
   left: 50%;
@@ -735,7 +758,7 @@ section > .row.row-between:first-child > h1 { flex: 1; min-width: 0; }
   pointer-events: none;
 }
 .home-hero-mark svg { width: 100%; height: 100%; }
-.app-header[data-home] > :not(.home-hero-mark) { position: relative; }
+.app-header > :not(.home-hero-mark) { position: relative; }
 .app-header .wordmark-name { font-size: 1.3125rem; }
 /* Üst çubukta logo çerçevesiz (K-061): yalnızca halka ve onay */
 .app-logo { display: inline-flex; flex: 0 0 auto; color: var(--text-primary); }

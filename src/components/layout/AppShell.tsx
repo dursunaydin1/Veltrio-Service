@@ -27,7 +27,7 @@ export function AppShell({ children }: { children: React.ReactNode }) {
   const hasUser = useSessionStore((s) => !!s.user);
   const hasDevice = useSessionStore((s) => !!s.device);
   const needsSetup = useSessionStore((s) => s.needsSetup);
-  // Üst çubuk her ekranda kart (K-066). Ana sayfada büyük arama kutusu olduğu için üstteki arama simgesi gizlenir, kartta selam satırı ve soluk logo olur (K-059)
+  // Üst çubuk her ekranda kart (K-066). Ana sayfada büyük arama kutusu olduğu için üstteki arama simgesi gizlenir, kartta selam satırı olur (K-059); soluk logo her ekranda (K-067)
   const onHome = usePathname() === "/dashboard";
   // Liste ekranlarının başlık + ekle satırı bu kutuya taşınır (K-066)
   const [headSlot, setHeadSlot] = useState<HTMLElement | null>(null);
@@ -49,9 +49,7 @@ export function AppShell({ children }: { children: React.ReactNode }) {
         İçeriğe geç
       </a>
       <header className="app-header" data-home={onHome ? "" : undefined}>
-        {onHome ? (
-          <span className="home-hero-mark" aria-hidden="true"><LogoGlyph size={64} ring /></span>
-        ) : null}
+        <span className="home-hero-mark" aria-hidden="true"><LogoGlyph size={64} ring /></span>
         <Link href="/dashboard" className="app-brand" aria-label="Ana sayfa">
           <span className="app-logo"><LogoGlyph size={42} ring /></span>
           <Wordmark />

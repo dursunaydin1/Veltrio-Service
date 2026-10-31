@@ -5,6 +5,12 @@
 
 ## 2026-10-31
 
+### K-067 · Liste ekranlarının üst kartı ana sayfayla birebir
+- **Neden:** İşletme sahibi diğer ekranlarda da ana sayfadaki kartı (ortada soluk logo, solda logo ve yazı, altta iki kenarda başlık ve işlem) istedi; dolu pirinç "+" düğmesini estetik bulmadı.
+- **Düzeltme:** K-066'daki başlık satırı eski `.page-head` stiliyle çakışıp alt alta diziliyordu; ad `.card-row` oldu. Başlık, selamla aynı yazı biçiminde.
+- **Soluk logo:** Artık her ekranın kartında.
+- **Ekle düğmesi:** İnce pirinç çerçeveli, hafif zeminli hap; "+" solda küçük dolu pirinç dairede, yanında yazı ("Servis aç").
+
 ### K-066 · Üst kart her ekranda; yazılı "ekle" düğmesi
 - **Neden:** İşletme sahibi denemede yuvarlak "+" simgesinin zor fark edildiğini, üst çubuğun ana sayfadaki kart gibi ortak olması gerektiğini söyledi; sekmelerde fare imleci değişmiyordu.
 - **Üst kart:** Ana sayfadaki kart (logo, yazı, zil) artık her ekranda. Liste ekranlarında kartın alt satırında sayfa başlığı ve "ekle" düğmesi (`PageHead`, AppShell'deki yere taşınır); ana sayfada selam satırı.
