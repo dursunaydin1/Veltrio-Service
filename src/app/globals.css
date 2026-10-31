@@ -703,6 +703,7 @@ section > .row.row-between:first-child > h1 { flex: 1; min-width: 0; }
 .page-head-slot { flex-basis: 100%; }
 .page-head-slot:empty { display: none; }
 .print-title { display: none; }
+.app-info { margin-top: -8px; text-align: center; font-size: 0.75rem; color: var(--text-muted); letter-spacing: 0.02em; }
 /* Kartın alt satırı (K-067): solda sayfa adı (selamla aynı yazı), sağda ilgili işlem */
 .card-row { display: flex; align-items: center; justify-content: space-between; gap: 12px; min-width: 0; }
 .card-row h1 {

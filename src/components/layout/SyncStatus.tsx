@@ -17,7 +17,7 @@ const PENDING_GRACE_MS = 15_000;
  * Eşitleme otomatiktir; gösterge yalnızca dikkat gereken durumda görünür:
  * çevrimdışı, sorun (hata/çakışma), eşitleme başarısız (dokununca yeniden dener),
  * ilk indirme sürüyor veya 15 saniyeden uzun gönderilemeyen kayıt.
- * Her şey yolundayken hiçbir şey çizilmez. Son eşitleme zamanı Menü sayfasındadır.
+ * Her şey yolundayken hiçbir şey çizilmez. Son eşitleme zamanı ipucunda ve "Eşitleme ve bildirimler" ekranındadır.
  * Dokunulunca eşitlemeyi hemen başlatır.
  */
 export function SyncStatus() {

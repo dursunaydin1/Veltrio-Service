@@ -5,6 +5,10 @@
 
 ## 2026-10-31
 
+### K-069 · Menü başındaki işletme/eşitleme/cihaz satırı kaldırıldı
+- **Neden:** Üç bilgi de başka yerde var (işletme adı: İşletme ayarları; son eşitleme: üst karttaki eşitleme simgesi ve "Eşitleme ve bildirimler"; cihaz kodu: Ayarlar → Cihazlar). Menü gezinme ekranı; liste hemen başlamalı. İşletme sahibi onayladı.
+- **Yerine:** Menü'nün en altında küçük, sönük tek satır: "Veltrio Service v{sürüm} · {cihaz kodu}" (destek isterken). Sürüm `package.json`'dan.
+
 ### K-068 · Tüm ekranların başlığı üst kartta
 - **Neden:** İşletme sahibi Menü'de başlığın kartın dışında kaldığını gördü; her ekranda ana sayfadaki düzeni istedi.
 - **Ne:** Menü, Raporlar (ve her rapor), Ayarlar ve alt ekranları, Yardım, Ara, Bildirimler, QR Tara, Dışa/İçe aktar, Bakiyeler ve tüm "… ekle / Satış yap / Satın alma" form ekranlarının başlığı `PageHead` ile kartın alt satırında. Menü'deki işletme adı ve son eşitleme bilgisi sayfada kaldı.

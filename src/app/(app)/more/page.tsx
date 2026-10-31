@@ -13,7 +13,8 @@ import {
   Truck,
 } from "lucide-react";
 import { logoutAction } from "@/app/(auth)/login/actions";
-import { LastSyncInfo } from "@/components/layout/LastSyncInfo";
+import { AppInfo } from "@/components/layout/AppInfo";
+import { version } from "../../../../package.json";
 import { PageHead } from "@/components/layout/PageHead";
 
 export const metadata: Metadata = { title: "Menü" };
@@ -38,7 +39,6 @@ export default function MorePage() {
   return (
     <section className="stack stack-lg">
       <PageHead title="Menü" />
-      <LastSyncInfo />
 
       <ul className="menu-list" aria-label="Kayıtlar">
         {RECORDS.map(({ href, label, Icon }) => (
@@ -76,6 +76,7 @@ export default function MorePage() {
         </li>
       </ul>
 
+      <AppInfo version={version} />
     </section>
   );
 }
