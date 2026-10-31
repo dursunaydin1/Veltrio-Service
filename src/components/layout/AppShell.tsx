@@ -17,6 +17,18 @@ import { SetupWizard } from "@/components/layout/SetupWizard";
 import { SyncStatus } from "@/components/layout/SyncStatus";
 import { useSessionStore } from "@/stores/session";
 
+const OWN_SEARCH = new Set([
+  "/services",
+  "/customers",
+  "/sales",
+  "/products",
+  "/purchases",
+  "/machines",
+  "/suppliers",
+  "/search",
+  "/settings/history",
+]);
+
 /**
  * Giriş yapmış kullanıcının gördüğü sayfa çerçevesi.
  * Oturum yüklenene kadar bekler; bu tarayıcı kayıtlı bir cihaz değilse
@@ -28,7 +40,10 @@ export function AppShell({ children }: { children: React.ReactNode }) {
   const hasDevice = useSessionStore((s) => !!s.device);
   const needsSetup = useSessionStore((s) => s.needsSetup);
   // Üst çubuk her ekranda kart (K-066). Ana sayfada büyük arama kutusu olduğu için üstteki arama simgesi gizlenir, kartta selam satırı olur (K-059); soluk logo her ekranda (K-067)
-  const onHome = usePathname() === "/dashboard";
+  const pathname = usePathname();
+  const onHome = pathname === "/dashboard";
+  // Kendi arama kutusu olan ekranlarda genel arama simgesi gizlenir; iki arama yan yana durmaz (K-070)
+  const showSearch = !onHome && !OWN_SEARCH.has(pathname);
   // Liste ekranlarının başlık + ekle satırı bu kutuya taşınır (K-066)
   const [headSlot, setHeadSlot] = useState<HTMLElement | null>(null);
 
@@ -57,11 +72,11 @@ export function AppShell({ children }: { children: React.ReactNode }) {
         <div className="app-header-actions">
           <SyncStatus />
           <NotificationBell />
-          {onHome ? null : (
+          {showSearch ? (
             <Link href="/search" className="icon-btn" aria-label="Ara">
               <Search size={22} aria-hidden="true" />
             </Link>
-          )}
+          ) : null}
         </div>
         {onHome ? <Greeting /> : <div ref={setHeadSlot} className="page-head-slot" />}
       </header>

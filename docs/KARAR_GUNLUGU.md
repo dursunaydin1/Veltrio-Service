@@ -5,6 +5,10 @@
 
 ## 2026-10-31
 
+### K-070 · Kendi araması olan ekranlarda üstteki arama simgesi yok
+- **Neden:** Liste ekranlarında sayfanın arama kutusuyla üst karttaki genel arama simgesi yan yana duruyor, "iki arama" gibi görünüyordu.
+- **Karar:** Genel arama simgesi kalır (her ekrandan bir dokunuşla genel arama); yalnızca kendi arama kutusu olan ekranlarda gizlenir: 7 liste ekranı, Ara ve Geçmiş. Ana sayfada zaten büyük arama kutusu var.
+
 ### K-069 · Menü başındaki işletme/eşitleme/cihaz satırı kaldırıldı
 - **Neden:** Üç bilgi de başka yerde var (işletme adı: İşletme ayarları; son eşitleme: üst karttaki eşitleme simgesi ve "Eşitleme ve bildirimler"; cihaz kodu: Ayarlar → Cihazlar). Menü gezinme ekranı; liste hemen başlamalı. İşletme sahibi onayladı.
 - **Yerine:** Menü'nün en altında küçük, sönük tek satır: "Veltrio Service v{sürüm} · {cihaz kodu}" (destek isterken). Sürüm `package.json`'dan.
