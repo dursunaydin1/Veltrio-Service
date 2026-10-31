@@ -4,12 +4,13 @@ import { useMemo, useState } from "react";
 import Link from "next/link";
 import { ListSkeleton } from "@/components/common/ListSkeleton";
 import { useLiveQuery } from "dexie-react-hooks";
-import { Plus } from "lucide-react";
+
 import { db } from "@/lib/db";
 import { useSessionStore } from "@/stores/session";
 import { machineTitleOf } from "@/lib/machines/title";
 import { foldText } from "@/lib/utils/search";
 import type { Machine } from "@/types";
+import { PageHead } from "@/components/layout/PageHead";
 
 /** Arama: tür, marka, model, seri / iç numara ve sahibin adı üzerinde kelime kelime. */
 export function matchesMachine(machine: Machine, ownerName: string, query: string): boolean {
@@ -55,12 +56,7 @@ export function MachineList() {
 
   return (
     <section className="stack stack-md">
-      <div className="row row-between">
-        <h1>Makineler</h1>
-        <Link href="/machines/new" className="icon-btn icon-btn-add" aria-label="Makine ekle" title="Makine ekle">
-          <Plus size={22} aria-hidden="true" />
-        </Link>
-      </div>
+      <PageHead title="Makineler" addHref="/machines/new" addLabel="Makine ekle" />
 
       <input
         className="form-input"
@@ -79,7 +75,7 @@ export function MachineList() {
       {data === undefined ? <ListSkeleton /> : visible.length === 0 ? (
         <div className="empty-state" role="note">
           {data.machines.length === 0
-            ? "Henüz makine eklenmemiş. Sağ üstteki + ile ilkini ekleyin."
+            ? "Henüz makine eklenmemiş. Üstteki “Makine ekle” ile ilkini ekleyin."
             : "Aramanıza uyan makine yok."}
         </div>
       ) : (

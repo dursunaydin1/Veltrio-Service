@@ -539,6 +539,7 @@ section > .row.row-between:first-child > h1 { flex: 1; min-width: 0; }
 
 [role="tablist"] > [role="tab"] {
   flex: 1 0 auto;
+  cursor: pointer;
   min-height: 40px;
   padding: 8px 14px;
   border: none;
@@ -683,8 +684,9 @@ section > .row.row-between:first-child > h1 { flex: 1; min-width: 0; }
 }
 .wordmark-stacked { flex-direction: column; align-items: center; gap: 8px; }
 
-/* Ana sayfa (K-059): logo, yazı, zil ve tarih tek kart; sayfayla birlikte kayar */
-.app-header[data-home] {
+/* Üst kart (K-059, K-066): her ekranda logo, yazı ve zil tek kart; sayfayla birlikte kayar.
+   Ana sayfada selam satırı, liste ekranlarında başlık + ekle düğmesi satırı. */
+.app-header {
   position: relative;
   flex-wrap: wrap;
   row-gap: 14px;
@@ -697,7 +699,28 @@ section > .row.row-between:first-child > h1 { flex: 1; min-width: 0; }
   -webkit-backdrop-filter: none;
   backdrop-filter: none;
 }
-.app-header[data-home] .icon-btn { background: var(--bg-elevated); }
+.app-header .app-header-actions .icon-btn { background: var(--bg-elevated); }
+.page-head-slot { flex-basis: 100%; }
+.page-head-slot:empty { display: none; }
+.page-head { display: flex; align-items: center; justify-content: space-between; gap: 12px; min-width: 0; }
+.page-head h1 { min-width: 0; font-family: var(--font-brand); font-size: 1.25rem; letter-spacing: -0.01em; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+/* Liste ekranındaki "ekle" düğmesi: dolu pirinç, yazılı; ilk bakışta bulunur */
+.btn-add {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  flex: 0 0 auto;
+  min-height: 40px;
+  padding: 0 16px 0 12px;
+  border-radius: var(--radius-full);
+  background: var(--accent-primary);
+  color: var(--on-accent);
+  font-size: 0.875rem;
+  font-weight: 700;
+  white-space: nowrap;
+  transition: background var(--transition-fast);
+}
+.btn-add:hover { background: var(--accent-hover); color: var(--on-accent); }
 .app-today { position: relative; flex-basis: 100%; display: flex; align-items: baseline; justify-content: space-between; gap: 12px; }
 /* Soluk logo: kartın tam ortasında (alttaki logolu düğmeyle aynı dikey eksen), kart yüksekliğinin %80'i */
 .home-hero-mark {
@@ -1548,15 +1571,8 @@ input.form-input[type="search"] {
   background-position: 16px center;
 }
 
-/* Sayfa başlığındaki "ekle" düğmesi: zil gibi yuvarlak, ince çerçeveli "+" */
-.icon-btn-add {
-  width: var(--touch-min);
-  height: var(--touch-min);
-  border: 1px solid var(--border-subtle);
-  background: var(--bg-surface);
-  color: var(--accent-light);
-}
-.icon-btn-add:hover { border-color: var(--accent-ring); color: var(--accent-primary); }
+/* Müşteri fotoğrafı varsa baş harf rozeti yerine küçük resim */
+.avatar-photo { object-fit: cover; background: var(--bg-hover); }
 
 /* Liste satırı: solda rozet, sağda başlık + alt bilgi */
 .list-main { flex: 1; min-width: 0; display: flex; flex-direction: column; gap: 3px; }

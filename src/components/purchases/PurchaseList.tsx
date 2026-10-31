@@ -4,12 +4,13 @@ import { useMemo, useState } from "react";
 import Link from "next/link";
 import { ListSkeleton } from "@/components/common/ListSkeleton";
 import { useLiveQuery } from "dexie-react-hooks";
-import { Plus } from "lucide-react";
+
 import { db } from "@/lib/db";
 import type { Purchase } from "@/lib/db";
 import { useSessionStore } from "@/stores/session";
 import { formatCurrency, formatDate } from "@/lib/utils";
 import { foldText } from "@/lib/utils/search";
+import { PageHead } from "@/components/layout/PageHead";
 
 type Tab = Purchase["status"];
 
@@ -62,12 +63,7 @@ export function PurchaseList() {
 
   return (
     <section className="stack stack-md">
-      <div className="row row-between">
-        <h1>Satın Almalar</h1>
-        <Link href="/purchases/new" className="icon-btn icon-btn-add" aria-label="Satın alma" title="Satın alma">
-          <Plus size={22} aria-hidden="true" />
-        </Link>
-      </div>
+      <PageHead title="Satın Almalar" addHref="/purchases/new" addLabel="Satın al" />
 
       <div role="tablist" aria-label="Alım durumu">
         {TABS.map((t) => (
@@ -95,7 +91,7 @@ export function PurchaseList() {
       {data === undefined ? <ListSkeleton /> : visible.length === 0 ? (
         <div className="empty-state" role="note">
           {data.purchases.length === 0
-            ? "Henüz alım kaydı yok. Sağ üstteki + ile ilkini ekleyin."
+            ? "Henüz alım kaydı yok. Üstteki “Satın al” ile ilkini ekleyin."
             : "Bu sekmede / aramada alım yok."}
         </div>
       ) : (

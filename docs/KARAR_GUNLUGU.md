@@ -5,6 +5,13 @@
 
 ## 2026-10-31
 
+### K-066 · Üst kart her ekranda; yazılı "ekle" düğmesi
+- **Neden:** İşletme sahibi denemede yuvarlak "+" simgesinin zor fark edildiğini, üst çubuğun ana sayfadaki kart gibi ortak olması gerektiğini söyledi; sekmelerde fare imleci değişmiyordu.
+- **Üst kart:** Ana sayfadaki kart (logo, yazı, zil) artık her ekranda. Liste ekranlarında kartın alt satırında sayfa başlığı ve "ekle" düğmesi (`PageHead`, AppShell'deki yere taşınır); ana sayfada selam satırı.
+- **Ekle düğmesi:** Simge yerine dolu pirinç, yazılı düğme: "+ Servis aç", "+ Müşteri ekle", "+ Satış yap", "+ Ürün ekle", "+ Satın al", "+ Makine ekle", "+ Tedarikçi ekle". Boş durum mesajları bu adı söyler.
+- **Sekmeler:** Üzerine gelince el imleci.
+- **Müşteri fotoğrafı:** Kayıtta fotoğraf varsa listede baş harf rozeti yerine küçük resim gösterilir (alan zaten vardı).
+
 ### K-065 · Liste ve form ekranları ana sayfanın diline getirildi
 - **Neden:** Ana sayfa yenilendikten sonra diğer ekranlar geride kalmıştı; işletme sahibi tüm iyileştirmeleri onayladı.
 - **Boş durumlar:** "Henüz kayıt yok" türü mesajlar turuncu uyarı kutusu yerine sakin, kesik çizgili kutuda (14 ekran). Gerçek uyarılar (iptal, hassas veri, stok girişi yok…) turuncu kaldı.

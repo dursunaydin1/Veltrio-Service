@@ -4,12 +4,13 @@ import { useMemo, useState } from "react";
 import Link from "next/link";
 import { ListSkeleton, initials } from "@/components/common/ListSkeleton";
 import { useLiveQuery } from "dexie-react-hooks";
-import { Plus } from "lucide-react";
+
 import { db } from "@/lib/db";
 import { useSessionStore } from "@/stores/session";
 import { formatPhone } from "@/lib/utils/phone";
 import { foldText } from "@/lib/utils/search";
 import type { Supplier } from "@/types";
+import { PageHead } from "@/components/layout/PageHead";
 
 /** Arama: harf içeriyorsa ad / adreste, yalnızca rakamsa telefonda (baştaki 0 yok sayılır). */
 export function matchesSupplier(supplier: Supplier, query: string): boolean {
@@ -45,12 +46,7 @@ export function SupplierList() {
 
   return (
     <section className="stack stack-md">
-      <div className="row row-between">
-        <h1>Tedarikçiler</h1>
-        <Link href="/suppliers/new" className="icon-btn icon-btn-add" aria-label="Tedarikçi ekle" title="Tedarikçi ekle">
-          <Plus size={22} aria-hidden="true" />
-        </Link>
-      </div>
+      <PageHead title="Tedarikçiler" addHref="/suppliers/new" addLabel="Tedarikçi ekle" />
 
       <input
         className="form-input"
@@ -69,7 +65,7 @@ export function SupplierList() {
       {suppliers === undefined ? <ListSkeleton /> : visible.length === 0 ? (
         <div className="empty-state" role="note">
           {suppliers.length === 0
-            ? "Henüz tedarikçi eklenmemiş. Sağ üstteki + ile ilkini ekleyin."
+            ? "Henüz tedarikçi eklenmemiş. Üstteki “Tedarikçi ekle” ile ilkini ekleyin."
             : "Aramanıza uyan tedarikçi yok."}
         </div>
       ) : (

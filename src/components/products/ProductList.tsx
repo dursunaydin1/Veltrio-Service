@@ -4,7 +4,7 @@ import { useMemo, useState } from "react";
 import Link from "next/link";
 import { ListSkeleton } from "@/components/common/ListSkeleton";
 import { useLiveQuery } from "dexie-react-hooks";
-import { Plus } from "lucide-react";
+
 import { db } from "@/lib/db";
 import { useSessionStore } from "@/stores/session";
 import { useStockBalances } from "@/hooks/useStock";
@@ -14,6 +14,7 @@ import { unitLabel } from "@/lib/products/constants";
 import { foldText } from "@/lib/utils/search";
 import { isCriticalStock } from "@/lib/products/stock";
 import type { Product } from "@/types";
+import { PageHead } from "@/components/layout/PageHead";
 
 function matches(product: Product, query: string): boolean {
   if (!query.trim()) return true;
@@ -45,12 +46,7 @@ export function ProductList() {
 
   return (
     <section className="stack stack-md">
-      <div className="row row-between">
-        <h1>Stok</h1>
-        <Link href="/products/new" className="icon-btn icon-btn-add" aria-label="Ürün ekle" title="Ürün ekle">
-          <Plus size={22} aria-hidden="true" />
-        </Link>
-      </div>
+      <PageHead title="Stok" addHref="/products/new" addLabel="Ürün ekle" />
 
       <input
         className="form-input"
@@ -73,7 +69,7 @@ export function ProductList() {
       {products === undefined ? <ListSkeleton /> : visible.length === 0 ? (
         <div className="empty-state" role="note">
           {products.length === 0
-            ? "Henüz ürün eklenmemiş. Sağ üstteki + ile ilkini ekleyin."
+            ? "Henüz ürün eklenmemiş. Üstteki “Ürün ekle” ile ilkini ekleyin."
             : "Aramanıza uyan ürün yok."}
         </div>
       ) : (

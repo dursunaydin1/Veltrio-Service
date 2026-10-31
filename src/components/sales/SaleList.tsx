@@ -4,12 +4,13 @@ import { useMemo, useState } from "react";
 import Link from "next/link";
 import { ListSkeleton } from "@/components/common/ListSkeleton";
 import { useLiveQuery } from "dexie-react-hooks";
-import { Plus } from "lucide-react";
+
 import { db } from "@/lib/db";
 import type { Sale } from "@/lib/db";
 import { useSessionStore } from "@/stores/session";
 import { formatCurrency, formatDate } from "@/lib/utils";
 import { foldText } from "@/lib/utils/search";
+import { PageHead } from "@/components/layout/PageHead";
 
 type Tab = Sale["status"];
 
@@ -62,12 +63,7 @@ export function SaleList() {
 
   return (
     <section className="stack stack-md">
-      <div className="row row-between">
-        <h1>Satışlar</h1>
-        <Link href="/sales/new" className="icon-btn icon-btn-add" aria-label="Satış yap" title="Satış yap">
-          <Plus size={22} aria-hidden="true" />
-        </Link>
-      </div>
+      <PageHead title="Satışlar" addHref="/sales/new" addLabel="Satış yap" />
 
       <div role="tablist" aria-label="Satış durumu">
         {TABS.map((t) => (
@@ -94,7 +90,7 @@ export function SaleList() {
 
       {data === undefined ? <ListSkeleton /> : visible.length === 0 ? (
         <div className="empty-state" role="note">
-          {data.sales.length === 0 ? "Henüz satış yok. Sağ üstteki + ile ilkini yapın." : "Bu sekmede / aramada satış yok."}
+          {data.sales.length === 0 ? "Henüz satış yok. Üstteki “Satış yap” ile ilkini yapın." : "Bu sekmede / aramada satış yok."}
         </div>
       ) : (
         <ul className="menu-list" aria-label="Satışlar">

@@ -4,7 +4,7 @@ import { useMemo, useState } from "react";
 import Link from "next/link";
 import { ListSkeleton } from "@/components/common/ListSkeleton";
 import { useLiveQuery } from "dexie-react-hooks";
-import { Plus, Wrench } from "lucide-react";
+import { Wrench } from "lucide-react";
 import { db } from "@/lib/db";
 import type { Service } from "@/lib/db";
 import { machineTitle } from "@/components/machines/MachineList";
@@ -14,6 +14,7 @@ import { useSessionStore } from "@/stores/session";
 import { isOpenStatus, statusTone } from "@/lib/services/status";
 import { foldText } from "@/lib/utils/search";
 import { formatCurrency, formatDate, todayLocalDate } from "@/lib/utils";
+import { PageHead } from "@/components/layout/PageHead";
 
 type Tab = "active" | "delivered" | "cancelled";
 
@@ -85,12 +86,7 @@ export function ServiceList() {
 
   return (
     <section className="stack stack-md">
-      <div className="row row-between">
-        <h1>Servisler</h1>
-        <Link href="/services/new" className="icon-btn icon-btn-add" aria-label="Servis aç" title="Servis aç">
-          <Plus size={22} aria-hidden="true" />
-        </Link>
-      </div>
+      <PageHead title="Servisler" addHref="/services/new" addLabel="Servis aç" />
 
       <div role="tablist" aria-label="Servis durumu">
         {TABS.map((t) => (
@@ -118,7 +114,7 @@ export function ServiceList() {
       {data === undefined ? <ListSkeleton /> : visible.length === 0 ? (
         <div className="empty-state" role="note">
           {data.services.length === 0
-            ? "Henüz servis kaydı yok. Sağ üstteki + ile ilkini açın."
+            ? "Henüz servis kaydı yok. Üstteki “Servis aç” ile ilkini açın."
             : "Bu sekmede / aramada servis yok."}
         </div>
       ) : (

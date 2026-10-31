@@ -1,5 +1,6 @@
 "use client";
 
+import { useState } from "react";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
 import { Search } from "lucide-react";
@@ -10,6 +11,7 @@ import { DeviceSetup } from "@/components/layout/DeviceSetup";
 import { PwaBanner } from "@/components/layout/PwaBanner";
 import { UpdateNotice } from "@/components/layout/UpdateNotice";
 import { NotificationBell } from "@/components/layout/NotificationBell";
+import { PageHeadSlot } from "@/components/layout/PageHead";
 import { PinGate } from "@/components/layout/PinGate";
 import { SetupWizard } from "@/components/layout/SetupWizard";
 import { SyncStatus } from "@/components/layout/SyncStatus";
@@ -25,8 +27,10 @@ export function AppShell({ children }: { children: React.ReactNode }) {
   const hasUser = useSessionStore((s) => !!s.user);
   const hasDevice = useSessionStore((s) => !!s.device);
   const needsSetup = useSessionStore((s) => s.needsSetup);
-  // Ana sayfada: büyük arama kutusu olduğu için üstteki arama simgesi gizlenir; üst çubuk tarihle birlikte tek kart olur (K-059)
+  // Üst çubuk her ekranda kart (K-066). Ana sayfada büyük arama kutusu olduğu için üstteki arama simgesi gizlenir, kartta selam satırı ve soluk logo olur (K-059)
   const onHome = usePathname() === "/dashboard";
+  // Liste ekranlarının başlık + ekle satırı bu kutuya taşınır (K-066)
+  const [headSlot, setHeadSlot] = useState<HTMLElement | null>(null);
 
   if (!sessionLoaded) {
     return (
@@ -61,12 +65,12 @@ export function AppShell({ children }: { children: React.ReactNode }) {
             </Link>
           )}
         </div>
-        {onHome ? <Greeting /> : null}
+        {onHome ? <Greeting /> : <div ref={setHeadSlot} className="page-head-slot" />}
       </header>
       <main id="main" className="app-main">
         <UpdateNotice />
         <PwaBanner />
-        {children}
+        <PageHeadSlot.Provider value={onHome ? null : headSlot}>{children}</PageHeadSlot.Provider>
       </main>
       <BottomNav />
     </div>

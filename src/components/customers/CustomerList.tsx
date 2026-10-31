@@ -4,12 +4,13 @@ import { useMemo, useState } from "react";
 import Link from "next/link";
 import { ListSkeleton, initials } from "@/components/common/ListSkeleton";
 import { useLiveQuery } from "dexie-react-hooks";
-import { Plus } from "lucide-react";
+
 import { db } from "@/lib/db";
 import { useSessionStore } from "@/stores/session";
 import { formatPhone } from "@/lib/utils/phone";
 import { foldText } from "@/lib/utils/search";
 import type { Customer } from "@/types";
+import { PageHead } from "@/components/layout/PageHead";
 
 /** Arama: harf içeriyorsa ad/köy/adreste kelime kelime; yalnızca rakamsa telefonda (baştaki 0 yok sayılır). */
 export function matchesCustomer(customer: Customer, query: string): boolean {
@@ -47,12 +48,7 @@ export function CustomerList() {
 
   return (
     <section className="stack stack-md">
-      <div className="row row-between">
-        <h1>Müşteriler</h1>
-        <Link href="/customers/new" className="icon-btn icon-btn-add" aria-label="Müşteri ekle" title="Müşteri ekle">
-          <Plus size={22} aria-hidden="true" />
-        </Link>
-      </div>
+      <PageHead title="Müşteriler" addHref="/customers/new" addLabel="Müşteri ekle" />
 
       <input
         className="form-input"
@@ -71,7 +67,7 @@ export function CustomerList() {
       {customers === undefined ? <ListSkeleton /> : visible.length === 0 ? (
         <div className="empty-state" role="note">
           {customers.length === 0
-            ? "Henüz müşteri eklenmemiş. Sağ üstteki + ile ilkini ekleyin."
+            ? "Henüz müşteri eklenmemiş. Üstteki “Müşteri ekle” ile ilkini ekleyin."
             : "Aramanıza uyan müşteri yok."}
         </div>
       ) : (
@@ -79,7 +75,12 @@ export function CustomerList() {
           {visible.map((c) => (
             <li key={c.id}>
               <Link href={`/customers/${c.id}`}>
-                <span className="avatar avatar-sm menu-avatar monogram" aria-hidden="true">{initials(c.name)}</span>
+                {c.photo ? (
+                  // eslint-disable-next-line @next/next/no-img-element
+                  <img src={c.photo} alt="" className="avatar avatar-sm avatar-photo" />
+                ) : (
+                  <span className="avatar avatar-sm menu-avatar monogram" aria-hidden="true">{initials(c.name)}</span>
+                )}
                 <span className="list-main">
                 <span className="list-title">
                   <span>{c.name}</span>
