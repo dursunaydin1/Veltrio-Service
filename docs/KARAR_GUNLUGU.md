@@ -5,6 +5,10 @@
 
 ## 2026-10-31
 
+### K-059 · Ana sayfada üst çubuk ve tarih tek kart
+- **Neden:** İşletme sahibi üstteki logo, yazı ve zil ile altındaki tarih kartının birleştirilmesini istedi.
+- **Yapılanlar:** Ana sayfada üst çubuk yuvarlak köşeli bir karta dönüşür: üst satırda logo, "Veltrio / SERVICE" ve zil; altında pirinç "BUGÜN" ve iri tarih; sağ alt köşede logonun soluk silueti. Bu kart sayfayla birlikte kayar. Diğer sayfalarda üst çubuk eskisi gibi ince ve sabittir.
+
 ### K-058 · Üst kart sadeleşti: yalnızca tarih
 - **Neden:** İşletme sahibi durum cümlesini ve üç sayıyı gereksiz buldu. Doğru: açık servis sayısı "Tümü (n)" düğmesinde, gecikme ve yaklaşan teslimler alttaki iş listesinde (ne yapılacağıyla birlikte) zaten görünüyor; sayılar aynı bilgiyi üçüncü kez gösteriyordu.
 - **Yapılanlar:** Kartta pirinç "BUGÜN", iri tarih ve sağda logonun soluk silueti kaldı.

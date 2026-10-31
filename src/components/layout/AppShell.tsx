@@ -4,6 +4,7 @@ import Link from "next/link";
 import { usePathname } from "next/navigation";
 import { Search } from "lucide-react";
 import { BottomNav } from "@/components/layout/BottomNav";
+import { Greeting } from "@/components/layout/Greeting";
 import { LogoMark, Wordmark } from "@/components/layout/Logo";
 import { DeviceSetup } from "@/components/layout/DeviceSetup";
 import { PwaBanner } from "@/components/layout/PwaBanner";
@@ -24,7 +25,7 @@ export function AppShell({ children }: { children: React.ReactNode }) {
   const hasUser = useSessionStore((s) => !!s.user);
   const hasDevice = useSessionStore((s) => !!s.device);
   const needsSetup = useSessionStore((s) => s.needsSetup);
-  // Ana sayfada büyük arama kutusu olduğu için üstteki arama simgesi gizlenir
+  // Ana sayfada: büyük arama kutusu olduğu için üstteki arama simgesi gizlenir; üst çubuk tarihle birlikte tek kart olur (K-059)
   const onHome = usePathname() === "/dashboard";
 
   if (!sessionLoaded) {
@@ -43,7 +44,7 @@ export function AppShell({ children }: { children: React.ReactNode }) {
       <a href="#main" className="skip-link">
         İçeriğe geç
       </a>
-      <header className="app-header">
+      <header className="app-header" data-home={onHome ? "" : undefined}>
         <Link href="/dashboard" className="app-brand" aria-label="Ana sayfa">
           <LogoMark size={40} />
           <Wordmark lockup />
@@ -57,6 +58,7 @@ export function AppShell({ children }: { children: React.ReactNode }) {
             </Link>
           )}
         </div>
+        {onHome ? <Greeting /> : null}
       </header>
       <main id="main" className="app-main">
         <UpdateNotice />
