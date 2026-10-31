@@ -5,6 +5,10 @@
 
 ## 2026-10-31
 
+### K-058 · Üst kart sadeleşti: yalnızca tarih
+- **Neden:** İşletme sahibi durum cümlesini ve üç sayıyı gereksiz buldu. Doğru: açık servis sayısı "Tümü (n)" düğmesinde, gecikme ve yaklaşan teslimler alttaki iş listesinde (ne yapılacağıyla birlikte) zaten görünüyor; sayılar aynı bilgiyi üçüncü kez gösteriyordu.
+- **Yapılanlar:** Kartta pirinç "BUGÜN", iri tarih ve sağda logonun soluk silueti kaldı.
+
 ### K-057 · Karşılama kartı: selam yerine günün özeti
 - **Neden:** İşletme sahibi "İyi günler" selamını gereksiz, işletme adını da uygun bulmadı (tek kullanıcı kendi işletmesinin adını görmeye ihtiyaç duymaz); logo silueti beğenildi ama sağdan kesiliyordu.
 - **Yapılanlar:** Pirinç "GÜNÜN ÖZETİ", iri tarih ("31 Ekim Cumartesi"), altında günün durumuna göre tek cümle (öncelik: gecikme → müşteri onayı → yaklaşan teslim → "Her şey yolunda, gecikme yok." → "Atölye boş, yeni işlere hazır."). Logo silueti küçültülüp kartın içine alındı, tamamı görünür. İşletme adı Menü'de duruyor.

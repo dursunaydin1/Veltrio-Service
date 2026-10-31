@@ -687,14 +687,14 @@ section > .row.row-between:first-child > h1 { flex: 1; min-width: 0; }
 .wordmark-lockup .wordmark-name { font-size: 1.1875rem; line-height: 1; }
 .wordmark-lockup .wordmark-tag { font-size: 0.5625rem; letter-spacing: 0.46em; line-height: 1; }
 
-/* Ana sayfa günün özeti kartı (K-056, K-057) */
+/* Ana sayfa üst kartı (K-056 → K-058): tarih ve logo silueti */
 .home-hero {
   position: relative;
   overflow: hidden;
   display: flex;
   flex-direction: column;
   gap: 6px;
-  padding: 18px;
+  padding: 18px 110px 18px 18px;
   background: var(--bg-surface);
   border: 1px solid var(--border-subtle);
   border-radius: var(--radius-xl);
@@ -716,33 +716,6 @@ section > .row.row-between:first-child > h1 { flex: 1; min-width: 0; }
   line-height: 1.15;
   color: var(--text-primary);
 }
-.home-business {
-  font-size: 0.875rem;
-  color: var(--text-muted);
-  overflow: hidden;
-  text-overflow: ellipsis;
-  white-space: nowrap;
-  max-width: calc(100% - 120px);
-}
-.home-stats {
-  display: flex;
-  gap: 22px;
-  margin-top: 10px;
-  padding-top: 12px;
-  border-top: 1px solid var(--border-subtle);
-  font-size: 0.75rem;
-  color: var(--text-muted);
-}
-.home-stats:hover { color: var(--text-secondary); }
-.home-stats b {
-  display: block;
-  font-family: var(--font-brand);
-  font-size: 1.25rem;
-  font-weight: 600;
-  color: var(--text-primary);
-  font-variant-numeric: tabular-nums;
-}
-.home-stats [data-late] b { color: var(--danger-fg); }
 .wordmark-stacked .wordmark-tag { font-size: 0.42em; letter-spacing: 0.5em; margin-right: -0.5em; }
 
 .icon-btn {
