@@ -5,7 +5,7 @@ import { usePathname } from "next/navigation";
 import { Search } from "lucide-react";
 import { BottomNav } from "@/components/layout/BottomNav";
 import { Greeting } from "@/components/layout/Greeting";
-import { LogoMark, Wordmark } from "@/components/layout/Logo";
+import { LogoGlyph, LogoMark, Wordmark } from "@/components/layout/Logo";
 import { DeviceSetup } from "@/components/layout/DeviceSetup";
 import { PwaBanner } from "@/components/layout/PwaBanner";
 import { UpdateNotice } from "@/components/layout/UpdateNotice";
@@ -45,9 +45,12 @@ export function AppShell({ children }: { children: React.ReactNode }) {
         İçeriğe geç
       </a>
       <header className="app-header" data-home={onHome ? "" : undefined}>
+        {onHome ? (
+          <span className="home-hero-mark" aria-hidden="true"><LogoGlyph size={64} ring /></span>
+        ) : null}
         <Link href="/dashboard" className="app-brand" aria-label="Ana sayfa">
           <LogoMark size={40} />
-          <Wordmark lockup />
+          <Wordmark />
         </Link>
         <div className="app-header-actions">
           <SyncStatus />

@@ -1,7 +1,6 @@
 "use client";
 
 import { useEffect, useState } from "react";
-import { LogoGlyph } from "@/components/layout/Logo";
 
 /** "31 Ekim Cumartesi" (İstanbul saati) */
 const DATE_FORMATTER = new Intl.DateTimeFormat("tr-TR", {
@@ -12,8 +11,8 @@ const DATE_FORMATTER = new Intl.DateTimeFormat("tr-TR", {
 });
 
 /**
- * Ana sayfada üst çubuğun içindeki tarih satırı (K-059): pirinç "BUGÜN", iri tarih ve köşede logonun soluk silueti.
- * Logo, yazı ve zil ile birlikte tek kart olur (AppShell, `data-home`).
+ * Ana sayfada üst çubuğun içindeki tarih satırı (K-059, K-060). Logo, yazı ve zil ile birlikte tek kart olur
+ * (AppShell, `data-home`); kartın tam ortasında, alttaki logolu düğmeyle aynı hizada logonun soluk silueti durur.
  * Tarih İstanbul saatine göredir; sunucu ile tarayıcı saati farklı olabileceği için yalnızca tarayıcıda çizilir.
  */
 export function Greeting() {
@@ -21,8 +20,6 @@ export function Greeting() {
   useEffect(() => setNow(new Date()), []); // eslint-disable-line react-hooks/set-state-in-effect
   return (
     <div className="app-today">
-      <span className="home-hero-mark" aria-hidden="true"><LogoGlyph size={64} ring /></span>
-      <span className="home-date">Bugün</span>
       <span className="home-hello">{now ? DATE_FORMATTER.format(now) : " "}</span>
     </div>
   );

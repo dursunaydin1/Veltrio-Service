@@ -43,12 +43,11 @@ export function LogoMark({ size = 32 }: { size?: number }) {
 
 /**
  * Yazılı marka: "Veltrio" iri, "SERVICE" küçük, harf aralıklı ve pirinç.
- * `stacked`: alt alta ortalı (giriş ekranı); `lockup`: alt alta sola dayalı, logonun yanında (üst çubuk, K-055).
+ * Varsayılan: tek satır (üst çubuk). `stacked`: alt alta ortalı (giriş ekranı).
  */
-export function Wordmark({ stacked = false, lockup = false }: { stacked?: boolean; lockup?: boolean }) {
-  const variant = stacked ? " wordmark-stacked" : lockup ? " wordmark-lockup" : "";
+export function Wordmark({ stacked = false }: { stacked?: boolean }) {
   return (
-    <span className={`wordmark${variant}`}>
+    <span className={stacked ? "wordmark wordmark-stacked" : "wordmark"}>
       <span className="wordmark-name">Veltrio</span>{" "}
       <span className="wordmark-tag">Service</span>
     </span>

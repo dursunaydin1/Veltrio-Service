@@ -5,6 +5,9 @@
 
 ## 2026-10-31
 
+### K-060 · Ana sayfa kartı inceltildi
+- "BUGÜN" yazısı kaldırıldı; tarih küçültüldü (17 px, ikincil renk). "Veltrio SERVICE" logonun yanında tek satır. Soluk logo kartın tam ortasında (alttaki logolu düğmeyle aynı dikey eksen), kart yüksekliğinin %80'i kadar.
+
 ### K-059 · Ana sayfada üst çubuk ve tarih tek kart
 - **Neden:** İşletme sahibi üstteki logo, yazı ve zil ile altındaki tarih kartının birleştirilmesini istedi.
 - **Yapılanlar:** Ana sayfada üst çubuk yuvarlak köşeli bir karta dönüşür: üst satırda logo, "Veltrio / SERVICE" ve zil; altında pirinç "BUGÜN" ve iri tarih; sağ alt köşede logonun soluk silueti. Bu kart sayfayla birlikte kayar. Diğer sayfalarda üst çubuk eskisi gibi ince ve sabittir.
