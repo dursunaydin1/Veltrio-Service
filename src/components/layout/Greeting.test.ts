@@ -1,11 +1,18 @@
 import { describe, expect, it } from "vitest";
-import { greetingFor } from "./Greeting";
+import { dayNote } from "./Greeting";
 
-describe("greetingFor", () => {
-  it("saate göre selam verir", () => {
-    expect(greetingFor(3)).toBe("İyi geceler");
-    expect(greetingFor(8)).toBe("Günaydın");
-    expect(greetingFor(14)).toBe("İyi günler");
-    expect(greetingFor(21)).toBe("İyi akşamlar");
+const base = { active: 0, upcoming: 0, overdue: 0, waitingApproval: 0 };
+
+describe("günün özeti cümlesi", () => {
+  it("önceliğe göre tek cümle seçer: gecikme > onay > yaklaşan > açık > boş", () => {
+    expect(dayNote({ ...base, active: 5, overdue: 1, upcoming: 2, waitingApproval: 1 })).toMatch(/Gecikmiş/);
+    expect(dayNote({ ...base, active: 5, upcoming: 2, waitingApproval: 1 })).toMatch(/onayı/);
+    expect(dayNote({ ...base, active: 5, upcoming: 2 })).toMatch(/Yaklaşan/);
+    expect(dayNote({ ...base, active: 5 })).toBe("Her şey yolunda, gecikme yok.");
+    expect(dayNote(base)).toBe("Atölye boş, yeni işlere hazır.");
+  });
+
+  it("veri gelmeden yükleniyor der", () => {
+    expect(dayNote(undefined)).toBe("Kayıtlar yükleniyor…");
   });
 });

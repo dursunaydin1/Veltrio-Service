@@ -5,6 +5,10 @@
 
 ## 2026-10-31
 
+### K-057 · Karşılama kartı: selam yerine günün özeti
+- **Neden:** İşletme sahibi "İyi günler" selamını gereksiz, işletme adını da uygun bulmadı (tek kullanıcı kendi işletmesinin adını görmeye ihtiyaç duymaz); logo silueti beğenildi ama sağdan kesiliyordu.
+- **Yapılanlar:** Pirinç "GÜNÜN ÖZETİ", iri tarih ("31 Ekim Cumartesi"), altında günün durumuna göre tek cümle (öncelik: gecikme → müşteri onayı → yaklaşan teslim → "Her şey yolunda, gecikme yok." → "Atölye boş, yeni işlere hazır."). Logo silueti küçültülüp kartın içine alındı, tamamı görünür. İşletme adı Menü'de duruyor.
+
 ### K-056 · Ana sayfa karşılama kartı (seçenek A)
 - **Neden:** K-055'teki düz selam satırı işletme sahibine göre hâlâ estetik değildi. İki tasarım önizlemede karşılaştırıldı (A: karşılama kartı, B: sade başlık); işletme sahibi önerdiğim **A**'yı seçti.
 - **Yapılanlar:** Tarih ("Cumartesi · 31 Ekim", pirinç), iri selam ve işletme adı tek kartta; altında ince çizgiyle ayrılmış üç sayı: açık servis, teslimi yaklaşan, gecikmiş (gecikmiş varsa kırmızı). Dokununca Servisler açılır. Kartın sağında logonun soluk silueti. Üst çubuğun alt çizgisi kaldırıldı.

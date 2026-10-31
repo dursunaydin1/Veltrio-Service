@@ -687,7 +687,7 @@ section > .row.row-between:first-child > h1 { flex: 1; min-width: 0; }
 .wordmark-lockup .wordmark-name { font-size: 1.1875rem; line-height: 1; }
 .wordmark-lockup .wordmark-tag { font-size: 0.5625rem; letter-spacing: 0.46em; line-height: 1; }
 
-/* Ana sayfa karşılama kartı (K-056) */
+/* Ana sayfa günün özeti kartı (K-056, K-057) */
 .home-hero {
   position: relative;
   overflow: hidden;
@@ -699,7 +699,7 @@ section > .row.row-between:first-child > h1 { flex: 1; min-width: 0; }
   border: 1px solid var(--border-subtle);
   border-radius: var(--radius-xl);
 }
-.home-hero-mark { position: absolute; right: -36px; top: 50%; transform: translateY(-50%); color: #fff; opacity: 0.08; pointer-events: none; }
+.home-hero-mark { position: absolute; right: 18px; top: 50%; transform: translateY(-50%); color: #fff; opacity: 0.1; pointer-events: none; }
 .home-hero > :not(.home-hero-mark) { position: relative; }
 .home-date {
   font-size: 0.6875rem;
@@ -722,7 +722,7 @@ section > .row.row-between:first-child > h1 { flex: 1; min-width: 0; }
   overflow: hidden;
   text-overflow: ellipsis;
   white-space: nowrap;
-  max-width: 70%;
+  max-width: calc(100% - 120px);
 }
 .home-stats {
   display: flex;
