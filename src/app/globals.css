@@ -698,7 +698,11 @@ section > .row.row-between:first-child > h1 { flex: 1; min-width: 0; }
   backdrop-filter: none;
 }
 .app-header[data-home] .icon-btn { background: var(--bg-elevated); }
-.app-today { position: relative; flex-basis: 100%; display: flex; flex-direction: column; gap: 6px; }
+.app-today { position: relative; flex-basis: 100%; display: flex; align-items: baseline; justify-content: space-between; gap: 12px; }
+/* Zilin altında sessiz eşitleme bilgisi (K-061) */
+.home-sync { display: inline-flex; align-items: center; gap: 6px; font-size: 0.75rem; font-weight: 500; color: var(--text-muted); white-space: nowrap; }
+.home-sync::before { content: ""; width: 6px; height: 6px; border-radius: 50%; background: var(--success-fg); }
+.home-sync[data-offline]::before { background: var(--warning-fg); }
 /* Soluk logo: kartın tam ortasında (alttaki logolu düğmeyle aynı dikey eksen), kart yüksekliğinin %80'i */
 .home-hero-mark {
   position: absolute;
@@ -713,7 +717,9 @@ section > .row.row-between:first-child > h1 { flex: 1; min-width: 0; }
 }
 .home-hero-mark svg { width: 100%; height: 100%; }
 .app-header[data-home] > :not(.home-hero-mark) { position: relative; }
-.app-header .wordmark-name { font-size: 1.125rem; }
+.app-header .wordmark-name { font-size: 1.3125rem; }
+/* Üst çubukta logo çerçevesiz (K-061): yalnızca halka ve onay */
+.app-logo { display: inline-flex; flex: 0 0 auto; color: var(--text-primary); }
 .home-hello {
   font-family: var(--font-brand);
   font-size: 1.0625rem;
