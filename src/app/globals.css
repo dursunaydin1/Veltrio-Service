@@ -699,17 +699,6 @@ section > .row.row-between:first-child > h1 { flex: 1; min-width: 0; }
 }
 .app-header[data-home] .icon-btn { background: var(--bg-elevated); }
 .app-today { position: relative; flex-basis: 100%; display: flex; align-items: baseline; justify-content: space-between; gap: 12px; }
-/* Zilin altında saat (K-062): tarihle aynı yazı tipi, pirinç, eşit genişlikli rakamlar */
-.home-clock {
-  font-family: var(--font-brand);
-  font-size: 1.0625rem;
-  font-weight: 600;
-  letter-spacing: 0.02em;
-  color: var(--accent-primary);
-  font-variant-numeric: tabular-nums;
-  white-space: nowrap;
-  padding-right: 10px;
-}
 /* Soluk logo: kartın tam ortasında (alttaki logolu düğmeyle aynı dikey eksen), kart yüksekliğinin %80'i */
 .home-hero-mark {
   position: absolute;

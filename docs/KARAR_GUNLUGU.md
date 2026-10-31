@@ -5,6 +5,9 @@
 
 ## 2026-10-31
 
+### K-063 · Saat kaldırıldı
+- Saat telefonun durum çubuğunda zaten görünüyor; tekrar ediyordu. Tarih satırının sağı bilerek boş bırakıldı (sade düzende boşluk da tasarımın parçası).
+
 ### K-062 · Zilin altında saat
 - İşletme sahibi "Eşitlendi" bilgisini istemedi, daha premium bir şey istedi. Tarih satırının sağına pirinç renkli saat ("14:32") kondu: soldaki tarihle birlikte saat kadranı gibi okunur, dakika başında güncellenir. Eşitleme sorunu olursa üst çubuktaki gösterge yine çıkar.
 
