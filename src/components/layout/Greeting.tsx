@@ -20,7 +20,7 @@ const TIME_FORMATTER = new Intl.DateTimeFormat("tr-TR", { hour: "2-digit", minut
 export function Greeting() {
   const [now, setNow] = useState<Date | null>(null);
   useEffect(() => {
-    setNow(new Date()); // eslint-disable-line react-hooks/set-state-in-effect
+    setNow(new Date());
     // Dakika başında güncelle, sonra her dakika
     let timer = window.setTimeout(function tick() {
       setNow(new Date());
