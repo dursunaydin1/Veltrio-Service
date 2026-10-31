@@ -609,8 +609,15 @@ section > .row.row-between:first-child > h1 { flex: 1; min-width: 0; }
   background: var(--bg-overlay);
   -webkit-backdrop-filter: saturate(160%) blur(14px);
   backdrop-filter: saturate(160%) blur(14px);
-  border-bottom: 1px solid var(--border-subtle);
 }
+/* Üst çubuk düğmeleri (K-055): ince çerçeveli yuvarlak, sakin */
+.app-header-actions .icon-btn {
+  width: var(--touch-min);
+  height: var(--touch-min);
+  border: 1px solid var(--border-subtle);
+  background: var(--bg-surface);
+}
+.app-header-actions .icon-btn:hover { border-color: var(--border-default); }
 
 .app-brand {
   display: flex;
@@ -621,20 +628,10 @@ section > .row.row-between:first-child > h1 { flex: 1; min-width: 0; }
 }
 .app-brand:hover { color: var(--text-primary); }
 
-.app-title {
-  font-size: 1rem;
-  font-weight: 700;
-  letter-spacing: -0.01em;
-  color: var(--text-primary);
-  overflow: hidden;
-  text-overflow: ellipsis;
-  white-space: nowrap;
-}
 
-.app-brand-text { display: flex; flex-direction: column; min-width: 0; line-height: 1.25; }
-.app-subtitle { font-size: 0.75rem; font-weight: 500; color: var(--text-muted); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
 
-.app-header-actions { display: flex; align-items: center; gap: 2px; flex: 0 0 auto; }
+
+.app-header-actions { display: flex; align-items: center; gap: 8px; flex: 0 0 auto; }
 
 .app-main {
   flex: 1;
@@ -685,6 +682,67 @@ section > .row.row-between:first-child > h1 { flex: 1; min-width: 0; }
   color: var(--accent-primary);
 }
 .wordmark-stacked { flex-direction: column; align-items: center; gap: 8px; }
+/* Üst çubuk (K-055): logonun yanında alt alta, sola dayalı; tabeladaki düzen */
+.wordmark-lockup { flex-direction: column; align-items: flex-start; gap: 5px; }
+.wordmark-lockup .wordmark-name { font-size: 1.1875rem; line-height: 1; }
+.wordmark-lockup .wordmark-tag { font-size: 0.5625rem; letter-spacing: 0.46em; line-height: 1; }
+
+/* Ana sayfa karşılama kartı (K-056) */
+.home-hero {
+  position: relative;
+  overflow: hidden;
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  padding: 18px;
+  background: var(--bg-surface);
+  border: 1px solid var(--border-subtle);
+  border-radius: var(--radius-xl);
+}
+.home-hero-mark { position: absolute; right: -36px; top: 50%; transform: translateY(-50%); color: #fff; opacity: 0.08; pointer-events: none; }
+.home-hero > :not(.home-hero-mark) { position: relative; }
+.home-date {
+  font-size: 0.6875rem;
+  font-weight: 600;
+  letter-spacing: 0.16em;
+  text-transform: uppercase;
+  color: var(--accent-primary);
+}
+.home-hello {
+  font-family: var(--font-brand);
+  font-size: 1.5rem;
+  font-weight: 600;
+  letter-spacing: -0.015em;
+  line-height: 1.15;
+  color: var(--text-primary);
+}
+.home-business {
+  font-size: 0.875rem;
+  color: var(--text-muted);
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  max-width: 70%;
+}
+.home-stats {
+  display: flex;
+  gap: 22px;
+  margin-top: 10px;
+  padding-top: 12px;
+  border-top: 1px solid var(--border-subtle);
+  font-size: 0.75rem;
+  color: var(--text-muted);
+}
+.home-stats:hover { color: var(--text-secondary); }
+.home-stats b {
+  display: block;
+  font-family: var(--font-brand);
+  font-size: 1.25rem;
+  font-weight: 600;
+  color: var(--text-primary);
+  font-variant-numeric: tabular-nums;
+}
+.home-stats [data-late] b { color: var(--danger-fg); }
 .wordmark-stacked .wordmark-tag { font-size: 0.42em; letter-spacing: 0.5em; margin-right: -0.5em; }
 
 .icon-btn {

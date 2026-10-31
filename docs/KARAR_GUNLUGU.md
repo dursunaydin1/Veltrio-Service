@@ -5,6 +5,14 @@
 
 ## 2026-10-31
 
+### K-056 · Ana sayfa karşılama kartı (seçenek A)
+- **Neden:** K-055'teki düz selam satırı işletme sahibine göre hâlâ estetik değildi. İki tasarım önizlemede karşılaştırıldı (A: karşılama kartı, B: sade başlık); işletme sahibi önerdiğim **A**'yı seçti.
+- **Yapılanlar:** Tarih ("Cumartesi · 31 Ekim", pirinç), iri selam ve işletme adı tek kartta; altında ince çizgiyle ayrılmış üç sayı: açık servis, teslimi yaklaşan, gecikmiş (gecikmiş varsa kırmızı). Dokununca Servisler açılır. Kartın sağında logonun soluk silueti. Üst çubuğun alt çizgisi kaldırıldı.
+
+### K-055 · Üst bölüm: marka bloğu ve ana sayfa karşılaması
+- **Neden:** İşletme sahibi üst çubuktaki "Veltrio Service" yazısını ve altındaki selam satırını estetik bulmadı; üç farklı yazı biçimi dar bir alana sıkışıyordu.
+- **Yapılanlar:** (1) Üst çubukta logo (40 px, pirinç halkalı) ve yanında tabeladaki gibi alt alta yazı: "Veltrio" iri, "SERVICE" küçük, harf aralıklı, pirinç. Her sayfada aynı. (2) Selam üst çubuktan çıktı; ana sayfanın en üstünde ayrı karşılama: pirinç renkli küçük tarih ("CUMA, 31 EKİM"), altında iri selam ("Günaydın") ve işletme adı. (3) Sağdaki düğmeler ince çerçeveli yuvarlak (44 px dokunma alanı korunur).
+
 ### K-054 · Fotoğraflar daha küçük: 1600 → 1200 px
 - **Neden:** Fotoğraflar kaydın içinde (veritabanında) tutuluyor. Ücretsiz Supabase planı 500 MB; 1600 px'te bir fotoğraf ≈ 200-400 KB, yani ≈ 1.500-2.500 fotoğraf. İşletme sahibi ücretsiz kalmak istedi; Google Drive değerlendirildi ve uygun bulunmadı (uygulama deposu değil, doğrudan gösterim bağlantısı güvenilmez, ayrı yetkilendirme ve yükleme kuyruğu gerekir).
 - **Karar:** Uzun kenar 1200 px (JPEG kalite 0,7 aynı). Bir fotoğraf ≈ 100-150 KB; ücretsiz planda ≈ 4-5 bin fotoğraf. Telefonda görünür fark yok. Önceden kaydedilmiş fotoğraflar değişmez.
