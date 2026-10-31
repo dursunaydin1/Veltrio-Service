@@ -717,13 +717,18 @@ section > .row.row-between:first-child > h1 { flex: 1; min-width: 0; }
 /* Üst çubukta logo çerçevesiz (K-061): yalnızca halka ve onay */
 .app-logo { display: inline-flex; flex: 0 0 auto; color: var(--text-primary); }
 .home-hello {
+  min-width: 0;
   font-family: var(--font-brand);
   font-size: 1.0625rem;
   font-weight: 600;
   letter-spacing: -0.01em;
   line-height: 1.2;
-  color: var(--text-secondary);
+  color: var(--text-primary);
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
 }
+.home-date { flex: 0 0 auto; padding-right: 8px; font-size: 0.8125rem; font-weight: 500; color: var(--text-muted); white-space: nowrap; }
 .wordmark-stacked .wordmark-tag { font-size: 0.42em; letter-spacing: 0.5em; margin-right: -0.5em; }
 
 .icon-btn {

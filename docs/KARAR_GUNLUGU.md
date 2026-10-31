@@ -5,6 +5,9 @@
 
 ## 2026-10-31
 
+### K-064 · Ana sayfa kartında kişisel selam
+- İşletme sahibi profesyonel bir karşılama istedi. Tarih satırı: solda saate göre selam ve kullanıcının ilk adı ("İyi akşamlar, Dursun"; kullanıcı adı yoksa işletme sahibinin adı, o da yoksa yalnızca selam), sağda zilin altında küçük ve sönük tarih ("31 Ekim Cumartesi").
+
 ### K-063 · Saat kaldırıldı
 - Saat telefonun durum çubuğunda zaten görünüyor; tekrar ediyordu. Tarih satırının sağı bilerek boş bırakıldı (sade düzende boşluk da tasarımın parçası).
 
