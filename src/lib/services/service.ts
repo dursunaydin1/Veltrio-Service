@@ -157,7 +157,7 @@ export type OpenServiceParams = {
   promisedDate?: string;
   /** Kabulde alınan kapora */
   deposit?: { amountKurus: number; method: PaymentMethod };
-  /** Kabul fotoğrafı (JPEG data URL, ≤1600px) */
+  /** Kabul fotoğrafı (JPEG data URL, ≤1200px) */
   photo?: string;
   /** Garanti talebi (SR-011): kaynak ve kapsam açıklaması isteğe bağlı */
   warranty?: { source?: string; coverage?: string };

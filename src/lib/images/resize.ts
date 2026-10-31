@@ -1,13 +1,14 @@
 /**
- * İstemci tarafında fotoğraf küçültme (FR-028): uzun kenar 1600 px'i geçmez,
+ * İstemci tarafında fotoğraf küçültme (FR-028): uzun kenar 1200 px'i geçmez,
  * JPEG olarak kaydedilir. Fotoğraf yerel veritabanında ve eşitlemede metin
- * (data URL) olarak taşındığı için boyut kısıtlıdır.
+ * (data URL) olarak taşındığı için boyut kısıtlıdır. K-054: 1600 → 1200 px; bir fotoğraf
+ * ≈ 100-150 KB olur, ücretsiz Supabase planına 4-5 bin fotoğraf sığar. Eski fotoğraflar değişmez.
  */
 
-export const MAX_EDGE = 1600;
+export const MAX_EDGE = 1200;
 export const JPEG_QUALITY = 0.7;
-/** Küçültmeden sonra kabul edilen en büyük data URL uzunluğu (≈ 1,2 MB) */
-export const MAX_DATA_URL_LENGTH = 1_600_000;
+/** Küçültmeden sonra kabul edilen en büyük data URL uzunluğu (≈ 0,75 MB) */
+export const MAX_DATA_URL_LENGTH = 1_000_000;
 
 /** Oranı koruyarak en uzun kenarı `max`'a sığdırır; küçükse büyütmez. */
 export function fitWithin(width: number, height: number, max: number = MAX_EDGE): { width: number; height: number } {

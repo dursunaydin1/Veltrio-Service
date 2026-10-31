@@ -79,7 +79,7 @@ export interface Service {
   /** Garanti kaynağı (üretici, bayi, satış garantisi…) ve kapsam açıklaması */
   warranty_source?: string;
   warranty_coverage?: string;
-  /** İsteğe bağlı kabul fotoğrafı (JPEG data URL, ≤1600px) */
+  /** İsteğe bağlı kabul fotoğrafı (JPEG data URL, ≤1200px) */
   intake_photo?: string;
   /** İptal edilen serviste alınan inceleme / teşhis ücreti (TL) */
   cancel_fee?: number;

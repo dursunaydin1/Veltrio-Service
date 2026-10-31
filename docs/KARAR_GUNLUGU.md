@@ -3,6 +3,13 @@
 > Plandan (docs/00–07) veya PRD'den sapmaların, düzeltmelerin ve yeni çözümlerin kaydı. Yeni kayıtlar en üste eklenir.
 > Biçim: **Ne değişti → Neden → Sonuç / etkilenen dosyalar**
 
+## 2026-10-31
+
+### K-054 · Fotoğraflar daha küçük: 1600 → 1200 px
+- **Neden:** Fotoğraflar kaydın içinde (veritabanında) tutuluyor. Ücretsiz Supabase planı 500 MB; 1600 px'te bir fotoğraf ≈ 200-400 KB, yani ≈ 1.500-2.500 fotoğraf. İşletme sahibi ücretsiz kalmak istedi; Google Drive değerlendirildi ve uygun bulunmadı (uygulama deposu değil, doğrudan gösterim bağlantısı güvenilmez, ayrı yetkilendirme ve yükleme kuyruğu gerekir).
+- **Karar:** Uzun kenar 1200 px (JPEG kalite 0,7 aynı). Bir fotoğraf ≈ 100-150 KB; ücretsiz planda ≈ 4-5 bin fotoğraf. Telefonda görünür fark yok. Önceden kaydedilmiş fotoğraflar değişmez.
+- **Sonraki adım (gerekirse):** 500 MB zorlanırsa önce Supabase Storage (≈ 1 GB ücretsiz, aynı güvenlik kuralları), çok büyürse Cloudflare R2 (≈ 10 GB ücretsiz). Kayıt başına birden fazla fotoğraf istenirse de bu taşıma yapılır.
+
 ## 2026-10-30
 
 ### K-053 · Canlıya hazırlık: hata ekranları, hata kaydı, kendi yazı tiplerimiz, CSP, sade menü ve fiş

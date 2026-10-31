@@ -5,7 +5,7 @@ import { resizeImageFile } from "@/lib/images/resize";
 
 /**
  * İsteğe bağlı fotoğraf alanı (FR-028): telefonda kamera veya galeri açılır,
- * seçilen görsel istemcide 1600 px'e küçültülür. Değer JPEG data URL'dir.
+ * seçilen görsel istemcide 1200 px'e küçültülür. Değer JPEG data URL'dir.
  */
 export function PhotoField({
   label,
