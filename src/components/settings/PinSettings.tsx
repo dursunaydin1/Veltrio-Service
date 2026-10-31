@@ -2,6 +2,7 @@
 
 import { useState, useSyncExternalStore } from "react";
 import { attemptUnlock, hasPin, removePin, setPin, validatePinFormat } from "@/lib/pin/pin";
+import { PageHead } from "@/components/layout/PageHead";
 
 const subscribeStorage = (cb: () => void) => {
   window.addEventListener("storage", cb);
@@ -68,7 +69,7 @@ export function PinSettings() {
 
   return (
     <section className="stack stack-md">
-      <h1>Cihaz PIN kodu</h1>
+      <PageHead title="Cihaz PIN kodu" />
       <p>
         PIN, bu cihazda uygulamayı hızlıca açmak içindir (4-8 rakam). 5 hatalı denemede cihaz geçici olarak kilitlenir.
         PIN&apos;i unutursanız şifrenizle yeniden giriş yaparsınız.

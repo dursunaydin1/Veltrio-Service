@@ -8,6 +8,7 @@ import { ACTION_LABEL, ENTITY_LABEL, describeChange, entityHref } from "@/lib/au
 import { useSessionStore } from "@/stores/session";
 import { foldText } from "@/lib/utils/search";
 import { formatDateTime } from "@/lib/utils";
+import { PageHead } from "@/components/layout/PageHead";
 
 const PAGE = 50;
 
@@ -40,7 +41,7 @@ export function AuditHistory() {
 
   return (
     <section className="stack stack-md">
-      <h1>Geçmiş</h1>
+      <PageHead title="Geçmiş" />
       <p>Kritik işlemler (iade, iptal, stok düzeltme, arşivleme, cihaz iptali, ayar değişikliği…) burada değiştirilemez kayıt olarak tutulur.</p>
       <div className="row row-gap-md">
         <select className="form-input" style={{ flex: 1 }} aria-label="Kayıt türü" value={entity} onChange={(e) => { setEntity(e.target.value); setLimit(PAGE); }}>

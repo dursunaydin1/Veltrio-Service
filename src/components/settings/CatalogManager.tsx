@@ -18,6 +18,7 @@ import {
 } from "@/lib/catalog/service";
 import { useSessionStore } from "@/stores/session";
 import { formatCurrency } from "@/lib/utils";
+import { PageHead } from "@/components/layout/PageHead";
 
 type Kind = "OPERATION" | "ISSUE";
 type Entry = (OperationCatalogEntry | IssueCatalogEntry) & { suggested_price?: number; default_duration?: number };
@@ -39,7 +40,7 @@ export function CatalogManager() {
 
   return (
     <section className="stack stack-md">
-      <h1>Kataloglar</h1>
+      <PageHead title="Kataloglar" />
       <div role="tablist" aria-label="Katalog türü">
         {([["OPERATION", "İşlemler"], ["ISSUE", "Arızalar"]] as const).map(([id, label]) => (
           <button

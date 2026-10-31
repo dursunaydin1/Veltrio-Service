@@ -5,6 +5,12 @@
 
 ## 2026-10-31
 
+### K-068 · Tüm ekranların başlığı üst kartta
+- **Neden:** İşletme sahibi Menü'de başlığın kartın dışında kaldığını gördü; her ekranda ana sayfadaki düzeni istedi.
+- **Ne:** Menü, Raporlar (ve her rapor), Ayarlar ve alt ekranları, Yardım, Ara, Bildirimler, QR Tara, Dışa/İçe aktar, Bakiyeler ve tüm "… ekle / Satış yap / Satın alma" form ekranlarının başlığı `PageHead` ile kartın alt satırında. Menü'deki işletme adı ve son eşitleme bilgisi sayfada kaldı.
+- **Yazdırma:** Kart yazdırılmadığı için başlık yalnızca baskıda sayfada da çıkar (`.print-title`).
+- **Kalan:** Kayıt detay ekranları (servis, satış, müşteri…) başlıklarının yanında durum ve düğmeler olduğu için şimdilik sayfada.
+
 ### K-067 · Liste ekranlarının üst kartı ana sayfayla birebir
 - **Neden:** İşletme sahibi diğer ekranlarda da ana sayfadaki kartı (ortada soluk logo, solda logo ve yazı, altta iki kenarda başlık ve işlem) istedi; dolu pirinç "+" düğmesini estetik bulmadı.
 - **Düzeltme:** K-066'daki başlık satırı eski `.page-head` stiliyle çakışıp alt alta diziliyordu; ad `.card-row` oldu. Başlık, selamla aynı yazı biçiminde.

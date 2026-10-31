@@ -7,6 +7,7 @@ import type { ServiceTemplate } from "@/lib/db";
 import { useBusinessContext } from "@/hooks/useBusinessContext";
 import { createTemplate, getTemplateItems, setTemplateActive, updateTemplate } from "@/lib/catalog/service";
 import { useSessionStore } from "@/stores/session";
+import { PageHead } from "@/components/layout/PageHead";
 
 type Row = { title: string; required: boolean };
 
@@ -33,7 +34,7 @@ export function TemplateManager() {
 
   return (
     <section className="stack stack-md">
-      <h1>Servis şablonları</h1>
+      <PageHead title="Servis şablonları" />
       <p>
         Şablon uygulandığında maddeler servise kopyalanır. Şablonu sonradan değiştirmek açık servislerdeki maddeleri
         değiştirmez.

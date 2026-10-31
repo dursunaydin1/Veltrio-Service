@@ -32,6 +32,7 @@ import {
   type Decision,
   type ValidatedRow,
 } from "@/lib/import/validate";
+import { PageHead } from "@/components/layout/PageHead";
 
 type Step = "pick" | "map" | "preview" | "done";
 
@@ -146,7 +147,7 @@ export function ImportWizard() {
 
   return (
     <section className="stack stack-md">
-      <h1>İçe aktar</h1>
+      <PageHead title="İçe aktar" />
       {!isOnline ? <div className="alert alert-error" role="alert">Çevrimdışısınız: içe aktarma sunucu doğrulaması gerektirdiğinden internete bağlanmalısınız.</div> : null}
       {error ? <div className="alert alert-error" role="alert">{error}</div> : null}
 

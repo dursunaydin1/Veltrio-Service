@@ -5,6 +5,7 @@ import { useLiveQuery } from "dexie-react-hooks";
 import { useSessionStore } from "@/stores/session";
 import { DATASETS } from "@/lib/reports/datasets";
 import { RangePicker, ReportTable, ExportPanel, useReportRange } from "./ReportParts";
+import { PageHead } from "@/components/layout/PageHead";
 
 /** Dışa aktarma merkezi (Adım 6.8): hedef seçilir, kimlik doğrulanır, uyarı onaylanır ve dosya indirilir. */
 export function ExportHub() {
@@ -20,7 +21,7 @@ export function ExportHub() {
 
   return (
     <section className="stack stack-md">
-      <h1>Dışa aktar</h1>
+      <PageHead title="Dışa aktar" />
       <p>Verilerinizi Excel veya CSV olarak indirin. Dosyalar müşteri ve mali bilgi içerir; indirmeden önce kimliğiniz doğrulanır.</p>
       <div className="form-group no-print">
         <label className="form-label" htmlFor="ex-dataset">Ne aktarılsın?</label>

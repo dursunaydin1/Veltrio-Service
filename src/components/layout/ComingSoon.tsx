@@ -1,8 +1,10 @@
+import { PageHead } from "@/components/layout/PageHead";
+
 /** Henüz geliştirilmemiş bölümler için geçici sayfa içeriği. */
 export function ComingSoon({ title, phase }: { title: string; phase: string }) {
   return (
     <section className="stack stack-md">
-      <h1>{title}</h1>
+      <PageHead title={title} />
       <div className="empty-state" role="note">
         Bu bölüm {phase} kapsamında geliştirilecek.
       </div>

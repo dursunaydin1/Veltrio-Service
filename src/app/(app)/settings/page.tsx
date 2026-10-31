@@ -1,12 +1,13 @@
 import type { Metadata } from "next";
 import Link from "next/link";
+import { PageHead } from "@/components/layout/PageHead";
 
 export const metadata: Metadata = { title: "Ayarlar" };
 
 export default function Page() {
   return (
     <section className="stack stack-md">
-      <h1>Ayarlar</h1>
+      <PageHead title="Ayarlar" />
       <ul className="menu-list" aria-label="Ayarlar">
         <li><Link href="/settings/business">İşletme bilgileri ve ayarlar (onay eşiği, hatırlatma, stok…)</Link></li>
         <li><Link href="/settings/catalog">Arıza ve işlem katalogları</Link></li>

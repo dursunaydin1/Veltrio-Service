@@ -1,5 +1,6 @@
 import type { Metadata } from "next";
 import { MachineForm } from "@/components/machines/MachineForm";
+import { PageHead } from "@/components/layout/PageHead";
 
 export const metadata: Metadata = { title: "Yeni makine" };
 
@@ -11,7 +12,7 @@ export default async function NewMachinePage({
   const { customer } = await searchParams;
   return (
     <section className="stack stack-md">
-      <h1>Makine ekle</h1>
+      <PageHead title="Makine ekle" />
       <MachineForm initialCustomerId={customer} />
     </section>
   );

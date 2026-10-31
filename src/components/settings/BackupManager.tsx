@@ -18,6 +18,7 @@ import {
   type RestoreResult,
 } from "@/lib/backup/backup";
 import { formatDateTime } from "@/lib/utils";
+import { PageHead } from "@/components/layout/PageHead";
 
 type ServerBackup = { id: string; kind: string; status: string; created_at: string; size_bytes: number | null; error: string | null };
 
@@ -124,7 +125,7 @@ export function BackupManager() {
 
   return (
     <section className="stack stack-md">
-      <h1>Yedekleme</h1>
+      <PageHead title="Yedekleme" />
       <div className="card stack stack-sm">
         <strong>Son yedek (bu cihaz)</strong>
         <span>

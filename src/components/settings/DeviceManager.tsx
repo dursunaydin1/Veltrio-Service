@@ -8,6 +8,7 @@ import { useBusinessContext } from "@/hooks/useBusinessContext";
 import { useSessionStore } from "@/stores/session";
 import { formatDateTime } from "@/lib/utils";
 import type { Device } from "@/types";
+import { PageHead } from "@/components/layout/PageHead";
 
 type Row = Device & { wipe_confirmed_at?: string };
 
@@ -67,7 +68,7 @@ export function DeviceManager() {
 
   return (
     <section className="stack stack-md">
-      <h1>Cihazlar</h1>
+      <PageHead title="Cihazlar" />
       <p>
         Bu hesaba kayıtlı cihazlar. Kayıp veya çalıntı bir cihazı iptal ederseniz internete bağlandığında yerel verisini
         siler ve bir daha eşitleme yapamaz.

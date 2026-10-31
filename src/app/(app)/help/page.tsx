@@ -1,5 +1,6 @@
 import type { Metadata } from "next";
 import Link from "next/link";
+import { PageHead } from "@/components/layout/PageHead";
 
 export const metadata: Metadata = { title: "Yardım" };
 
@@ -41,7 +42,7 @@ const TOPICS: { title: string; body: string }[] = [
 export default function HelpPage() {
   return (
     <section className="stack stack-md">
-      <h1>Yardım</h1>
+      <PageHead title="Yardım" />
       <ul className="menu-list" aria-label="Sık sorulanlar">
         {TOPICS.map((t) => (
           <li key={t.title} style={{ display: "block", padding: 0 }}>

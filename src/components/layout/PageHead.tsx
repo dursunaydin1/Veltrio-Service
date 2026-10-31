@@ -9,7 +9,7 @@ import { Plus } from "lucide-react";
 export const PageHeadSlot = createContext<HTMLElement | null>(null);
 
 /**
- * Liste ekranının başlığı ve "ekle" düğmesi (K-066): ana sayfadaki selam satırı gibi
+ * Ekran başlığı ve isteğe bağlı "ekle" düğmesi (K-066, K-068): ana sayfadaki selam satırı gibi
  * üst kartın içinde görünür. Kart yoksa (ör. testte) yerinde çizilir.
  */
 export function PageHead({ title, addHref, addLabel }: { title: string; addHref?: string; addLabel?: string }) {
@@ -25,5 +25,12 @@ export function PageHead({ title, addHref, addLabel }: { title: string; addHref?
       ) : null}
     </div>
   );
-  return slot ? createPortal(head, slot) : head;
+  if (!slot) return head;
+  // Yazdırırken üst kart gizlenir; başlık sayfada kalsın (raporlar)
+  return (
+    <>
+      {createPortal(head, slot)}
+      <p className="print-title" aria-hidden="true">{title}</p>
+    </>
+  );
 }

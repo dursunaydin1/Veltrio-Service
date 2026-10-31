@@ -4,6 +4,7 @@ import { useState } from "react";
 import { useBusinessContext } from "@/hooks/useBusinessContext";
 import { findStockMismatches, repairStockMismatches, type StockMismatch } from "@/lib/stock/integrity";
 import { formatQuantity } from "@/lib/utils";
+import { PageHead } from "@/components/layout/PageHead";
 
 /**
  * Veri denetimi (ST-013, TC-054): stok özetini hareket defteriyle karşılaştırır;
@@ -30,7 +31,7 @@ export function DataCheck() {
 
   return (
     <section className="stack stack-md">
-      <h1>Veri denetimi</h1>
+      <PageHead title="Veri denetimi" />
       <p>
         Ürünlerin stok özeti, stok hareket defterinden yeniden hesaplanıp karşılaştırılır. Fark bulunursa hareketler esas
         alınır; hareketler hiçbir zaman değiştirilmez.

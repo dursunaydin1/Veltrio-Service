@@ -6,6 +6,7 @@ import { parseSettingsForm, toSettingsForm, type SettingsFormInput } from "@/lib
 import { writeAuditLog } from "@/lib/sync/audit";
 import { useBusinessContext } from "@/hooks/useBusinessContext";
 import { useSessionStore } from "@/stores/session";
+import { PageHead } from "@/components/layout/PageHead";
 
 type Errors = Partial<Record<keyof SettingsFormInput | "name" | "ownerName", string>>;
 
@@ -89,7 +90,7 @@ export function BusinessSettingsForm() {
 
   return (
     <form className="stack stack-lg" onSubmit={submit} noValidate>
-      <h1>İşletme ayarları</h1>
+      <PageHead title="İşletme ayarları" />
 
       <section className="card stack stack-md" aria-labelledby="bs-info">
         <h2 id="bs-info">İşletme bilgileri</h2>

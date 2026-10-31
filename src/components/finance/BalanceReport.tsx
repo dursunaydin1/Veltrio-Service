@@ -9,6 +9,7 @@ import { AGING_BANDS, type AgingBandId } from "@/lib/finance/aging";
 import { getCustomerOpenItems } from "@/lib/finance/openItems";
 import { getSupplierBalance } from "@/lib/finance/service";
 import { formatCurrency } from "@/lib/utils";
+import { PageHead } from "@/components/layout/PageHead";
 
 const money = (kurus: number) => formatCurrency(kurus / 100);
 
@@ -69,7 +70,7 @@ export function BalanceReport() {
 
   return (
     <section className="stack stack-md">
-      <h1>Bakiyeler</h1>
+      <PageHead title="Bakiyeler" />
       <div role="tablist" aria-label="Bakiye türü">
         {([["CUSTOMERS", "Müşteriler"], ["SUPPLIERS", "Tedarikçiler"]] as const).map(([id, label]) => (
           <button

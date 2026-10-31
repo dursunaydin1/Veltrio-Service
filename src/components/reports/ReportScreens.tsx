@@ -30,12 +30,13 @@ import { statusLabel } from "@/lib/services/status";
 import { PAYMENT_METHOD_LABELS } from "@/lib/finance/service";
 import { formatDateTime, formatQuantity } from "@/lib/utils";
 import { ExportPanel, RangePicker, ReportTable, useReportRange } from "./ReportParts";
+import { PageHead } from "@/components/layout/PageHead";
 
 function useBusinessId() {
   return useSessionStore((s) => s.business?.id);
 }
 
-const Title = ({ children }: { children: string }) => <h1>{children}</h1>;
+const Title = ({ children }: { children: string }) => <PageHead title={children} />;
 
 // ---------------------------------------------------------------- Satış
 

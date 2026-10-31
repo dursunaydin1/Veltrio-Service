@@ -1,5 +1,6 @@
 import type { Metadata } from "next";
 import Link from "next/link";
+import { PageHead } from "@/components/layout/PageHead";
 
 export const metadata: Metadata = { title: "Raporlar" };
 
@@ -33,7 +34,7 @@ const GROUPS: { title: string; links: { href: string; label: string }[] }[] = [
 export default function Page() {
   return (
     <section className="stack stack-md">
-      <h1>Raporlar</h1>
+      <PageHead title="Raporlar" />
       {GROUPS.map((g) => (
         <section key={g.title} className="stack stack-sm" aria-label={g.title}>
           <h2>{g.title}</h2>

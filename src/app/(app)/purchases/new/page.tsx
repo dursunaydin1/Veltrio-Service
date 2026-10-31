@@ -1,5 +1,6 @@
 import type { Metadata } from "next";
 import { PurchaseForm } from "@/components/purchases/PurchaseForm";
+import { PageHead } from "@/components/layout/PageHead";
 
 export const metadata: Metadata = { title: "Yeni alım" };
 
@@ -11,7 +12,7 @@ export default async function NewPurchasePage({
   const { supplier } = await searchParams;
   return (
     <section className="stack stack-md">
-      <h1>Satın alma</h1>
+      <PageHead title="Satın alma" />
       <PurchaseForm initialSupplierId={supplier} />
     </section>
   );

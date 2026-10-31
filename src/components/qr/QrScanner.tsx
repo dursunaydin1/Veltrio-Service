@@ -3,6 +3,7 @@
 import { useEffect, useRef, useState } from "react";
 import { useRouter } from "next/navigation";
 import { parseScan } from "@/lib/qr/payload";
+import { PageHead } from "@/components/layout/PageHead";
 
 const REGION_ID = "qr-reader";
 
@@ -72,7 +73,7 @@ export function QrScanner() {
 
   return (
     <section className="stack stack-md">
-      <h1>QR Tara</h1>
+      <PageHead title="QR Tara" />
       <div id={REGION_ID} style={{ width: "100%", maxWidth: 360, margin: "0 auto", minHeight: 240 }} aria-label="Kamera görüntüsü" />
       {starting ? <p>Kamera hazırlanıyor…</p> : null}
       {error ? <div className="alert alert-warning" role="alert">{error}</div> : null}

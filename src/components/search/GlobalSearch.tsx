@@ -5,6 +5,7 @@ import Link from "next/link";
 import { useLiveQuery } from "dexie-react-hooks";
 import { useSessionStore } from "@/stores/session";
 import { MIN_QUERY_LENGTH, SEARCH_KIND_LABEL, searchAll, type SearchHit, type SearchKind } from "@/lib/search/globalSearch";
+import { PageHead } from "@/components/layout/PageHead";
 
 const ORDER: SearchKind[] = ["customer", "machine", "service", "sale", "purchase", "product", "supplier"];
 
@@ -25,7 +26,7 @@ export function GlobalSearch() {
 
   return (
     <section className="stack stack-md">
-      <h1>Ara</h1>
+      <PageHead title="Ara" />
       <input
         className="form-input"
         type="search"

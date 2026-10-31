@@ -14,6 +14,7 @@ import {
 } from "lucide-react";
 import { logoutAction } from "@/app/(auth)/login/actions";
 import { LastSyncInfo } from "@/components/layout/LastSyncInfo";
+import { PageHead } from "@/components/layout/PageHead";
 
 export const metadata: Metadata = { title: "Menü" };
 
@@ -36,10 +37,8 @@ const LINKS = [
 export default function MorePage() {
   return (
     <section className="stack stack-lg">
-      <header className="page-head">
-        <h1>Menü</h1>
-        <LastSyncInfo />
-      </header>
+      <PageHead title="Menü" />
+      <LastSyncInfo />
 
       <ul className="menu-list" aria-label="Kayıtlar">
         {RECORDS.map(({ href, label, Icon }) => (

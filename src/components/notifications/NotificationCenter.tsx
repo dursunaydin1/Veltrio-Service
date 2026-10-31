@@ -13,6 +13,7 @@ import { ConflictResolveError, resolveKeepMine, resolveKeepServer, retryItem } f
 import { readLastBackup } from "@/lib/backup/backup";
 import { formatDateTime } from "@/lib/utils";
 import type { SyncQueueItem } from "@/types";
+import { PageHead } from "@/components/layout/PageHead";
 
 const TYPE_LABEL: Record<string, string> = {
   CUSTOMER_APPROVAL_NEEDED: "Onay bekleniyor",
@@ -79,7 +80,7 @@ export function NotificationCenter() {
 
   return (
     <section className="stack stack-md">
-      <h1>Eşitleme ve bildirimler</h1>
+      <PageHead title="Eşitleme ve bildirimler" />
 
       <div className="tile-grid" aria-label="Eşitleme durumu">
         <div className="tile">
