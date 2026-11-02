@@ -5,6 +5,12 @@
 
 ## 2026-11-02
 
+### K-078 · Ana sayfada geri: "Çıkmak için tekrar geri yapın"; tek "Fotoğraf ekle"
+- **Sorun:** Ana sayfada geri yapınca uygulama kapanmıyor, eski sayfalara (ör. çıkıştan önceki Menü) dönüyordu; işletme sahibi doğrudan çıkış yerine onay istedi.
+- **Kısıt:** Web uygulaması kendini kodla kapatamaz ve "Çık / Vazgeç" düğmeli bir pencereden uygulamayı kapatamaz. Kapatma ancak telefonun kendi geri hareketiyle olur.
+- **Çözüm:** Android'deki alışıldık yol: ana sayfada ilk geri hareketi uygulamadan çıkmaz, alt çubuğun üstünde "Çıkmak için tekrar geri yapın" uyarısı çıkar; 2,5 sn içinde ikinci geri uygulamayı kapatır, yoksa uyarı kalkar. Ana sayfanın üstüne aynı adreste bir "bekçi" geçmiş kaydı konarak yapılır (`useNavTracker`). Giriş ve çıkış yönlendirmeleri artık geçmişe yeni kayıt eklemez (`RedirectType.replace`), böylece ana sayfanın altında eski sayfa kalmaz.
+- **Fotoğraf:** K-076'daki iki düğme geri alındı. "Galeriden seç" Chrome'da dosya yöneticisini açıyordu. Tek "Fotoğraf ekle" düğmesi telefonun kendi seçicisini açar; kamera ve galeri oradan seçilir (diğer uygulamalardaki gibi). Seçicinin görünümü telefona ve Chrome sürümüne bağlıdır.
+
 ### K-077 · Uzun listeler parça parça; makine marka / model önerileri
 - **Listeler:** Yedi liste ekranı önce 30 kayıt çizer; aşağı inince sıradaki 30 kendiliğinden gelir ("N kayıt daha göster" düğmesi de var). Arama ve sekme değişince baştan başlar. Telefonda yüzlerce satırı bir anda çizmek yavaşlatıyordu.
 - **Makine formu:** Marka kutusu önceki kayıtlardaki markaları (en çok kullanılan önce) ve yaygın markaları önerir; model kutusu yazılan markanın önceki modellerini önerir. Serbest yazım yine mümkün; ayrı bir marka/model kataloğu şimdilik gerekmedi.
@@ -13,7 +19,7 @@
 - **Neden:** İşletme sahibi telefonda geri hareketinin geçmişi tersine sardığını, oysa üst basamağa çıkıp ana sayfada bitmesi gerektiğini söyledi.
 - **Geri hareketi:** Alt çubuktaki sekmeler geçmişte birikmez; başka bir yerden sekmeye dokununca önce ana sayfaya dönülür, sekme onun üstüne açılır. Geri: kayıt → liste → ana sayfa → uygulamadan çıkış. Logo da ana sayfaya geri sarar. Kayıt formları kaydedilince geçmişten çıkar (geri formu yeniden açmaz). Mantık `src/lib/nav/history.ts` (+ test), bağlantı `useAppNav`.
 - **Kayıttan sonra:** Yeni müşteri / tedarikçi / ürün kaydedilince listeye değil kaydın sayfasına gidilir (sıradaki iş genelde makine eklemek, servis açmak…).
-- **Fotoğraf:** "Fotoğraf çek" ve "Galeriden seç" ayrı düğmeler (müşteri, ürün, servis kabul fotoğrafı).
+- **Fotoğraf:** "Fotoğraf çek" ve "Galeriden seç" ayrı düğmeler (müşteri, ürün, servis kabul fotoğrafı). K-078 ile tek düğmeye dönüldü.
 
 ### K-075 · QR: izinsiz yol "Fotoğraf çekerek okut"
 - **Neden:** İşletme sahibi haklı olarak, kullanıcıların Chrome ayarlarıyla uğraşmayacağını söyledi; uygulama içinden aç-kapa istedi.

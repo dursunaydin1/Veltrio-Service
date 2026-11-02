@@ -43,7 +43,7 @@ export function AppShell({ children }: { children: React.ReactNode }) {
   // Üst çubuk her ekranda kart (K-066). Ana sayfada büyük arama kutusu olduğu için üstteki arama simgesi gizlenir, kartta selam satırı olur (K-059); soluk logo her ekranda (K-067)
   const pathname = usePathname();
   // Telefonun geri hareketi basamak basamak ana sayfaya iner (K-076)
-  useNavTracker();
+  const exitHint = useNavTracker();
   const { goHome } = useAppNav();
   const onHome = pathname === "/dashboard";
   // Kendi arama kutusu olan ekranlarda genel arama simgesi gizlenir; iki arama yan yana durmaz (K-070)
@@ -97,6 +97,9 @@ export function AppShell({ children }: { children: React.ReactNode }) {
         <PwaBanner />
         <PageHeadSlot.Provider value={onHome ? null : headSlot}>{children}</PageHeadSlot.Provider>
       </main>
+      {exitHint ? (
+        <div className="exit-hint" role="status">Çıkmak için tekrar geri yapın</div>
+      ) : null}
       <BottomNav />
     </div>
     </PinGate>

@@ -705,6 +705,25 @@ section > .row.row-between:first-child > h1 { flex: 1; min-width: 0; }
 .page-head-slot { flex-basis: 100%; }
 .page-head-slot:empty { display: none; }
 .print-title { display: none; }
+/* Ana sayfada ilk geri hareketinde çıkış uyarısı (K-078): alt çubuğun hemen üstünde */
+.exit-hint {
+  position: fixed;
+  left: 50%;
+  bottom: calc(var(--nav-h) + 40px + env(safe-area-inset-bottom));
+  z-index: 60;
+  transform: translateX(-50%);
+  padding: 10px 18px;
+  border: 1px solid var(--border-default);
+  border-radius: var(--radius-full);
+  background: var(--bg-elevated);
+  color: var(--text-primary);
+  font-size: 0.875rem;
+  font-weight: 600;
+  white-space: nowrap;
+  box-shadow: var(--shadow-tab);
+  animation: fade-in 160ms ease both;
+}
+
 /* QR kamera izni kartı (K-074) */
 .permission-card { align-items: flex-start; }
 .permission-card p, .permission-card small { color: var(--text-secondary); line-height: 1.5; }

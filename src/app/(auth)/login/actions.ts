@@ -1,7 +1,7 @@
 "use server";
 
 import { createClient } from "@/lib/supabase/server";
-import { redirect } from "next/navigation";
+import { redirect, RedirectType } from "next/navigation";
 import { safeNextPath } from "@/lib/auth/redirect";
 
 export async function loginAction(formData: FormData) {
@@ -30,11 +30,12 @@ export async function loginAction(formData: FormData) {
     return { error: "Giriş yapılamadı. Lütfen tekrar deneyin." };
   }
 
-  redirect(safeNextPath(formData.get("next") as string | null));
+  // Giriş ve çıkış ekranı geçmişte kalmasın: geri hareketi giriş ekranına dönmesin (K-078)
+  redirect(safeNextPath(formData.get("next") as string | null), RedirectType.replace);
 }
 
 export async function logoutAction() {
   const supabase = await createClient();
   await supabase.auth.signOut();
-  redirect("/login");
+  redirect("/login", RedirectType.replace);
 }
