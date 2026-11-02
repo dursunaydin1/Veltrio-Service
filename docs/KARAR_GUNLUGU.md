@@ -5,6 +5,11 @@
 
 ## 2026-11-02
 
+### K-075 · QR: izinsiz yol "Fotoğraf çekerek okut"
+- **Neden:** İşletme sahibi haklı olarak, kullanıcıların Chrome ayarlarıyla uğraşmayacağını söyledi; uygulama içinden aç-kapa istedi.
+- **Kısıt:** Web uygulaması izni kendisi açamaz ve telefonun / Chrome'un ayar ekranına bağlantı veremez (güvenlik gereği). Bu ancak yerel uygulama sarmalayıcısıyla (ör. Capacitor, mağaza sürümü) mümkün.
+- **Çözüm:** "Fotoğraf çekerek okut": telefonun kendi kamera uygulaması açılır, çekilen fotoğraftaki QR çözülür (`html5-qrcode` `scanFile`); tarayıcı kamera izni gerekmez. İzin reddedildiyse ana yol bu; izin açma adımları katlanmış "isterseniz" bölümünde. İzin hiç sorulmadıysa "Kamerayı aç" yine ilk seçenek (canlı tarama daha hızlı).
+
 ### K-074 · "E-postamı hatırla" ve QR kamera izni akışı
 - **Oturum:** Giriş zaten kalıcı; çıkış yapılmadıkça uygulama her açılışta yeniden sormaz (hızlı açılış için PIN var). Bilinçli çıkıştan sonra şifre istenmesi doğru davranış; "beni hatırla" kutusu bu yüzden eklenmedi.
 - **E-postamı hatırla:** Girişte açma-kapama (varsayılan açık); e-posta yalnızca bu cihazda saklanır, sonraki girişte dolu gelir ve imleç şifreye geçer. Şifre uygulamada saklanmaz; telefonun şifre yöneticisi (Google) hatırlayabilir.

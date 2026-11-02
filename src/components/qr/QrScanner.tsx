@@ -2,13 +2,14 @@
 
 import { useEffect, useRef, useState } from "react";
 import { useRouter } from "next/navigation";
-import { Camera, CameraOff } from "lucide-react";
+import { Camera, CameraOff, ImageUp } from "lucide-react";
 import { cameraErrorMessage, isPermissionDenied } from "@/lib/qr/camera";
 import { parseScan } from "@/lib/qr/payload";
 import { reportError } from "@/lib/errors/report";
 import { PageHead } from "@/components/layout/PageHead";
 
 const REGION_ID = "qr-reader";
+const FILE_REGION_ID = "qr-file";
 
 /**
  * checking: izin durumu soruluyor · ask: izin henüz istenmedi, önce ne için gerektiği anlatılır
@@ -24,6 +25,8 @@ type Phase = "checking" | "ask" | "denied" | "scanning" | "failed";
  * İzin akışı (K-074): web uygulaması telefonun ayarlar ekranını kendisi açamaz. Bu yüzden izin
  * istenmeden önce ne için gerektiği anlatılır; reddedilmişse nereden açılacağı adım adım gösterilir
  * ve kullanıcı izni verip döndüğünde kamera kendiliğinden başlar.
+ * İzinle hiç uğraşmamak için "Fotoğraf çekerek okut" (K-075): telefonun kendi kamera uygulaması açılır,
+ * çekilen fotoğraftaki QR çözülür. Bu yol tarayıcı kamera izni istemez.
  */
 export function QrScanner() {
   const router = useRouter();
@@ -33,6 +36,8 @@ export function QrScanner() {
   // Her "Kamerayı aç / Tekrar dene" kamerayı yeniden başlatır
   const [attempt, setAttempt] = useState(0);
   const handled = useRef(false);
+  const photoInput = useRef<HTMLInputElement>(null);
+  const [reading, setReading] = useState(false);
 
   function open(text: string) {
     if (handled.current) return;
@@ -44,6 +49,33 @@ export function QrScanner() {
     handled.current = true;
     router.push(result.path);
   }
+
+  async function readPhoto(file: File | undefined) {
+    if (!file) return;
+    setError(null);
+    setReading(true);
+    try {
+      const { Html5Qrcode } = await import("html5-qrcode");
+      const text = await new Html5Qrcode(FILE_REGION_ID).scanFile(file, false);
+      open(text);
+    } catch {
+      setError("Fotoğrafta QR kod bulunamadı. Etikete biraz yaklaşıp net ve ışıklı bir fotoğraf çekin.");
+    } finally {
+      setReading(false);
+      if (photoInput.current) photoInput.current.value = "";
+    }
+  }
+
+  const photoButton = (primary: boolean) => (
+    <button
+      type="button"
+      className={`btn ${primary ? "btn-primary" : "btn-secondary"} btn-full ${reading ? "btn-loading" : ""}`}
+      disabled={reading}
+      onClick={() => photoInput.current?.click()}
+    >
+      {reading ? "Okunuyor…" : <><ImageUp size={18} aria-hidden="true" /> Fotoğraf çekerek okut</>}
+    </button>
+  );
 
   function startCamera() {
     setError(null);
@@ -137,29 +169,48 @@ export function QrScanner() {
           <strong>Kamera izni gerekiyor</strong>
           <p>Makine ve ürün etiketlerindeki QR kodunu okumak için kamerayı kullanırız. Görüntü kaydedilmez, telefondan dışarı gönderilmez.</p>
           <button type="button" className="btn btn-primary btn-full" onClick={startCamera}>Kamerayı aç</button>
-          <small>Telefon izin isteyecek; “İzin ver”e dokunun.</small>
+          <small>Telefon izin isteyecek; “İzin ver”e dokunun. İzin vermek istemezseniz:</small>
+          {photoButton(false)}
         </div>
       ) : null}
 
       {phase === "denied" ? (
         <div className="card stack stack-md permission-card" role="alert">
           <span className="avatar" data-tone="warn" aria-hidden="true"><CameraOff size={22} /></span>
-          <strong>Kamera izni kapalı</strong>
-          <p>Uygulama telefonun ayarlarını kendisi açamaz; izni bir kez siz açmalısınız:</p>
-          <ol className="permission-steps">
-            <li><b>Chrome</b>’u açın → sağ üstteki <b>⋮</b> → <b>Ayarlar</b> → <b>Site ayarları</b> → <b>Kamera</b></li>
-            <li>Listede <b>veltrio-service.vercel.app</b>’e dokunun → <b>İzin ver</b></li>
-            <li>Kamera hâlâ açılmazsa telefonun <b>Ayarlar → Uygulamalar → Chrome → Uygulama izinleri → Kamera</b> bölümünden de izin verin.</li>
-            <li>Bu ekrana dönün; kamera kendiliğinden açılır.</li>
-          </ol>
-          <button type="button" className="btn btn-secondary btn-full" onClick={startCamera}>İzni verdim, tekrar dene</button>
+          <strong>Canlı kamera izni kapalı</strong>
+          <p>Sorun değil: telefonun kendi kamerasıyla etiketin fotoğrafını çekin, kodu oradan okuyalım. İzin gerekmez.</p>
+          {photoButton(true)}
+          <details className="permission-more">
+            <summary>Canlı tarama için izni açmak isterseniz</summary>
+            <ol className="permission-steps">
+              <li><b>Chrome</b>’u açın → sağ üstteki <b>⋮</b> → <b>Ayarlar</b> → <b>Site ayarları</b> → <b>Kamera</b></li>
+              <li>Listede <b>veltrio-service.vercel.app</b>’e dokunun → <b>İzin ver</b></li>
+              <li>Kamera hâlâ açılmazsa telefonun <b>Ayarlar → Uygulamalar → Chrome → Uygulama izinleri → Kamera</b> bölümünden de izin verin.</li>
+              <li>Bu ekrana dönün; kamera kendiliğinden açılır.</li>
+            </ol>
+          </details>
+          <button type="button" className="btn btn-ghost btn-full" onClick={startCamera}>İzni verdim, tekrar dene</button>
         </div>
       ) : null}
 
       {error ? <div className="alert alert-warning" role="alert">{error}</div> : null}
       {phase === "failed" ? (
-        <button type="button" className="btn btn-primary" onClick={startCamera}>Tekrar dene</button>
+        <>
+          <button type="button" className="btn btn-primary" onClick={startCamera}>Tekrar dene</button>
+          {photoButton(false)}
+        </>
       ) : null}
+
+      {/* Telefonun kamera uygulamasını açar; tarayıcı kamera izni gerekmez */}
+      <input
+        ref={photoInput}
+        type="file"
+        accept="image/*"
+        capture="environment"
+        hidden
+        onChange={(e) => void readPhoto(e.target.files?.[0])}
+      />
+      <div id={FILE_REGION_ID} hidden />
 
       <form
         className="stack stack-sm"
