@@ -11,6 +11,8 @@ import { useSessionStore } from "@/stores/session";
 import { formatCurrency, formatDate } from "@/lib/utils";
 import { foldText } from "@/lib/utils/search";
 import { PageHead } from "@/components/layout/PageHead";
+import { useIncremental } from "@/hooks/useIncremental";
+import { LoadMore } from "@/components/common/LoadMore";
 
 type Tab = Purchase["status"];
 
@@ -62,6 +64,7 @@ export function PurchaseList() {
       .filter((p) => matchesPurchase(p, data.suppliers.get(p.supplier_id ?? "") ?? "", query))
       .sort((a, b) => b.purchase_date.localeCompare(a.purchase_date));
   }, [data, tab, query]);
+  const shown = useIncremental(visible);
 
   return (
     <section className="stack stack-md">
@@ -97,8 +100,9 @@ export function PurchaseList() {
             : "Bu sekmede / aramada alım yok."}
         </div>
       ) : (
+        <>
         <ul className="menu-list" aria-label="Alımlar">
-          {visible.map((p) => (
+          {shown.items.map((p) => (
             <li key={p.id}>
               <Link href={`/purchases/${p.id}`} style={{ alignItems: "flex-start", flexDirection: "column", gap: 4 }}>
                 <span className="row row-between" style={{ width: "100%", gap: 8 }}>
@@ -112,6 +116,8 @@ export function PurchaseList() {
             </li>
           ))}
         </ul>
+        {shown.hasMore ? <LoadMore remaining={shown.remaining} onMore={shown.next} /> : null}
+      </>
       )}
     </section>
   );

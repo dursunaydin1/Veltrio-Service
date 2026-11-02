@@ -16,6 +16,7 @@ import { PinGate } from "@/components/layout/PinGate";
 import { SetupWizard } from "@/components/layout/SetupWizard";
 import { SyncStatus } from "@/components/layout/SyncStatus";
 import { useSessionStore } from "@/stores/session";
+import { useAppNav, useNavTracker } from "@/lib/nav/useAppNav";
 
 const OWN_SEARCH = new Set([
   "/services",
@@ -41,6 +42,9 @@ export function AppShell({ children }: { children: React.ReactNode }) {
   const needsSetup = useSessionStore((s) => s.needsSetup);
   // Üst çubuk her ekranda kart (K-066). Ana sayfada büyük arama kutusu olduğu için üstteki arama simgesi gizlenir, kartta selam satırı olur (K-059); soluk logo her ekranda (K-067)
   const pathname = usePathname();
+  // Telefonun geri hareketi basamak basamak ana sayfaya iner (K-076)
+  useNavTracker();
+  const { goHome } = useAppNav();
   const onHome = pathname === "/dashboard";
   // Kendi arama kutusu olan ekranlarda genel arama simgesi gizlenir; iki arama yan yana durmaz (K-070)
   const showSearch = !onHome && !OWN_SEARCH.has(pathname);
@@ -65,7 +69,15 @@ export function AppShell({ children }: { children: React.ReactNode }) {
       </a>
       <header className="app-header" data-home={onHome ? "" : undefined}>
         <span className="home-hero-mark" aria-hidden="true"><LogoGlyph size={64} ring /></span>
-        <Link href="/dashboard" className="app-brand" aria-label="Ana sayfa">
+        <Link
+          href="/dashboard"
+          className="app-brand"
+          aria-label="Ana sayfa"
+          onClick={(e) => {
+            e.preventDefault();
+            goHome();
+          }}
+        >
           <span className="app-logo"><LogoGlyph size={42} ring /></span>
           <Wordmark />
         </Link>

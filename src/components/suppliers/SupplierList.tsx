@@ -11,6 +11,8 @@ import { formatPhone } from "@/lib/utils/phone";
 import { foldText } from "@/lib/utils/search";
 import type { Supplier } from "@/types";
 import { PageHead } from "@/components/layout/PageHead";
+import { useIncremental } from "@/hooks/useIncremental";
+import { LoadMore } from "@/components/common/LoadMore";
 
 /** Arama: harf içeriyorsa ad / adreste, yalnızca rakamsa telefonda (baştaki 0 yok sayılır). */
 export function matchesSupplier(supplier: Supplier, query: string): boolean {
@@ -45,6 +47,7 @@ export function SupplierList() {
         .sort((a, b) => a.name.localeCompare(b.name, "tr")),
     [suppliers, query, showArchived]
   );
+  const shown = useIncremental(visible);
 
   return (
     <section className="stack stack-md">
@@ -71,8 +74,9 @@ export function SupplierList() {
             : "Aramanıza uyan tedarikçi yok."}
         </div>
       ) : (
+        <>
         <ul className="menu-list" aria-label="Tedarikçiler">
-          {visible.map((s) => (
+          {shown.items.map((s) => (
             <li key={s.id}>
               <Link href={`/suppliers/${s.id}`}>
                 <span className="avatar avatar-sm menu-avatar monogram" aria-hidden="true">{initials(s.name)}</span>
@@ -89,6 +93,8 @@ export function SupplierList() {
             </li>
           ))}
         </ul>
+        {shown.hasMore ? <LoadMore remaining={shown.remaining} onMore={shown.next} /> : null}
+      </>
       )}
     </section>
   );

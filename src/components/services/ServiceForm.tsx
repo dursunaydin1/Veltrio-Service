@@ -3,7 +3,6 @@
 import { PhotoField } from "@/components/common/PhotoField";
 import { useState } from "react";
 import Link from "next/link";
-import { useRouter } from "next/navigation";
 import { useLiveQuery } from "dexie-react-hooks";
 import { ArrowLeft, Check, CircleHelp, Cog, Plus } from "lucide-react";
 import { db } from "@/lib/db";
@@ -26,6 +25,7 @@ import {
 } from "@/lib/services/wizard";
 import { formatDate, todayLocalDate } from "@/lib/utils";
 import type { PaymentMethod } from "@/types";
+import { useAppNav } from "@/lib/nav/useAppNav";
 
 /** Sık arıza başlıkları (PRD §8.1); dokunulunca şikâyet metnine eklenir. */
 export const ISSUE_CATEGORIES = [
@@ -53,7 +53,8 @@ export function ServiceForm({
   initialCustomerId?: string;
   initialMachineId?: string;
 }) {
-  const router = useRouter();
+  // Kaydedince form geçmişten çıkar; geri hareketi formu yeniden açmaz (K-076)
+  const nav = useAppNav();
   const ctx = useBusinessContext();
 
   const [step, setStep] = useState(() => initialWizardStep({ customerId: initialCustomerId, machineId: initialMachineId }));
@@ -152,7 +153,7 @@ export function ServiceForm({
         photo,
         warranty: warrantyOn ? { source: warrantySource, coverage: warrantyCoverage } : undefined,
       });
-      router.push(`/services/${service.id}`);
+      nav.replace(`/services/${service.id}`);
     } catch (e) {
       setError(e instanceof Error ? e.message : "Servis açılamadı.");
       setBusy(false);

@@ -10,12 +10,14 @@ import { QuickDial, haptic } from "@/components/layout/QuickDial";
 import { loadServiceFacts, summarizeServices } from "@/lib/notifications/serviceReminders";
 import { todayLocalDate } from "@/lib/utils";
 import { useSessionStore } from "@/stores/session";
+import { useAppNav } from "@/lib/nav/useAppNav";
 
 /**
  * Yüzen alt çubuk (K-048): dört sekme + ortada logolu düğme. Her ekran boyutunda aynıdır.
  * Logolu düğme hızlı seçimi açar (servis, satış, müşteri, ürün, satın alma); Satışlar ve Stok Menü'dedir.
  * Servisler sekmesinde dikkat isteyen servis sayısı (teslimi geçen + onay bekleyen) rozetle görünür.
- * Açık sekmeye yeniden dokununca sayfanın başına dönülür.
+ * Açık sekmeye yeniden dokununca sayfanın başına dönülür. Sekmeler geçmişte üst üste birikmez:
+ * geri hareketi sekmeden ana sayfaya, ana sayfadan uygulama dışına çıkar (K-076).
  */
 const LEFT = [
   { href: "/dashboard", label: "Ana Sayfa", Icon: House },
@@ -43,6 +45,7 @@ export function BottomNav() {
   const pathname = usePathname();
   const businessId = useSessionStore((s) => s.business?.id);
   const reminderDays = useSessionStore((s) => s.business?.settings?.default_service_reminder_days);
+  const { goTab } = useAppNav();
   const [dialOpen, setDialOpen] = useState(false);
   const closeDial = useCallback(() => setDialOpen(false), []);
   const isActive = (href: string) => pathname === href || pathname.startsWith(`${href}/`);
@@ -68,11 +71,10 @@ export function BottomNav() {
         aria-label={badge ? `${label} (${badge} servis dikkat istiyor)` : undefined}
         onClick={(e) => {
           haptic();
-          // Açık sekmeye yeniden dokunulursa sayfanın başına dön
-          if (pathname === href) {
-            e.preventDefault();
-            window.scrollTo({ top: 0, behavior: "smooth" });
-          }
+          e.preventDefault();
+          // Açık sekmeye yeniden dokunulursa sayfanın başına dön; yoksa sekme ana sayfanın üstüne açılır (K-076)
+          if (pathname === href) window.scrollTo({ top: 0, behavior: "smooth" });
+          else goTab(href);
         }}
       >
         <span className="nav-icon">

@@ -2,7 +2,6 @@
 
 import { OfflineStockNotice } from "@/components/layout/OfflineStockNotice";
 import { useState } from "react";
-import { useRouter } from "next/navigation";
 import { useServiceContext } from "@/hooks/useServiceContext";
 import { useStockBalances } from "@/hooks/useStock";
 import { CustomerPicker } from "@/components/customers/CustomerPicker";
@@ -21,6 +20,7 @@ import { computeSaleTotals } from "@/lib/sales/totals";
 import { formatCurrency, formatQuantity, todayLocalDate } from "@/lib/utils";
 import type { Sale, SaleItem } from "@/lib/db";
 import type { PaymentMethod, Product, TaxMode } from "@/types";
+import { useAppNav } from "@/lib/nav/useAppNav";
 
 type DraftLine = {
   key: string;
@@ -89,7 +89,8 @@ export function SaleForm({
   initialCustomerId?: string;
   onDone?: () => void;
 }) {
-  const router = useRouter();
+  // Kaydedince form geçmişten çıkar; geri hareketi formu yeniden açmaz (K-076)
+  const nav = useAppNav();
   const ctx = useServiceContext();
   const balances = useStockBalances();
 
@@ -210,7 +211,7 @@ export function SaleForm({
         saved = await createSale(ctx, input, { finalize, payment, negativeStockReason: reason });
       }
       if (onDone) onDone();
-      else router.push(`/sales/${saved.id}`);
+      else nav.replace(`/sales/${saved.id}`);
     } catch (e) {
       if (e instanceof NegativeStockReasonRequiredError) setNeedsReason(true);
       setError(e instanceof Error ? e.message : "Kaydedilemedi.");

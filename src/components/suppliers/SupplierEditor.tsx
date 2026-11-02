@@ -1,7 +1,6 @@
 "use client";
 
 import { useState } from "react";
-import { useRouter } from "next/navigation";
 import { useLiveQuery } from "dexie-react-hooks";
 import { Phone } from "lucide-react";
 import { db } from "@/lib/db";
@@ -11,10 +10,12 @@ import { SupplierForm } from "@/components/suppliers/SupplierForm";
 import { SupplierPurchases } from "@/components/suppliers/SupplierPurchases";
 import { setSupplierArchived } from "@/lib/suppliers/service";
 import { telLink } from "@/lib/utils/phone";
+import { useAppNav } from "@/lib/nav/useAppNav";
 
 /** Tedarikçi detayı: ara, bakiye / ödemeler, düzenleme, arşivleme (Adım 4.5-4.7). */
 export function SupplierEditor({ id }: { id: string }) {
-  const router = useRouter();
+  // Kaydedince form geçmişten çıkar; geri hareketi formu yeniden açmaz (K-076)
+  const nav = useAppNav();
   const ctx = useBusinessContext();
   const [error, setError] = useState<string | null>(null);
 
@@ -40,7 +41,7 @@ export function SupplierEditor({ id }: { id: string }) {
     setError(null);
     try {
       await setSupplierArchived(ctx, supplier.id, !archived);
-      router.push("/suppliers");
+      nav.replace("/suppliers");
     } catch (e) {
       setError(e instanceof Error ? e.message : "İşlem yapılamadı.");
     }

@@ -11,6 +11,8 @@ import { formatPhone } from "@/lib/utils/phone";
 import { foldText } from "@/lib/utils/search";
 import type { Customer } from "@/types";
 import { PageHead } from "@/components/layout/PageHead";
+import { useIncremental } from "@/hooks/useIncremental";
+import { LoadMore } from "@/components/common/LoadMore";
 
 /** Arama: harf içeriyorsa ad/köy/adreste kelime kelime; yalnızca rakamsa telefonda (baştaki 0 yok sayılır). */
 export function matchesCustomer(customer: Customer, query: string): boolean {
@@ -47,6 +49,7 @@ export function CustomerList() {
       .filter((c) => matchesCustomer(c, query))
       .sort((a, b) => a.name.localeCompare(b.name, "tr"));
   }, [customers, query, showArchived]);
+  const shown = useIncremental(visible);
 
   return (
     <section className="stack stack-md">
@@ -73,8 +76,9 @@ export function CustomerList() {
             : "Aramanıza uyan müşteri yok."}
         </div>
       ) : (
+        <>
         <ul className="menu-list" aria-label="Müşteriler">
-          {visible.map((c) => (
+          {shown.items.map((c) => (
             <li key={c.id}>
               <Link href={`/customers/${c.id}`}>
                 {c.photo ? (
@@ -96,6 +100,8 @@ export function CustomerList() {
             </li>
           ))}
         </ul>
+        {shown.hasMore ? <LoadMore remaining={shown.remaining} onMore={shown.next} /> : null}
+      </>
       )}
     </section>
   );

@@ -15,6 +15,8 @@ import { foldText } from "@/lib/utils/search";
 import { isCriticalStock } from "@/lib/products/stock";
 import type { Product } from "@/types";
 import { PageHead } from "@/components/layout/PageHead";
+import { useIncremental } from "@/hooks/useIncremental";
+import { LoadMore } from "@/components/common/LoadMore";
 
 function matches(product: Product, query: string): boolean {
   if (!query.trim()) return true;
@@ -45,6 +47,7 @@ export function ProductList() {
       .filter((p) => matches(p, query))
       .sort((a, b) => a.name.localeCompare(b.name, "tr"));
   }, [products, query, showArchived]);
+  const shown = useIncremental(visible);
 
   return (
     <section className="stack stack-md">
@@ -75,8 +78,9 @@ export function ProductList() {
             : "Aramanıza uyan ürün yok."}
         </div>
       ) : (
+        <>
         <ul className="menu-list" aria-label="Ürünler">
-          {visible.map((p) => {
+          {shown.items.map((p) => {
             const balance = balances?.get(p.id) ?? EMPTY_BALANCE;
             return (
             <li key={p.id}>
@@ -107,6 +111,8 @@ export function ProductList() {
             );
           })}
         </ul>
+        {shown.hasMore ? <LoadMore remaining={shown.remaining} onMore={shown.next} /> : null}
+      </>
       )}
     </section>
   );

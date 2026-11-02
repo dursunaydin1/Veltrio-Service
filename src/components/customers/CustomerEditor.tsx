@@ -1,7 +1,6 @@
 "use client";
 
 import { useState } from "react";
-import { useRouter } from "next/navigation";
 import { useLiveQuery } from "dexie-react-hooks";
 import { MessageCircle, Phone } from "lucide-react";
 import { db } from "@/lib/db";
@@ -12,10 +11,12 @@ import { CustomerMachines } from "@/components/customers/CustomerMachines";
 import { CustomerForm } from "@/components/customers/CustomerForm";
 import { setCustomerArchived } from "@/lib/customers/service";
 import { telLink, whatsappLink } from "@/lib/utils/phone";
+import { useAppNav } from "@/lib/nav/useAppNav";
 
 /** Müşteri detay sayfası: ara / WhatsApp, düzenleme formu, arşivleme (Adım 3.2). */
 export function CustomerEditor({ id }: { id: string }) {
-  const router = useRouter();
+  // Kaydedince form geçmişten çıkar; geri hareketi formu yeniden açmaz (K-076)
+  const nav = useAppNav();
   const ctx = useBusinessContext();
   const [error, setError] = useState<string | null>(null);
 
@@ -43,7 +44,7 @@ export function CustomerEditor({ id }: { id: string }) {
     setError(null);
     try {
       await setCustomerArchived(ctx, customer.id, !archived);
-      router.push("/customers");
+      nav.replace("/customers");
     } catch (e) {
       setError(e instanceof Error ? e.message : "İşlem yapılamadı.");
     }

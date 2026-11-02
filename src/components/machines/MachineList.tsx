@@ -11,6 +11,8 @@ import { machineTitleOf } from "@/lib/machines/title";
 import { foldText } from "@/lib/utils/search";
 import type { Machine } from "@/types";
 import { PageHead } from "@/components/layout/PageHead";
+import { useIncremental } from "@/hooks/useIncremental";
+import { LoadMore } from "@/components/common/LoadMore";
 
 /** Arama: tür, marka, model, seri / iç numara ve sahibin adı üzerinde kelime kelime. */
 export function matchesMachine(machine: Machine, ownerName: string, query: string): boolean {
@@ -55,6 +57,7 @@ export function MachineList() {
       .filter((m) => matchesMachine(m, data.owners.get(m.customer_id ?? "") ?? "", query))
       .sort((a, b) => machineTitle(a).localeCompare(machineTitle(b), "tr"));
   }, [data, query, showArchived]);
+  const shown = useIncremental(visible);
 
   return (
     <section className="stack stack-md">
@@ -81,8 +84,9 @@ export function MachineList() {
             : "Aramanıza uyan makine yok."}
         </div>
       ) : (
+        <>
         <ul className="menu-list" aria-label="Makineler">
-          {visible.map((m) => (
+          {shown.items.map((m) => (
             <li key={m.id}>
               <Link href={`/machines/${m.id}`} style={{ alignItems: "flex-start", flexDirection: "column", gap: 4 }}>
                 <span className="row row-between" style={{ width: "100%", gap: 8 }}>
@@ -101,6 +105,8 @@ export function MachineList() {
             </li>
           ))}
         </ul>
+        {shown.hasMore ? <LoadMore remaining={shown.remaining} onMore={shown.next} /> : null}
+      </>
       )}
     </section>
   );

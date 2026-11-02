@@ -2,7 +2,6 @@
 
 import { PhotoField } from "@/components/common/PhotoField";
 import { useState } from "react";
-import { useRouter } from "next/navigation";
 import { useBusinessContext } from "@/hooks/useBusinessContext";
 import { useSessionStore } from "@/stores/session";
 import { PRODUCT_CATEGORIES, PRODUCT_UNITS, TAX_MODE_LABELS } from "@/lib/products/constants";
@@ -13,6 +12,7 @@ import {
   updateProduct,
 } from "@/lib/products/service";
 import type { Product, TaxMode } from "@/types";
+import { useAppNav } from "@/lib/nav/useAppNav";
 
 const money = (n: number | null | undefined) =>
   n == null ? "" : n.toFixed(2).replace(".", ",");
@@ -43,7 +43,8 @@ type Errors = Partial<Record<keyof ProductFormInput, string>>;
 
 /** Ürün oluşturma ve düzenleme formu (Adım 2.1). */
 export function ProductForm({ product }: { product?: Product }) {
-  const router = useRouter();
+  // Kaydedince form geçmişten çıkar; geri hareketi formu yeniden açmaz (K-076)
+  const nav = useAppNav();
   const ctx = useBusinessContext();
   const settings = useSessionStore((s) => s.business?.settings);
 
@@ -79,9 +80,12 @@ export function ProductForm({ product }: { product?: Product }) {
 
     setBusy(true);
     try {
-      if (product) await updateProduct(ctx, product.id, parsed.fields);
-      else await createProduct(ctx, parsed.fields);
-      router.push("/products");
+      let id: string;
+      if (product) {
+        await updateProduct(ctx, product.id, parsed.fields);
+        id = product.id;
+      } else id = (await createProduct(ctx, parsed.fields)).id;
+      nav.replace(`/products/${id}`);
     } catch (e) {
       if (e instanceof ProductCodeTakenError) setErrors({ code: e.message });
       else setFormError(e instanceof Error ? e.message : "Kaydedilemedi.");

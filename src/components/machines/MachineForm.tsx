@@ -2,11 +2,12 @@
 
 import { useState } from "react";
 import Link from "next/link";
-import { useRouter } from "next/navigation";
 import { useLiveQuery } from "dexie-react-hooks";
 import { useBusinessContext } from "@/hooks/useBusinessContext";
 import { CustomerPicker } from "@/components/customers/CustomerPicker";
 import { MACHINE_TYPES, parseMachineForm, type MachineFormInput } from "@/lib/machines/schema";
+import { brandSuggestions, modelSuggestions } from "@/lib/machines/suggest";
+import { db } from "@/lib/db";
 import {
   DuplicateSerialError,
   createMachine,
@@ -14,6 +15,7 @@ import {
   updateMachine,
 } from "@/lib/machines/service";
 import type { Machine } from "@/types";
+import { useAppNav } from "@/lib/nav/useAppNav";
 
 function toFormInput(machine: Machine | undefined, customerId: string): MachineFormInput {
   return {
@@ -39,7 +41,8 @@ export function MachineForm({
   machine?: Machine;
   initialCustomerId?: string;
 }) {
-  const router = useRouter();
+  // Kaydedince form geçmişten çıkar; geri hareketi formu yeniden açmaz (K-076)
+  const nav = useAppNav();
   const ctx = useBusinessContext();
 
   const [values, setValues] = useState<MachineFormInput>(() =>
@@ -61,6 +64,14 @@ export function MachineForm({
       [ctx?.businessId, values.brand, serial, machine?.id]
     ) ?? [];
   const blockedByDuplicate = duplicates.length > 0 && !allowDuplicate;
+
+  // Önceki kayıtlardan marka / model önerileri (K-077): aynı model birçok müşteride olur
+  const known = useLiveQuery(
+    () => (ctx ? db.machines.where("business_id").equals(ctx.businessId).toArray() : []),
+    [ctx?.businessId]
+  );
+  const brands = brandSuggestions(known ?? []);
+  const models = modelSuggestions(known ?? [], values.brand);
 
   async function handleSubmit(event: React.FormEvent) {
     event.preventDefault();
@@ -88,10 +99,10 @@ export function MachineForm({
         const { customer_id: _owner, ...rest } = parsed.fields;
         void _owner;
         await updateMachine(ctx, machine.id, rest, options);
-        router.push(`/machines/${machine.id}`);
+        nav.replace(`/machines/${machine.id}`);
       } else {
         const created = await createMachine(ctx, parsed.fields, options);
-        router.push(`/machines/${created.id}`);
+        nav.replace(`/machines/${created.id}`);
       }
     } catch (e) {
       setFormError(
@@ -136,12 +147,18 @@ export function MachineForm({
       <div className="row row-gap-md">
         <div className="form-group" style={{ flex: 1 }}>
           <label className="form-label" htmlFor="m-brand">Marka {values.isTemporary ? "" : "*"}</label>
-          <input {...field("brand")} className="form-input" value={values.brand} onChange={(e) => set("brand", e.target.value)} />
+          <input {...field("brand")} className="form-input" list="machine-brands" autoComplete="off" value={values.brand} onChange={(e) => set("brand", e.target.value)} />
+          <datalist id="machine-brands">
+            {brands.map((b) => <option key={b} value={b} />)}
+          </datalist>
           {err("brand")}
         </div>
         <div className="form-group" style={{ flex: 1 }}>
           <label className="form-label" htmlFor="m-model">Model {values.isTemporary ? "" : "*"}</label>
-          <input {...field("model")} className="form-input" value={values.model} onChange={(e) => set("model", e.target.value)} />
+          <input {...field("model")} className="form-input" list="machine-models" autoComplete="off" value={values.model} onChange={(e) => set("model", e.target.value)} />
+          <datalist id="machine-models">
+            {models.map((m) => <option key={m} value={m} />)}
+          </datalist>
           {err("model")}
         </div>
       </div>

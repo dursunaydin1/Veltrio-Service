@@ -2,7 +2,6 @@
 
 import { useState } from "react";
 import Link from "next/link";
-import { useRouter } from "next/navigation";
 import { useLiveQuery } from "dexie-react-hooks";
 import { db } from "@/lib/db";
 import { useBusinessContext } from "@/hooks/useBusinessContext";
@@ -14,10 +13,12 @@ import { getMachineServiceSummary } from "@/lib/services/service";
 import { StatusBadge } from "@/components/services/StatusBadge";
 import { formatCurrency, formatDate, formatDateTime, todayLocalDate } from "@/lib/utils";
 import type { Machine } from "@/types";
+import { useAppNav } from "@/lib/nav/useAppNav";
 
 /** Makine profili: sahibi, bilgiler, sahiplik geçmişi, sahip değiştirme, arşivleme (Adım 3.3). */
 export function MachineEditor({ id }: { id: string }) {
-  const router = useRouter();
+  // Kaydedince form geçmişten çıkar; geri hareketi formu yeniden açmaz (K-076)
+  const nav = useAppNav();
   const ctx = useBusinessContext();
   const [error, setError] = useState<string | null>(null);
 
@@ -49,7 +50,7 @@ export function MachineEditor({ id }: { id: string }) {
     setError(null);
     try {
       await setMachineArchived(ctx, machine.id, !archived);
-      router.push("/machines");
+      nav.replace("/machines");
     } catch (e) {
       setError(e instanceof Error ? e.message : "İşlem yapılamadı.");
     }
@@ -134,7 +135,7 @@ function MachineStats({ machine }: { machine: Machine }) {
 /** Geçici kaydı aynı müşterinin mevcut makinesiyle birleştirir; servisler hedefe taşınır (AC-051). */
 function MergeSection({ machine }: { machine: Machine }) {
   const ctx = useBusinessContext();
-  const router = useRouter();
+  const nav = useAppNav();
   const [open, setOpen] = useState(false);
   const [target, setTarget] = useState("");
   const [reason, setReason] = useState("");
@@ -160,7 +161,7 @@ function MergeSection({ machine }: { machine: Machine }) {
     setBusy(true);
     try {
       await mergeTemporaryMachine(ctx, machine.id, target, reason);
-      router.push(`/machines/${target}`);
+      nav.replace(`/machines/${target}`);
     } catch (e) {
       setError(e instanceof Error ? e.message : "Birleştirilemedi.");
       setBusy(false);

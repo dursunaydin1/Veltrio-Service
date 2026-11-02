@@ -15,6 +15,8 @@ import { isOpenStatus, statusTone } from "@/lib/services/status";
 import { foldText } from "@/lib/utils/search";
 import { formatCurrency, formatDate, todayLocalDate } from "@/lib/utils";
 import { PageHead } from "@/components/layout/PageHead";
+import { useIncremental } from "@/hooks/useIncremental";
+import { LoadMore } from "@/components/common/LoadMore";
 
 type Tab = "active" | "delivered" | "cancelled";
 
@@ -85,6 +87,7 @@ export function ServiceList() {
       )
       .sort((a, b) => b.received_date.localeCompare(a.received_date));
   }, [data, tab, query]);
+  const shown = useIncremental(visible);
 
   return (
     <section className="stack stack-md">
@@ -120,8 +123,9 @@ export function ServiceList() {
             : "Bu sekmede / aramada servis yok."}
         </div>
       ) : (
+        <>
         <ul className="menu-list" aria-label="Servisler">
-          {visible.map((s) => {
+          {shown.items.map((s) => {
             const overdue = isOverdue(s, today);
             return (
               <li key={s.id}>
@@ -156,6 +160,8 @@ export function ServiceList() {
             );
           })}
         </ul>
+        {shown.hasMore ? <LoadMore remaining={shown.remaining} onMore={shown.next} /> : null}
+      </>
       )}
     </section>
   );

@@ -1,12 +1,12 @@
 "use client";
 
 import { useEffect, useRef, useState } from "react";
-import { useRouter } from "next/navigation";
 import { Camera, CameraOff, ImageUp } from "lucide-react";
 import { cameraErrorMessage, isPermissionDenied } from "@/lib/qr/camera";
 import { parseScan } from "@/lib/qr/payload";
 import { reportError } from "@/lib/errors/report";
 import { PageHead } from "@/components/layout/PageHead";
+import { useAppNav } from "@/lib/nav/useAppNav";
 
 const REGION_ID = "qr-reader";
 const FILE_REGION_ID = "qr-file";
@@ -29,7 +29,8 @@ type Phase = "checking" | "ask" | "denied" | "scanning" | "failed";
  * çekilen fotoğraftaki QR çözülür. Bu yol tarayıcı kamera izni istemez.
  */
 export function QrScanner() {
-  const router = useRouter();
+  // Kaydedince form geçmişten çıkar; geri hareketi formu yeniden açmaz (K-076)
+  const nav = useAppNav();
   const [phase, setPhase] = useState<Phase>("checking");
   const [error, setError] = useState<string | null>(null);
   const [manual, setManual] = useState("");
@@ -47,7 +48,7 @@ export function QrScanner() {
       return;
     }
     handled.current = true;
-    router.push(result.path);
+    nav.replace(result.path);
   }
 
   async function readPhoto(file: File | undefined) {

@@ -3,7 +3,6 @@
 import { PhotoField } from "@/components/common/PhotoField";
 import { useState } from "react";
 import Link from "next/link";
-import { useRouter } from "next/navigation";
 import { useLiveQuery } from "dexie-react-hooks";
 import { useBusinessContext } from "@/hooks/useBusinessContext";
 import { parseCustomerForm, type CustomerFormInput } from "@/lib/customers/schema";
@@ -15,6 +14,7 @@ import {
 } from "@/lib/customers/service";
 import { formatPhone, isPlausiblePhone, normalizePhone } from "@/lib/utils/phone";
 import type { Customer } from "@/types";
+import { useAppNav } from "@/lib/nav/useAppNav";
 
 function toFormInput(customer?: Customer): CustomerFormInput {
   return {
@@ -32,7 +32,8 @@ type Errors = Partial<Record<keyof CustomerFormInput, string>>;
 
 /** Müşteri oluşturma ve düzenleme formu (Adım 3.2). */
 export function CustomerForm({ customer }: { customer?: Customer }) {
-  const router = useRouter();
+  // Kaydedince form geçmişten çıkar; geri hareketi formu yeniden açmaz (K-076)
+  const nav = useAppNav();
   const ctx = useBusinessContext();
 
   const [values, setValues] = useState<CustomerFormInput>(() => toFormInput(customer));
@@ -76,9 +77,13 @@ export function CustomerForm({ customer }: { customer?: Customer }) {
     setBusy(true);
     try {
       const options = { allowDuplicatePhone: allowDuplicate };
-      if (customer) await updateCustomer(ctx, customer.id, parsed.fields, options);
-      else await createCustomer(ctx, parsed.fields, options);
-      router.push("/customers");
+      let id: string;
+      if (customer) {
+        await updateCustomer(ctx, customer.id, parsed.fields, options);
+        id = customer.id;
+      } else id = (await createCustomer(ctx, parsed.fields, options)).id;
+      // Kaydedilen müşterinin sayfası açılır: sıradaki iş genelde makine eklemek veya servis açmak (K-076)
+      nav.replace(`/customers/${id}`);
     } catch (e) {
       setFormError(
         e instanceof DuplicatePhoneError

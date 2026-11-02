@@ -5,6 +5,16 @@
 
 ## 2026-11-02
 
+### K-077 · Uzun listeler parça parça; makine marka / model önerileri
+- **Listeler:** Yedi liste ekranı önce 30 kayıt çizer; aşağı inince sıradaki 30 kendiliğinden gelir ("N kayıt daha göster" düğmesi de var). Arama ve sekme değişince baştan başlar. Telefonda yüzlerce satırı bir anda çizmek yavaşlatıyordu.
+- **Makine formu:** Marka kutusu önceki kayıtlardaki markaları (en çok kullanılan önce) ve yaygın markaları önerir; model kutusu yazılan markanın önceki modellerini önerir. Serbest yazım yine mümkün; ayrı bir marka/model kataloğu şimdilik gerekmedi.
+
+### K-076 · Geri hareketi basamak basamak ana sayfaya; kayıttan sonra kaydın sayfası; galeriden fotoğraf
+- **Neden:** İşletme sahibi telefonda geri hareketinin geçmişi tersine sardığını, oysa üst basamağa çıkıp ana sayfada bitmesi gerektiğini söyledi.
+- **Geri hareketi:** Alt çubuktaki sekmeler geçmişte birikmez; başka bir yerden sekmeye dokununca önce ana sayfaya dönülür, sekme onun üstüne açılır. Geri: kayıt → liste → ana sayfa → uygulamadan çıkış. Logo da ana sayfaya geri sarar. Kayıt formları kaydedilince geçmişten çıkar (geri formu yeniden açmaz). Mantık `src/lib/nav/history.ts` (+ test), bağlantı `useAppNav`.
+- **Kayıttan sonra:** Yeni müşteri / tedarikçi / ürün kaydedilince listeye değil kaydın sayfasına gidilir (sıradaki iş genelde makine eklemek, servis açmak…).
+- **Fotoğraf:** "Fotoğraf çek" ve "Galeriden seç" ayrı düğmeler (müşteri, ürün, servis kabul fotoğrafı).
+
 ### K-075 · QR: izinsiz yol "Fotoğraf çekerek okut"
 - **Neden:** İşletme sahibi haklı olarak, kullanıcıların Chrome ayarlarıyla uğraşmayacağını söyledi; uygulama içinden aç-kapa istedi.
 - **Kısıt:** Web uygulaması izni kendisi açamaz ve telefonun / Chrome'un ayar ekranına bağlantı veremez (güvenlik gereği). Bu ancak yerel uygulama sarmalayıcısıyla (ör. Capacitor, mağaza sürümü) mümkün.

@@ -11,6 +11,8 @@ import { useSessionStore } from "@/stores/session";
 import { formatCurrency, formatDate } from "@/lib/utils";
 import { foldText } from "@/lib/utils/search";
 import { PageHead } from "@/components/layout/PageHead";
+import { useIncremental } from "@/hooks/useIncremental";
+import { LoadMore } from "@/components/common/LoadMore";
 
 type Tab = Sale["status"];
 
@@ -62,6 +64,7 @@ export function SaleList() {
       .filter((s) => matchesSale(s, data.customers.get(s.customer_id ?? "") ?? "", query))
       .sort((a, b) => b.sale_date.localeCompare(a.sale_date) || b.created_at.localeCompare(a.created_at));
   }, [data, tab, query]);
+  const shown = useIncremental(visible);
 
   return (
     <section className="stack stack-md">
@@ -95,8 +98,9 @@ export function SaleList() {
           {data.sales.length === 0 ? "Henüz satış yok. Üstteki “Satış yap” ile ilkini yapın." : "Bu sekmede / aramada satış yok."}
         </div>
       ) : (
+        <>
         <ul className="menu-list" aria-label="Satışlar">
-          {visible.map((s) => (
+          {shown.items.map((s) => (
             <li key={s.id}>
               <Link href={`/sales/${s.id}`} style={{ alignItems: "flex-start", flexDirection: "column", gap: 4 }}>
                 <span className="row row-between" style={{ width: "100%", gap: 8 }}>
@@ -110,6 +114,8 @@ export function SaleList() {
             </li>
           ))}
         </ul>
+        {shown.hasMore ? <LoadMore remaining={shown.remaining} onMore={shown.next} /> : null}
+      </>
       )}
     </section>
   );

@@ -1,7 +1,6 @@
 "use client";
 
 import { useState } from "react";
-import { useRouter } from "next/navigation";
 import { useBusinessContext } from "@/hooks/useBusinessContext";
 import { ProductPicker } from "@/components/products/ProductPicker";
 import { SupplierPicker } from "@/components/suppliers/SupplierPicker";
@@ -16,6 +15,7 @@ import {
 import { formatCurrency, todayLocalDate } from "@/lib/utils";
 import type { Purchase, PurchaseItem } from "@/lib/db";
 import type { PaymentMethod, Product, TaxMode } from "@/types";
+import { useAppNav } from "@/lib/nav/useAppNav";
 
 type DraftLine = {
   key: string;
@@ -87,7 +87,8 @@ export function PurchaseForm({
   initialSupplierId?: string;
   onDone?: () => void;
 }) {
-  const router = useRouter();
+  // Kaydedince form geçmişten çıkar; geri hareketi formu yeniden açmaz (K-076)
+  const nav = useAppNav();
   const ctx = useBusinessContext();
 
   const [supplierId, setSupplierId] = useState(purchase?.supplier_id ?? initialSupplierId);
@@ -179,7 +180,7 @@ export function PurchaseForm({
         saved = await createPurchase(ctx, input, { receive, payment });
       }
       if (onDone) onDone();
-      else router.push(`/purchases/${saved.id}`);
+      else nav.replace(`/purchases/${saved.id}`);
     } catch (e) {
       setError(e instanceof Error ? e.message : "Kaydedilemedi.");
       setBusy(false);

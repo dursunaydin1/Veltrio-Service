@@ -2,7 +2,6 @@
 
 import { useState } from "react";
 import Link from "next/link";
-import { useRouter } from "next/navigation";
 import { useLiveQuery } from "dexie-react-hooks";
 import { db } from "@/lib/db";
 import { useBusinessContext } from "@/hooks/useBusinessContext";
@@ -14,10 +13,12 @@ import { setProductArchived } from "@/lib/products/service";
 import { getProductBalance } from "@/lib/stock/ledger";
 import { formatCurrency, formatQuantity } from "@/lib/utils";
 import { unitLabel } from "@/lib/products/constants";
+import { useAppNav } from "@/lib/nav/useAppNav";
 
 /** Ürün düzenleme sayfasının içeriği: form + pasifleştirme / yeniden etkinleştirme. */
 export function ProductEditor({ id }: { id: string }) {
-  const router = useRouter();
+  // Kaydedince form geçmişten çıkar; geri hareketi formu yeniden açmaz (K-076)
+  const nav = useAppNav();
   const ctx = useBusinessContext();
   const [error, setError] = useState<string | null>(null);
 
@@ -45,7 +46,7 @@ export function ProductEditor({ id }: { id: string }) {
     setError(null);
     try {
       await setProductArchived(ctx, product.id, !archived);
-      router.push("/products");
+      nav.replace("/products");
     } catch (e) {
       setError(e instanceof Error ? e.message : "İşlem yapılamadı.");
     }

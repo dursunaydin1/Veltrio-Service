@@ -1,17 +1,18 @@
 "use client";
 
 import { useState } from "react";
-import { useRouter } from "next/navigation";
 import { useBusinessContext } from "@/hooks/useBusinessContext";
 import { parseSupplierForm, type SupplierFormInput } from "@/lib/suppliers/schema";
 import { createSupplier, updateSupplier } from "@/lib/suppliers/service";
 import type { Supplier } from "@/types";
+import { useAppNav } from "@/lib/nav/useAppNav";
 
 type Errors = Partial<Record<keyof SupplierFormInput, string>>;
 
 /** Tedarikçi oluşturma / düzenleme formu (Adım 4.5). */
 export function SupplierForm({ supplier }: { supplier?: Supplier }) {
-  const router = useRouter();
+  // Kaydedince form geçmişten çıkar; geri hareketi formu yeniden açmaz (K-076)
+  const nav = useAppNav();
   const ctx = useBusinessContext();
 
   const [values, setValues] = useState<SupplierFormInput>({
@@ -45,9 +46,12 @@ export function SupplierForm({ supplier }: { supplier?: Supplier }) {
 
     setBusy(true);
     try {
-      if (supplier) await updateSupplier(ctx, supplier.id, parsed.fields);
-      else await createSupplier(ctx, parsed.fields);
-      router.push("/suppliers");
+      let id: string;
+      if (supplier) {
+        await updateSupplier(ctx, supplier.id, parsed.fields);
+        id = supplier.id;
+      } else id = (await createSupplier(ctx, parsed.fields)).id;
+      nav.replace(`/suppliers/${id}`);
     } catch (e) {
       setFormError(e instanceof Error ? e.message : "Kaydedilemedi.");
       setBusy(false);
