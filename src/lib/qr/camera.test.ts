@@ -1,5 +1,5 @@
 import { describe, expect, it } from "vitest";
-import { cameraErrorMessage } from "./camera";
+import { cameraErrorMessage, isPermissionDenied } from "./camera";
 
 describe("cameraErrorMessage", () => {
   it("izin reddini ayırt eder (Error ve düz metin)", () => {
@@ -16,5 +16,10 @@ describe("cameraErrorMessage", () => {
 
   it("bilinmeyen hatada genel ileti", () => {
     expect(cameraErrorMessage(new Error("boom"))).toMatch(/Tekrar dene/);
+  });
+
+  it("izin reddini ayrıca tanır", () => {
+    expect(isPermissionDenied("NotAllowedError: Permission dismissed")).toBe(true);
+    expect(isPermissionDenied(new Error("NotReadableError"))).toBe(false);
   });
 });

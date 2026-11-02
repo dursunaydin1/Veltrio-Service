@@ -4,11 +4,11 @@ import { useState } from "react";
 import { Eye, EyeOff } from "lucide-react";
 
 /** Göz simgeli şifre alanı: yazılanı göster / gizle (telefonda yazım hatası kontrolü için). */
-export function PasswordInput(props: Omit<React.InputHTMLAttributes<HTMLInputElement>, "type">) {
+export function PasswordInput({ ref, ...props }: Omit<React.ComponentProps<"input">, "type">) {
   const [visible, setVisible] = useState(false);
   return (
     <div className="password-field">
-      <input {...props} type={visible ? "text" : "password"} className="form-input" />
+      <input ref={ref} {...props} type={visible ? "text" : "password"} className="form-input" />
       <button
         type="button"
         className="icon-btn"

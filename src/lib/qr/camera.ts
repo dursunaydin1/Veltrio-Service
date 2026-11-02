@@ -2,9 +2,18 @@
  * Kamera açılamadığında kullanıcıya ne yapacağını söyleyen ileti (K-073).
  * html5-qrcode hatayı bazen Error, bazen düz metin olarak fırlatır; ikisinde de hata adına bakılır.
  */
+function errorText(error: unknown): string {
+  return error instanceof Error ? `${error.name} ${error.message}` : String(error);
+}
+
+/** Kullanıcı ya da telefon kamera iznini reddetti mi? (izin ekranına yönlendirilir, K-074) */
+export function isPermissionDenied(error: unknown): boolean {
+  return /NotAllowedError|Permission/i.test(errorText(error));
+}
+
 export function cameraErrorMessage(error: unknown): string {
-  const text = error instanceof Error ? `${error.name} ${error.message}` : String(error);
-  if (/NotAllowedError|Permission|izin/i.test(text)) {
+  const text = errorText(error);
+  if (isPermissionDenied(error)) {
     return "Kamera izni verilmemiş. Telefonun Ayarlar → Uygulamalar → Chrome (veya Veltrio) → İzinler → Kamera bölümünden izin verin, sonra “Tekrar dene”ye dokunun.";
   }
   if (/NotFoundError|OverconstrainedError|Requested device not found/i.test(text)) {

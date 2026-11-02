@@ -5,6 +5,11 @@
 
 ## 2026-11-02
 
+### K-074 · "E-postamı hatırla" ve QR kamera izni akışı
+- **Oturum:** Giriş zaten kalıcı; çıkış yapılmadıkça uygulama her açılışta yeniden sormaz (hızlı açılış için PIN var). Bilinçli çıkıştan sonra şifre istenmesi doğru davranış; "beni hatırla" kutusu bu yüzden eklenmedi.
+- **E-postamı hatırla:** Girişte açma-kapama (varsayılan açık); e-posta yalnızca bu cihazda saklanır, sonraki girişte dolu gelir ve imleç şifreye geçer. Şifre uygulamada saklanmaz; telefonun şifre yöneticisi (Google) hatırlayabilir.
+- **QR izni:** Web uygulaması telefonun ayarlar ekranını kendisi açamaz. Bunun yerine: izin hiç istenmediyse önce neden gerektiğini anlatan kart ve "Kamerayı aç"; reddedildiyse adım adım nereden açılacağı; izin verilip dönülünce kamera kendiliğinden başlar (izin durumu izlenir).
+
 ### K-073 · QR tarama: kamera açılmazsa nedeni ve "Tekrar dene"
 - **Neden:** Telefonda QR Tara "Kamera açılamadı" dedi; ileti nedeni söylemiyordu, ekranda boş kamera alanı kalıyordu.
 - **Ne:** Hata adına göre ileti (`cameraErrorMessage`): izin verilmemiş (nereden verileceği yazılı), kamera yok, kamera başka uygulamada, https gerekli. Kamera alanı hata olunca gizlenir; "Tekrar dene" kamerayı yeniden başlatır. Gerçek hata `client_errors` tablosuna da yazılır.

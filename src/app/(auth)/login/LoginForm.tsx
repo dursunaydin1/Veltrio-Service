@@ -1,18 +1,43 @@
 "use client";
 
 import Link from "next/link";
-import { useState, useTransition } from "react";
+import { useEffect, useRef, useState, useTransition } from "react";
 import { loginAction } from "./actions";
 import { PasswordInput } from "@/components/auth/PasswordInput";
+
+/** "E-postamı hatırla" (K-074): yalnızca e-posta bu cihazda saklanır; şifreyi telefonun şifre yöneticisi hatırlar. */
+const REMEMBER_KEY = "veltrio_login_email";
 
 export function LoginForm({ notice }: { notice?: string }) {
   const [error, setError]       = useState<string | null>(notice ?? null);
   const [isPending, startTransition] = useTransition();
+  const [remember, setRemember] = useState(true);
+  const emailRef = useRef<HTMLInputElement>(null);
+  const passwordRef = useRef<HTMLInputElement>(null);
+
+  useEffect(() => {
+    try {
+      const saved = window.localStorage.getItem(REMEMBER_KEY);
+      if (saved && emailRef.current && !emailRef.current.value) {
+        emailRef.current.value = saved;
+        passwordRef.current?.focus();
+      }
+    } catch {
+      // Depolama kapalıysa e-posta her seferinde yazılır.
+    }
+  }, []);
 
   function handleSubmit(e: React.FormEvent<HTMLFormElement>) {
     e.preventDefault();
     setError(null);
     const formData = new FormData(e.currentTarget);
+    try {
+      const email = String(formData.get("email") ?? "").trim();
+      if (remember && email) window.localStorage.setItem(REMEMBER_KEY, email);
+      else window.localStorage.removeItem(REMEMBER_KEY);
+    } catch {
+      // yok sayılır
+    }
     formData.set("next", new URLSearchParams(window.location.search).get("next") ?? "");
 
     startTransition(async () => {
@@ -36,6 +61,7 @@ export function LoginForm({ notice }: { notice?: string }) {
           E-posta Adresi
         </label>
         <input
+          ref={emailRef}
           id="email"
           name="email"
           type="email"
@@ -56,6 +82,7 @@ export function LoginForm({ notice }: { notice?: string }) {
           </label>
         </div>
         <PasswordInput
+          ref={passwordRef}
           id="password"
           name="password"
           autoComplete="current-password"
@@ -64,6 +91,11 @@ export function LoginForm({ notice }: { notice?: string }) {
           placeholder="••••••••"
         />
       </div>
+
+      <label className="toggle-row toggle-inline">
+        <span>E-postamı hatırla</span>
+        <input type="checkbox" className="switch" checked={remember} onChange={(e) => setRemember(e.target.checked)} />
+      </label>
 
       {/* Giriş butonu */}
       <button

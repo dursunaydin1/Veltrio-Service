@@ -705,6 +705,12 @@ section > .row.row-between:first-child > h1 { flex: 1; min-width: 0; }
 .page-head-slot { flex-basis: 100%; }
 .page-head-slot:empty { display: none; }
 .print-title { display: none; }
+/* QR kamera izni kartı (K-074) */
+.permission-card { align-items: flex-start; }
+.permission-card p, .permission-card small { color: var(--text-secondary); line-height: 1.5; }
+.permission-steps { display: flex; flex-direction: column; gap: 8px; padding-left: 20px; color: var(--text-primary); line-height: 1.45; }
+.permission-steps b, .permission-card small b { color: var(--accent-light); font-weight: 600; }
+
 /* Şifre alanı: sağda göster / gizle düğmesi */
 .password-field { position: relative; }
 .password-field .form-input { padding-right: 52px; }
