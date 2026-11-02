@@ -147,11 +147,11 @@ export function QrScanner() {
           <strong>Kamera izni kapalı</strong>
           <p>Uygulama telefonun ayarlarını kendisi açamaz; izni bir kez siz açmalısınız:</p>
           <ol className="permission-steps">
-            <li>Ana ekrandaki <b>Veltrio</b> simgesine basılı tutun → <b>Uygulama bilgisi</b></li>
-            <li><b>İzinler</b> → <b>Kamera</b> → <b>Uygulamayı kullanırken izin ver</b></li>
+            <li><b>Chrome</b>’u açın → sağ üstteki <b>⋮</b> → <b>Ayarlar</b> → <b>Site ayarları</b> → <b>Kamera</b></li>
+            <li>Listede <b>veltrio-service.vercel.app</b>’e dokunun → <b>İzin ver</b></li>
+            <li>Kamera hâlâ açılmazsa telefonun <b>Ayarlar → Uygulamalar → Chrome → Uygulama izinleri → Kamera</b> bölümünden de izin verin.</li>
             <li>Bu ekrana dönün; kamera kendiliğinden açılır.</li>
           </ol>
-          <small>Tarayıcıdan kullanıyorsanız: adres çubuğundaki kilit simgesi → <b>İzinler</b> → <b>Kamera</b>.</small>
           <button type="button" className="btn btn-secondary btn-full" onClick={startCamera}>İzni verdim, tekrar dene</button>
         </div>
       ) : null}
