@@ -2,7 +2,9 @@
 
 import { useEffect, useRef, useState } from "react";
 import { useRouter } from "next/navigation";
+import { cameraErrorMessage } from "@/lib/qr/camera";
 import { parseScan } from "@/lib/qr/payload";
+import { reportError } from "@/lib/errors/report";
 import { PageHead } from "@/components/layout/PageHead";
 
 const REGION_ID = "qr-reader";
@@ -17,6 +19,9 @@ export function QrScanner() {
   const [error, setError] = useState<string | null>(null);
   const [manual, setManual] = useState("");
   const [starting, setStarting] = useState(true);
+  const [cameraFailed, setCameraFailed] = useState(false);
+  // "Tekrar dene" kamerayı yeniden başlatır
+  const [attempt, setAttempt] = useState(0);
   const handled = useRef(false);
 
   function open(text: string) {
@@ -55,10 +60,13 @@ export function QrScanner() {
         };
         if (cancelled) await stop();
         else setStarting(false);
-      } catch {
+      } catch (e) {
         if (!cancelled) {
           setStarting(false);
-          setError("Kamera açılamadı. Tarayıcıda kamera iznini kontrol edin veya QR adresini aşağıya yapıştırın.");
+          setCameraFailed(true);
+          setError(cameraErrorMessage(e));
+          // Gerçek nedeni görebilmek için hata kaydına da yazılır (client_errors)
+          void reportError(e instanceof Error ? e : new Error(`QR kamera: ${String(e)}`));
         }
       }
     })();
@@ -67,16 +75,31 @@ export function QrScanner() {
       cancelled = true;
       void stop?.();
     };
-    // open yalnızca router'a dayanır; tarayıcı bir kez başlatılır
+    // open yalnızca router'a dayanır; tarayıcı her denemede bir kez başlatılır
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, []);
+  }, [attempt]);
+
+  function retry() {
+    setError(null);
+    setCameraFailed(false);
+    setStarting(true);
+    setAttempt((n) => n + 1);
+  }
 
   return (
     <section className="stack stack-md">
       <PageHead title="QR Tara" />
-      <div id={REGION_ID} style={{ width: "100%", maxWidth: 360, margin: "0 auto", minHeight: 240 }} aria-label="Kamera görüntüsü" />
+      <div
+        id={REGION_ID}
+        style={{ width: "100%", maxWidth: 360, margin: "0 auto", minHeight: cameraFailed ? 0 : 240 }}
+        aria-label="Kamera görüntüsü"
+        hidden={cameraFailed}
+      />
       {starting ? <p>Kamera hazırlanıyor…</p> : null}
       {error ? <div className="alert alert-warning" role="alert">{error}</div> : null}
+      {cameraFailed ? (
+        <button type="button" className="btn btn-primary" onClick={retry}>Tekrar dene</button>
+      ) : null}
       <form
         className="stack stack-sm"
         onSubmit={(e) => {

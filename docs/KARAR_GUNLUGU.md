@@ -5,6 +5,10 @@
 
 ## 2026-11-02
 
+### K-073 · QR tarama: kamera açılmazsa nedeni ve "Tekrar dene"
+- **Neden:** Telefonda QR Tara "Kamera açılamadı" dedi; ileti nedeni söylemiyordu, ekranda boş kamera alanı kalıyordu.
+- **Ne:** Hata adına göre ileti (`cameraErrorMessage`): izin verilmemiş (nereden verileceği yazılı), kamera yok, kamera başka uygulamada, https gerekli. Kamera alanı hata olunca gizlenir; "Tekrar dene" kamerayı yeniden başlatır. Gerçek hata `client_errors` tablosuna da yazılır.
+
 ### K-072 · Denetimler hızlandı; tam test GitHub'da
 - **Neden:** Tür denetimi, lint ve testler art arda koşunca (yük altında 10 dakikayı aştı) işletme sahibi bekliyordu.
 - **Ölçüm:** Testler ~42 sn, tür denetimi ~34 sn, lint ~66 sn.
