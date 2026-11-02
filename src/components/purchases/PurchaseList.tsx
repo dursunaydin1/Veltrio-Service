@@ -41,6 +41,8 @@ export function matchesPurchase(purchase: Purchase, supplierName: string, query:
 /** Satın alma listesi: teslim alınan / taslak / iptal sekmeleri ve arama (Adım 4.6). */
 export function PurchaseList() {
   const businessId = useSessionStore((s) => s.business?.id);
+  // İlk indirme sürerken boş liste "henüz kayıt yok" demesin
+  const pullingAll = useSessionStore((s) => s.pullingAll);
   const [tab, setTab] = useState<Tab>("RECEIVED");
   const [query, setQuery] = useState("");
 
@@ -88,7 +90,7 @@ export function PurchaseList() {
         onChange={(e) => setQuery(e.target.value)}
       />
 
-      {data === undefined ? <ListSkeleton /> : visible.length === 0 ? (
+      {data === undefined || (pullingAll && visible.length === 0) ? <ListSkeleton /> : visible.length === 0 ? (
         <div className="empty-state" role="note">
           {data.purchases.length === 0
             ? "Henüz alım kaydı yok. Üstteki “Satın al” ile ilkini ekleyin."

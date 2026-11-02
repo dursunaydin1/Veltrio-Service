@@ -343,14 +343,16 @@ input[type="file"]::file-selector-button:hover { background: var(--bg-hover); }
 .btn-lg { min-height: 54px; padding: 14px 26px; font-size: 1.0625rem; border-radius: var(--radius-lg); }
 
 @keyframes spin { to { transform: rotate(360deg); } }
+/* Bekleme simgesi (K-071): dönen dişli; servis atölyesine yakışır. Renk currentColor / pirinç. */
+:root { --gear-mask: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='%23000' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpath d='M12.22 2h-.44a2 2 0 0 0-2 2v.18a2 2 0 0 1-1 1.73l-.43.25a2 2 0 0 1-2 0l-.15-.08a2 2 0 0 0-2.73.73l-.22.38a2 2 0 0 0 .73 2.73l.15.1a2 2 0 0 1 1 1.72v.51a2 2 0 0 1-1 1.74l-.15.09a2 2 0 0 0-.73 2.73l.22.38a2 2 0 0 0 2.73.73l.15-.08a2 2 0 0 1 2 0l.43.25a2 2 0 0 1 1 1.73V20a2 2 0 0 0 2 2h.44a2 2 0 0 0 2-2v-.18a2 2 0 0 1 1-1.73l.43-.25a2 2 0 0 1 2 0l.15.08a2 2 0 0 0 2.73-.73l.22-.39a2 2 0 0 0-.73-2.73l-.15-.08a2 2 0 0 1-1-1.74v-.5a2 2 0 0 1 1-1.74l.15-.09a2 2 0 0 0 .73-2.73l-.22-.38a2 2 0 0 0-2.73-.73l-.15.08a2 2 0 0 1-2 0l-.43-.25a2 2 0 0 1-1-1.73V4a2 2 0 0 0-2-2z'/%3E%3Ccircle cx='12' cy='12' r='3'/%3E%3C/svg%3E"); }
 .btn-loading::before {
   content: "";
-  width: 16px;
-  height: 16px;
-  border: 2px solid color-mix(in srgb, currentColor 30%, transparent);
-  border-top-color: currentColor;
-  border-radius: 50%;
-  animation: spin 0.7s linear infinite;
+  width: 18px;
+  height: 18px;
+  background: currentColor;
+  -webkit-mask: var(--gear-mask) center / contain no-repeat;
+  mask: var(--gear-mask) center / contain no-repeat;
+  animation: spin 1.6s linear infinite;
 }
 
 /* ============================================================
@@ -462,12 +464,12 @@ section > .row.row-between:first-child > h1 { flex: 1; min-width: 0; }
 }
 
 .loader-ring {
-  width: 44px;
-  height: 44px;
-  border: 3px solid var(--border-default);
-  border-top-color: var(--accent-primary);
-  border-radius: 50%;
-  animation: spin 0.8s linear infinite;
+  width: 48px;
+  height: 48px;
+  background: var(--accent-primary);
+  -webkit-mask: var(--gear-mask) center / contain no-repeat;
+  mask: var(--gear-mask) center / contain no-repeat;
+  animation: spin 1.8s linear infinite;
 }
 
 /* ============================================================
@@ -703,6 +705,10 @@ section > .row.row-between:first-child > h1 { flex: 1; min-width: 0; }
 .page-head-slot { flex-basis: 100%; }
 .page-head-slot:empty { display: none; }
 .print-title { display: none; }
+/* Şifre alanı: sağda göster / gizle düğmesi */
+.password-field { position: relative; }
+.password-field .form-input { padding-right: 52px; }
+.password-field .icon-btn { position: absolute; top: 50%; right: 4px; transform: translateY(-50%); }
 .app-info { margin-top: -8px; text-align: center; font-size: 0.75rem; color: var(--text-muted); letter-spacing: 0.02em; }
 /* Kartın alt satırı (K-067): solda sayfa adı (selamla aynı yazı), sağda ilgili işlem */
 .card-row { display: flex; align-items: center; justify-content: space-between; gap: 12px; min-width: 0; }
@@ -747,16 +753,18 @@ section > .row.row-between:first-child > h1 { flex: 1; min-width: 0; }
 }
 .btn-add:hover { border-color: var(--accent-primary); color: var(--text-primary); }
 .app-today { position: relative; flex-basis: 100%; display: flex; align-items: baseline; justify-content: space-between; gap: 12px; }
-/* Soluk logo (her ekranda, K-067): kartın tam ortasında (alttaki logolu düğmeyle aynı dikey eksen), kart yüksekliğinin %80'i */
+/* Soluk logo (her ekranda, K-067, K-071): kartın tam ortasında (alttaki logolu düğmeyle aynı dikey eksen).
+   Kart yüksekliğinin %150'si, kenarlardan taşan kısmı kırpılır; çok sönük olduğu için yazının altında filigran gibi kalır,
+   hangi telefon genişliği olursa olsun yazıyla "çakışmış" görünmez. */
 .home-hero-mark {
   position: absolute;
   left: 50%;
   top: 50%;
-  height: 80%;
+  height: 150%;
   aspect-ratio: 1;
   transform: translate(-50%, -50%);
   color: #fff;
-  opacity: 0.08;
+  opacity: 0.04;
   pointer-events: none;
 }
 .home-hero-mark svg { width: 100%; height: 100%; }

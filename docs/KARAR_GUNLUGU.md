@@ -3,6 +3,17 @@
 > Plandan (docs/00–07) veya PRD'den sapmaların, düzeltmelerin ve yeni çözümlerin kaydı. Yeni kayıtlar en üste eklenir.
 > Biçim: **Ne değişti → Neden → Sonuç / etkilenen dosyalar**
 
+## 2026-11-02
+
+### K-071 · Telefon denemesinden ilk düzeltmeler
+- **Bağlam:** Uygulama Vercel'de deneme yayınında (`veltrio-service.vercel.app`, demo Supabase projesi); işletme sahibi telefona kurup kullanmaya başladı.
+- **Şifre alanları:** Giriş, hesap oluşturma ve şifre yenileme ekranlarında göz simgesiyle göster / gizle (`PasswordInput`). PIN alanları gizli kaldı.
+- **Bekleme animasyonu:** Dönen halka yerine dönen dişli (sayfa yükleme ve düğmelerdeki "…ılıyor" durumu); servis atölyesiyle ilgili.
+- **Üst karttaki soluk logo:** Telefonda "SERVICE" yazısıyla iç içe görünüyordu. Telefona özel ayar yerine ortak çözüm: logo kartın %150'si boyutunda, kenarlardan kırpılmış ve çok sönük (%4); yazının altında filigran gibi durur, her genişlikte aynı.
+- **İlk indirme:** Veriler sunucudan inerken kullanıcı diğer ekranlara geçebilir (çevrimdışı-öncelikli yapı; engellenmez). Ancak listeler bu sırada "Henüz kayıt yok, ilkini ekleyin" diyordu; artık indirme sürerken yer tutucu satırlar görünür (yinelenen kayıt açılmasın).
+- **Depolama bilgisi:** Ana ekrandan açılan uygulamada "uygulamayı ana ekrana ekleyin" bilgisi artık çıkmaz.
+- **Önbellek:** `sw.js` VERSION v4.
+
 ## 2026-10-31
 
 ### K-070 · Kendi araması olan ekranlarda üstteki arama simgesi yok

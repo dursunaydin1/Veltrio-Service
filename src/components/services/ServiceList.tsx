@@ -45,6 +45,8 @@ export function matchesService(service: Service, customerName: string, machineTe
 /** Servis listesi: aktif / teslim edilen / iptal sekmeleri, arama, teslim sözü (Adım 3.17). */
 export function ServiceList() {
   const businessId = useSessionStore((s) => s.business?.id);
+  // İlk indirme sürerken boş liste "henüz kayıt yok" demesin
+  const pullingAll = useSessionStore((s) => s.pullingAll);
   const [tab, setTab] = useState<Tab>("active");
   const [query, setQuery] = useState("");
 
@@ -111,7 +113,7 @@ export function ServiceList() {
         onChange={(e) => setQuery(e.target.value)}
       />
 
-      {data === undefined ? <ListSkeleton /> : visible.length === 0 ? (
+      {data === undefined || (pullingAll && visible.length === 0) ? <ListSkeleton /> : visible.length === 0 ? (
         <div className="empty-state" role="note">
           {data.services.length === 0
             ? "Henüz servis kaydı yok. Üstteki “Servis aç” ile ilkini açın."

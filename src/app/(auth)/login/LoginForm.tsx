@@ -3,6 +3,7 @@
 import Link from "next/link";
 import { useState, useTransition } from "react";
 import { loginAction } from "./actions";
+import { PasswordInput } from "@/components/auth/PasswordInput";
 
 export function LoginForm({ notice }: { notice?: string }) {
   const [error, setError]       = useState<string | null>(notice ?? null);
@@ -54,15 +55,13 @@ export function LoginForm({ notice }: { notice?: string }) {
             Şifre
           </label>
         </div>
-        <input
+        <PasswordInput
           id="password"
           name="password"
-          type="password"
           autoComplete="current-password"
           required
           disabled={isPending}
           placeholder="••••••••"
-          className="form-input"
         />
       </div>
 

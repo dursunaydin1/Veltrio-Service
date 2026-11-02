@@ -5,6 +5,7 @@ import { useRouter } from "next/navigation";
 import { useState } from "react";
 import { createClient } from "@/lib/supabase/client";
 import { validatePassword } from "@/lib/auth/password";
+import { PasswordInput } from "@/components/auth/PasswordInput";
 
 /** Hesap oluşturma (Adım 1.3): e-posta zorunludur, çünkü hesap kurtarma e-postayla yapılır (AC-048). */
 export function RegisterForm() {
@@ -68,12 +69,12 @@ export function RegisterForm() {
       </div>
       <div className="form-group">
         <label className="form-label" htmlFor="reg-password">Şifre *</label>
-        <input id="reg-password" className="form-input" type="password" autoComplete="new-password" value={password} onChange={(e) => setPassword(e.target.value)} />
+        <PasswordInput id="reg-password" autoComplete="new-password" value={password} onChange={(e) => setPassword(e.target.value)} />
         <small style={{ color: "var(--text-muted)" }}>En az 10 karakter, harf ve rakam içermeli.</small>
       </div>
       <div className="form-group">
         <label className="form-label" htmlFor="reg-confirm">Şifre (tekrar) *</label>
-        <input id="reg-confirm" className="form-input" type="password" autoComplete="new-password" value={confirm} onChange={(e) => setConfirm(e.target.value)} />
+        <PasswordInput id="reg-confirm" autoComplete="new-password" value={confirm} onChange={(e) => setConfirm(e.target.value)} />
       </div>
       <button type="submit" className="btn btn-primary btn-full btn-lg" disabled={busy}>{busy ? "Oluşturuluyor…" : "Hesap oluştur"}</button>
       <Link href="/login" className="btn btn-ghost btn-full">Zaten hesabım var</Link>

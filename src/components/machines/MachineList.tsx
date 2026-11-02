@@ -34,6 +34,8 @@ export const machineTitle = machineTitleOf;
 /** Makine listesi: marka, model, seri no, iç numara veya sahibe göre arama (Adım 3.3). */
 export function MachineList() {
   const businessId = useSessionStore((s) => s.business?.id);
+  // İlk indirme sürerken boş liste "henüz kayıt yok" demesin
+  const pullingAll = useSessionStore((s) => s.pullingAll);
   const [query, setQuery] = useState("");
   const [showArchived, setShowArchived] = useState(false);
 
@@ -72,7 +74,7 @@ export function MachineList() {
         Arşivlenmiş makineleri de göster
       </label>
 
-      {data === undefined ? <ListSkeleton /> : visible.length === 0 ? (
+      {data === undefined || (pullingAll && visible.length === 0) ? <ListSkeleton /> : visible.length === 0 ? (
         <div className="empty-state" role="note">
           {data.machines.length === 0
             ? "Henüz makine eklenmemiş. Üstteki “Makine ekle” ile ilkini ekleyin."

@@ -31,6 +31,8 @@ export function matchesCustomer(customer: Customer, query: string): boolean {
 /** Müşteri listesi: ad, telefon veya köye göre arama (Adım 3.2). */
 export function CustomerList() {
   const businessId = useSessionStore((s) => s.business?.id);
+  // İlk indirme sürerken boş liste "henüz kayıt yok" demesin
+  const pullingAll = useSessionStore((s) => s.pullingAll);
   const [query, setQuery] = useState("");
   const [showArchived, setShowArchived] = useState(false);
 
@@ -64,7 +66,7 @@ export function CustomerList() {
         <input type="checkbox" className="switch" checked={showArchived} onChange={(e) => setShowArchived(e.target.checked)} />
       </label>
 
-      {customers === undefined ? <ListSkeleton /> : visible.length === 0 ? (
+      {customers === undefined || (pullingAll && visible.length === 0) ? <ListSkeleton /> : visible.length === 0 ? (
         <div className="empty-state" role="note">
           {customers.length === 0
             ? "Henüz müşteri eklenmemiş. Üstteki “Müşteri ekle” ile ilkini ekleyin."

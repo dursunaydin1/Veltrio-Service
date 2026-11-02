@@ -27,6 +27,8 @@ export function matchesSupplier(supplier: Supplier, query: string): boolean {
 /** Tedarikçi listesi (Adım 4.5). */
 export function SupplierList() {
   const businessId = useSessionStore((s) => s.business?.id);
+  // İlk indirme sürerken boş liste "henüz kayıt yok" demesin
+  const pullingAll = useSessionStore((s) => s.pullingAll);
   const [query, setQuery] = useState("");
   const [showArchived, setShowArchived] = useState(false);
 
@@ -62,7 +64,7 @@ export function SupplierList() {
         <input type="checkbox" className="switch" checked={showArchived} onChange={(e) => setShowArchived(e.target.checked)} />
       </label>
 
-      {suppliers === undefined ? <ListSkeleton /> : visible.length === 0 ? (
+      {suppliers === undefined || (pullingAll && visible.length === 0) ? <ListSkeleton /> : visible.length === 0 ? (
         <div className="empty-state" role="note">
           {suppliers.length === 0
             ? "Henüz tedarikçi eklenmemiş. Üstteki “Tedarikçi ekle” ile ilkini ekleyin."

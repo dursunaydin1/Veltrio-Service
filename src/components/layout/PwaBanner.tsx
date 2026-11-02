@@ -57,7 +57,8 @@ export function PwaBanner() {
   const rawWarning = health ? storageWarning(health, pending ?? 0) : null;
   const showInstall = !dismissed && (hint === "prompt" || hint === "ios");
   // Ana ekrana ekleme önerisi görünüyorsa aynı şeyi söyleyen depolama bilgisi ayrıca gösterilmez.
-  const warning = softWarning && (storageDismissed || showInstall) ? null : rawWarning;
+  // Uygulama zaten ana ekrandan açıldıysa "ana ekrana ekleyin" bilgisi anlamsız.
+  const warning = softWarning && (storageDismissed || showInstall || hint === "installed") ? null : rawWarning;
 
   function remember(key: string) {
     try {

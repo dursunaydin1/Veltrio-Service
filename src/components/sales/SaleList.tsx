@@ -41,6 +41,8 @@ export function matchesSale(sale: Sale, customerName: string, query: string): bo
 /** Satış listesi: tamamlanan / taslak / iptal sekmeleri ve arama (Adım 4.8). */
 export function SaleList() {
   const businessId = useSessionStore((s) => s.business?.id);
+  // İlk indirme sürerken boş liste "henüz kayıt yok" demesin
+  const pullingAll = useSessionStore((s) => s.pullingAll);
   const [tab, setTab] = useState<Tab>("FINAL");
   const [query, setQuery] = useState("");
 
@@ -88,7 +90,7 @@ export function SaleList() {
         onChange={(e) => setQuery(e.target.value)}
       />
 
-      {data === undefined ? <ListSkeleton /> : visible.length === 0 ? (
+      {data === undefined || (pullingAll && visible.length === 0) ? <ListSkeleton /> : visible.length === 0 ? (
         <div className="empty-state" role="note">
           {data.sales.length === 0 ? "Henüz satış yok. Üstteki “Satış yap” ile ilkini yapın." : "Bu sekmede / aramada satış yok."}
         </div>

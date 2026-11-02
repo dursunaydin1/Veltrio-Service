@@ -4,6 +4,7 @@ import { useState } from "react";
 import { useRouter } from "next/navigation";
 import { createClient } from "@/lib/supabase/client";
 import { validatePassword } from "@/lib/auth/password";
+import { PasswordInput } from "@/components/auth/PasswordInput";
 
 /** Yeni şifre belirleme: sıfırlama bağlantısıyla açılan oturumda çalışır; şifre politikası uygulanır. */
 export function ResetPasswordForm() {
@@ -38,12 +39,12 @@ export function ResetPasswordForm() {
       ) : null}
       <div className="form-group">
         <label className="form-label" htmlFor="rp-password">Yeni şifre</label>
-        <input id="rp-password" className="form-input" type="password" autoComplete="new-password" value={password} onChange={(e) => setPassword(e.target.value)} autoFocus />
+        <PasswordInput id="rp-password" autoComplete="new-password" value={password} onChange={(e) => setPassword(e.target.value)} autoFocus />
         <small style={{ color: "var(--text-muted)" }}>En az 10 karakter, harf ve rakam içermeli.</small>
       </div>
       <div className="form-group">
         <label className="form-label" htmlFor="rp-confirm">Yeni şifre (tekrar)</label>
-        <input id="rp-confirm" className="form-input" type="password" autoComplete="new-password" value={confirm} onChange={(e) => setConfirm(e.target.value)} />
+        <PasswordInput id="rp-confirm" autoComplete="new-password" value={confirm} onChange={(e) => setConfirm(e.target.value)} />
       </div>
       <button type="submit" className="btn btn-primary btn-full btn-lg" disabled={busy}>{busy ? "Kaydediliyor…" : "Şifreyi güncelle"}</button>
     </form>

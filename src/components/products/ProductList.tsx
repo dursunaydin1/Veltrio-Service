@@ -28,6 +28,8 @@ function matches(product: Product, query: string): boolean {
 /** Ürün listesi: arama, pasifleri gösterme, kritik stok rozeti (Adım 2.1, 2.9). */
 export function ProductList() {
   const businessId = useSessionStore((s) => s.business?.id);
+  // İlk indirme sürerken boş liste "henüz kayıt yok" demesin
+  const pullingAll = useSessionStore((s) => s.pullingAll);
   const [query, setQuery] = useState("");
   const [showArchived, setShowArchived] = useState(false);
   const balances = useStockBalances();
@@ -66,7 +68,7 @@ export function ProductList() {
         Pasif ürünleri de göster
       </label>
 
-      {products === undefined ? <ListSkeleton /> : visible.length === 0 ? (
+      {products === undefined || (pullingAll && visible.length === 0) ? <ListSkeleton /> : visible.length === 0 ? (
         <div className="empty-state" role="note">
           {products.length === 0
             ? "Henüz ürün eklenmemiş. Üstteki “Ürün ekle” ile ilkini ekleyin."
