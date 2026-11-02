@@ -5,6 +5,12 @@
 
 ## 2026-11-02
 
+### K-072 · Denetimler hızlandı; tam test GitHub'da
+- **Neden:** Tür denetimi, lint ve testler art arda koşunca (yük altında 10 dakikayı aştı) işletme sahibi bekliyordu.
+- **Ölçüm:** Testler ~42 sn, tür denetimi ~34 sn, lint ~66 sn.
+- **Çözüm:** `npm run check`: üçü aynı anda; lint önbellekli (değişmeyen dosyaya bakmaz), yalnızca değişen dosyalarla ilgili testler. Hız testi (NFR-003) yük altında yanlış alarm verdiği için günlük denetimde atlanır.
+- **Tam denetim:** `npm run check:full` her push'ta GitHub Actions'ta (`.github/workflows/ci.yml`) çalışır; hız testi orada ötekiler bittikten sonra tek başına koşar. Hata olursa GitHub e-postayla bildirir. Vercel de derlemede tür hatası varsa yayına almaz; telefondaki sürüm bozulmaz.
+
 ### K-071 · Telefon denemesinden ilk düzeltmeler
 - **Bağlam:** Uygulama Vercel'de deneme yayınında (`veltrio-service.vercel.app`, demo Supabase projesi); işletme sahibi telefona kurup kullanmaya başladı.
 - **Şifre alanları:** Giriş, hesap oluşturma ve şifre yenileme ekranlarında göz simgesiyle göster / gizle (`PasswordInput`). PIN alanları gizli kaldı.

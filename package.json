@@ -9,6 +9,8 @@
     "lint": "eslint",
     "test": "vitest run",
     "test:watch": "vitest",
+    "check": "node scripts/check.mjs",
+    "check:full": "node scripts/check.mjs --full",
     "test:e2e": "vitest run --config vitest.e2e.config.mts",
     "db:migrate": "node scripts/migrate.mjs"
   },

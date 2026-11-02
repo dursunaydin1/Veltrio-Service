@@ -19,6 +19,8 @@ npm run dev     # next dev (Turbopack)
 npm run build   # next build
 npm run lint    # eslint (flat config, eslint.config.mjs)
 npm test        # vitest run (tek dosya: npx vitest run src/lib/utils/phone.test.ts)
+npm run check   # tsc + eslint (önbellekli) + yalnızca değişen dosyalarla ilgili testler, paralel; günlük denetim
+npm run check:full  # aynısı, bütün testlerle (GitHub Actions her push'ta bunu çalıştırır)
 ```
 
 Tests are Vitest unit tests next to the code (`*.test.ts`, `@` alias configured in `vitest.config.mts`). Environment vars go in `.env.local` (see `.env.local.example`): `NEXT_PUBLIC_SUPABASE_URL`, `NEXT_PUBLIC_SUPABASE_ANON_KEY`. If they are missing, `src/proxy.ts` skips the auth redirect so the app still runs locally.
