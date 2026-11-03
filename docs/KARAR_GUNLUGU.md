@@ -5,6 +5,10 @@
 
 ## 2026-11-03
 
+### K-080 · Servis kabulünde seyrek doldurulan alanlar kapalı
+- **Neden:** İşletme sahibi son adımda her zaman doldurulmayan boş kutuların (hasar, aksesuar) premium durmadığını söyledi.
+- **Ne:** Son adımda yalnızca teslim tarihi, garanti, kapora ve özet açık. Hasar / çizik, aksesuar ve fotoğraf, "Not eklemek isterseniz" başlığı altında kesik çizgili "+ …" çipleri olarak durur. Dokununca alan açılır, imleç oraya gelir. X ile kapatılınca girilen bilgi de silinir.
+
 ### K-079 · Servis açarken "Transaction committed too early" hatası; arıza etiketleri kullanım sırasına göre
 - **Hata:** Kuyruğa yazılan her kayıt eşitlemeyi anında (eşzamanlı olay) tetikliyordu. Eşitleme, servis açma işleminin (Dexie transaction) içinde başlayıp sunucuya istek atınca işlem erken kapanıyor, servis, kapora ve durum geçmişi birlikte geri alınıyordu (kayıt oluşmuyordu). Özellikle birden çok tabloya yazan işlemlerde (servis + kapora) görülür.
 - **Düzeltme:** `notifySyncRequested` olayı en dıştaki işlem tamamlandıktan sonra, Dexie işleminin dışında ve işlem başına bir kez yayar (`queue.ts`, test eklendi).

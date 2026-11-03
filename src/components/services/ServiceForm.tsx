@@ -4,7 +4,7 @@ import { PhotoField } from "@/components/common/PhotoField";
 import { useState } from "react";
 import Link from "next/link";
 import { useLiveQuery } from "dexie-react-hooks";
-import { ArrowLeft, Check, CircleHelp, Cog, Plus } from "lucide-react";
+import { ArrowLeft, Check, CircleHelp, Cog, Plus, X } from "lucide-react";
 import { db } from "@/lib/db";
 import { useBusinessContext } from "@/hooks/useBusinessContext";
 import { CustomerPicker } from "@/components/customers/CustomerPicker";
@@ -42,6 +42,13 @@ export const ISSUE_CATEGORIES = [
   "Bakım talebi",
 ] as const;
 
+type Extra = "damage" | "accessories" | "photo";
+const EXTRAS: { id: Extra; label: string }[] = [
+  { id: "damage", label: "Hasar / çizik" },
+  { id: "accessories", label: "Aksesuar" },
+  { id: "photo", label: "Fotoğraf" },
+];
+
 /**
  * Yeni servis kabulü (§5.1, Adım 3.6) — telefon için adım adım (K-044):
  * 1) müşteri, 2) makine, 3) şikâyet, 4) isteğe bağlı kabul bilgileri ve özet.
@@ -69,6 +76,15 @@ export function ServiceForm({
   const [depositOn, setDepositOn] = useState(false);
   const [deposit, setDeposit] = useState("");
   const [photo, setPhoto] = useState<string | undefined>(undefined);
+  // Seyrek doldurulan alanlar kapalı gelir; "+ Hasar notu" gibi çiplerle açılır (K-080)
+  const [extras, setExtras] = useState<Extra[]>([]);
+  const openExtra = (e: Extra) => setExtras((list) => (list.includes(e) ? list : [...list, e]));
+  const closeExtra = (e: Extra) => {
+    setExtras((list) => list.filter((x) => x !== e));
+    if (e === "damage") setDamage("");
+    if (e === "accessories") setAccessories("");
+    if (e === "photo") setPhoto(undefined);
+  };
   const [warrantyOn, setWarrantyOn] = useState(false);
   const [warrantySource, setWarrantySource] = useState("");
   const [warrantyCoverage, setWarrantyCoverage] = useState("");
@@ -358,15 +374,45 @@ export function ServiceForm({
               />
             </div>
 
-            <div className="form-group">
-              <label className="form-label" htmlFor="sv-damage">Mevcut hasar / çizikler</label>
-              <input id="sv-damage" className="form-input" value={damage} onChange={(e) => setDamage(e.target.value)} />
-            </div>
-            <div className="form-group">
-              <label className="form-label" htmlFor="sv-acc">Teslim alınan aksesuarlar</label>
-              <input id="sv-acc" className="form-input" placeholder="Ör. zincir kılıfı, bıçak" value={accessories} onChange={(e) => setAccessories(e.target.value)} />
-            </div>
-            <PhotoField label="Kabul fotoğrafı" value={photo} onChange={setPhoto} />
+            {extras.includes("damage") ? (
+              <div className="form-group extra-field">
+                <div className="extra-head">
+                  <label className="form-label" htmlFor="sv-damage">Mevcut hasar / çizikler</label>
+                  <button type="button" className="icon-btn" aria-label="Hasar notunu kaldır" onClick={() => closeExtra("damage")}>
+                    <X size={18} aria-hidden="true" />
+                  </button>
+                </div>
+                <input id="sv-damage" className="form-input" placeholder="Ör. kapakta çizik" autoFocus value={damage} onChange={(e) => setDamage(e.target.value)} />
+              </div>
+            ) : null}
+            {extras.includes("accessories") ? (
+              <div className="form-group extra-field">
+                <div className="extra-head">
+                  <label className="form-label" htmlFor="sv-acc">Teslim alınan aksesuarlar</label>
+                  <button type="button" className="icon-btn" aria-label="Aksesuar notunu kaldır" onClick={() => closeExtra("accessories")}>
+                    <X size={18} aria-hidden="true" />
+                  </button>
+                </div>
+                <input id="sv-acc" className="form-input" placeholder="Ör. zincir kılıfı, bıçak" autoFocus value={accessories} onChange={(e) => setAccessories(e.target.value)} />
+              </div>
+            ) : null}
+            {extras.includes("photo") ? (
+              <div className="extra-field">
+                <PhotoField label="Kabul fotoğrafı" value={photo} onChange={setPhoto} />
+              </div>
+            ) : null}
+            {EXTRAS.some(({ id }) => !extras.includes(id)) ? (
+              <div className="form-group">
+                <span className="form-label">Not eklemek isterseniz</span>
+                <div className="chip-group">
+                  {EXTRAS.filter(({ id }) => !extras.includes(id)).map(({ id, label }) => (
+                    <button key={id} type="button" className="chip chip-add" onClick={() => openExtra(id)}>
+                      <Plus size={16} aria-hidden="true" /> {label}
+                    </button>
+                  ))}
+                </div>
+              </div>
+            ) : null}
 
             <div className="toggle-card">
               <label className="toggle-row">
