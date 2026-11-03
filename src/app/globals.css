@@ -615,8 +615,10 @@ section > .row.row-between:first-child > h1 { flex: 1; min-width: 0; }
 }
 /* Üst çubuk düğmeleri (K-055): ince çerçeveli yuvarlak, sakin */
 .app-header-actions .icon-btn {
-  width: var(--touch-min);
-  height: var(--touch-min);
+  width: var(--header-btn);
+  height: var(--header-btn);
+  min-width: var(--header-btn);
+  min-height: var(--header-btn);
   border: 1px solid var(--border-subtle);
   background: var(--bg-surface);
 }
@@ -634,7 +636,14 @@ section > .row.row-between:first-child > h1 { flex: 1; min-width: 0; }
 
 
 
-.app-header-actions { display: flex; align-items: center; gap: 8px; flex: 0 0 auto; }
+/* Üst karttaki düğmeler hep logoyla aynı satırda kalır (K-081); yer daralırsa yazı küçülür */
+:root { --header-btn: 42px; }
+.app-header-actions { display: flex; flex-wrap: nowrap; align-items: center; gap: 6px; flex: 0 0 auto; margin-left: auto; }
+.app-brand { flex: 1 1 auto; min-width: 0; overflow: hidden; }
+@media (max-width: 400px) {
+  .app-header .wordmark-name { font-size: 1.125rem; }
+  .app-header .app-logo svg { width: 36px; height: 36px; }
+}
 
 .app-main {
   flex: 1;
@@ -705,6 +714,10 @@ section > .row.row-between:first-child > h1 { flex: 1; min-width: 0; }
 .page-head-slot { flex-basis: 100%; }
 .page-head-slot:empty { display: none; }
 .print-title { display: none; }
+/* Kaydedilirken formu kilitleyen çerçeve (K-081): görünmez, yalnızca alanları devre dışı bırakır */
+.form-lock { display: contents; border: 0; margin: 0; padding: 0; min-width: 0; }
+.form-lock:disabled .wizard-body { opacity: 0.6; pointer-events: none; }
+
 /* Ana sayfada ilk geri hareketinde çıkış uyarısı (K-078): alt çubuğun hemen üstünde */
 .exit-hint {
   position: fixed;
@@ -1294,6 +1307,31 @@ input[type="checkbox"].switch:focus-visible { outline: 2px solid var(--border-fo
 .sync-pill[data-tone="idle"]    { color: var(--text-muted); background: transparent; min-width: var(--touch-min); justify-content: center; padding: 4px; }
 /* Yalnızca simge + sayı; açıklama ekran okuyucu ve ipucu içindir */
 .sync-pill .sync-label { display: none; }
+/* Üst kartta (K-081): zil ve arama gibi yuvarlak; sayı köşede rozet. Böylece belirince düğmeler alt satıra kaymaz */
+.app-header .sync-pill {
+  position: relative;
+  width: var(--header-btn);
+  min-width: var(--header-btn);
+  min-height: var(--header-btn);
+  height: var(--header-btn);
+  padding: 0;
+  justify-content: center;
+}
+.app-header .sync-short {
+  position: absolute;
+  top: -3px;
+  right: -3px;
+  min-width: 18px;
+  height: 18px;
+  padding: 0 5px;
+  border-radius: 9px;
+  background: var(--accent-warning);
+  color: #1a1408;
+  font-size: 0.6875rem;
+  font-weight: 700;
+  line-height: 18px;
+  text-align: center;
+}
 
 /* ============================================================
    SAYFA BÖLÜMLERİ

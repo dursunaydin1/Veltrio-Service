@@ -236,6 +236,8 @@ export function ServiceForm({
         </div>
       ) : null}
 
+      {/* Kaydedilirken alanlar kilitlenir; işlem bitmeden değer değişmesin (K-081) */}
+      <fieldset className="form-lock" disabled={busy}>
       <div className="wizard-body">
         {step === 0 ? (
           <>
@@ -479,6 +481,8 @@ export function ServiceForm({
 
         {error ? <div className="alert alert-error" role="alert">{error}</div> : null}
       </div>
+
+      </fieldset>
 
       <div className="wizard-footer">
         {step < last ? (

@@ -88,7 +88,8 @@ export function SyncStatus() {
       onClick={() => window.dispatchEvent(new Event(SYNC_REQUEST_EVENT))}
     >
       <Icon size={16} aria-hidden="true" />
-      {short ? <span className="sync-short" aria-hidden="true">{short}</span> : null}
+      {/* Üst kartta yer kaplamasın diye yalnızca sayı, simgenin köşesinde rozet (K-081) */}
+      {short && /^\d+\+?$/.test(short) ? <span className="sync-short" aria-hidden="true">{short}</span> : null}
       <span className="sr-only">{label}</span>
     </button>
   );

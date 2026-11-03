@@ -5,6 +5,12 @@
 
 ## 2026-11-03
 
+### K-081 · Üst kartta eşitleme simgesi düğmeleri kaydırmıyor; kaydederken servis formu kilitli
+- **Sorun 1:** Gönderilmeyi bekleyen kayıt olunca beliren eşitleme hapı (simge + sayı) zil ve aramanın yanına sığmıyor, düğmeler alt satıra kayıyordu.
+- **Düzeltme:** Üst karttaki eşitleme göstergesi de zil gibi yuvarlak; sayı köşede küçük turuncu rozet. Düğmeler 42 px, aralık 6 px, hep logoyla aynı satırda; dar telefonlarda (≤400 px) yazı ve logo biraz küçülür.
+- **Sorun 2:** "Servisi aç"a basıldıktan sonra kayıt bitene kadar alanlar (ör. garanti anahtarı) değiştirilebiliyordu.
+- **Düzeltme:** Kaydederken sihirbazın tüm alanları kilitlenir ve soluklaşır (`fieldset disabled`).
+
 ### K-080 · Servis kabulünde seyrek doldurulan alanlar kapalı
 - **Neden:** İşletme sahibi son adımda her zaman doldurulmayan boş kutuların (hasar, aksesuar) premium durmadığını söyledi.
 - **Ne:** Son adımda yalnızca teslim tarihi, garanti, kapora ve özet açık. Hasar / çizik, aksesuar ve fotoğraf, "Not eklemek isterseniz" başlığı altında kesik çizgili "+ …" çipleri olarak durur. Dokununca alan açılır, imleç oraya gelir. X ile kapatılınca girilen bilgi de silinir.
