@@ -5,6 +5,13 @@
 
 ## 2026-11-03
 
+### K-082 · Servis "Arıza ve teşhis" sekmesi sadeleşti; kaydedince sıradaki sekme
+- **Kabul alanları:** Hasar / aksesuar, kabulde yazılan bilgiyi düzeltmek veya sonradan eklemek içindir (ör. çizik sonradan fark edildi). Doluysa görünür, boşsa "+ Hasar / çizik", "+ Aksesuar" çipi olarak durur; "Kabul bilgileri" başlığı altında toplandı.
+- **Yapılan iş:** Teşhisten farklı olarak işin sonunda ne yapıldığı; müşteriye verilen "Sonuç özeti"nde görünür. İş başlamadan (İşlemde öncesi) gizli, altında açıklama var.
+- **Akış:** Kaydedince sayfada kalınmaz: iş başlamadıysa "İşlemler ve onay" sekmesine (işçilik / parça ekle), başladıysa "Özet"e (durumu ilerlet) geçilir, "Servis bilgileri kaydedildi" onayı kısa süre görünür.
+- **Sekmeler:** Servis ekranında sekme çubuğu aşağı kaydırınca ekranın üstünde sabit kalır.
+- **Garanti:** Onay kutusu yerine diğer ekranlardaki gibi açma-kapama anahtarı.
+
 ### K-081 · Üst kartta eşitleme simgesi düğmeleri kaydırmıyor; kaydederken servis formu kilitli
 - **Sorun 1:** Gönderilmeyi bekleyen kayıt olunca beliren eşitleme hapı (simge + sayı) zil ve aramanın yanına sığmıyor, düğmeler alt satıra kayıyordu.
 - **Düzeltme:** Üst karttaki eşitleme göstergesi de zil gibi yuvarlak; sayı köşede küçük turuncu rozet. Düğmeler 42 px, aralık 6 px, hep logoyla aynı satırda; dar telefonlarda (≤400 px) yazı ve logo biraz küçülür.

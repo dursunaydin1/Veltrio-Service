@@ -714,6 +714,17 @@ section > .row.row-between:first-child > h1 { flex: 1; min-width: 0; }
 .page-head-slot { flex-basis: 100%; }
 .page-head-slot:empty { display: none; }
 .print-title { display: none; }
+/* Uzun ekranlarda sekme çubuğu yukarıda kalır (K-082): aşağı kaydırınca da sekmeler elin altında */
+.sticky-tabs {
+  position: sticky;
+  top: max(8px, env(safe-area-inset-top));
+  z-index: 20;
+  background: var(--bg-surface);
+  box-shadow: 0 6px 16px -10px rgba(0, 0, 0, 0.6);
+  scroll-margin-top: max(8px, env(safe-area-inset-top));
+}
+.form-section-title { margin-top: 4px; font-size: 0.8125rem; font-weight: 700; letter-spacing: 0.06em; text-transform: uppercase; color: var(--text-muted); }
+
 /* Kaydedilirken formu kilitleyen çerçeve (K-081): görünmez, yalnızca alanları devre dışı bırakır */
 .form-lock { display: contents; border: 0; margin: 0; padding: 0; min-width: 0; }
 .form-lock:disabled .wizard-body { opacity: 0.6; pointer-events: none; }
