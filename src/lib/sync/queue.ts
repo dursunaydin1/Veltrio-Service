@@ -1,3 +1,4 @@
+import Dexie, { type Transaction } from "dexie";
 import { db } from "@/lib/db";
 import { assertWriteAllowed } from "@/lib/sync/offlineLimit";
 import { pushRank } from "@/lib/sync/tables";
@@ -42,10 +43,27 @@ export async function enqueue(
   notifySyncRequested();
 }
 
+const notified = new WeakSet<Transaction>();
+
+/**
+ * Eşitlemeyi tetikler; ama yazma işlemi (transaction) bitmeden değil (K-079).
+ * Olay eşzamanlı yayılırsa dinleyen eşitleme işlemin içinde başlar, sunucuya istek atarken
+ * işlemi erken kapatır ("Transaction committed too early") ve kayıt tümüyle geri alınır.
+ * Bu yüzden en dıştaki işlem tamamlanınca, Dexie işleminin dışında yayılır.
+ */
 function notifySyncRequested(): void {
-  if (typeof window !== "undefined") {
-    window.dispatchEvent(new Event("veltrio:sync-requested"));
+  if (typeof window === "undefined") return;
+  const fire = () => Dexie.ignoreTransaction(() => window.dispatchEvent(new Event("veltrio:sync-requested")));
+  let tx = Dexie.currentTransaction;
+  while (tx?.parent) tx = tx.parent;
+  if (!tx) {
+    setTimeout(fire, 0);
+    return;
   }
+  // Aynı işlemde birden çok kayıt kuyruğa girer; eşitleme bir kez tetiklenir
+  if (notified.has(tx)) return;
+  notified.add(tx);
+  tx.on("complete", () => setTimeout(fire, 0));
 }
 
 /**

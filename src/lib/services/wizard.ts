@@ -61,3 +61,12 @@ export function hasIssue(complaint: string, label: string): boolean {
   const key = label.toLocaleLowerCase("tr");
   return complaint.split(",").some((p) => p.trim().toLocaleLowerCase("tr") === key);
 }
+
+/**
+ * Hızlı arıza etiketlerinin sırası (K-079): geçmiş servislerde en çok seçilen önce, eşitse alfabetik.
+ * Hiç kullanılmamışlar sonda; böylece işletmenin sık gördüğü arızalar parmağın altına gelir.
+ */
+export function rankIssues(labels: readonly string[], complaints: readonly string[]): string[] {
+  const count = new Map(labels.map((l) => [l, complaints.filter((c) => hasIssue(c, l)).length]));
+  return [...labels].sort((a, b) => (count.get(b) ?? 0) - (count.get(a) ?? 0) || a.localeCompare(b, "tr"));
+}

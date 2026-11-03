@@ -1,5 +1,5 @@
 import "fake-indexeddb/auto";
-import { beforeEach, describe, expect, it } from "vitest";
+import { afterEach, beforeEach, describe, expect, it } from "vitest";
 import { db } from "@/lib/db";
 import { enqueue, getPendingItems, markConflict, markError } from "./queue";
 
@@ -132,5 +132,29 @@ describe("getPendingItems — bağımlılık sırası", () => {
     await enqueue("machines", "m1", "INSERT", { id: "m1", business_id: BUSINESS }, DEVICE);
 
     expect((await getPendingItems()).map((i) => i.record_id)).toEqual(["m1", "u1"]);
+  });
+});
+
+describe("enqueue — eşitleme tetiklemesi (K-079)", () => {
+  const original = (globalThis as { window?: unknown }).window;
+  afterEach(() => {
+    (globalThis as { window?: unknown }).window = original;
+  });
+
+  it("yazma işlemi bitmeden eşitleme olayı yayılmaz; işlem başına bir kez yayılır", async () => {
+    const target = new EventTarget();
+    let fired = 0;
+    target.addEventListener("veltrio:sync-requested", () => (fired += 1));
+    (globalThis as { window?: unknown }).window = target;
+
+    await db.transaction("rw", db.sync_queue, async () => {
+      await enqueue("products", ID, "INSERT", rec(), DEVICE);
+      await enqueue("products", "22222222-2222-4222-8222-222222222222", "INSERT", rec({ id: "22222222-2222-4222-8222-222222222222" }), DEVICE);
+      await db.sync_queue.count();
+      // İşlem sürerken dinleyici çalışmamış olmalı (eskiden enqueue içinde hemen çalışıyordu)
+      expect(fired).toBe(0);
+    });
+    await new Promise((r) => setTimeout(r, 10));
+    expect(fired).toBe(1);
   });
 });

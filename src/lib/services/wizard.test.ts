@@ -1,5 +1,5 @@
 import { describe, expect, it } from "vitest";
-import { addDaysToLocalDate, hasIssue, initialWizardStep, toggleIssue, UNKNOWN_MACHINE, wizardStepError } from "./wizard";
+import { addDaysToLocalDate, hasIssue, initialWizardStep, rankIssues, toggleIssue, UNKNOWN_MACHINE, wizardStepError } from "./wizard";
 
 const empty = { customerId: "", machineId: "", tempType: "", complaint: "" };
 
@@ -36,5 +36,12 @@ describe("servis kabul adımları", () => {
     c = toggleIssue(c, "Çalışmıyor");
     expect(c).toBe("Güç kaybı");
     expect(hasIssue(c, "Çalışmıyor")).toBe(false);
+  });
+});
+
+describe("hızlı arıza sırası", () => {
+  it("en çok seçilen önce, eşitse alfabetik", () => {
+    const complaints = ["Çalışmıyor, Zincir", "Zincir", "zincir, Karbüratör"];
+    expect(rankIssues(["Karbüratör", "Çalışmıyor", "Zincir", "Buji"], complaints)).toEqual(["Zincir", "Çalışmıyor", "Karbüratör", "Buji"]);
   });
 });

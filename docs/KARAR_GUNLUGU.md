@@ -3,6 +3,14 @@
 > Plandan (docs/00–07) veya PRD'den sapmaların, düzeltmelerin ve yeni çözümlerin kaydı. Yeni kayıtlar en üste eklenir.
 > Biçim: **Ne değişti → Neden → Sonuç / etkilenen dosyalar**
 
+## 2026-11-03
+
+### K-079 · Servis açarken "Transaction committed too early" hatası; arıza etiketleri kullanım sırasına göre
+- **Hata:** Kuyruğa yazılan her kayıt eşitlemeyi anında (eşzamanlı olay) tetikliyordu. Eşitleme, servis açma işleminin (Dexie transaction) içinde başlayıp sunucuya istek atınca işlem erken kapanıyor, servis, kapora ve durum geçmişi birlikte geri alınıyordu (kayıt oluşmuyordu). Özellikle birden çok tabloya yazan işlemlerde (servis + kapora) görülür.
+- **Düzeltme:** `notifySyncRequested` olayı en dıştaki işlem tamamlandıktan sonra, Dexie işleminin dışında ve işlem başına bir kez yayar (`queue.ts`, test eklendi).
+- **Arıza etiketleri:** Ayarlar → Kataloglar → Arızalar'dan gelir (eklenir, kapatılır). Sırası artık alfabetik değil: geçmiş servislerde en çok seçilen önce.
+- **Çalışma biçimi:** İşletme sahibi küçük değişikliklerde yerel test beklenmemesini istedi. Küçük arayüz / metin işleri doğrudan gönderilir; tam denetimi GitHub Actions, tür denetimini Vercel derlemesi yapar (hatada yayın olmaz). Yerelde yalnızca ciddi değişikliklerde (eşitleme, para, stok) ilgili testler koşulur.
+
 ## 2026-11-02
 
 ### K-078 · Ana sayfada geri: "Çıkmak için tekrar geri yapın"; tek "Fotoğraf ekle"

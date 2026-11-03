@@ -20,6 +20,7 @@ import {
   addDaysToLocalDate,
   hasIssue,
   initialWizardStep,
+  rankIssues,
   toggleIssue,
   wizardStepError,
 } from "@/lib/services/wizard";
@@ -75,12 +76,23 @@ export function ServiceForm({
   const [error, setError] = useState<string | null>(null);
   const [busy, setBusy] = useState(false);
 
-  // Hızlı arıza seçimi: etkin arıza kataloğu varsa o, yoksa varsayılan başlıklar (Adım 3.5)
+  // Hızlı arıza seçimi: etkin arıza kataloğu varsa o (Ayarlar → Kataloglar → Arızalar), yoksa varsayılan başlıklar (Adım 3.5)
   const issueCatalog = useLiveQuery(
     () => (ctx ? db.issue_catalog.where("business_id").equals(ctx.businessId).filter((i) => i.active).toArray() : []),
     [ctx?.businessId]
   );
-  const issueLabels = issueCatalog && issueCatalog.length > 0 ? issueCatalog.map((i) => i.name).sort((a, b) => a.localeCompare(b, "tr")) : ISSUE_CATEGORIES;
+  // Geçmiş şikâyetler: en çok seçilen arızalar başa gelir (K-079)
+  const pastComplaints = useLiveQuery(
+    () =>
+      ctx
+        ? db.services.where("business_id").equals(ctx.businessId).toArray().then((list) => list.map((s) => s.customer_complaint ?? ""))
+        : [],
+    [ctx?.businessId]
+  );
+  const issueLabels = rankIssues(
+    issueCatalog && issueCatalog.length > 0 ? issueCatalog.map((i) => i.name) : ISSUE_CATEGORIES,
+    pastComplaints ?? []
+  );
   const customer = useLiveQuery(() => (customerId ? db.customers.get(customerId) : undefined), [customerId]);
   const machines = useLiveQuery(
     () =>
