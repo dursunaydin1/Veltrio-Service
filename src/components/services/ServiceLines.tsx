@@ -53,7 +53,7 @@ const priceText = (tl: number) => tl.toFixed(2).replace(".", ",");
 type Mode = null | { type: "op"; edit?: ServiceOperation } | { type: "part" } | { type: "approval" };
 
 /** Servis kalemleri: işlemler, parçalar, teklif özeti, müşteri kararı (Adım 3.8-3.9). */
-export function ServiceLines({ service, onApproved }: { service: Service; onApproved?: () => void }) {
+export function ServiceLines({ service, onApproved, onNext }: { service: Service; onApproved?: () => void; onNext?: () => void }) {
   const ctx = useServiceContext();
   const settings = useSessionStore((s) => s.business?.settings);
   const [mode, setMode] = useState<Mode>(null);
@@ -159,6 +159,12 @@ export function ServiceLines({ service, onApproved }: { service: Service; onAppr
             <p>Bu durumda kalem değiştirilemez; gerekirse servisi yeniden açın.</p>
           )}
 
+          {/* Kalemler bitti ve karar gerekmiyorsa: Özet'teki sıradaki adıma dön (K-084) */}
+          {onNext && !needsDecision && lines && lines.operations.length + lines.parts.length > 0 ? (
+            <button type="button" className="btn btn-primary btn-full" onClick={onNext}>
+              Sıradaki adım →
+            </button>
+          ) : null}
           {editable && summary.pendingCount > 0 ? (
             <button type="button" className="btn btn-primary btn-full" onClick={() => setMode({ type: "approval" })}>
               Müşteri kararını kaydet ({summary.pendingCount} kalem bekliyor)

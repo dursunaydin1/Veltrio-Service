@@ -2,7 +2,7 @@
 
 import { useEffect, useRef, useState } from "react";
 import Link from "next/link";
-import { ArrowRight, FileText, Plus, Printer } from "lucide-react";
+import { ArrowRight, Check, Circle, FileText, Plus, Printer } from "lucide-react";
 import { useLiveQuery } from "dexie-react-hooks";
 import { db } from "@/lib/db";
 import type { Service } from "@/lib/db";
@@ -15,6 +15,10 @@ import { parseMoneyInput } from "@/lib/calc";
 import { ChecklistPanel } from "@/components/services/ChecklistPanel";
 import { ServiceReturnPanel } from "@/components/services/ServiceReturnPanel";
 import { StatusBadge } from "@/components/services/StatusBadge";
+import { serviceGuide, suggestResolution } from "@/lib/services/guide";
+import { getServiceLines } from "@/lib/services/quote";
+import { approvalRequired, summarizeLines } from "@/lib/services/lines";
+import { DEFAULT_APPROVAL_THRESHOLD } from "@/lib/services/service";
 import { ChecklistIncompleteError, changeServiceStatus, getServiceBalance, updateServiceDetails } from "@/lib/services/service";
 import {
   SERVICE_MAIN_NEXT,
@@ -42,7 +46,7 @@ export function ServiceDetail({ id }: { id: string }) {
   }, [flash]);
   function moveOn(next: DetailTab, message: string) {
     setTab(next);
-    setFlash(message);
+    setFlash(message || null);
     tabsRef.current?.scrollIntoView({ behavior: "smooth", block: "start" });
   }
   const afterDetailsSaved = (next: DetailTab) => moveOn(next, "Servis bilgileri kaydedildi.");
@@ -137,7 +141,7 @@ export function ServiceDetail({ id }: { id: string }) {
 
       {tab === "summary" ? (
         <>
-          <StatusActions service={service} />
+          <StatusActions service={service} onGoTab={(t) => moveOn(t, t === "lines" ? "Kalemleri ekleyin; bitince “Sıradaki adım”a dokunun." : "")} />
           <DeliveryPanel service={service} />
         </>
       ) : null}
@@ -145,7 +149,11 @@ export function ServiceDetail({ id }: { id: string }) {
         <DetailsForm key={`${service.id}:${service.version ?? 0}:${service.updated_at}`} service={service} onSaved={afterDetailsSaved} />
       ) : null}
       {tab === "lines" ? (
-        <ServiceLines service={service} onApproved={() => moveOn("summary", "Müşteri kararı kaydedildi. Sıradaki adım: durumu ilerletin.")} />
+        <ServiceLines
+          service={service}
+          onApproved={() => moveOn("summary", "Müşteri kararı kaydedildi.")}
+          onNext={() => moveOn("summary", "")}
+        />
       ) : null}
       {tab === "checklist" ? <ChecklistPanel service={service} /> : null}
       {tab === "payments" ? (
@@ -171,8 +179,32 @@ const DETAIL_TABS: { id: DetailTab; label: string }[] = [
   { id: "history", label: "Geçmiş" },
 ];
 
-function StatusActions({ service }: { service: Service }) {
+/** Servis için ortak "bilgileri kaydet" girdisi: yalnızca verilen alanlar değişir. */
+function detailsOf(service: Service, patch: { diagnosis?: string; resolution?: string }) {
+  return {
+    customer_complaint: service.customer_complaint ?? "",
+    diagnosis: patch.diagnosis ?? service.diagnosis ?? "",
+    resolution: patch.resolution ?? service.resolution ?? "",
+    promised_date: service.promised_date,
+    existing_damage: service.existing_damage ?? "",
+    received_accessories: service.received_accessories ?? "",
+    is_warranty_claim: service.is_warranty_claim,
+    warranty_source: service.warranty_source ?? "",
+    warranty_coverage: service.warranty_coverage ?? "",
+  };
+}
+
+/**
+ * "Sonraki adım" kartı (K-084): üstte servisin adımları (teşhis, kalem, müşteri kararı, yapılan iş) tikli;
+ * altta sıradaki iş kartın içinde yapılır: teşhis yazılır, kalem / karar için doğru sekmeye gidilir,
+ * "İş tamamlandı"da yapılan iş (kalemlerden önerilen metinle) sorulur. Diğer durumlar küçük düğmelerdedir.
+ */
+function StatusActions({ service, onGoTab }: { service: Service; onGoTab: (tab: DetailTab) => void }) {
   const ctx = useServiceContext();
+  const lines = useLiveQuery(() => getServiceLines(service.id), [service.id]);
+  const [diagnosisText, setDiagnosisText] = useState(service.diagnosis ?? "");
+  const [completing, setCompleting] = useState(false);
+  const [resolutionText, setResolutionText] = useState("");
   const [pending, setPending] = useState<ServiceStatus | null>(null);
   const [reason, setReason] = useState("");
   const [error, setError] = useState<string | null>(null);
@@ -183,6 +215,52 @@ function StatusActions({ service }: { service: Service }) {
 
   if (!isServiceStatus(service.status)) return null;
   const from = service.status;
+  const allLines = [...(lines?.operations ?? []), ...(lines?.parts ?? [])];
+  const quote = summarizeLines(allLines);
+  const needsDecision = approvalRequired(quote.quote, ctx?.approvalThreshold ?? DEFAULT_APPROVAL_THRESHOLD) && quote.pendingCount > 0;
+  const guide = serviceGuide({ status: from, diagnosis: service.diagnosis, lineCount: allLines.length, needsDecision });
+
+  async function saveDiagnosis() {
+    if (!ctx) return setError("Cihaz bilgisi henüz yüklenmedi, lütfen tekrar deneyin.");
+    if (!diagnosisText.trim()) return setError("Teşhisi yazın.");
+    setBusy(true);
+    setError(null);
+    try {
+      await updateServiceDetails(ctx, service.id, detailsOf(service, { diagnosis: diagnosisText }));
+      await changeServiceStatus(ctx, service.id, "DIAGNOSED", undefined);
+    } catch (e) {
+      setError(e instanceof Error ? e.message : "Kaydedilemedi.");
+    }
+    setBusy(false);
+  }
+
+  function startCompleting() {
+    const billed = (l: { status: string }) => l.status === "APPROVED" || l.status === "PENDING";
+    setResolutionText(
+      service.resolution ||
+        suggestResolution(
+          (lines?.operations ?? []).filter(billed).map((o) => o.description),
+          (lines?.parts ?? []).filter(billed).map((p) => p.description_snapshot)
+        )
+    );
+    setError(null);
+    setCompleting(true);
+  }
+
+  async function complete() {
+    if (!ctx) return setError("Cihaz bilgisi henüz yüklenmedi, lütfen tekrar deneyin.");
+    setBusy(true);
+    setError(null);
+    try {
+      await updateServiceDetails(ctx, service.id, detailsOf(service, { resolution: resolutionText }));
+    } catch (e) {
+      setBusy(false);
+      return setError(e instanceof Error ? e.message : "Kaydedilemedi.");
+    }
+    setBusy(false);
+    setCompleting(false);
+    await go("COMPLETED");
+  }
   // "İş tamamlandı" → "Teslim edildi" geçişi teslim paneliyle (kalan bakiye, tahsilat) yapılır.
   const options = SERVICE_TRANSITIONS[from].filter((to) => !(from === "COMPLETED" && to === "DELIVERED"));
   if (options.length === 0) return null;
@@ -230,6 +308,16 @@ function StatusActions({ service }: { service: Service }) {
   return (
     <section className="card stack stack-md" aria-labelledby="st-title">
       <h2 id="st-title">Sonraki adım</h2>
+      {from !== "CANCELLED" ? (
+        <ol className="guide-steps" aria-label="Servis adımları">
+          {guide.steps.map((step) => (
+            <li key={step.id} data-done={step.done ? "" : undefined}>
+              {step.done ? <Check size={14} strokeWidth={3} aria-hidden="true" /> : <Circle size={12} aria-hidden="true" />}
+              {step.label}
+            </li>
+          ))}
+        </ol>
+      ) : null}
 
       {checklistWarning ? (
         <div className="alert alert-warning" role="alert">
@@ -281,9 +369,58 @@ function StatusActions({ service }: { service: Service }) {
             </button>
           </div>
         </form>
+      ) : completing ? (
+        <form
+          className="stack stack-md"
+          onSubmit={(e) => {
+            e.preventDefault();
+            void complete();
+          }}
+        >
+          <div className="form-group">
+            <label className="form-label" htmlFor="st-resolution">Yapılan iş</label>
+            <textarea id="st-resolution" className="form-input" rows={3} value={resolutionText} onChange={(e) => setResolutionText(e.target.value)} autoFocus />
+            <small style={{ color: "var(--text-muted)" }}>Kalemlerden önerildi; düzeltebilirsiniz. Müşteriye verilen sonuç özetinde görünür.</small>
+          </div>
+          {error ? <div className="alert alert-error" role="alert">{error}</div> : null}
+          <div className="row row-gap-md">
+            <button type="button" className="btn btn-secondary" style={{ flex: 1 }} onClick={() => setCompleting(false)} disabled={busy}>Vazgeç</button>
+            <button type="submit" className="btn btn-primary" style={{ flex: 1 }} disabled={busy}>İşi tamamla</button>
+          </div>
+        </form>
       ) : (
         <>
-          {main ? (
+          {guide.task === "diagnosis" ? (
+            <div className="stack stack-sm">
+              <label className="form-label" htmlFor="st-diagnosis">Teşhis ne?</label>
+              <textarea id="st-diagnosis" className="form-input" rows={2} placeholder="Ör. hava filtresi tıkalı, misina kafası aşınmış" value={diagnosisText} onChange={(e) => setDiagnosisText(e.target.value)} />
+              <button type="button" className="btn btn-primary btn-lg btn-full" onClick={() => void saveDiagnosis()} disabled={busy}>
+                Teşhisi kaydet
+                <ArrowRight size={18} aria-hidden="true" />
+              </button>
+            </div>
+          ) : guide.task === "lines" ? (
+            <div className="stack stack-sm">
+              <p>Şimdi yapılacak işçiliği ve gereken parçaları ekleyin.</p>
+              <button type="button" className="btn btn-primary btn-lg btn-full" onClick={() => onGoTab("lines")}>
+                İşçilik / parça ekle
+                <ArrowRight size={18} aria-hidden="true" />
+              </button>
+            </div>
+          ) : guide.task === "approval" ? (
+            <div className="stack stack-sm">
+              <p>Teklif hazır: {formatCurrency(quote.quote / 100)}. İşe başlamadan müşterinin kararını kaydedin.</p>
+              <button type="button" className="btn btn-primary btn-lg btn-full" onClick={() => onGoTab("lines")}>
+                Müşteri kararını kaydet
+                <ArrowRight size={18} aria-hidden="true" />
+              </button>
+            </div>
+          ) : guide.task === "complete" ? (
+            <button type="button" className="btn btn-primary btn-lg btn-full" onClick={startCompleting} disabled={busy}>
+              İş tamamlandı
+              <ArrowRight size={18} aria-hidden="true" />
+            </button>
+          ) : main ? (
             <button type="button" className="btn btn-primary btn-lg btn-full" onClick={() => choose(main)} disabled={busy}>
               {statusLabel(main)}
               <ArrowRight size={18} aria-hidden="true" />

@@ -54,7 +54,7 @@ export function RecentServices() {
   return (
     <section className="stack stack-sm" aria-labelledby="ongoing-title">
       <h2 id="ongoing-title" className="section-title">
-        Devam eden servisler
+        Teslimi yaklaşanlar
         {data.total > 0 ? (
           <Link href="/services" className="section-action">
             Tümü ({data.total})
@@ -73,7 +73,7 @@ export function RecentServices() {
           <Link href="/services/new" className="btn btn-primary btn-sm">Servis aç</Link>
         </div>
       ) : (
-        <ul className="card-list" aria-label="Devam eden servisler">
+        <ul className="card-list" aria-label="Teslimi yaklaşan servisler">
           {data.items.map(({ service, customer, machine }) => {
             const promise = describePromise(service.promised_date, today);
             return (

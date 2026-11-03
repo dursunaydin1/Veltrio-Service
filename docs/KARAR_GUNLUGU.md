@@ -5,6 +5,12 @@
 
 ## 2026-11-03
 
+### K-084 · Servis rehberi: "Sonraki adım" kartı işi kendisi yaptırır
+- **Neden:** İşletme sahibi sekmeler arasında gezip neyin yapıldığını / eksik kaldığını aramak istemedi; "yapılan iş" için ayrıca başka sekmeye gitmek kopuk bir akıştı.
+- **Adımlar:** Kartın üstünde Teşhis · İşçilik ve parça · Müşteri kararı · Yapılan iş; yapılan pirinç tikli, kalan sönük.
+- **Sıradaki iş kartın içinde:** teşhis yoksa teşhis kutusu ve "Teşhisi kaydet" (durum kendiliğinden "Teşhis tamamlandı"); kalem yoksa "İşçilik / parça ekle" (doğru sekmeye götürür); karar gerekiyorsa "Müşteri kararını kaydet"; işlemdeyse "İş tamamlandı" → yapılan iş kalemlerden önerilen metinle sorulur → "İşi tamamla". Kalem sekmesinde, karar gerekmiyorsa "Sıradaki adım →" Özet'e döner. Mantık `src/lib/services/guide.ts` (+ test).
+- **Ana sayfa:** "Devam eden servisler" başlığı "Teslimi yaklaşanlar" oldu (teslim tarihi en yakın 3 açık servis).
+
 ### K-083 · İsteğe bağlı alanlara ortak yapı; işlem kataloğu çip; onaydan sonra Özet
 - **Ortak yapı:** `OptionalField` / `OptionalGroup`: isteğe bağlı alan kapalıyken kesik çizgili "+ …" çipi, dokununca açılır, imleç içine gelir, X ile kapanır ve değeri silinir; dolu alan açık gelir.
 - **Uygulandığı yerler:** Müşteri formu (adres, not, fotoğraf), makine formu (yıl, garanti, not; seri numarası tanıma ve yinelenen kayıt uyarısı için açık kaldı), işlem ekleme (indirim; KDV varsayılanla gelir, çipte "KDV: dahil %20 · değiştir"), müşteri kararı (açıklama).

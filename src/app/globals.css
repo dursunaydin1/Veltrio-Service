@@ -1191,6 +1191,11 @@ a.item-card::after {
 .chip-add { border-style: dashed; background: transparent; color: var(--text-secondary); }
 .chip-add svg { color: var(--accent-light); }
 .extra-field { animation: fade-in 160ms ease both; }
+/* Servis adımları (K-084): tamamlanan pirinç tikli, kalan sönük */
+.guide-steps { display: flex; flex-wrap: wrap; gap: 6px 14px; padding: 0; margin: -4px 0 0; list-style: none; }
+.guide-steps li { display: inline-flex; align-items: center; gap: 6px; font-size: 0.8125rem; font-weight: 600; color: var(--text-muted); }
+.guide-steps li[data-done] { color: var(--text-primary); }
+.guide-steps li[data-done] svg { color: var(--accent-light); }
 .optional-group-wrap { display: flex; flex-direction: column; gap: 8px; }
 .optional-group { display: flex; flex-wrap: wrap; gap: 8px; }
 .optional-group > .extra-field { flex-basis: 100%; }
