@@ -16,6 +16,7 @@ import {
 } from "@/lib/machines/service";
 import type { Machine } from "@/types";
 import { useAppNav } from "@/lib/nav/useAppNav";
+import { OptionalField, OptionalGroup } from "@/components/common/OptionalField";
 
 function toFormInput(machine: Machine | undefined, customerId: string): MachineFormInput {
   return {
@@ -163,23 +164,10 @@ export function MachineForm({
         </div>
       </div>
 
-      <div className="row row-gap-md">
-        <div className="form-group" style={{ flex: 2 }}>
-          <label className="form-label" htmlFor="m-serialNumber">Seri numarası</label>
-          <input {...field("serialNumber")} className="form-input" value={values.serialNumber} onChange={(e) => set("serialNumber", e.target.value)} autoComplete="off" />
-          {err("serialNumber")}
-        </div>
-        <div className="form-group" style={{ flex: 1 }}>
-          <label className="form-label" htmlFor="m-year">Yıl</label>
-          <input {...field("year")} className="form-input" inputMode="numeric" maxLength={4} value={values.year} onChange={(e) => set("year", e.target.value)} />
-          {err("year")}
-        </div>
-      </div>
       <div className="form-group">
-        <label className="form-label" htmlFor="m-warrantyUntil">Garanti bitiş tarihi</label>
-        <input {...field("warrantyUntil")} className="form-input" type="date" value={values.warrantyUntil ?? ""} onChange={(e) => set("warrantyUntil", e.target.value)} />
-        <small style={{ color: "var(--text-muted)" }}>Bilgi amaçlıdır; garanti kapsamını serviste siz doğrularsınız.</small>
-        {err("warrantyUntil")}
+        <label className="form-label" htmlFor="m-serialNumber">Seri numarası</label>
+        <input {...field("serialNumber")} className="form-input" value={values.serialNumber} onChange={(e) => set("serialNumber", e.target.value)} autoComplete="off" />
+        {err("serialNumber")}
       </div>
       {!serial ? <p>Seri numarası yoksa makine sistemin atadığı iç numarayla (MK-…) tanınır.</p> : null}
 
@@ -202,11 +190,21 @@ export function MachineForm({
         </div>
       ) : null}
 
-      <div className="form-group">
-        <label className="form-label" htmlFor="m-notes">Not</label>
-        <textarea {...field("notes")} className="form-input" rows={3} value={values.notes} onChange={(e) => set("notes", e.target.value)} />
-        {err("notes")}
-      </div>
+      <OptionalGroup title="Eklemek isterseniz">
+        <OptionalField label="Yıl" htmlFor="m-year" filled={!!values.year} onClear={() => set("year", "")}>
+          <input {...field("year")} className="form-input" inputMode="numeric" maxLength={4} value={values.year} onChange={(e) => set("year", e.target.value)} />
+          {err("year")}
+        </OptionalField>
+        <OptionalField label="Garanti bitiş tarihi" chip="Garanti" htmlFor="m-warrantyUntil" filled={!!values.warrantyUntil} onClear={() => set("warrantyUntil", "")}>
+          <input {...field("warrantyUntil")} className="form-input" type="date" value={values.warrantyUntil ?? ""} onChange={(e) => set("warrantyUntil", e.target.value)} />
+          <small style={{ color: "var(--text-muted)" }}>Bilgi amaçlıdır; garanti kapsamını serviste siz doğrularsınız.</small>
+          {err("warrantyUntil")}
+        </OptionalField>
+        <OptionalField label="Not" htmlFor="m-notes" filled={!!values.notes} onClear={() => set("notes", "")}>
+          <textarea {...field("notes")} className="form-input" rows={3} value={values.notes} onChange={(e) => set("notes", e.target.value)} />
+          {err("notes")}
+        </OptionalField>
+      </OptionalGroup>
 
       {formError ? <div className="alert alert-error" role="alert">{formError}</div> : null}
 

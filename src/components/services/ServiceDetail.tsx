@@ -40,11 +40,12 @@ export function ServiceDetail({ id }: { id: string }) {
     const t = setTimeout(() => setFlash(null), 2500);
     return () => clearTimeout(t);
   }, [flash]);
-  function afterDetailsSaved(next: DetailTab) {
+  function moveOn(next: DetailTab, message: string) {
     setTab(next);
-    setFlash("Servis bilgileri kaydedildi.");
+    setFlash(message);
     tabsRef.current?.scrollIntoView({ behavior: "smooth", block: "start" });
   }
+  const afterDetailsSaved = (next: DetailTab) => moveOn(next, "Servis bilgileri kaydedildi.");
   const found = useLiveQuery(() => db.services.where("id").equals(id).toArray(), [id]);
   const related = useLiveQuery(async () => {
     const s = found?.[0];
@@ -143,7 +144,9 @@ export function ServiceDetail({ id }: { id: string }) {
       {tab === "details" ? (
         <DetailsForm key={`${service.id}:${service.version ?? 0}:${service.updated_at}`} service={service} onSaved={afterDetailsSaved} />
       ) : null}
-      {tab === "lines" ? <ServiceLines service={service} /> : null}
+      {tab === "lines" ? (
+        <ServiceLines service={service} onApproved={() => moveOn("summary", "Müşteri kararı kaydedildi. Sıradaki adım: durumu ilerletin.")} />
+      ) : null}
       {tab === "checklist" ? <ChecklistPanel service={service} /> : null}
       {tab === "payments" ? (
         <>

@@ -25,6 +25,7 @@ import { approvalRequired, summarizeLines } from "@/lib/services/lines";
 import { useSessionStore } from "@/stores/session";
 import { formatCurrency, formatDateTime, formatQuantity } from "@/lib/utils";
 import type { Product, TaxMode } from "@/types";
+import { OptionalField, OptionalGroup } from "@/components/common/OptionalField";
 
 const STATUS_LABEL: Record<LineStatus, string> = {
   PENDING: "Karar bekliyor",
@@ -52,7 +53,7 @@ const priceText = (tl: number) => tl.toFixed(2).replace(".", ",");
 type Mode = null | { type: "op"; edit?: ServiceOperation } | { type: "part" } | { type: "approval" };
 
 /** Servis kalemleri: işlemler, parçalar, teklif özeti, müşteri kararı (Adım 3.8-3.9). */
-export function ServiceLines({ service }: { service: Service }) {
+export function ServiceLines({ service, onApproved }: { service: Service; onApproved?: () => void }) {
   const ctx = useServiceContext();
   const settings = useSessionStore((s) => s.business?.settings);
   const [mode, setMode] = useState<Mode>(null);
@@ -99,7 +100,9 @@ export function ServiceLines({ service }: { service: Service }) {
 
       {needsDecision ? (
         <div className="alert alert-warning" role="alert">
-          Teklif {formatCurrency(threshold)} eşiğini aşıyor: karar bekleyen kalemler için müşteri onayı gerekli.
+          {threshold > 0
+            ? `Teklif ${formatCurrency(threshold)} onay sınırını aşıyor; işe başlamadan müşterinin kararını kaydedin.`
+            : "İşe başlamadan müşterinin kararını (onay / ret) kaydedin. Onay sınırı Ayarlar → İşletme ayarları'ndan değiştirilebilir."}
         </div>
       ) : null}
       {error ? <div className="alert alert-error" role="alert">{error}</div> : null}
@@ -167,7 +170,15 @@ export function ServiceLines({ service }: { service: Service }) {
       ) : mode.type === "part" ? (
         <PartForm service={service} defaultTax={defaultTax} onDone={() => setMode(null)} />
       ) : (
-        <ApprovalForm service={service} lines={lines} onDone={() => setMode(null)} />
+        <ApprovalForm
+          service={service}
+          lines={lines}
+          onDone={() => setMode(null)}
+          onSaved={() => {
+            setMode(null);
+            onApproved?.();
+          }}
+        />
       )}
 
       {approvals && approvals.length > 0 ? (
@@ -337,10 +348,19 @@ function OperationForm({
   const [taxRate, setTaxRate] = useState(String(edit?.tax_rate ?? defaultTax.rate).replace(".", ","));
   const [error, setError] = useState<string | null>(null);
   const [busy, setBusy] = useState(false);
-  const catalog = useLiveQuery(
-    () => db.operation_catalog.where("business_id").equals(service.business_id).filter((o) => o.active).toArray(),
-    [service.business_id]
-  );
+  // Hızlı seçim (K-083): katalogdaki işlemler, geçmiş servislerde en çok kullanılan önce (Ayarlar → Kataloglar → İşlemler)
+  const catalog = useLiveQuery(async () => {
+    const [entries, used] = await Promise.all([
+      db.operation_catalog.where("business_id").equals(service.business_id).filter((o) => o.active).toArray(),
+      db.service_operations.where("business_id").equals(service.business_id).toArray(),
+    ]);
+    const count = new Map<string, number>();
+    for (const op of used) count.set(op.description.trim().toLocaleLowerCase("tr"), (count.get(op.description.trim().toLocaleLowerCase("tr")) ?? 0) + 1);
+    const uses = (name: string) => count.get(name.trim().toLocaleLowerCase("tr")) ?? 0;
+    return entries.sort((a, b) => uses(b.name) - uses(a.name) || a.name.localeCompare(b.name, "tr"));
+  }, [service.business_id]);
+  const [showAllCatalog, setShowAllCatalog] = useState(false);
+  const QUICK = 6;
 
   /** Katalogtan seçim açıklamayı ve önerilen fiyatı forma kopyalar; sonradan değişse satır değişmez. */
   function pickFromCatalog(id: string) {
@@ -382,12 +402,28 @@ function OperationForm({
       <h3>{edit ? "İşlemi düzenle" : "İşlem ekle"}</h3>
       <div className="form-group">
         {!edit && catalog && catalog.length > 0 ? (
-          <select className="form-input" aria-label="Katalogdan işlem seç" value="" onChange={(e) => pickFromCatalog(e.target.value)} style={{ marginBottom: 8 }}>
-            <option value="">Katalogdan seç…</option>
-            {catalog.map((o) => (
-              <option key={o.id} value={o.id}>{o.name}{o.suggested_price !== undefined ? ` — ${priceText(o.suggested_price)} ₺` : ""}</option>
-            ))}
-          </select>
+          <div className="stack stack-sm" style={{ marginBottom: 8 }}>
+            <span className="form-label">Sık yapılan işlemler</span>
+            <div className="chip-group" aria-label="Sık yapılan işlemler">
+              {(showAllCatalog ? catalog : catalog.slice(0, QUICK)).map((o) => (
+                <button
+                  key={o.id}
+                  type="button"
+                  className="chip chip-toggle"
+                  aria-pressed={description === o.name}
+                  onClick={() => pickFromCatalog(o.id)}
+                >
+                  {o.name}
+                  {o.suggested_price !== undefined ? <small style={{ color: "var(--text-muted)", fontWeight: 500 }}>{priceText(o.suggested_price)} ₺</small> : null}
+                </button>
+              ))}
+              {!showAllCatalog && catalog.length > QUICK ? (
+                <button type="button" className="chip chip-add" onClick={() => setShowAllCatalog(true)}>
+                  Tümü ({catalog.length})
+                </button>
+              ) : null}
+            </div>
+          </div>
         ) : null}
         <label className="form-label" htmlFor="op-desc">Açıklama *</label>
         <input id="op-desc" className="form-input" placeholder="Ör. karbüratör ayarı" value={description} onChange={(e) => setDescription(e.target.value)} autoFocus />
@@ -403,24 +439,30 @@ function OperationForm({
         </div>
       </div>
       {price.trim() === "" ? <p>Fiyat girilmezse kalem “fiyat bekleniyor” olur ve iş tamamlanamaz.</p> : null}
-      <div className="form-group">
-        <label className="form-label" htmlFor="op-discount">İndirim (₺, toplam)</label>
-        <input id="op-discount" className="form-input" inputMode="decimal" placeholder="0,00" value={discount} onChange={(e) => setDiscount(e.target.value)} />
-      </div>
-      <div className="row row-gap-md">
-        <div className="form-group" style={{ flex: 1 }}>
-          <label className="form-label" htmlFor="op-tax">KDV</label>
-          <select id="op-tax" className="form-input" value={taxMode} onChange={(e) => setTaxMode(e.target.value as TaxMode)}>
-            <option value="INCLUSIVE">KDV dahil</option>
-            <option value="EXCLUSIVE">KDV hariç</option>
-            <option value="NONE">KDV yok</option>
-          </select>
-        </div>
-        <div className="form-group" style={{ flex: 1 }}>
-          <label className="form-label" htmlFor="op-rate">Oran (%)</label>
-          <input id="op-rate" className="form-input" inputMode="decimal" value={taxRate} onChange={(e) => setTaxRate(e.target.value)} />
-        </div>
-      </div>
+      <OptionalGroup>
+        <OptionalField label="İndirim (₺, toplam)" chip="İndirim" htmlFor="op-discount" filled={discount.trim() !== ""} onClear={() => setDiscount("")}>
+          <input id="op-discount" className="form-input" inputMode="decimal" placeholder="0,00" value={discount} onChange={(e) => setDiscount(e.target.value)} />
+        </OptionalField>
+        <OptionalField
+          label="KDV"
+          chip={`KDV: ${taxMode === "NONE" ? "yok" : `${taxMode === "INCLUSIVE" ? "dahil" : "hariç"} %${taxRate}`} · değiştir`}
+          htmlFor="op-tax"
+          filled={taxMode !== defaultTax.mode || taxRate !== String(defaultTax.rate).replace(".", ",")}
+          onClear={() => {
+            setTaxMode(defaultTax.mode);
+            setTaxRate(String(defaultTax.rate).replace(".", ","));
+          }}
+        >
+          <div className="row row-gap-md">
+            <select id="op-tax" className="form-input" style={{ flex: 1 }} value={taxMode} onChange={(e) => setTaxMode(e.target.value as TaxMode)}>
+              <option value="INCLUSIVE">KDV dahil</option>
+              <option value="EXCLUSIVE">KDV hariç</option>
+              <option value="NONE">KDV yok</option>
+            </select>
+            <input id="op-rate" className="form-input" style={{ flex: 1 }} inputMode="decimal" aria-label="KDV oranı (%)" value={taxRate} onChange={(e) => setTaxRate(e.target.value)} />
+          </div>
+        </OptionalField>
+      </OptionalGroup>
       {error ? <div className="alert alert-error" role="alert">{error}</div> : null}
       <div className="row row-gap-md">
         <button type="button" className="btn btn-secondary" style={{ flex: 1 }} onClick={onDone} disabled={busy}>Vazgeç</button>
@@ -536,10 +578,12 @@ function ApprovalForm({
   service,
   lines,
   onDone,
+  onSaved,
 }: {
   service: Service;
   lines: { operations: ServiceOperation[]; parts: ServicePart[] } | undefined;
   onDone: () => void;
+  onSaved: () => void;
 }) {
   const ctx = useServiceContext();
   const pending: { kind: "operation" | "part"; id: string; title: string; total: number }[] = [
@@ -564,7 +608,7 @@ function ApprovalForm({
         method,
         explanation,
       });
-      onDone();
+      onSaved();
     } catch (e) {
       setError(e instanceof Error ? e.message : "Kaydedilemedi.");
       setBusy(false);
@@ -603,10 +647,11 @@ function ApprovalForm({
           <option value="OTHER">Diğer</option>
         </select>
       </div>
-      <div className="form-group">
-        <label className="form-label" htmlFor="ap-note">Açıklama</label>
-        <input id="ap-note" className="form-input" value={explanation} onChange={(e) => setExplanation(e.target.value)} />
-      </div>
+      <OptionalGroup>
+        <OptionalField label="Açıklama" htmlFor="ap-note" filled={!!explanation} onClear={() => setExplanation("")}>
+          <input id="ap-note" className="form-input" placeholder="Ör. fiyatı kabul etti, parçayı sonra getirecek" value={explanation} onChange={(e) => setExplanation(e.target.value)} />
+        </OptionalField>
+      </OptionalGroup>
       {error ? <div className="alert alert-error" role="alert">{error}</div> : null}
       <div className="row row-gap-md">
         <button type="button" className="btn btn-secondary" style={{ flex: 1 }} onClick={onDone} disabled={busy}>Vazgeç</button>

@@ -15,6 +15,7 @@ import {
 import { formatPhone, isPlausiblePhone, normalizePhone } from "@/lib/utils/phone";
 import type { Customer } from "@/types";
 import { useAppNav } from "@/lib/nav/useAppNav";
+import { OptionalField, OptionalGroup } from "@/components/common/OptionalField";
 
 function toFormInput(customer?: Customer): CustomerFormInput {
   return {
@@ -182,31 +183,31 @@ export function CustomerForm({ customer }: { customer?: Customer }) {
         {err("village")}
       </div>
 
-      <div className="form-group">
-        <label className="form-label" htmlFor="c-address">Açık adres</label>
-        <textarea
-          {...field("address")}
-          className="form-input"
-          rows={2}
-          value={values.address}
-          onChange={(e) => set("address", e.target.value)}
-        />
-        {err("address")}
-      </div>
-
-      <div className="form-group">
-        <label className="form-label" htmlFor="c-notes">Not</label>
-        <textarea
-          {...field("notes")}
-          className="form-input"
-          rows={3}
-          value={values.notes}
-          onChange={(e) => set("notes", e.target.value)}
-        />
-        {err("notes")}
-      </div>
-
-      <PhotoField label="Müşteri fotoğrafı (isteğe bağlı)" value={values.photo || undefined} onChange={(photo) => set("photo", photo ?? "")} />
+      <OptionalGroup title="Eklemek isterseniz">
+        <OptionalField label="Açık adres" chip="Adres" htmlFor="c-address" filled={!!values.address} onClear={() => set("address", "")}>
+          <textarea
+            {...field("address")}
+            className="form-input"
+            rows={2}
+            value={values.address}
+            onChange={(e) => set("address", e.target.value)}
+          />
+          {err("address")}
+        </OptionalField>
+        <OptionalField label="Not" htmlFor="c-notes" filled={!!values.notes} onClear={() => set("notes", "")}>
+          <textarea
+            {...field("notes")}
+            className="form-input"
+            rows={3}
+            value={values.notes}
+            onChange={(e) => set("notes", e.target.value)}
+          />
+          {err("notes")}
+        </OptionalField>
+        <OptionalField label="Müşteri fotoğrafı" chip="Fotoğraf" filled={!!values.photo} onClear={() => set("photo", "")}>
+          <PhotoField label="Müşteri fotoğrafı" value={values.photo || undefined} onChange={(photo) => set("photo", photo ?? "")} />
+        </OptionalField>
+      </OptionalGroup>
 
       {formError ? <div className="alert alert-error" role="alert">{formError}</div> : null}
 

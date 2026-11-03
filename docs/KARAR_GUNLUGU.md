@@ -5,6 +5,13 @@
 
 ## 2026-11-03
 
+### K-083 · İsteğe bağlı alanlara ortak yapı; işlem kataloğu çip; onaydan sonra Özet
+- **Ortak yapı:** `OptionalField` / `OptionalGroup`: isteğe bağlı alan kapalıyken kesik çizgili "+ …" çipi, dokununca açılır, imleç içine gelir, X ile kapanır ve değeri silinir; dolu alan açık gelir.
+- **Uygulandığı yerler:** Müşteri formu (adres, not, fotoğraf), makine formu (yıl, garanti, not; seri numarası tanıma ve yinelenen kayıt uyarısı için açık kaldı), işlem ekleme (indirim; KDV varsayılanla gelir, çipte "KDV: dahil %20 · değiştir"), müşteri kararı (açıklama).
+- **İşlem kataloğu:** "Katalogdan seç" açılır listesi yerine "Sık yapılan işlemler" çipleri (Ayarlar → Kataloglar → İşlemler); geçmişte en çok kullanılan önce, ilk 6, "Tümü". Dokununca açıklama ve önerilen fiyat dolar.
+- **Onay uyarısı:** "Teklif 0 ₺ eşiğini aşıyor" yerine anlaşılır metin; onay sınırı 0 ise "İşe başlamadan müşterinin kararını kaydedin…".
+- **Akış:** Müşteri kararı kaydedilince "Özet" sekmesine geçilir: "Müşteri kararı kaydedildi. Sıradaki adım: durumu ilerletin." İlerleme çubuğu durum ilerletilince ilerler; karar kaydı durumu kendiliğinden değiştirmez.
+
 ### K-082 · Servis "Arıza ve teşhis" sekmesi sadeleşti; kaydedince sıradaki sekme
 - **Kabul alanları:** Hasar / aksesuar, kabulde yazılan bilgiyi düzeltmek veya sonradan eklemek içindir (ör. çizik sonradan fark edildi). Doluysa görünür, boşsa "+ Hasar / çizik", "+ Aksesuar" çipi olarak durur; "Kabul bilgileri" başlığı altında toplandı.
 - **Yapılan iş:** Teşhisten farklı olarak işin sonunda ne yapıldığı; müşteriye verilen "Sonuç özeti"nde görünür. İş başlamadan (İşlemde öncesi) gizli, altında açıklama var.

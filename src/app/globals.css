@@ -1191,6 +1191,9 @@ a.item-card::after {
 .chip-add { border-style: dashed; background: transparent; color: var(--text-secondary); }
 .chip-add svg { color: var(--accent-light); }
 .extra-field { animation: fade-in 160ms ease both; }
+.optional-group-wrap { display: flex; flex-direction: column; gap: 8px; }
+.optional-group { display: flex; flex-wrap: wrap; gap: 8px; }
+.optional-group > .extra-field { flex-basis: 100%; }
 .extra-head { display: flex; align-items: center; justify-content: space-between; gap: 8px; margin-bottom: -4px; }
 .extra-head .form-label { margin: 0; }
 .chip-toggle[aria-pressed="true"] {
