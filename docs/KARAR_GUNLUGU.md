@@ -5,6 +5,12 @@
 
 ## 2026-11-04
 
+### K-086 · İsteğe bağlı alanlar tüm projede "+ çip"; tahsilattan sonra Özet
+- **Neden:** İşletme sahibi bu düzenin her ekranda kendiliğinden olmasını istedi (çalışma kuralı 15).
+- **Taranıp değiştirilenler:** Tahsilat ve ödeme notları (servis, açık kalemler, müşteri / tedarikçi hesabı, açılış bakiyesi kaynak notu), stok girişi notu, satış (belge indirimi, vade tarihi, farklı tarih, not), satın alma (fatura no, farklı tarih, not), tedarikçi (adres, not), servis iptalinde inceleme ücreti, servis iadesinde ek düzeltme. Ürün formunda açık kalanlar ad, satış fiyatı ve birim; kod, kategori, marka / model, alış fiyatı, kritik stok, KDV (özet çip), raf yeri, uyumlu modeller ve fotoğraf çip oldu.
+- **Kapsam dışı:** Ayarlar ekranları ile giriş / kurulum formları.
+- **Akış:** Serviste tahsilat kaydedilince "Özet"e dönülür ("Tahsilat kaydedildi."); teslim edilmiş serviste özet kartı kalan borcu gösterir.
+
 ### K-085 · Teslimden sonra sade özet; adım listesi kaldırıldı; teslim formu ortak yapıda
 - **Neden:** Teslim edilmiş serviste "Sonraki adım" kartı tüm adımlar tikli ve tek "Yeniden aç" düğmesiyle duruyordu; üstteki ilerleme çubuğuyla aynı şeyi söylüyor, kafa karıştırıyordu.
 - **Adım listesi:** K-084'teki tikli adım satırı kaldırıldı; aşamayı üstteki ilerleme çubuğu gösterir. Kart yalnızca yapılacak iş varken çıkar.

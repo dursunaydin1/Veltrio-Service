@@ -19,6 +19,7 @@ import {
 } from "@/lib/finance/service";
 import { formatCurrency, formatDateTime, todayLocalDate } from "@/lib/utils";
 import type { Payment, PaymentDirection, PaymentMethod } from "@/types";
+import { OptionalField, OptionalGroup } from "@/components/common/OptionalField";
 
 type Mode = null | "primary" | "secondary" | "opening";
 type OpeningDirection = "OWED_BY_PARTY" | "OWED_TO_PARTY";
@@ -267,10 +268,11 @@ function PaymentForm({
           ))}
         </select>
       </div>
-      <div className="form-group">
-        <label className="form-label" htmlFor="pay-note">Not</label>
-        <input id="pay-note" className="form-input" value={note} onChange={(e) => setNote(e.target.value)} />
-      </div>
+      <OptionalGroup>
+        <OptionalField label="Not" htmlFor="pay-note" filled={!!note} onClear={() => setNote("")}>
+          <input id="pay-note" className="form-input" value={note} onChange={(e) => setNote(e.target.value)} />
+        </OptionalField>
+      </OptionalGroup>
       {error ? <div className="alert alert-error" role="alert">{error}</div> : null}
       <div className="row row-gap-md">
         <button type="button" className="btn btn-secondary" style={{ flex: 1 }} onClick={onDone} disabled={busy}>Vazgeç</button>
@@ -367,10 +369,11 @@ function OpeningForm({
         <label className="form-label" htmlFor="ob-date">Bakiye tarihi</label>
         <input id="ob-date" className="form-input" type="date" value={asOf} onChange={(e) => setAsOf(e.target.value)} />
       </div>
-      <div className="form-group">
-        <label className="form-label" htmlFor="ob-note">Kaynak notu</label>
-        <input id="ob-note" className="form-input" placeholder="Ör. eski defter" value={note} onChange={(e) => setNote(e.target.value)} />
-      </div>
+      <OptionalGroup>
+        <OptionalField label="Kaynak notu" chip="Kaynak notu" htmlFor="ob-note" filled={!!note} onClear={() => setNote("")}>
+          <input id="ob-note" className="form-input" placeholder="Ör. eski defter" value={note} onChange={(e) => setNote(e.target.value)} />
+        </OptionalField>
+      </OptionalGroup>
       {existing ? (
         <div className="form-group">
           <label className="form-label" htmlFor="ob-reason">Değiştirme nedeni *</label>

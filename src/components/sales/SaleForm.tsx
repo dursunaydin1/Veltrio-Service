@@ -21,6 +21,7 @@ import { formatCurrency, formatQuantity, todayLocalDate } from "@/lib/utils";
 import type { Sale, SaleItem } from "@/lib/db";
 import type { PaymentMethod, Product, TaxMode } from "@/types";
 import { useAppNav } from "@/lib/nav/useAppNav";
+import { OptionalField, OptionalGroup } from "@/components/common/OptionalField";
 
 type DraftLine = {
   key: string;
@@ -272,10 +273,11 @@ export function SaleForm({
         <p>Henüz ürün yok. Yukarıdan ürün arayıp ekleyin.</p>
       )}
 
-      <div className="form-group">
-        <label className="form-label" htmlFor="sl-docdisc">Belge indirimi (₺, tüm satışa)</label>
-        <input id="sl-docdisc" className="form-input" inputMode="decimal" placeholder="0,00" value={docDiscount} onChange={(e) => setDocDiscount(e.target.value)} />
-      </div>
+      <OptionalGroup>
+        <OptionalField label="Belge indirimi (₺, tüm satışa)" chip="Belge indirimi" htmlFor="sl-docdisc" filled={!!docDiscount} onClear={() => setDocDiscount("")}>
+          <input id="sl-docdisc" className="form-input" inputMode="decimal" placeholder="0,00" value={docDiscount} onChange={(e) => setDocDiscount(e.target.value)} />
+        </OptionalField>
+      </OptionalGroup>
 
       <div className="tile">
         <div className="tile-label">Satış toplamı</div>
@@ -316,24 +318,23 @@ export function SaleForm({
           </div>
         ) : null}
         {unpaidKurus > 0 && totalKurus > 0 && customerId ? (
-          <div className="form-group">
-            <label className="form-label" htmlFor="sl-due">Vade tarihi (isteğe bağlı)</label>
-            <input id="sl-due" className="form-input" type="date" value={dueDate} onChange={(e) => setDueDate(e.target.value)} />
-            <small style={{ color: "var(--text-muted)" }}>Girilirse vade gününde ve 7 gün gecikince hatırlatılır.</small>
-          </div>
+          <OptionalGroup>
+            <OptionalField label="Vade tarihi" chip="Vade tarihi" htmlFor="sl-due" filled={!!dueDate} onClear={() => setDueDate("")}>
+              <input id="sl-due" className="form-input" type="date" value={dueDate} onChange={(e) => setDueDate(e.target.value)} />
+              <small style={{ color: "var(--text-muted)" }}>Girilirse vade gününde ve 7 gün gecikince hatırlatılır.</small>
+            </OptionalField>
+          </OptionalGroup>
         ) : null}
       </fieldset>
 
-      <div className="row row-gap-md">
-        <div className="form-group" style={{ flex: 1 }}>
-          <label className="form-label" htmlFor="sl-date">Satış tarihi</label>
+      <OptionalGroup>
+        <OptionalField label="Satış tarihi" chip="Farklı tarih" htmlFor="sl-date" filled={date !== todayLocalDate()} onClear={() => setDate(todayLocalDate())}>
           <input id="sl-date" className="form-input" type="date" value={date} onChange={(e) => setDate(e.target.value)} />
-        </div>
-        <div className="form-group" style={{ flex: 2 }}>
-          <label className="form-label" htmlFor="sl-notes">Not</label>
+        </OptionalField>
+        <OptionalField label="Not" htmlFor="sl-notes" filled={!!notes} onClear={() => setNotes("")}>
           <input id="sl-notes" className="form-input" value={notes} onChange={(e) => setNotes(e.target.value)} />
-        </div>
-      </div>
+        </OptionalField>
+      </OptionalGroup>
 
       {needsReason ? (
         <div className="form-group">

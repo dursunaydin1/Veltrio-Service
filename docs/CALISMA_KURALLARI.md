@@ -23,6 +23,7 @@
 
 ## Tasarım tercihleri
 14. **Koyu lacivert tema, pirinç vurgu, gece mavisi logo** (kırmızı yalnızca gecikme/sorunda, turuncu uyarıda, yeşil tamamda) (2026-10-28'de lacivert palet seçildi, K-046; 2026-10-30'da hazır SaaS mavisi sıradan bulunduğu için vurgu pirince alındı, K-051). Logo: kıvrımlı onay işareti, pirinç halka; yazı "Veltrio" iri, "SERVICE" küçük ve harf aralıklı. Parlama ve gradyan efektlerinden kaçınılır; renkler düz kullanılır. Ekranlar sade tutulur, her zaman görünen bilgiler azaltılır; ayrıntı ilgili sayfaya konur.
+15. **İsteğe bağlı alanlar "+ çip" olarak durur** (2026-11-04, K-086): not, açıklama, adres, bugünden farklı tarih, indirim, vade gibi boş bırakılabilen alanlar `OptionalField` ile kapalı gelir; dokununca açılır, X ile kapanır ve silinir. Varsayılanı olan ayarlar (ör. KDV) özet çip olarak görünür. Zorunlu ve sık kullanılan alanlar açık kalır. Ayarlar ekranları bu kuralın dışındadır. Kaydedince sayfada kalınmaz, akış sıradaki ekrana / sekmeye geçer. Her yeni ya da değişen formda kendiliğinden uygulanır.
 
 ## Teknik tercihler (kullanıcı onaylı)
 12. Para tutarları veritabanında `DECIMAL(15,4)`, kodda **kuruş cinsinden tam sayı** (`src/lib/calc.ts`).

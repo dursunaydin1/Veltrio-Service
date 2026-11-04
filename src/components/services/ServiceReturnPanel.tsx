@@ -17,6 +17,7 @@ import {
 import { getServiceBalance } from "@/lib/services/service";
 import { formatCurrency, formatDateTime, formatQuantity } from "@/lib/utils";
 import type { PaymentMethod } from "@/types";
+import { OptionalField, OptionalGroup } from "@/components/common/OptionalField";
 
 const DISPOSITION_LABEL: Record<StockDisposition, string> = {
   SELLABLE: "Satılabilir stoğa dön",
@@ -205,10 +206,11 @@ function DeliveredReturn({ service }: { service: Service }) {
               </div>
             </div>
           ))}
-          <div className="form-group">
-            <label className="form-label" htmlFor="dr-extra">Parçaya bağlı olmayan düzeltme (₺)</label>
-            <input id="dr-extra" className="form-input" inputMode="decimal" placeholder="0,00 (işçilik indirimi vb.)" value={extra} onChange={(e) => setExtra(e.target.value)} />
-          </div>
+          <OptionalGroup>
+            <OptionalField label="Parçaya bağlı olmayan düzeltme (₺)" chip="Ek düzeltme (₺)" htmlFor="dr-extra" filled={!!extra} onClear={() => setExtra("")}>
+              <input id="dr-extra" className="form-input" inputMode="decimal" placeholder="0,00 (işçilik indirimi vb.)" value={extra} onChange={(e) => setExtra(e.target.value)} />
+            </OptionalField>
+          </OptionalGroup>
           <div className="form-group">
             <label className="form-label" htmlFor="dr-method">Para iadesi</label>
             <select id="dr-method" className="form-input" value={method} onChange={(e) => setMethod(e.target.value as RefundMethod)}>

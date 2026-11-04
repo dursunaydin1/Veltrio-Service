@@ -32,6 +32,7 @@ import {
   type ServiceStatus,
 } from "@/lib/services/status";
 import { formatCurrency, formatDate, formatDateTime } from "@/lib/utils";
+import { OptionalField, OptionalGroup } from "@/components/common/OptionalField";
 
 /** Servis detayı: özet, durum geçişleri, bilgiler (şikâyet / teşhis / yapılan iş) ve durum geçmişi (Adım 3.7, 3.17). */
 export function ServiceDetail({ id }: { id: string }) {
@@ -159,7 +160,7 @@ export function ServiceDetail({ id }: { id: string }) {
       {tab === "checklist" ? <ChecklistPanel service={service} /> : null}
       {tab === "payments" ? (
         <>
-          <ServicePayments service={service} />
+          <ServicePayments service={service} onCollected={() => moveOn("summary", "Tahsilat kaydedildi.")} />
           <ServiceReturnPanel service={service} />
         </>
       ) : null}
@@ -406,11 +407,12 @@ function StatusActions({ service, onGoTab }: { service: Service; onGoTab: (tab: 
             <input id="st-reason" className="form-input" value={reason} onChange={(e) => setReason(e.target.value)} autoFocus />
           </div>
           {pending === "CANCELLED" ? (
-            <div className="form-group">
-              <label className="form-label" htmlFor="st-fee">İnceleme / teşhis ücreti (₺, isteğe bağlı)</label>
-              <input id="st-fee" className="form-input" inputMode="decimal" placeholder="0,00" value={fee} onChange={(e) => setFee(e.target.value)} />
-              <small style={{ color: "var(--text-muted)" }}>Girilirse servis iptal olarak kalır ve sayaç artmaz; ücret müşteri bakiyesine yazılır.</small>
-            </div>
+            <OptionalGroup>
+              <OptionalField label="İnceleme / teşhis ücreti (₺)" chip="İnceleme ücreti" htmlFor="st-fee" filled={!!fee} onClear={() => setFee("")}>
+                <input id="st-fee" className="form-input" inputMode="decimal" placeholder="0,00" value={fee} onChange={(e) => setFee(e.target.value)} />
+                <small style={{ color: "var(--text-muted)" }}>Girilirse servis iptal olarak kalır ve sayaç artmaz; ücret müşteri bakiyesine yazılır.</small>
+              </OptionalField>
+            </OptionalGroup>
           ) : null}
           {error ? <div className="alert alert-error" role="alert">{error}</div> : null}
           <div className="row row-gap-md">

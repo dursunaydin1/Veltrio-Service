@@ -16,6 +16,7 @@ import { formatCurrency, todayLocalDate } from "@/lib/utils";
 import type { Purchase, PurchaseItem } from "@/lib/db";
 import type { PaymentMethod, Product, TaxMode } from "@/types";
 import { useAppNav } from "@/lib/nav/useAppNav";
+import { OptionalField, OptionalGroup } from "@/components/common/OptionalField";
 
 type DraftLine = {
   key: string;
@@ -198,16 +199,14 @@ export function PurchaseForm({
     >
       <SupplierPicker value={supplierId} onChange={setSupplierId} />
 
-      <div className="row row-gap-md">
-        <div className="form-group" style={{ flex: 1 }}>
-          <label className="form-label" htmlFor="pu-date">Alım tarihi</label>
-          <input id="pu-date" className="form-input" type="date" value={date} onChange={(e) => setDate(e.target.value)} />
-        </div>
-        <div className="form-group" style={{ flex: 1 }}>
-          <label className="form-label" htmlFor="pu-ref">Fatura / irsaliye no</label>
+      <OptionalGroup>
+        <OptionalField label="Fatura / irsaliye no" chip="Fatura no" htmlFor="pu-ref" filled={!!supplierRef} onClear={() => setSupplierRef("")}>
           <input id="pu-ref" className="form-input" value={supplierRef} onChange={(e) => setSupplierRef(e.target.value)} />
-        </div>
-      </div>
+        </OptionalField>
+        <OptionalField label="Alım tarihi" chip="Farklı tarih" htmlFor="pu-date" filled={date !== todayLocalDate()} onClear={() => setDate(todayLocalDate())}>
+          <input id="pu-date" className="form-input" type="date" value={date} onChange={(e) => setDate(e.target.value)} />
+        </OptionalField>
+      </OptionalGroup>
 
       <label className="row row-gap-sm" style={{ minHeight: 44 }}>
         <input type="checkbox" checked={quick} onChange={(e) => setQuick(e.target.checked)} />
@@ -289,10 +288,11 @@ export function PurchaseForm({
         <div className="tile-value">{formatCurrency(grand / 100)}</div>
       </div>
 
-      <div className="form-group">
-        <label className="form-label" htmlFor="pu-notes">Not</label>
-        <input id="pu-notes" className="form-input" value={notes} onChange={(e) => setNotes(e.target.value)} />
-      </div>
+      <OptionalGroup>
+        <OptionalField label="Not" htmlFor="pu-notes" filled={!!notes} onClear={() => setNotes("")}>
+          <input id="pu-notes" className="form-input" value={notes} onChange={(e) => setNotes(e.target.value)} />
+        </OptionalField>
+      </OptionalGroup>
 
       <fieldset className="stack stack-sm" style={{ border: 0, padding: 0 }}>
         <legend className="form-label">Teslim alırken yapılan ödeme (isteğe bağlı)</legend>

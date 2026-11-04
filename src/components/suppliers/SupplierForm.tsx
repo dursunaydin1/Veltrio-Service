@@ -6,6 +6,7 @@ import { parseSupplierForm, type SupplierFormInput } from "@/lib/suppliers/schem
 import { createSupplier, updateSupplier } from "@/lib/suppliers/service";
 import type { Supplier } from "@/types";
 import { useAppNav } from "@/lib/nav/useAppNav";
+import { OptionalField, OptionalGroup } from "@/components/common/OptionalField";
 
 type Errors = Partial<Record<keyof SupplierFormInput, string>>;
 
@@ -82,16 +83,16 @@ export function SupplierForm({ supplier }: { supplier?: Supplier }) {
         <input {...field("phone")} className="form-input" type="tel" inputMode="tel" value={values.phone} onChange={(e) => set("phone", e.target.value)} autoComplete="off" />
         {err("phone")}
       </div>
-      <div className="form-group">
-        <label className="form-label" htmlFor="s-address">Adres</label>
-        <textarea {...field("address")} className="form-input" rows={2} value={values.address} onChange={(e) => set("address", e.target.value)} />
-        {err("address")}
-      </div>
-      <div className="form-group">
-        <label className="form-label" htmlFor="s-notes">Not</label>
-        <textarea {...field("notes")} className="form-input" rows={3} value={values.notes} onChange={(e) => set("notes", e.target.value)} />
-        {err("notes")}
-      </div>
+      <OptionalGroup>
+        <OptionalField label="Adres" chip="Adres" htmlFor="s-address" filled={!!values.address} onClear={() => set("address", "")}>
+          <textarea {...field("address")} className="form-input" rows={2} value={values.address} onChange={(e) => set("address", e.target.value)} />
+          {err("address")}
+        </OptionalField>
+        <OptionalField label="Not" htmlFor="s-notes" filled={!!values.notes} onClear={() => set("notes", "")}>
+          <textarea {...field("notes")} className="form-input" rows={3} value={values.notes} onChange={(e) => set("notes", e.target.value)} />
+          {err("notes")}
+        </OptionalField>
+      </OptionalGroup>
 
       {formError ? <div className="alert alert-error" role="alert">{formError}</div> : null}
 

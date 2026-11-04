@@ -17,6 +17,7 @@ import {
 import { PAYMENT_METHOD_LABELS } from "@/lib/finance/service";
 import { formatCurrency, formatDate } from "@/lib/utils";
 import type { PaymentMethod } from "@/types";
+import { OptionalField, OptionalGroup } from "@/components/common/OptionalField";
 
 const money = (kurus: number) => formatCurrency(kurus / 100);
 const field = (kurus: number) => (kurus / 100).toFixed(2).replace(".", ",");
@@ -285,10 +286,11 @@ export function CollectionForm({ party, onDone }: { party: { id: string; busines
         <small style={{ color: "var(--text-muted)" }}>Açık borç kalemi yok; tutar müşteri avansı olarak yazılır.</small>
       )}
 
-      <div className="form-group">
-        <label className="form-label" htmlFor="col-note">Not</label>
-        <input id="col-note" className="form-input" value={note} onChange={(e) => setNote(e.target.value)} />
-      </div>
+      <OptionalGroup>
+        <OptionalField label="Not" htmlFor="col-note" filled={!!note} onClear={() => setNote("")}>
+          <input id="col-note" className="form-input" value={note} onChange={(e) => setNote(e.target.value)} />
+        </OptionalField>
+      </OptionalGroup>
       {error ? <div className="alert alert-error" role="alert">{error}</div> : null}
       <div className="row row-gap-md">
         <button type="button" className="btn btn-secondary" style={{ flex: 1 }} onClick={onDone} disabled={busy}>Vazgeç</button>

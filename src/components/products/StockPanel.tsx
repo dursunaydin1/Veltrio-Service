@@ -18,6 +18,7 @@ import {
 } from "@/lib/stock/service";
 import { formatDateTime, formatQuantity } from "@/lib/utils";
 import type { Product } from "@/types";
+import { OptionalField, OptionalGroup } from "@/components/common/OptionalField";
 
 type Mode = "entry" | "adjust" | "damage" | null;
 
@@ -170,10 +171,11 @@ function EntryForm({ product, ctx, onDone }: FormProps) {
         <label className="form-label" htmlFor="entry-cost">Birim maliyet (₺)</label>
         <input id="entry-cost" className="form-input" inputMode="decimal" placeholder="0,00" value={cost} onChange={(e) => setCost(e.target.value)} />
       </div>
-      <div className="form-group">
-        <label className="form-label" htmlFor="entry-note">Not</label>
-        <input id="entry-note" className="form-input" value={note} onChange={(e) => setNote(e.target.value)} />
-      </div>
+      <OptionalGroup>
+        <OptionalField label="Not" htmlFor="entry-note" filled={!!note} onClear={() => setNote("")}>
+          <input id="entry-note" className="form-input" value={note} onChange={(e) => setNote(e.target.value)} />
+        </OptionalField>
+      </OptionalGroup>
       {error ? <div className="alert alert-error" role="alert">{error}</div> : null}
       <div className="row row-gap-md">
         <button type="button" className="btn btn-secondary" style={{ flex: 1 }} onClick={onDone} disabled={busy}>Vazgeç</button>

@@ -24,7 +24,8 @@ function useBalance(serviceId: string) {
 }
 
 /** Servis ödemeleri: toplam / tahsil edilen / kalan, ödeme geçmişi, tahsilat alma (Adım 3.12). */
-export function ServicePayments({ service }: { service: Service }) {
+/** Tahsilat kaydedilince `onCollected` çağrılır; servis ekranı Özet'e döner (K-086). */
+export function ServicePayments({ service, onCollected }: { service: Service; onCollected?: () => void }) {
   const balance = useBalance(service.id);
   const payments = useLiveQuery(async () => {
     const all = await getServicePayments(service.id);
@@ -60,7 +61,14 @@ export function ServicePayments({ service }: { service: Service }) {
       </div>
 
       {open ? (
-        <CollectForm service={service} onDone={() => setOpen(false)} />
+        <CollectForm
+          service={service}
+          onDone={() => setOpen(false)}
+          onSaved={() => {
+            setOpen(false);
+            onCollected?.();
+          }}
+        />
       ) : service.status !== "CANCELLED" ? (
         <button type="button" className="btn btn-secondary btn-full" onClick={() => setOpen(true)}>
           Tahsilat al
@@ -98,7 +106,7 @@ export function ServicePayments({ service }: { service: Service }) {
   );
 }
 
-function CollectForm({ service, onDone }: { service: Service; onDone: () => void }) {
+function CollectForm({ service, onDone, onSaved }: { service: Service; onDone: () => void; onSaved: () => void }) {
   const ctx = useServiceContext();
   const balance = useBalance(service.id);
   const [amount, setAmount] = useState("");
@@ -117,7 +125,7 @@ function CollectForm({ service, onDone }: { service: Service; onDone: () => void
     setBusy(true);
     try {
       await collectServicePayment(ctx, service.id, { amountKurus: kurus, method, note });
-      onDone();
+      onSaved();
     } catch (e) {
       setError(e instanceof Error ? e.message : "Kaydedilemedi.");
       setBusy(false);
@@ -144,10 +152,11 @@ function CollectForm({ service, onDone }: { service: Service; onDone: () => void
           ))}
         </select>
       </div>
-      <div className="form-group">
-        <label className="form-label" htmlFor="col-note">Not</label>
-        <input id="col-note" className="form-input" value={note} onChange={(e) => setNote(e.target.value)} />
-      </div>
+      <OptionalGroup>
+        <OptionalField label="Not" htmlFor="col-note" filled={!!note} onClear={() => setNote("")}>
+          <input id="col-note" className="form-input" value={note} onChange={(e) => setNote(e.target.value)} />
+        </OptionalField>
+      </OptionalGroup>
       {error ? <div className="alert alert-error" role="alert">{error}</div> : null}
       <div className="row row-gap-md">
         <button type="button" className="btn btn-secondary" style={{ flex: 1 }} onClick={onDone} disabled={busy}>Vazgeç</button>
