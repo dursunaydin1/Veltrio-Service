@@ -17,7 +17,7 @@ import type { Product } from "@/types";
 import { PageHead } from "@/components/layout/PageHead";
 import { useIncremental } from "@/hooks/useIncremental";
 import { LoadMore } from "@/components/common/LoadMore";
-import { NoMatchAdd, prefillQuery } from "@/components/common/NoMatchAdd";
+import { NoMatchAdd } from "@/components/common/NoMatchAdd";
 
 function matches(product: Product, query: string): boolean {
   if (!query.trim()) return true;
