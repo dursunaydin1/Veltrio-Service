@@ -30,7 +30,17 @@ export function OptionalField({
 
   // Kullanıcı açtıysa imleç alana gelir (sayfa açılırken dolu gelen alanda değil)
   useEffect(() => {
-    if (open && opened.current) box.current?.querySelector<HTMLElement>("input, textarea, select, button:not(.optional-close)")?.focus();
+    if (!open || !opened.current) return;
+    const el = box.current?.querySelector<HTMLElement>("input, textarea, select, button:not(.optional-close)");
+    el?.focus();
+    // Tarih alanında takvim de hemen açılır; ikinci dokunuş gerekmez (K-090)
+    if (el instanceof HTMLInputElement && el.type === "date") {
+      try {
+        el.showPicker();
+      } catch {
+        // Eski tarayıcı: alana dokununca açılır
+      }
+    }
   }, [open]);
 
   if (!open) {

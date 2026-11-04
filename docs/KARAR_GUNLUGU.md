@@ -5,6 +5,10 @@
 
 ## 2026-11-04
 
+### K-090 · Tarih çipi takvimi doğrudan açar; düğme sıraları taşmaz
+- **Tarih:** "+ Vade tarihi" gibi tarih çipine dokununca alan açılır ve takvim de hemen açılır (`showPicker`); ikinci dokunuş gerekmez. Takvimin kapanışı telefonun kendi penceresine bağlıdır (Android'de tarihe dokunup "Tamam").
+- **Taşma:** Tedarikçi / müşteri bakiye kartında iki ikincil düğme ("Tedarikçiden iade ödemesi", "Açılış bakiyesi") yan yana sığmıyor, sayfa yana taşıyordu; bu yüzden sayfanın bir kısmı yarım görünüp kaydırılamıyordu. Bu iki seyrek işlem katlanmış "Diğer işlemler" altına alındı. Genel önlem: düğme sıraları dar ekranda alt satıra iner, ana içerik yana taşamaz.
+
 ### K-089 · Seçici listede kaydırma takılması
 - **Sorun:** Sayfayı kaydırırken parmak seçici listenin üstüne gelince kaydırma kutunun içinde kalıyor, kutunun sonunda sayfaya geçmiyordu; parmağın altındaki satır da vurgulanıp "seçilmiş" gibi görünüyordu.
 - **Çözüm:** Kutu sonunda kaydırma sayfaya devam eder (`overscroll-behavior: contain` kaldırıldı). Kutu çerçeveli, ayrı zeminli ve 4 satır boyunda, sayfadan ayrı olduğu belli. Üzerine gelme vurgusu yalnızca fareli ekranlarda; seçici satırlarında dokunma vurgusu yok. Seçim yalnızca dokunup bırakınca olur (kaydırma seçim yapmaz).

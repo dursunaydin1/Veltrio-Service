@@ -108,14 +108,18 @@ export function PartyBalancePanel({
           <button type="button" className="btn btn-primary btn-full" onClick={() => setMode("primary")}>
             {cfg.primary.button}
           </button>
-          <div className="row row-gap-md">
-            <button type="button" className="btn btn-secondary" style={{ flex: 1 }} onClick={() => setMode("secondary")}>
-              {cfg.secondary.button}
-            </button>
-            <button type="button" className="btn btn-secondary" style={{ flex: 1 }} onClick={() => setMode("opening")}>
-              Açılış bakiyesi
-            </button>
-          </div>
+          {/* Seyrek işlemler katlanmış durur (K-090) */}
+          <details className="more-actions">
+            <summary>Diğer işlemler</summary>
+            <div className="stack stack-sm">
+              <button type="button" className="btn btn-secondary btn-full" onClick={() => setMode("secondary")}>
+                {cfg.secondary.button}
+              </button>
+              <button type="button" className="btn btn-secondary btn-full" onClick={() => setMode("opening")}>
+                Açılış bakiyesi
+              </button>
+            </div>
+          </details>
         </div>
       ) : mode === "opening" ? (
         <OpeningForm kind={kind} party={party} onDone={() => setMode(null)} />

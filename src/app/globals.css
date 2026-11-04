@@ -448,6 +448,9 @@ details[open] > summary::after { transform: rotate(225deg); margin-top: 10px; }
 .row-gap-sm  { gap: 8px; }
 .row-gap-md  { gap: 16px; }
 .row-wrap    { flex-wrap: wrap; }
+/* Düğme sıraları dar ekranda alt satıra iner; sayfa yana taşmaz (K-090) */
+.row:has(> .btn) { flex-wrap: wrap; }
+.app-main { overflow-x: clip; }
 
 /* Sayfa başlığı + sağda eylem düğmesi (liste sayfaları) */
 section > .row.row-between:first-child > h1 { flex: 1; min-width: 0; }
