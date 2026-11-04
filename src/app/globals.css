@@ -1195,8 +1195,16 @@ a.item-card::after {
 .more-actions { padding: 0 4px; color: var(--text-secondary); }
 .more-actions summary { min-height: var(--touch-min); display: flex; align-items: center; cursor: pointer; font-weight: 600; font-size: 0.875rem; }
 .more-actions[open] summary { margin-bottom: 8px; }
-/* Seçici listeleri (K-088): yaklaşık 5 satır görünür, gerisi kutunun içinde kayar */
-.picker-list { max-height: 320px; overflow-y: auto; overscroll-behavior: contain; }
+/* Seçici listeleri (K-088, K-089): yaklaşık 4 satır görünür, gerisi kutunun içinde kayar.
+   Kutu çerçeveli ve sayfadan ayrı görünür; kutunun sonuna gelince kaydırma sayfaya geçer (takılma hissi olmaz). */
+.picker-list {
+  max-height: 264px;
+  overflow-y: auto;
+  border: 1px solid var(--border-subtle);
+  border-radius: var(--radius-md);
+  background: var(--bg-subtle);
+  touch-action: pan-y;
+}
 
 .optional-group-wrap { display: flex; flex-direction: column; gap: 8px; }
 .optional-group { display: flex; flex-wrap: wrap; gap: 8px; }
@@ -1503,11 +1511,15 @@ a.tile:hover { border-color: var(--border-default); background: var(--bg-hover);
   cursor: pointer;
   transition: background var(--transition-fast);
 }
-.menu-list > li > a:hover,
-.menu-list > li > button:hover,
-.menu-list > li > form > button:hover { background: var(--bg-hover); color: var(--text-primary); }
+/* Üzerine gelme vurgusu yalnızca fareli ekranlarda (K-089): telefonda kaydırırken parmağın altındaki satır "seçilmiş" görünmesin */
+@media (hover: hover) {
+  .menu-list > li > a:hover,
+  .menu-list > li > button:hover,
+  .menu-list > li > form > button:hover { background: var(--bg-hover); color: var(--text-primary); }
+}
 .menu-list > li > a:active,
 .menu-list > li > button:active { background: var(--bg-elevated); }
+.picker-list > li > button:active { background: transparent; }
 
 /* Sağda ok (gezinen satırlar) */
 .menu-list > li > a { padding-right: 40px; position: relative; }

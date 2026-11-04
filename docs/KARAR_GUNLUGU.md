@@ -5,6 +5,10 @@
 
 ## 2026-11-04
 
+### K-089 · Seçici listede kaydırma takılması
+- **Sorun:** Sayfayı kaydırırken parmak seçici listenin üstüne gelince kaydırma kutunun içinde kalıyor, kutunun sonunda sayfaya geçmiyordu; parmağın altındaki satır da vurgulanıp "seçilmiş" gibi görünüyordu.
+- **Çözüm:** Kutu sonunda kaydırma sayfaya devam eder (`overscroll-behavior: contain` kaldırıldı). Kutu çerçeveli, ayrı zeminli ve 4 satır boyunda, sayfadan ayrı olduğu belli. Üzerine gelme vurgusu yalnızca fareli ekranlarda; seçici satırlarında dokunma vurgusu yok. Seçim yalnızca dokunup bırakınca olur (kaydırma seçim yapmaz).
+
 ### K-088 · Seçici listeler tam ve kayar; yeni kayıt en üstte
 - **Sorun:** Satın almada tedarikçi / ürün seçerken liste alfabetik ilk 6 kaydı gösteriyordu; yeni eklenen "Zincir…" ürünü sırada geride kaldığı için görünmüyordu (veri gecikmesi değildi, kayıt cihazdaydı). Müşteri seçicide liste yalnızca yazınca çıkıyordu.
 - **Çözüm:** Müşteri, tedarikçi ve ürün seçicileri tüm kayıtları gösterir (ilk 200); liste yaklaşık 5 satırlık kutuda kayar. Arama yokken en son eklenen / güncellenen en üstte, aranırken alfabetik.
