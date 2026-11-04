@@ -2,7 +2,7 @@
 
 import { useEffect, useRef, useState } from "react";
 import Link from "next/link";
-import { ArrowRight, Check, Circle, FileText, Plus, Printer } from "lucide-react";
+import { ArrowRight, FileText, Plus, Printer } from "lucide-react";
 import { useLiveQuery } from "dexie-react-hooks";
 import { db } from "@/lib/db";
 import type { Service } from "@/lib/db";
@@ -141,6 +141,7 @@ export function ServiceDetail({ id }: { id: string }) {
 
       {tab === "summary" ? (
         <>
+          {service.status === "DELIVERED" ? <DeliveredCard service={service} onCollect={() => moveOn("payments", "")} /> : null}
           <StatusActions service={service} onGoTab={(t) => moveOn(t, t === "lines" ? "Kalemleri ekleyin; bitince “Sıradaki adım”a dokunun." : "")} />
           <DeliveryPanel service={service} />
         </>
@@ -178,6 +179,41 @@ const DETAIL_TABS: { id: DetailTab; label: string }[] = [
   { id: "payments", label: "Ödemeler" },
   { id: "history", label: "Geçmiş" },
 ];
+
+/** Teslim edilmiş servisin özeti (K-085): ne zaman kime teslim edildi, ne tahsil edildi, borç kaldı mı. */
+function DeliveredCard({ service, onCollect }: { service: Service; onCollect: () => void }) {
+  const balance = useLiveQuery(() => getServiceBalance(service.id), [service.id]);
+  const deliveredAt = useLiveQuery(async () => {
+    const rows = await db.service_status_history.where("service_id").equals(service.id).toArray();
+    return rows.filter((r) => r.to_status === "DELIVERED").sort((a, b) => b.changed_at.localeCompare(a.changed_at))[0]?.changed_at;
+  }, [service.id]);
+  const remaining = Math.max(balance?.remaining ?? 0, 0);
+  return (
+    <section className="card stack stack-md" aria-labelledby="dv-title">
+      <h2 id="dv-title">Teslim edildi</h2>
+      <p>
+        {deliveredAt ? formatDateTime(deliveredAt) : "—"}
+        {service.delivered_to ? ` · Teslim alan: ${service.delivered_to}` : ""}
+      </p>
+      <div className="tile-grid">
+        <div className="tile">
+          <div className="tile-label">Tahsil edilen</div>
+          <div className="tile-value">{formatCurrency((balance?.paid ?? 0) / 100)}</div>
+        </div>
+        <div className="tile">
+          <div className="tile-label">Kalan borç</div>
+          <div className="tile-value" style={remaining > 0 ? { color: "var(--warning-fg)" } : undefined}>{formatCurrency(remaining / 100)}</div>
+        </div>
+      </div>
+      {remaining > 0 ? (
+        <button type="button" className="btn btn-primary btn-full" onClick={onCollect}>
+          Kalan borcu tahsil et
+          <ArrowRight size={18} aria-hidden="true" />
+        </button>
+      ) : null}
+    </section>
+  );
+}
 
 /** Servis için ortak "bilgileri kaydet" girdisi: yalnızca verilen alanlar değişir. */
 function detailsOf(service: Service, patch: { diagnosis?: string; resolution?: string }) {
@@ -305,19 +341,34 @@ function StatusActions({ service, onGoTab }: { service: Service; onGoTab: (tab: 
     }
   }
 
+  // Yapılacak iş yoksa (iş tamamlandı → teslim paneli; teslim edildi → bitti) kart çizilmez;
+  // yeniden açma / iptal gibi seyrek işlemler katlanmış "Diğer işlemler" altında durur (K-085).
+  if (!pending && !completing && !checklistWarning && !guide.task && !main) {
+    return (
+      <details className="more-actions">
+        <summary>Diğer işlemler</summary>
+        <div className="row row-gap-sm" style={{ flexWrap: "wrap" }}>
+          {others.map((to) => (
+            <button
+              key={to}
+              type="button"
+              className={`btn btn-sm ${to === "CANCELLED" ? "btn-ghost" : "btn-secondary"}`}
+              style={to === "CANCELLED" ? { color: "var(--danger-fg)" } : undefined}
+              onClick={() => choose(to)}
+              disabled={busy}
+            >
+              {isReopen(from, to) ? "Yeniden aç" : to === "CANCELLED" ? "İptal et" : statusLabel(to)}
+            </button>
+          ))}
+        </div>
+        {error ? <div className="alert alert-error" role="alert">{error}</div> : null}
+      </details>
+    );
+  }
+
   return (
     <section className="card stack stack-md" aria-labelledby="st-title">
       <h2 id="st-title">Sonraki adım</h2>
-      {from !== "CANCELLED" ? (
-        <ol className="guide-steps" aria-label="Servis adımları">
-          {guide.steps.map((step) => (
-            <li key={step.id} data-done={step.done ? "" : undefined}>
-              {step.done ? <Check size={14} strokeWidth={3} aria-hidden="true" /> : <Circle size={12} aria-hidden="true" />}
-              {step.label}
-            </li>
-          ))}
-        </ol>
-      ) : null}
 
       {checklistWarning ? (
         <div className="alert alert-warning" role="alert">

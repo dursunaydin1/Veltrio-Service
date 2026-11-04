@@ -3,6 +3,14 @@
 > Plandan (docs/00–07) veya PRD'den sapmaların, düzeltmelerin ve yeni çözümlerin kaydı. Yeni kayıtlar en üste eklenir.
 > Biçim: **Ne değişti → Neden → Sonuç / etkilenen dosyalar**
 
+## 2026-11-04
+
+### K-085 · Teslimden sonra sade özet; adım listesi kaldırıldı; teslim formu ortak yapıda
+- **Neden:** Teslim edilmiş serviste "Sonraki adım" kartı tüm adımlar tikli ve tek "Yeniden aç" düğmesiyle duruyordu; üstteki ilerleme çubuğuyla aynı şeyi söylüyor, kafa karıştırıyordu.
+- **Adım listesi:** K-084'teki tikli adım satırı kaldırıldı; aşamayı üstteki ilerleme çubuğu gösterir. Kart yalnızca yapılacak iş varken çıkar.
+- **Yapılacak iş yokken:** "İş tamamlandı"da sıradaki adım teslim formudur; "Teslim edildi"de "Teslim edildi" kartı (tarih, teslim alan, tahsil edilen, kalan borç; borç varsa "Kalan borcu tahsil et" → Ödemeler). Yeniden açma / iptal katlanmış "Diğer işlemler" altında.
+- **Teslim formu:** Borçlu teslim onayı açma-kapama anahtarı; "Başkası teslim aldı" ve "Ödeme sözü tarihi" isteğe bağlı çip (`OptionalField`).
+
 ## 2026-11-03
 
 ### K-084 · Servis rehberi: "Sonraki adım" kartı işi kendisi yaptırır

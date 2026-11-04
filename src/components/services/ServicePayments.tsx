@@ -14,6 +14,7 @@ import {
 } from "@/lib/services/service";
 import { formatCurrency, formatDateTime } from "@/lib/utils";
 import type { PaymentMethod } from "@/types";
+import { OptionalField, OptionalGroup } from "@/components/common/OptionalField";
 
 const money = (kurus: number) => formatCurrency(kurus / 100);
 const fieldMoney = (kurus: number) => (kurus / 100).toFixed(2).replace(".", ",");
@@ -222,23 +223,28 @@ export function DeliveryPanel({ service }: { service: Service }) {
         </button>
       ) : null}
 
-      <div className="form-group">
-        <label className="form-label" htmlFor="dl-receiver">Teslim alan kişi (müşteri değilse adı)</label>
-        <input id="dl-receiver" className="form-input" value={receiver} onChange={(e) => setReceiver(e.target.value)} />
-      </div>
-
       {after > 0 ? (
-        <label className="row row-gap-sm" style={{ minHeight: 44 }}>
-          <input type="checkbox" checked={ack} onChange={(e) => setAck(e.target.checked)} />
-          Müşteri kalan {money(after)} borcu kabul ediyor (borçlu teslim)
-        </label>
-      ) : null}
-      {after > 0 ? (
-        <div className="form-group">
-          <label className="form-label" htmlFor="dl-due">Ödeme sözü / vade tarihi (isteğe bağlı)</label>
-          <input id="dl-due" className="form-input" type="date" value={dueDate} onChange={(e) => setDueDate(e.target.value)} />
+        <div className="toggle-card">
+          <label className="toggle-row">
+            <span>
+              <strong>Borçlu teslim</strong>
+              <small>Müşteri kalan {money(after)} borcu kabul ediyor</small>
+            </span>
+            <input type="checkbox" className="switch" checked={ack} onChange={(e) => setAck(e.target.checked)} />
+          </label>
         </div>
       ) : null}
+
+      <OptionalGroup>
+        <OptionalField label="Teslim alan kişi (müşteri değilse)" chip="Başkası teslim aldı" htmlFor="dl-receiver" filled={!!receiver} onClear={() => setReceiver("")}>
+          <input id="dl-receiver" className="form-input" placeholder="Ad soyad" value={receiver} onChange={(e) => setReceiver(e.target.value)} />
+        </OptionalField>
+        {after > 0 ? (
+          <OptionalField label="Ödeme sözü / vade tarihi" chip="Ödeme sözü tarihi" htmlFor="dl-due" filled={!!dueDate} onClear={() => setDueDate("")}>
+            <input id="dl-due" className="form-input" type="date" value={dueDate} onChange={(e) => setDueDate(e.target.value)} />
+          </OptionalField>
+        ) : null}
+      </OptionalGroup>
 
       {error ? <div className="alert alert-error" role="alert">{error}</div> : null}
       <button type="submit" className="btn btn-primary btn-full btn-lg" disabled={busy}>
