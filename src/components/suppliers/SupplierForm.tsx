@@ -11,14 +11,14 @@ import { OptionalField, OptionalGroup } from "@/components/common/OptionalField"
 type Errors = Partial<Record<keyof SupplierFormInput, string>>;
 
 /** Tedarikçi oluşturma / düzenleme formu (Adım 4.5). */
-export function SupplierForm({ supplier }: { supplier?: Supplier }) {
+export function SupplierForm({ supplier, initial }: { supplier?: Supplier; initial?: { name?: string; phone?: string } }) {
   // Kaydedince form geçmişten çıkar; geri hareketi formu yeniden açmaz (K-076)
   const nav = useAppNav();
   const ctx = useBusinessContext();
 
   const [values, setValues] = useState<SupplierFormInput>({
-    name: supplier?.name ?? "",
-    phone: supplier?.phone ?? "",
+    name: supplier?.name ?? initial?.name ?? "",
+    phone: supplier?.phone ?? initial?.phone ?? "",
     address: supplier?.address ?? "",
     notes: supplier?.notes ?? "",
   });

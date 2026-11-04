@@ -4,11 +4,13 @@ import { PageHead } from "@/components/layout/PageHead";
 
 export const metadata: Metadata = { title: "Yeni ürün" };
 
-export default function NewProductPage() {
+export default async function NewProductPage({ searchParams }: { searchParams: Promise<{ name?: string }> }) {
+  // Aramada bulunamayan kayıt için ad / telefon dolu gelir (K-087)
+  const initial = await searchParams;
   return (
     <section className="stack stack-md">
       <PageHead title="Ürün ekle" />
-      <ProductForm />
+      <ProductForm initial={initial} />
     </section>
   );
 }

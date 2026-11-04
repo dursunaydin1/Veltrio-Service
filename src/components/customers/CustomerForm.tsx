@@ -32,12 +32,15 @@ function toFormInput(customer?: Customer): CustomerFormInput {
 type Errors = Partial<Record<keyof CustomerFormInput, string>>;
 
 /** Müşteri oluşturma ve düzenleme formu (Adım 3.2). */
-export function CustomerForm({ customer }: { customer?: Customer }) {
+export function CustomerForm({ customer, initial }: { customer?: Customer; initial?: { name?: string; phone?: string } }) {
   // Kaydedince form geçmişten çıkar; geri hareketi formu yeniden açmaz (K-076)
   const nav = useAppNav();
   const ctx = useBusinessContext();
 
-  const [values, setValues] = useState<CustomerFormInput>(() => toFormInput(customer));
+  const [values, setValues] = useState<CustomerFormInput>(() => ({
+    ...toFormInput(customer),
+    ...(customer ? {} : { name: initial?.name ?? "", phone: initial?.phone ?? "" }),
+  }));
   const [errors, setErrors] = useState<Errors>({});
   const [formError, setFormError] = useState<string | null>(null);
   const [allowDuplicate, setAllowDuplicate] = useState(false);

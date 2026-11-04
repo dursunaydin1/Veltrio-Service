@@ -43,19 +43,20 @@ function toFormInput(product: Product | undefined, taxMode: TaxMode, taxRate: nu
 type Errors = Partial<Record<keyof ProductFormInput, string>>;
 
 /** Ürün oluşturma ve düzenleme formu (Adım 2.1). */
-export function ProductForm({ product }: { product?: Product }) {
+export function ProductForm({ product, initial }: { product?: Product; initial?: { name?: string } }) {
   // Kaydedince form geçmişten çıkar; geri hareketi formu yeniden açmaz (K-076)
   const nav = useAppNav();
   const ctx = useBusinessContext();
   const settings = useSessionStore((s) => s.business?.settings);
 
-  const [values, setValues] = useState<ProductFormInput>(() =>
-    toFormInput(
+  const [values, setValues] = useState<ProductFormInput>(() => ({
+    ...toFormInput(
       product,
       settings?.default_tax_mode ?? "INCLUSIVE",
       settings?.default_tax_rate ?? 20
-    )
-  );
+    ),
+    ...(!product && initial?.name ? { name: initial.name } : {}),
+  }));
   const [errors, setErrors] = useState<Errors>({});
   const [formError, setFormError] = useState<string | null>(null);
   const [busy, setBusy] = useState(false);

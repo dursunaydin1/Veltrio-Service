@@ -13,6 +13,7 @@ import type { Supplier } from "@/types";
 import { PageHead } from "@/components/layout/PageHead";
 import { useIncremental } from "@/hooks/useIncremental";
 import { LoadMore } from "@/components/common/LoadMore";
+import { NoMatchAdd, prefillQuery } from "@/components/common/NoMatchAdd";
 
 /** Arama: harf içeriyorsa ad / adreste, yalnızca rakamsa telefonda (baştaki 0 yok sayılır). */
 export function matchesSupplier(supplier: Supplier, query: string): boolean {
@@ -68,11 +69,13 @@ export function SupplierList() {
       </label>
 
       {suppliers === undefined || (pullingAll && visible.length === 0) ? <ListSkeleton /> : visible.length === 0 ? (
-        <div className="empty-state" role="note">
-          {suppliers.length === 0
-            ? "Henüz tedarikçi eklenmemiş. Üstteki “Tedarikçi ekle” ile ilkini ekleyin."
-            : "Aramanıza uyan tedarikçi yok."}
-        </div>
+        query.trim() ? (
+          <NoMatchAdd query={query} noun="tedarikçi" href={`/suppliers/new?${prefillQuery(query)}`} />
+        ) : (
+          <div className="empty-state" role="note">
+            {suppliers.length === 0 ? "Henüz tedarikçi eklenmemiş. Üstteki “Tedarikçi ekle” ile ilkini ekleyin." : "Bu filtrede tedarikçi yok."}
+          </div>
+        )
       ) : (
         <>
         <ul className="menu-list" aria-label="Tedarikçiler">

@@ -5,6 +5,10 @@
 
 ## 2026-11-04
 
+### K-087 · Aramada bulunamayan kaydı oradan ekleme
+- **Neden:** İşletme sahibinin önerisi: aranan tedarikçi yoksa, liste "yok" deyip bırakmasın, eklemeyi önersin.
+- **Ne:** Müşteri, tedarikçi ve ürün listelerinde arama sonuç vermezse "“Ege Motor” adında tedarikçi bulunamadı" ve "+ “Ege Motor” ekle" düğmesi çıkar. Form aranan adla dolu açılır; müşteri ve tedarikçide aranan yalnızca rakamsa telefon alanına yazılır (`NoMatchAdd`, `?name=` / `?phone=`). Önce arayıp sonra eklemek yinelenen kaydı da azaltır.
+
 ### K-086 · İsteğe bağlı alanlar tüm projede "+ çip"; tahsilattan sonra Özet
 - **Neden:** İşletme sahibi bu düzenin her ekranda kendiliğinden olmasını istedi (çalışma kuralı 15).
 - **Taranıp değiştirilenler:** Tahsilat ve ödeme notları (servis, açık kalemler, müşteri / tedarikçi hesabı, açılış bakiyesi kaynak notu), stok girişi notu, satış (belge indirimi, vade tarihi, farklı tarih, not), satın alma (fatura no, farklı tarih, not), tedarikçi (adres, not), servis iptalinde inceleme ücreti, servis iadesinde ek düzeltme. Ürün formunda açık kalanlar ad, satış fiyatı ve birim; kod, kategori, marka / model, alış fiyatı, kritik stok, KDV (özet çip), raf yeri, uyumlu modeller ve fotoğraf çip oldu.

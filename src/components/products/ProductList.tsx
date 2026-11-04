@@ -17,6 +17,7 @@ import type { Product } from "@/types";
 import { PageHead } from "@/components/layout/PageHead";
 import { useIncremental } from "@/hooks/useIncremental";
 import { LoadMore } from "@/components/common/LoadMore";
+import { NoMatchAdd, prefillQuery } from "@/components/common/NoMatchAdd";
 
 function matches(product: Product, query: string): boolean {
   if (!query.trim()) return true;
@@ -72,11 +73,13 @@ export function ProductList() {
       </label>
 
       {products === undefined || (pullingAll && visible.length === 0) ? <ListSkeleton /> : visible.length === 0 ? (
-        <div className="empty-state" role="note">
-          {products.length === 0
-            ? "Henüz ürün eklenmemiş. Üstteki “Ürün ekle” ile ilkini ekleyin."
-            : "Aramanıza uyan ürün yok."}
-        </div>
+        query.trim() ? (
+          <NoMatchAdd query={query} noun="ürün" href={`/products/new?name=${encodeURIComponent(query.trim())}`} />
+        ) : (
+          <div className="empty-state" role="note">
+            {products.length === 0 ? "Henüz ürün eklenmemiş. Üstteki “Ürün ekle” ile ilkini ekleyin." : "Bu filtrede ürün yok."}
+          </div>
+        )
       ) : (
         <>
         <ul className="menu-list" aria-label="Ürünler">

@@ -13,6 +13,7 @@ import type { Customer } from "@/types";
 import { PageHead } from "@/components/layout/PageHead";
 import { useIncremental } from "@/hooks/useIncremental";
 import { LoadMore } from "@/components/common/LoadMore";
+import { NoMatchAdd, prefillQuery } from "@/components/common/NoMatchAdd";
 
 /** Arama: harf içeriyorsa ad/köy/adreste kelime kelime; yalnızca rakamsa telefonda (baştaki 0 yok sayılır). */
 export function matchesCustomer(customer: Customer, query: string): boolean {
@@ -70,11 +71,13 @@ export function CustomerList() {
       </label>
 
       {customers === undefined || (pullingAll && visible.length === 0) ? <ListSkeleton /> : visible.length === 0 ? (
-        <div className="empty-state" role="note">
-          {customers.length === 0
-            ? "Henüz müşteri eklenmemiş. Üstteki “Müşteri ekle” ile ilkini ekleyin."
-            : "Aramanıza uyan müşteri yok."}
-        </div>
+        query.trim() ? (
+          <NoMatchAdd query={query} noun="müşteri" href={`/customers/new?${prefillQuery(query)}`} />
+        ) : (
+          <div className="empty-state" role="note">
+            {customers.length === 0 ? "Henüz müşteri eklenmemiş. Üstteki “Müşteri ekle” ile ilkini ekleyin." : "Bu filtrede müşteri yok."}
+          </div>
+        )
       ) : (
         <>
         <ul className="menu-list" aria-label="Müşteriler">
