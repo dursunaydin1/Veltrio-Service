@@ -5,6 +5,10 @@
 
 ## 2026-11-04
 
+### K-088 · Seçici listeler tam ve kayar; yeni kayıt en üstte
+- **Sorun:** Satın almada tedarikçi / ürün seçerken liste alfabetik ilk 6 kaydı gösteriyordu; yeni eklenen "Zincir…" ürünü sırada geride kaldığı için görünmüyordu (veri gecikmesi değildi, kayıt cihazdaydı). Müşteri seçicide liste yalnızca yazınca çıkıyordu.
+- **Çözüm:** Müşteri, tedarikçi ve ürün seçicileri tüm kayıtları gösterir (ilk 200); liste yaklaşık 5 satırlık kutuda kayar. Arama yokken en son eklenen / güncellenen en üstte, aranırken alfabetik.
+
 ### K-087 · Aramada bulunamayan kaydı oradan ekleme
 - **Neden:** İşletme sahibinin önerisi: aranan tedarikçi yoksa, liste "yok" deyip bırakmasın, eklemeyi önersin.
 - **Ne:** Müşteri, tedarikçi ve ürün listelerinde arama sonuç vermezse "“Ege Motor” adında tedarikçi bulunamadı" ve "+ “Ege Motor” ekle" düğmesi çıkar. Form aranan adla dolu açılır; müşteri ve tedarikçide aranan yalnızca rakamsa telefon alanına yazılır (`NoMatchAdd`, `?name=` / `?phone=`). Önce arayıp sonra eklemek yinelenen kaydı da azaltır.

@@ -65,14 +65,17 @@ export function ProductPicker({
     );
   }
 
+  const typed = query.trim() !== "";
   const words = foldText(query.trim()).split(/\s+/).filter(Boolean);
   const matches = (products ?? [])
     .filter((p) => {
       const haystack = foldText([p.name, p.code, p.brand, p.model, p.category].filter(Boolean).join(" "));
       return words.every((w) => haystack.includes(w));
     })
-    .sort((a, b) => a.name.localeCompare(b.name, "tr"))
-    .slice(0, 6);
+    // Arama yokken en son eklenen / güncellenen önde (yeni kayıt hemen görünür); aranırken alfabetik.
+    // Liste kutu içinde kayar (K-088); çok büyük listede ilk 200 çizilir.
+    .sort((a, b) => (typed ? a.name.localeCompare(b.name, "tr") : (b.updated_at ?? b.created_at ?? "").localeCompare(a.updated_at ?? a.created_at ?? "")))
+    .slice(0, 200);
 
   return (
     <div className="form-group">
@@ -86,7 +89,7 @@ export function ProductPicker({
         onChange={(e) => setQuery(e.target.value)}
         autoComplete="off"
       />
-      <ul className="menu-list" aria-label="Ürün sonuçları" style={{ marginTop: 8 }}>
+      <ul className="menu-list picker-list" aria-label="Ürün sonuçları" style={{ marginTop: 8 }}>
         {matches.map((p) => (
           <li key={p.id}>
             <button

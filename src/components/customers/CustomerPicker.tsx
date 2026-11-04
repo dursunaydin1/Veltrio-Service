@@ -108,9 +108,11 @@ export function CustomerPicker({
 
   const typed = query.trim() !== "";
   const matches = (customers ?? [])
-    .filter((c) => typed && matchesCustomer(c, query))
-    .sort((a, b) => a.name.localeCompare(b.name, "tr"))
-    .slice(0, 6);
+    .filter((c) => !typed || matchesCustomer(c, query))
+    // Arama yokken en son eklenen / güncellenen önde (yeni kayıt hemen görünür); aranırken alfabetik.
+    // Liste kutu içinde kayar (K-088); çok büyük listede ilk 200 çizilir.
+    .sort((a, b) => (typed ? a.name.localeCompare(b.name, "tr") : (b.updated_at ?? b.created_at ?? "").localeCompare(a.updated_at ?? a.created_at ?? "")))
+    .slice(0, 200);
 
   return (
     <div className="form-group">
@@ -126,8 +128,8 @@ export function CustomerPicker({
         autoComplete="off"
       />
       {error ? <p className="form-error" role="alert">{error}</p> : null}
-      {typed ? (
-        <ul className="menu-list" aria-label="Müşteri sonuçları" style={{ marginTop: 8 }}>
+      {matches.length > 0 ? (
+        <ul className="menu-list picker-list" aria-label="Müşteri sonuçları" style={{ marginTop: 8 }}>
           {matches.map((c) => (
             <li key={c.id}>
               <button
