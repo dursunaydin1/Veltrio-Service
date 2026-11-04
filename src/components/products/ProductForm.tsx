@@ -1,7 +1,7 @@
 "use client";
 
 import { PhotoField } from "@/components/common/PhotoField";
-import { useRef, useState } from "react";
+import { useState } from "react";
 import { useBusinessContext } from "@/hooks/useBusinessContext";
 import { useSessionStore } from "@/stores/session";
 import { PRODUCT_CATEGORIES, PRODUCT_UNITS, TAX_MODE_LABELS } from "@/lib/products/constants";
@@ -99,7 +99,8 @@ export function ProductForm({ product }: { product?: Product }) {
     "aria-invalid": errors[key] ? true : undefined,
     "aria-describedby": errors[key] ? `e-${key}` : undefined,
   });
-  const initialTax = useRef({ mode: values.taxMode, rate: values.taxRate });
+  // Açılıştaki KDV: "değiştir" çipi yalnızca bundan farklıysa açık gelir
+  const [initialTax] = useState(() => ({ mode: values.taxMode, rate: values.taxRate }));
   const err = (key: keyof ProductFormInput) =>
     errors[key] ? (
       <p className="form-error" id={`e-${key}`} role="alert">
@@ -186,10 +187,10 @@ export function ProductForm({ product }: { product?: Product }) {
           label="KDV"
           chip={`KDV: ${TAX_MODE_LABELS[values.taxMode as TaxMode] ?? values.taxMode}${values.taxMode === "NONE" ? "" : ` %${values.taxRate}`} · değiştir`}
           htmlFor="f-taxMode"
-          filled={values.taxMode !== initialTax.current.mode || values.taxRate !== initialTax.current.rate}
+          filled={values.taxMode !== initialTax.mode || values.taxRate !== initialTax.rate}
           onClear={() => {
-            set("taxMode", initialTax.current.mode);
-            set("taxRate", initialTax.current.rate);
+            set("taxMode", initialTax.mode);
+            set("taxRate", initialTax.rate);
           }}
         >
           <div className="row row-gap-md">
