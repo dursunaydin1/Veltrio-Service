@@ -3,6 +3,14 @@
 > Plandan (docs/00–07) veya PRD'den sapmaların, düzeltmelerin ve yeni çözümlerin kaydı. Yeni kayıtlar en üste eklenir.
 > Biçim: **Ne değişti → Neden → Sonuç / etkilenen dosyalar**
 
+## 2026-11-05
+
+### K-091 · Seçici liste gerçekten kayar; yeni sayfa en üstten açılır
+- **Sorun 1:** Seçici kutusu telefonda kaymıyordu, son satır ("Hasan Yılmaz") yarım kalıyordu. Neden: `.menu-list`'in `overflow: hidden` kuralı CSS'te sonra geldiği için kutunun kayma ayarını eziyordu; ayrıca sütun düzeninde satırlar kutuya sığmak için sıkışıyordu.
+- **Düzeltme:** Kural `.menu-list.picker-list` ile güçlendirildi, satırlar sıkışmaz (`flex-shrink: 0`).
+- **Sorun 2:** Satış kaydedilince açılan satış sayfası en altından görünüyordu (önceki sayfanın kaydırma konumu kalıyordu).
+- **Düzeltme:** İleri gidilen ya da yerine konan her sayfa en üstten açılır; geri gelince tarayıcı eski konumu korur (`useNavTracker`).
+
 ## 2026-11-04
 
 ### K-090 · Tarih çipi takvimi doğrudan açar; düğme sıraları taşmaz

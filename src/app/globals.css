@@ -1200,9 +1200,11 @@ a.item-card::after {
 .more-actions[open] summary { margin-bottom: 8px; }
 /* Seçici listeleri (K-088, K-089): yaklaşık 4 satır görünür, gerisi kutunun içinde kayar.
    Kutu çerçeveli ve sayfadan ayrı görünür; kutunun sonuna gelince kaydırma sayfaya geçer (takılma hissi olmaz). */
-.picker-list {
+/* .menu-list'in overflow: hidden'ını ezmek için iki sınıf birlikte (K-091); satırlar sıkışmaz, kutu kayar */
+.menu-list.picker-list {
   max-height: 264px;
   overflow-y: auto;
+  -webkit-overflow-scrolling: touch;
   border: 1px solid var(--border-subtle);
   border-radius: var(--radius-md);
   background: var(--bg-subtle);
@@ -1523,6 +1525,7 @@ a.tile:hover { border-color: var(--border-default); background: var(--bg-hover);
 .menu-list > li > a:active,
 .menu-list > li > button:active { background: var(--bg-elevated); }
 .picker-list > li > button:active { background: transparent; }
+.menu-list.picker-list > li { flex-shrink: 0; }
 
 /* Sağda ok (gezinen satırlar) */
 .menu-list > li > a { padding-right: 40px; position: relative; }

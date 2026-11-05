@@ -86,6 +86,8 @@ export function useNavTracker(): boolean {
     } catch {
       // yok sayılır
     }
+    // Yeni açılan sayfa en üstten başlar (K-091); geri gelince tarayıcı eski konumu kendisi verir
+    if (pending !== "pop" && pending !== "home") window.scrollTo(0, 0);
     // İlk açılış: yığın bu sayfadan başlar. Ana sayfada yığın her zaman boştur.
     const state =
       pathname === HOME ? initialNav(HOME) : raw === null ? initialNav(pathname) : nextNav(read(pathname), pending ?? "push");
