@@ -2,9 +2,10 @@ import { db } from "@/lib/db";
 import { machineTitleOf } from "@/lib/machines/title";
 import { normalizePhone } from "@/lib/utils/phone";
 import { foldText } from "@/lib/utils/search";
+import { customerFields, machineFields, productFields, purchaseFields, saleFields, serviceFields, supplierFields } from "@/lib/search/match";
 
 /**
- * Genel arama (Adım 1.10, FR-024, AC-022): müşteri adı/telefon, makine iç no /
+ * Genel arama (Adım 1.10, FR-024, AC-022; aranan alanlar `match.ts`ta, K-106): müşteri adı/telefon, makine iç no /
  * seri no, servis no, ürün adı/kodu, satış no, alım no, tedarikçi. Sonuçlar türüne
  * göre etiketlenir; arşivdekiler varsayılan olarak hariçtir. Arama bu cihazdaki
  * eşitlenmiş kayıtlar üzerinde yapılır (çevrimdışı da çalışır).
@@ -41,7 +42,7 @@ export function parseQuery(query: string): { words: string[]; digits: string } {
 }
 
 /** Tüm kelimeler birleştirilmiş metinde geçiyorsa eşleşir. */
-export function matchesWords(words: string[], ...fields: (string | undefined | null)[]): boolean {
+export function matchesWords(words: string[], ...fields: (string | number | undefined | null)[]): boolean {
   if (words.length === 0) return false;
   const haystack = foldText(fields.filter(Boolean).join(" "));
   return words.every((w) => haystack.includes(w));
@@ -83,7 +84,7 @@ export async function searchAll(
   const customerName = new Map(customers.map((c) => [c.id, c.name]));
 
   for (const c of take(
-    customers.filter((c) => (withArchived || !c.archived_at) && (matchesWords(words, c.name, c.village, c.phone) || matchesPhone(digits, c.phone)))
+    customers.filter((c) => (withArchived || !c.archived_at) && (matchesWords(words, ...customerFields(c), c.phone) || matchesPhone(digits, c.phone)))
   )) {
     push("customer", { id: c.id, title: c.name, subtitle: [c.village, c.phone].filter(Boolean).join(" · "), href: `/customers/${c.id}`, archived: !!c.archived_at });
   }
@@ -92,7 +93,7 @@ export async function searchAll(
     machines.filter(
       (m) =>
         (withArchived || (!m.archived_at && !m.merged_into_id)) &&
-        matchesWords(words, m.internal_number, m.serial_number, m.brand, m.model, m.type)
+        matchesWords(words, ...machineFields(m))
     )
   )) {
     push("machine", {
@@ -105,32 +106,32 @@ export async function searchAll(
   }
 
   for (const s of take(
-    services.filter((s) => matchesWords(words, s.document_no, s.customer_complaint, customerName.get(s.customer_id ?? "")))
+    services.filter((s) => matchesWords(words, ...serviceFields(s, customerName.get(s.customer_id ?? ""))))
   )) {
     push("service", { id: s.id, title: s.document_no, subtitle: [customerName.get(s.customer_id ?? ""), s.customer_complaint].filter(Boolean).join(" · "), href: `/services/${s.id}`, archived: false });
   }
 
   for (const p of take(
-    products.filter((p) => (withArchived || !p.archived_at) && matchesWords(words, p.name, p.code, p.barcode, p.brand, p.model, p.category))
+    products.filter((p) => (withArchived || !p.archived_at) && matchesWords(words, ...productFields(p)))
   )) {
     push("product", { id: p.id, title: p.name, subtitle: [p.code, p.brand, p.model].filter(Boolean).join(" · "), href: `/products/${p.id}`, archived: !!p.archived_at });
   }
 
   for (const s of take(
-    sales.filter((s) => matchesWords(words, s.document_no, customerName.get(s.customer_id ?? ""), s.notes))
+    sales.filter((s) => matchesWords(words, ...saleFields(s, customerName.get(s.customer_id ?? ""))))
   )) {
     push("sale", { id: s.id, title: s.document_no, subtitle: customerName.get(s.customer_id ?? "") ?? "Müşterisiz satış", href: `/sales/${s.id}`, archived: false });
   }
 
   const supplierName = new Map(suppliers.map((s) => [s.id, s.name]));
   for (const p of take(
-    purchases.filter((p) => matchesWords(words, p.document_no, p.supplier_ref, supplierName.get(p.supplier_id ?? "")))
+    purchases.filter((p) => matchesWords(words, ...purchaseFields(p, supplierName.get(p.supplier_id ?? ""))))
   )) {
     push("purchase", { id: p.id, title: p.document_no, subtitle: supplierName.get(p.supplier_id ?? ""), href: `/purchases/${p.id}`, archived: false });
   }
 
   for (const s of take(
-    suppliers.filter((s) => (withArchived || !s.archived_at) && (matchesWords(words, s.name, s.phone) || matchesPhone(digits, s.phone)))
+    suppliers.filter((s) => (withArchived || !s.archived_at) && (matchesWords(words, ...supplierFields(s), s.phone) || matchesPhone(digits, s.phone)))
   )) {
     push("supplier", { id: s.id, title: s.name, subtitle: s.phone, href: `/suppliers/${s.id}`, archived: !!s.archived_at });
   }

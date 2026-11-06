@@ -1,5 +1,6 @@
 import { describe, expect, it } from "vitest";
-import { inTab, isOverdue, matchesService } from "./ServiceList";
+import { inTab, isOverdue } from "./ServiceList";
+import { matchesService } from "@/lib/search/match";
 import type { Service } from "@/lib/db";
 
 const svc = (over: Partial<Service> = {}): Service => ({

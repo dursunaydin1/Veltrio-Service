@@ -8,28 +8,11 @@ import { useLiveQuery } from "dexie-react-hooks";
 import { db } from "@/lib/db";
 import { useSessionStore } from "@/stores/session";
 import { machineTitleOf } from "@/lib/machines/title";
-import { foldText } from "@/lib/utils/search";
 import type { Machine } from "@/types";
 import { PageHead } from "@/components/layout/PageHead";
 import { useIncremental } from "@/hooks/useIncremental";
 import { LoadMore } from "@/components/common/LoadMore";
-
-/** Arama: tür, marka, model, seri / iç numara ve sahibin adı üzerinde kelime kelime. */
-export function matchesMachine(machine: Machine, ownerName: string, query: string): boolean {
-  if (!query.trim()) return true;
-  const haystack = [
-    machine.type,
-    machine.brand,
-    machine.model,
-    machine.serial_number,
-    machine.internal_number,
-    ownerName,
-  ]
-    .filter(Boolean)
-    .map((v) => foldText(String(v)))
-    .join(" ");
-  return foldText(query.trim()).split(/\s+/).every((word) => haystack.includes(word));
-}
+import { matchesMachine } from "@/lib/search/match";
 
 export const machineTitle = machineTitleOf;
 

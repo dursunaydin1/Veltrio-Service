@@ -9,10 +9,10 @@ import { db } from "@/lib/db";
 import type { Sale } from "@/lib/db";
 import { useSessionStore } from "@/stores/session";
 import { formatCurrency, formatDate } from "@/lib/utils";
-import { foldText } from "@/lib/utils/search";
 import { PageHead } from "@/components/layout/PageHead";
 import { useIncremental } from "@/hooks/useIncremental";
 import { LoadMore } from "@/components/common/LoadMore";
+import { matchesSale } from "@/lib/search/match";
 
 type Tab = Sale["status"];
 
@@ -32,13 +32,6 @@ export const SALE_STATUS_BADGE: Record<Sale["status"], string> = {
   FINAL: "badge-green",
   CANCELLED: "badge-red",
 };
-
-/** Arama: belge no, müşteri adı, not. */
-export function matchesSale(sale: Sale, customerName: string, query: string): boolean {
-  if (!query.trim()) return true;
-  const haystack = foldText([sale.document_no, customerName, sale.notes].filter(Boolean).join(" "));
-  return foldText(query.trim()).split(/\s+/).every((word) => haystack.includes(word));
-}
 
 /** Satış listesi: tamamlanan / taslak / iptal sekmeleri ve arama (Adım 4.8). */
 export function SaleList() {

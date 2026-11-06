@@ -3,7 +3,12 @@
     "allow": [
       "Bash(git rm *)",
       "Bash(python -I \"C:/Users/Admin/AppData/Local/Temp/claude/d--Projeler-SOFTWARE-Projeler-Veltrio-Service/1c2923fd-0585-4cbe-8eb4-34427dbb12f8/scratchpad/money.py\")",
-      "Bash(git commit -q -m 'refactor\\(money\\): one set of money formatters, remove dead tax helpers *)"
+      "Bash(git commit -q -m 'refactor\\(money\\): one set of money formatters, remove dead tax helpers *)",
+      "Bash(python -I \"C:/Users/Admin/AppData/Local/Temp/claude/d--Projeler-SOFTWARE-Projeler-Veltrio-Service/1c2923fd-0585-4cbe-8eb4-34427dbb12f8/scratchpad/match.py\")",
+      "Bash(sed -i '/^import type { Customer } from \"@\\\\/types\";\\\\r\\\\?$/d' src/components/customers/CustomerList.tsx)",
+      "Bash(sed -i '/^import type { Product } from \"@\\\\/types\";\\\\r\\\\?$/d' src/components/products/ProductList.tsx)",
+      "Bash(sed -i '/^import type { Supplier } from \"@\\\\/types\";\\\\r\\\\?$/d' src/components/suppliers/SupplierList.tsx)",
+      "Bash(git commit -q -m 'refactor\\(search\\): one module defines searchable fields for lists, pickers and global search *)"
     ]
   }
 }

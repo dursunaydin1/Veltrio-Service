@@ -1,5 +1,5 @@
 import { describe, expect, it } from "vitest";
-import { matchesPurchase } from "./PurchaseList";
+import { matchesPurchase } from "@/lib/search/match";
 import type { Purchase } from "@/lib/db";
 
 const p = (over: Partial<Purchase> = {}): Purchase => ({

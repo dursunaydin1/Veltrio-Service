@@ -11,23 +11,14 @@ import { useStockBalances } from "@/hooks/useStock";
 import { EMPTY_BALANCE } from "@/lib/stock/ledger";
 import { formatCurrency, formatQuantity } from "@/lib/utils";
 import { unitLabel } from "@/lib/products/constants";
-import { foldText } from "@/lib/utils/search";
 import { ProductThumb } from "@/components/products/ProductThumb";
 import { isCriticalStock } from "@/lib/products/stock";
-import type { Product } from "@/types";
 import { PageHead } from "@/components/layout/PageHead";
 import { useIncremental } from "@/hooks/useIncremental";
 import { LoadMore } from "@/components/common/LoadMore";
 import { NoMatchAdd } from "@/components/common/NoMatchAdd";
+import { matchesProduct } from "@/lib/search/match";
 
-function matches(product: Product, query: string): boolean {
-  if (!query.trim()) return true;
-  const haystack = [product.name, product.code, product.barcode, product.category, product.brand, product.model]
-    .filter(Boolean)
-    .map((v) => foldText(String(v)))
-    .join(" ");
-  return foldText(query.trim()).split(/\s+/).every((word) => haystack.includes(word));
-}
 
 /** Ürün listesi: arama, pasifleri gösterme, kritik stok rozeti (Adım 2.1, 2.9). */
 export function ProductList() {
@@ -46,7 +37,7 @@ export function ProductList() {
   const visible = useMemo(() => {
     return (products ?? [])
       .filter((p) => (showArchived ? true : !p.archived_at))
-      .filter((p) => matches(p, query))
+      .filter((p) => matchesProduct(p, query))
       .sort((a, b) => a.name.localeCompare(b.name, "tr"));
   }, [products, query, showArchived]);
   const shown = useIncremental(visible);

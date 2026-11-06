@@ -1,5 +1,6 @@
 import { describe, expect, it } from "vitest";
-import { machineTitle, matchesMachine } from "./MachineList";
+import { machineTitle } from "./MachineList";
+import { matchesMachine } from "@/lib/search/match";
 import type { Machine } from "@/types";
 
 const m = (over: Partial<Machine> = {}): Machine => ({

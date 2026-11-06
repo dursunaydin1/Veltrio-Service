@@ -8,24 +8,11 @@ import { useLiveQuery } from "dexie-react-hooks";
 import { db } from "@/lib/db";
 import { useSessionStore } from "@/stores/session";
 import { formatPhone } from "@/lib/utils/phone";
-import { foldText } from "@/lib/utils/search";
-import type { Supplier } from "@/types";
 import { PageHead } from "@/components/layout/PageHead";
 import { useIncremental } from "@/hooks/useIncremental";
 import { LoadMore } from "@/components/common/LoadMore";
 import { NoMatchAdd, prefillQuery } from "@/components/common/NoMatchAdd";
-
-/** Arama: harf içeriyorsa ad / adreste, yalnızca rakamsa telefonda (baştaki 0 yok sayılır). */
-export function matchesSupplier(supplier: Supplier, query: string): boolean {
-  if (!query.trim()) return true;
-  if (!/\p{L}/u.test(query)) {
-    const digits = query.replace(/\D/g, "").replace(/^0/, "");
-    const phone = (supplier.phone ?? "").replace(/\D/g, "").replace(/^0/, "");
-    return digits.length >= 3 && phone.includes(digits);
-  }
-  const text = foldText([supplier.name, supplier.address].filter(Boolean).join(" "));
-  return foldText(query.trim()).split(/\s+/).every((word) => text.includes(word));
-}
+import { matchesSupplier } from "@/lib/search/match";
 
 /** Tedarikçi listesi (Adım 4.5). */
 export function SupplierList() {

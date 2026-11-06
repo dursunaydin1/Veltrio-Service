@@ -12,11 +12,11 @@ import { getServiceBalance } from "@/lib/services/service";
 import { StatusBadge } from "@/components/services/StatusBadge";
 import { useSessionStore } from "@/stores/session";
 import { isOpenStatus, statusTone } from "@/lib/services/status";
-import { foldText } from "@/lib/utils/search";
 import { formatCurrency, formatDate, todayLocalDate } from "@/lib/utils";
 import { PageHead } from "@/components/layout/PageHead";
 import { useIncremental } from "@/hooks/useIncremental";
 import { LoadMore } from "@/components/common/LoadMore";
+import { matchesService } from "@/lib/search/match";
 
 type Tab = "active" | "delivered" | "cancelled";
 
@@ -35,13 +35,6 @@ export function inTab(service: Pick<Service, "status">, tab: Tab): boolean {
 /** Teslim sözü geçmiş açık servis mi? */
 export function isOverdue(service: Pick<Service, "status" | "promised_date">, today: string): boolean {
   return isOpenStatus(service.status) && !!service.promised_date && service.promised_date < today;
-}
-
-/** Arama: belge no, müşteri, makine (marka/model/seri/iç no). */
-export function matchesService(service: Service, customerName: string, machineText: string, query: string): boolean {
-  if (!query.trim()) return true;
-  const haystack = foldText([service.document_no, customerName, machineText, service.customer_complaint].filter(Boolean).join(" "));
-  return foldText(query.trim()).split(/\s+/).every((word) => haystack.includes(word));
 }
 
 /** Servis listesi: aktif / teslim edilen / iptal sekmeleri, arama, teslim sözü (Adım 3.17). */

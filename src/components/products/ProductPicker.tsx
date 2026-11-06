@@ -7,7 +7,7 @@ import { useStockBalances } from "@/hooks/useStock";
 import { useSessionStore } from "@/stores/session";
 import { unitLabel } from "@/lib/products/constants";
 import { formatCurrency, formatQuantity } from "@/lib/utils";
-import { foldText } from "@/lib/utils/search";
+import { matchesProduct } from "@/lib/search/match";
 import { ProductThumb } from "@/components/products/ProductThumb";
 import type { Product } from "@/types";
 
@@ -68,12 +68,8 @@ export function ProductPicker({
   }
 
   const typed = query.trim() !== "";
-  const words = foldText(query.trim()).split(/\s+/).filter(Boolean);
   const matches = (products ?? [])
-    .filter((p) => {
-      const haystack = foldText([p.name, p.code, p.barcode, p.brand, p.model, p.category].filter(Boolean).join(" "));
-      return words.every((w) => haystack.includes(w));
-    })
+    .filter((p) => matchesProduct(p, query))
     // Arama yokken en son eklenen / güncellenen önde (yeni kayıt hemen görünür); aranırken alfabetik.
     // Liste kutu içinde kayar (K-088); çok büyük listede ilk 200 çizilir.
     .sort((a, b) => (typed ? a.name.localeCompare(b.name, "tr") : (b.updated_at ?? b.created_at ?? "").localeCompare(a.updated_at ?? a.created_at ?? "")))

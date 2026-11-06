@@ -4,7 +4,7 @@ import { useState } from "react";
 import { useLiveQuery } from "dexie-react-hooks";
 import { db } from "@/lib/db";
 import { useSessionStore } from "@/stores/session";
-import { matchesCustomer } from "@/components/customers/CustomerList";
+import { matchesCustomer } from "@/lib/search/match";
 import { useBusinessContext } from "@/hooks/useBusinessContext";
 import { parseCustomerForm } from "@/lib/customers/schema";
 import { createCustomer, DuplicatePhoneError } from "@/lib/customers/service";

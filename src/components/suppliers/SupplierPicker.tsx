@@ -4,7 +4,7 @@ import { useState } from "react";
 import Link from "next/link";
 import { useLiveQuery } from "dexie-react-hooks";
 import { db } from "@/lib/db";
-import { matchesSupplier } from "@/components/suppliers/SupplierList";
+import { matchesSupplier } from "@/lib/search/match";
 import { useSessionStore } from "@/stores/session";
 import { formatPhone } from "@/lib/utils/phone";
 

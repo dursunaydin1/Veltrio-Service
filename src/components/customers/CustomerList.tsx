@@ -8,28 +8,11 @@ import { useLiveQuery } from "dexie-react-hooks";
 import { db } from "@/lib/db";
 import { useSessionStore } from "@/stores/session";
 import { formatPhone } from "@/lib/utils/phone";
-import { foldText } from "@/lib/utils/search";
-import type { Customer } from "@/types";
 import { PageHead } from "@/components/layout/PageHead";
 import { useIncremental } from "@/hooks/useIncremental";
 import { LoadMore } from "@/components/common/LoadMore";
 import { NoMatchAdd, prefillQuery } from "@/components/common/NoMatchAdd";
-
-/** Arama: harf içeriyorsa ad/köy/adreste kelime kelime; yalnızca rakamsa telefonda (baştaki 0 yok sayılır). */
-export function matchesCustomer(customer: Customer, query: string): boolean {
-  if (!query.trim()) return true;
-
-  if (!/\p{L}/u.test(query)) {
-    const digits = query.replace(/\D/g, "").replace(/^0/, "");
-    return digits.length >= 3 && (customer.phone_normalized ?? "").includes(digits);
-  }
-
-  const text = [customer.name, customer.village, customer.address]
-    .filter(Boolean)
-    .map((v) => foldText(String(v)))
-    .join(" ");
-  return foldText(query.trim()).split(/\s+/).every((word) => text.includes(word));
-}
+import { matchesCustomer } from "@/lib/search/match";
 
 /** Müşteri listesi: ad, telefon veya köye göre arama (Adım 3.2). */
 export function CustomerList() {

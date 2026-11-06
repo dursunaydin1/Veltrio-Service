@@ -9,10 +9,10 @@ import { db } from "@/lib/db";
 import type { Purchase } from "@/lib/db";
 import { useSessionStore } from "@/stores/session";
 import { formatCurrency, formatDate } from "@/lib/utils";
-import { foldText } from "@/lib/utils/search";
 import { PageHead } from "@/components/layout/PageHead";
 import { useIncremental } from "@/hooks/useIncremental";
 import { LoadMore } from "@/components/common/LoadMore";
+import { matchesPurchase } from "@/lib/search/match";
 
 type Tab = Purchase["status"];
 
@@ -32,13 +32,6 @@ export const PURCHASE_STATUS_BADGE: Record<Purchase["status"], string> = {
   RECEIVED: "badge-green",
   CANCELLED: "badge-red",
 };
-
-/** Arama: belge no, tedarikçi adı, tedarikçinin fatura / irsaliye no'su, not. */
-export function matchesPurchase(purchase: Purchase, supplierName: string, query: string): boolean {
-  if (!query.trim()) return true;
-  const haystack = foldText([purchase.document_no, supplierName, purchase.supplier_ref, purchase.notes].filter(Boolean).join(" "));
-  return foldText(query.trim()).split(/\s+/).every((word) => haystack.includes(word));
-}
 
 /** Satın alma listesi: teslim alınan / taslak / iptal sekmeleri ve arama (Adım 4.6). */
 export function PurchaseList() {
