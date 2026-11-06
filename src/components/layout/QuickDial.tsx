@@ -3,6 +3,7 @@
 import { useEffect, useRef } from "react";
 import Link from "next/link";
 import { Package, Plus, ShoppingBag, ShoppingCart, User, Wrench } from "lucide-react";
+import { haptic } from "@/lib/utils/haptic";
 
 /**
  * Hızlı seçim: tüm "yeni kayıt" işleri tek satırda ikon olarak. En sık iş (Servis aç) ortada, logolu düğmenin üstünde.
@@ -19,13 +20,6 @@ const ACTIONS = [
 const CENTER = 2;
 
 /** Kısa titreşim (destekleyen Android tarayıcılarında; diğerlerinde sessizce yok sayılır). */
-export function haptic() {
-  try {
-    navigator.vibrate?.(8);
-  } catch {
-    // desteklenmiyor
-  }
-}
 
 /**
  * Ortadaki logolu düğmeye basınca hemen üstünde açılan hızlı seçim (K-048, K-049).

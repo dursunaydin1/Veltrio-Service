@@ -7,7 +7,7 @@ import { db } from "@/lib/db";
 import { useBusinessContext } from "@/hooks/useBusinessContext";
 import { CustomerPicker } from "@/components/customers/CustomerPicker";
 import { MachineForm } from "@/components/machines/MachineForm";
-import { machineTitle } from "@/components/machines/MachineList";
+import { machineTitleOf } from "@/lib/machines/title";
 import { changeMachineOwner, mergeTemporaryMachine, setMachineArchived } from "@/lib/machines/service";
 import { getMachineServiceSummary } from "@/lib/services/service";
 import { StatusBadge } from "@/components/services/StatusBadge";
@@ -61,7 +61,7 @@ export function MachineEditor({ id }: { id: string }) {
     <div className="stack stack-lg">
       <div className="stack stack-sm">
         <div className="row row-between">
-          <h1>{machineTitle(machine)}</h1>
+          <h1>{machineTitleOf(machine)}</h1>
           <span className="row row-gap-sm">
             {machine.is_temporary ? <span className="badge badge-yellow">Geçici</span> : null}
             {archived ? <span className="badge badge-gray">Arşivde</span> : null}
@@ -177,7 +177,7 @@ function MergeSection({ machine }: { machine: Machine }) {
           <p>Bu geçici kayıttaki servisler seçilen makineye taşınır, geçici kayıt arşivlenir. Hiçbir kayıt silinmez.</p>
           <select className="form-input" aria-label="Birleştirilecek makine" value={target} onChange={(e) => setTarget(e.target.value)}>
             <option value="">Makine seç…</option>
-            {candidates.map((m) => <option key={m.id} value={m.id}>{machineTitle(m)} · {m.internal_number ?? ""}</option>)}
+            {candidates.map((m) => <option key={m.id} value={m.id}>{machineTitleOf(m)} · {m.internal_number ?? ""}</option>)}
           </select>
           <input className="form-input" placeholder="Birleştirme nedeni *" aria-label="Birleştirme nedeni" value={reason} onChange={(e) => setReason(e.target.value)} />
           {error ? <div className="alert alert-error" role="alert">{error}</div> : null}

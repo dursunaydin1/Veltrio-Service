@@ -22,16 +22,6 @@ const TABS: { id: Tab; label: string }[] = [
   { id: "CANCELLED", label: "İptal" },
 ];
 
-export const PURCHASE_STATUS_LABEL: Record<Purchase["status"], string> = {
-  DRAFT: "Taslak",
-  RECEIVED: "Teslim alındı",
-  CANCELLED: "İptal edildi",
-};
-export const PURCHASE_STATUS_BADGE: Record<Purchase["status"], string> = {
-  DRAFT: "badge-yellow",
-  RECEIVED: "badge-green",
-  CANCELLED: "badge-red",
-};
 
 /** Satın alma listesi: teslim alınan / taslak / iptal sekmeleri ve arama (Adım 4.6). */
 export function PurchaseList() {

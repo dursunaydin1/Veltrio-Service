@@ -25,7 +25,7 @@ import { OptionalField, OptionalGroup } from "@/components/common/OptionalField"
 import { DateQuickPick } from "@/components/common/DateQuickPick";
 import { ScanBarcode, X } from "lucide-react";
 import { CodeScanner } from "@/components/qr/CodeScanner";
-import { haptic } from "@/components/layout/QuickDial";
+import { haptic } from "@/lib/utils/haptic";
 import { parseScan } from "@/lib/qr/payload";
 import { findProductByBarcode, normalizeBarcode } from "@/lib/products/service";
 import { db } from "@/lib/db";

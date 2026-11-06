@@ -127,3 +127,17 @@ export function statusTone(status: string): "gray" | "violet" | "yellow" | "gree
 export function statusLabel(status: string): string {
   return isServiceStatus(status) ? SERVICE_STATUS_LABELS[status] : status;
 }
+
+/** Servis listesi sekmesi: aktif = teslim edilmemiş ve iptal edilmemiş (K-107). */
+export type ServiceListTab = "active" | "delivered" | "cancelled";
+
+export function inTab(service: { status: string }, tab: ServiceListTab): boolean {
+  if (tab === "active") return isOpenStatus(service.status);
+  if (tab === "delivered") return service.status === "DELIVERED";
+  return service.status === "CANCELLED";
+}
+
+/** Teslim sözü geçmiş açık servis mi? */
+export function isOverdue(service: { status: string; promised_date?: string | null }, today: string): boolean {
+  return isOpenStatus(service.status) && !!service.promised_date && service.promised_date < today;
+}

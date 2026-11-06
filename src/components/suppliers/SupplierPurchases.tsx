@@ -4,7 +4,7 @@ import Link from "next/link";
 import { useLiveQuery } from "dexie-react-hooks";
 import { Plus } from "lucide-react";
 import { db } from "@/lib/db";
-import { PURCHASE_STATUS_BADGE, PURCHASE_STATUS_LABEL } from "@/components/purchases/PurchaseList";
+import { PURCHASE_STATUS_BADGE, PURCHASE_STATUS_LABEL } from "@/lib/purchases/status";
 import { formatCurrency, formatDate } from "@/lib/utils";
 import type { Supplier } from "@/types";
 

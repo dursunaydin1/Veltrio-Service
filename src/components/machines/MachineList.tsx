@@ -14,7 +14,6 @@ import { useIncremental } from "@/hooks/useIncremental";
 import { LoadMore } from "@/components/common/LoadMore";
 import { matchesMachine } from "@/lib/search/match";
 
-export const machineTitle = machineTitleOf;
 
 /** Makine listesi: marka, model, seri no, iç numara veya sahibe göre arama (Adım 3.3). */
 export function MachineList() {
@@ -38,7 +37,7 @@ export function MachineList() {
     return data.machines
       .filter((m) => !m.merged_into_id && (showArchived || !m.archived_at))
       .filter((m) => matchesMachine(m, data.owners.get(m.customer_id ?? "") ?? "", query))
-      .sort((a, b) => machineTitle(a).localeCompare(machineTitle(b), "tr"));
+      .sort((a, b) => machineTitleOf(a).localeCompare(machineTitleOf(b), "tr"));
   }, [data, query, showArchived]);
   const shown = useIncremental(visible);
 
@@ -76,7 +75,7 @@ export function MachineList() {
             <li key={m.id}>
               <Link href={`/machines/${m.id}`} style={{ alignItems: "flex-start", flexDirection: "column", gap: 4 }}>
                 <span className="row row-between" style={{ width: "100%", gap: 8 }}>
-                  <span>{machineTitle(m)}</span>
+                  <span>{machineTitleOf(m)}</span>
                   <span className="row row-gap-sm">
                     {m.is_temporary ? <span className="badge badge-yellow">Geçici</span> : null}
                     {m.archived_at ? <span className="badge badge-gray">Arşivde</span> : null}

@@ -8,7 +8,7 @@ import { ArrowLeft, Check, CircleHelp, Cog, Plus, X } from "lucide-react";
 import { db } from "@/lib/db";
 import { useBusinessContext } from "@/hooks/useBusinessContext";
 import { CustomerPicker } from "@/components/customers/CustomerPicker";
-import { machineTitle } from "@/components/machines/MachineList";
+import { machineTitleOf } from "@/lib/machines/title";
 import { parseMoneyInput } from "@/lib/calc";
 import { PAYMENT_METHOD_LABELS } from "@/lib/finance/service";
 import { getMachineServiceSummary, openService } from "@/lib/services/service";
@@ -27,20 +27,8 @@ import {
 import { formatDate, todayLocalDate } from "@/lib/utils";
 import type { PaymentMethod } from "@/types";
 import { useAppNav } from "@/lib/nav/useAppNav";
+import { ISSUE_CATEGORIES } from "@/lib/catalog/service";
 
-/** Sık arıza başlıkları (PRD §8.1); dokunulunca şikâyet metnine eklenir. */
-export const ISSUE_CATEGORIES = [
-  "Çalışmıyor",
-  "Zor çalışıyor",
-  "Güç kaybı",
-  "Stop ediyor",
-  "Yakıt kaçağı",
-  "Yağlama sorunu",
-  "Titreşim / ses",
-  "Kesmiyor / biçmiyor",
-  "Parça kırığı / hasarı",
-  "Bakım talebi",
-] as const;
 
 type Extra = "damage" | "accessories" | "photo";
 const EXTRAS: { id: Extra; label: string }[] = [
@@ -106,7 +94,7 @@ export function ServiceForm({
     [ctx?.businessId]
   );
   const issueLabels = rankIssues(
-    issueCatalog && issueCatalog.length > 0 ? issueCatalog.map((i) => i.name) : ISSUE_CATEGORIES,
+    issueCatalog && issueCatalog.length > 0 ? issueCatalog.map((i) => i.name) : ISSUE_CATEGORIES.filter((c) => c !== "Diğer"),
     pastComplaints ?? []
   );
   const customer = useLiveQuery(() => (customerId ? db.customers.get(customerId) : undefined), [customerId]);
@@ -189,7 +177,7 @@ export function ServiceForm({
   }
 
   const machineLabel =
-    machineId === UNKNOWN_MACHINE ? tempType.trim() || "Kayıtsız makine" : selectedMachine ? machineTitle(selectedMachine) : undefined;
+    machineId === UNKNOWN_MACHINE ? tempType.trim() || "Kayıtsız makine" : selectedMachine ? machineTitleOf(selectedMachine) : undefined;
 
   return (
     <div className="wizard">
@@ -261,7 +249,7 @@ export function ServiceForm({
                 >
                   <span className="choice-icon"><Cog size={20} aria-hidden="true" /></span>
                   <span className="choice-text">
-                    <strong>{machineTitle(m)}</strong>
+                    <strong>{machineTitleOf(m)}</strong>
                     <small>{[m.type, m.serial_number ?? m.internal_number].filter(Boolean).join(" · ") || "Ayrıntı yok"}</small>
                   </span>
                 </button>

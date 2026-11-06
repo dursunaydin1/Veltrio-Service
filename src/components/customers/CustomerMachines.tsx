@@ -4,7 +4,7 @@ import Link from "next/link";
 import { useLiveQuery } from "dexie-react-hooks";
 import { Plus } from "lucide-react";
 import { db } from "@/lib/db";
-import { machineTitle } from "@/components/machines/MachineList";
+import { machineTitleOf } from "@/lib/machines/title";
 import type { Customer } from "@/types";
 
 /** Müşteri profilindeki makineler bölümü (Adım 3.1-3.3). */
@@ -35,7 +35,7 @@ export function CustomerMachines({ customer }: { customer: Customer }) {
           {machines.map((m) => (
             <li key={m.id}>
               <Link href={`/machines/${m.id}`} style={{ flexDirection: "column", alignItems: "flex-start", gap: 2 }}>
-                <span>{machineTitle(m)}</span>
+                <span>{machineTitleOf(m)}</span>
                 <small style={{ color: "var(--text-muted)", fontWeight: 500 }}>
                   {[m.type, m.serial_number ?? m.internal_number].filter(Boolean).join(" · ")}
                 </small>

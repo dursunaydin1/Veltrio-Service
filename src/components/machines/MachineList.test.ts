@@ -1,5 +1,5 @@
 import { describe, expect, it } from "vitest";
-import { machineTitle } from "./MachineList";
+import { machineTitleOf } from "@/lib/machines/title";
 import { matchesMachine } from "@/lib/search/match";
 import type { Machine } from "@/types";
 
@@ -37,7 +37,7 @@ describe("matchesMachine", () => {
 
 describe("machineTitle", () => {
   it("marka + model; yoksa tür", () => {
-    expect(machineTitle(m())).toBe("Stihl MS 180");
-    expect(machineTitle(m({ brand: undefined, model: undefined }))).toBe("Zincirli testere");
+    expect(machineTitleOf(m())).toBe("Stihl MS 180");
+    expect(machineTitleOf(m({ brand: undefined, model: undefined }))).toBe("Zincirli testere");
   });
 });

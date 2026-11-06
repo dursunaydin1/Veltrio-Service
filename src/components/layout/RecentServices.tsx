@@ -6,7 +6,7 @@ import { Wrench } from "lucide-react";
 import { db } from "@/lib/db";
 import { describePromise } from "@/lib/services/promise";
 import { isOpenStatus, statusTone } from "@/lib/services/status";
-import { machineTitle } from "@/components/machines/MachineList";
+import { machineTitleOf } from "@/lib/machines/title";
 import { StatusBadge } from "@/components/services/StatusBadge";
 import { todayLocalDate } from "@/lib/utils";
 import { useSessionStore } from "@/stores/session";
@@ -43,7 +43,7 @@ export function RecentServices() {
       items: recent.map((s, i) => ({
         service: s,
         customer: customers[i]?.name,
-        machine: machines[i] ? machineTitle(machines[i]) : undefined,
+        machine: machines[i] ? machineTitleOf(machines[i]) : undefined,
       })),
     };
   }, [businessId]);

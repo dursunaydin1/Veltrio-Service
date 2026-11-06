@@ -3,8 +3,8 @@
 import Link from "next/link";
 import { useLiveQuery } from "dexie-react-hooks";
 import { db } from "@/lib/db";
-import { SALE_STATUS_LABEL } from "@/components/sales/SaleList";
-import { PURCHASE_STATUS_LABEL } from "@/components/purchases/PurchaseList";
+import { SALE_STATUS_LABEL } from "@/lib/sales/status";
+import { PURCHASE_STATUS_LABEL } from "@/lib/purchases/status";
 import { formatCurrency, formatDate, formatQuantity } from "@/lib/utils";
 
 const LIMIT = 30;

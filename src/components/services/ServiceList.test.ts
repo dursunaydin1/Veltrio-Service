@@ -1,5 +1,5 @@
 import { describe, expect, it } from "vitest";
-import { inTab, isOverdue } from "./ServiceList";
+import { inTab, isOverdue } from "@/lib/services/status";
 import { matchesService } from "@/lib/search/match";
 import type { Service } from "@/lib/db";
 

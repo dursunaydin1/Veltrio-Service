@@ -5,13 +5,13 @@ import { getCustomerOpenItems } from "@/lib/finance/openItems";
 import { unitLabel } from "@/lib/products/constants";
 import type { Column } from "@/lib/export/export";
 import { MOVEMENT_LABEL, inRange, localDate, type DateRange } from "./calc";
+import { SALE_STATUS_LABEL } from "@/lib/sales/status";
 
 /**
  * Dışa aktarma hedefleri (Adım 6.8): her biri sütun tanımı + satırlar döner. Tutarlar
  * kuruş cinsindendir (`money` sütunları dışa aktarmada TL'ye çevrilir).
  */
 
-const SALE_STATUS_LABEL = { DRAFT: "Taslak", FINAL: "Tamamlandı", CANCELLED: "İptal edildi" } as const;
 
 export type Dataset<T extends Record<string, unknown> = Record<string, unknown>> = {
   id: string;

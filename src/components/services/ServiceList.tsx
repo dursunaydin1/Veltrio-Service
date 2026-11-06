@@ -6,36 +6,24 @@ import { ListSkeleton } from "@/components/common/ListSkeleton";
 import { useLiveQuery } from "dexie-react-hooks";
 import { Wrench } from "lucide-react";
 import { db } from "@/lib/db";
-import type { Service } from "@/lib/db";
-import { machineTitle } from "@/components/machines/MachineList";
+import { machineTitleOf } from "@/lib/machines/title";
 import { getServiceBalance } from "@/lib/services/service";
 import { StatusBadge } from "@/components/services/StatusBadge";
 import { useSessionStore } from "@/stores/session";
-import { isOpenStatus, statusTone } from "@/lib/services/status";
+import { inTab, isOverdue, statusTone, type ServiceListTab } from "@/lib/services/status";
 import { formatCurrency, formatDate, todayLocalDate } from "@/lib/utils";
 import { PageHead } from "@/components/layout/PageHead";
 import { useIncremental } from "@/hooks/useIncremental";
 import { LoadMore } from "@/components/common/LoadMore";
 import { matchesService } from "@/lib/search/match";
 
-type Tab = "active" | "delivered" | "cancelled";
+type Tab = ServiceListTab;
 
 const TABS: { id: Tab; label: string }[] = [
   { id: "active", label: "Aktif" },
   { id: "delivered", label: "Teslim edilen" },
   { id: "cancelled", label: "İptal" },
 ];
-
-export function inTab(service: Pick<Service, "status">, tab: Tab): boolean {
-  if (tab === "active") return isOpenStatus(service.status);
-  if (tab === "delivered") return service.status === "DELIVERED";
-  return service.status === "CANCELLED";
-}
-
-/** Teslim sözü geçmiş açık servis mi? */
-export function isOverdue(service: Pick<Service, "status" | "promised_date">, today: string): boolean {
-  return isOpenStatus(service.status) && !!service.promised_date && service.promised_date < today;
-}
 
 /** Servis listesi: aktif / teslim edilen / iptal sekmeleri, arama, teslim sözü (Adım 3.17). */
 export function ServiceList() {
@@ -64,7 +52,7 @@ export function ServiceList() {
       machines: new Map(
         machines.map((m) => [
           m.id,
-          { title: machineTitle(m), text: [machineTitle(m), m.type, m.serial_number, m.internal_number].filter(Boolean).join(" ") },
+          { title: machineTitleOf(m), text: [machineTitleOf(m), m.type, m.serial_number, m.internal_number].filter(Boolean).join(" ") },
         ])
       ),
     };

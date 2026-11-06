@@ -8,7 +8,7 @@ import { db } from "@/lib/db";
 import type { Service } from "@/lib/db";
 import { useBusinessContext } from "@/hooks/useBusinessContext";
 import { useServiceContext } from "@/hooks/useServiceContext";
-import { machineTitle } from "@/components/machines/MachineList";
+import { machineTitleOf } from "@/lib/machines/title";
 import { ServiceLines } from "@/components/services/ServiceLines";
 import { DeliveryPanel, ServicePayments } from "@/components/services/ServicePayments";
 import { parseMoneyInput } from "@/lib/calc";
@@ -91,7 +91,7 @@ export function ServiceDetail({ id }: { id: string }) {
             )}
           </h1>
           <p style={{ fontWeight: 500 }}>
-            {related?.machine ? <Link href={`/machines/${related.machine.id}`}>{machineTitle(related.machine)}</Link> : "Makine bilgisi yok"}
+            {related?.machine ? <Link href={`/machines/${related.machine.id}`}>{machineTitleOf(related.machine)}</Link> : "Makine bilgisi yok"}
           </p>
           <small style={{ color: "var(--text-muted)" }}>
             Kabul: {formatDateTime(service.received_date)}

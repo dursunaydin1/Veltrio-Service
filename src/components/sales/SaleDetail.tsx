@@ -6,7 +6,7 @@ import { useLiveQuery } from "dexie-react-hooks";
 import { db } from "@/lib/db";
 import type { Sale } from "@/lib/db";
 import { useServiceContext } from "@/hooks/useServiceContext";
-import { SALE_STATUS_BADGE, SALE_STATUS_LABEL } from "@/components/sales/SaleList";
+import { SALE_STATUS_BADGE, SALE_STATUS_LABEL } from "@/lib/sales/status";
 import { SaleForm } from "@/components/sales/SaleForm";
 import { SaleReturnPanel } from "@/components/sales/SaleReturnPanel";
 import { parseMoneyInput } from "@/lib/calc";

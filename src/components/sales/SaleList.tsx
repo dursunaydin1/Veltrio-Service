@@ -22,16 +22,6 @@ const TABS: { id: Tab; label: string }[] = [
   { id: "CANCELLED", label: "İptal" },
 ];
 
-export const SALE_STATUS_LABEL: Record<Sale["status"], string> = {
-  DRAFT: "Taslak",
-  FINAL: "Tamamlandı",
-  CANCELLED: "İptal edildi",
-};
-export const SALE_STATUS_BADGE: Record<Sale["status"], string> = {
-  DRAFT: "badge-yellow",
-  FINAL: "badge-green",
-  CANCELLED: "badge-red",
-};
 
 /** Satış listesi: tamamlanan / taslak / iptal sekmeleri ve arama (Adım 4.8). */
 export function SaleList() {

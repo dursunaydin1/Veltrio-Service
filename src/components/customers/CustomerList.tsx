@@ -2,7 +2,8 @@
 
 import { useMemo, useState } from "react";
 import Link from "next/link";
-import { ListSkeleton, initials } from "@/components/common/ListSkeleton";
+import { ListSkeleton } from "@/components/common/ListSkeleton";
+import { initials } from "@/lib/utils/text";
 import { useLiveQuery } from "dexie-react-hooks";
 
 import { db } from "@/lib/db";

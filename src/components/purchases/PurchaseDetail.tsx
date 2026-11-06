@@ -6,7 +6,7 @@ import { useLiveQuery } from "dexie-react-hooks";
 import { db } from "@/lib/db";
 import type { Purchase } from "@/lib/db";
 import { useBusinessContext } from "@/hooks/useBusinessContext";
-import { PURCHASE_STATUS_BADGE, PURCHASE_STATUS_LABEL } from "@/components/purchases/PurchaseList";
+import { PURCHASE_STATUS_BADGE, PURCHASE_STATUS_LABEL } from "@/lib/purchases/status";
 import { PurchaseForm } from "@/components/purchases/PurchaseForm";
 import { PurchaseReturnPanel } from "@/components/purchases/PurchaseReturnPanel";
 import { parseMoneyInput } from "@/lib/calc";

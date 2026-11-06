@@ -4,7 +4,7 @@ import Link from "next/link";
 import { useLiveQuery } from "dexie-react-hooks";
 import { db } from "@/lib/db";
 import { StatusBadge } from "@/components/services/StatusBadge";
-import { SALE_STATUS_BADGE, SALE_STATUS_LABEL } from "@/components/sales/SaleList";
+import { SALE_STATUS_BADGE, SALE_STATUS_LABEL } from "@/lib/sales/status";
 import type { Customer } from "@/types";
 import { formatCurrency, formatDate } from "@/lib/utils";
 
