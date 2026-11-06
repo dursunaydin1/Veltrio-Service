@@ -5,6 +5,10 @@
 
 ## 2026-11-06
 
+### K-100 · Raporlarda aramalı seçici
+- **Hesap ekstresi:** Müşteri açılır listesi yerine `CustomerPicker` (ad, telefon, köyle süzülür). Raporda "+ Yeni müşteri" yok (`allowAdd={false}`); arşivlenmiş müşteriler de seçilebilir (`includeArchived`), eski hesabın ekstresi alınabilsin.
+- **Stok raporu → Hareket geçmişi:** Ürün açılır listesi yerine `ProductPicker` (ad, kod, marka ile arama).
+
 ### K-099 · Ürün yokken toplam ve ödeme gizli
 - **Satış:** Ürün yokken "Satış toplamı 0 ₺", belge indirimi ve ödeme bölümü görünmez; yalnızca "Henüz ürün yok" yazısı, müşteri ve kaydet düğmeleri kalır. İlk ürünle açılır, son ürün kaldırılınca yeniden gizlenir.
 - **Satın alma:** Aynı kural: satır yokken "Alım toplamı" ve teslim ödemesi gizli. Hızlı alımda toplam kutusu zaten yazıldığı için toplam kartı gösterilmez, ödeme bölümü görünür.

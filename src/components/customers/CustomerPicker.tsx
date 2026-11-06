@@ -12,7 +12,7 @@ import { formatPhone } from "@/lib/utils/phone";
 
 /**
  * Arayarak müşteri seçme (makine, servis kabulü, satış vb. formlarda ortak).
- * Arşivlenmiş müşteriler seçilemez.
+ * Arşivlenmiş müşteriler seçilemez (`includeArchived` ile raporlarda seçilebilir).
  */
 export function CustomerPicker({
   value,
@@ -21,6 +21,8 @@ export function CustomerPicker({
   error,
   required = true,
   onClear,
+  allowAdd = true,
+  includeArchived = false,
 }: {
   value: string;
   onChange: (customerId: string) => void;
@@ -29,6 +31,10 @@ export function CustomerPicker({
   /** false ise etikette yıldız yok ve seçim `onClear` ile kaldırılabilir */
   required?: boolean;
   onClear?: () => void;
+  /** false: "+ Yeni müşteri" düğmesi yok (rapor ekranları) */
+  allowAdd?: boolean;
+  /** true: arşivlenmiş müşteriler de listelenir (geçmiş hesap ekstresi) */
+  includeArchived?: boolean;
 }) {
   const businessId = useSessionStore((s) => s.business?.id);
   const [query, setQuery] = useState("");
@@ -72,9 +78,9 @@ export function CustomerPicker({
   const customers = useLiveQuery(
     () =>
       businessId
-        ? db.customers.where("business_id").equals(businessId).filter((c) => !c.archived_at).toArray()
+        ? db.customers.where("business_id").equals(businessId).filter((c) => includeArchived || !c.archived_at).toArray()
         : [],
-    [businessId]
+    [businessId, includeArchived]
   );
 
   const selected = customers?.find((c) => c.id === value);
@@ -151,7 +157,7 @@ export function CustomerPicker({
         </ul>
       ) : null}
       {typed && customers && matches.length === 0 ? <p>Müşteri bulunamadı.</p> : null}
-      {!adding ? (
+      {!allowAdd ? null : !adding ? (
         <button
           type="button"
           className="btn btn-secondary"

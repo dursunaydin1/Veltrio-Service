@@ -31,6 +31,8 @@ import { PAYMENT_METHOD_LABELS } from "@/lib/finance/service";
 import { formatDateTime, formatQuantity } from "@/lib/utils";
 import { ExportPanel, RangePicker, ReportTable, useReportRange } from "./ReportParts";
 import { PageHead } from "@/components/layout/PageHead";
+import { CustomerPicker } from "@/components/customers/CustomerPicker";
+import { ProductPicker } from "@/components/products/ProductPicker";
 
 function useBusinessId() {
   return useSessionStore((s) => s.business?.id);
@@ -232,13 +234,9 @@ export function StockReportScreen() {
           <ReportTable columns={STOCK_COLUMNS} rows={display} rowKey={(r) => r.name + r.code} empty="Ürün yok." />
           <ExportPanel title="Stok raporu" base="stok-raporu" columns={STOCK_COLUMNS} rows={display} />
           <h2>Hareket geçmişi</h2>
-          <select className="form-input no-print" aria-label="Ürün seç" value={detail?.id ?? ""} onChange={(e) => {
-            const r = rows.find((x) => x.productId === e.target.value);
-            setDetail(r ? { id: r.productId, name: r.name } : null);
-          }}>
-            <option value="">Ürün seçin…</option>
-            {rows.map((r) => <option key={r.productId} value={r.productId}>{r.name}</option>)}
-          </select>
+          <div className="no-print">
+            <ProductPicker value={detail?.id ?? ""} onChange={(p) => setDetail({ id: p.id, name: p.name })} label="Ürün" includeSerial />
+          </div>
           {detail && movements ? (
             movements.length === 0 ? (
               <p>Seçilen aralıkta bu ürün için hareket yok.</p>
@@ -329,10 +327,10 @@ export function StatementScreen() {
   return (
     <section className="stack stack-md">
       <Title>Müşteri hesap ekstresi</Title>
-      <select className="form-input no-print" aria-label="Müşteri seç" value={customerId} onChange={(e) => setCustomerId(e.target.value)}>
-        <option value="">Müşteri seçin…</option>
-        {(customers ?? []).map((c) => <option key={c.id} value={c.id}>{c.name}</option>)}
-      </select>
+      {/* Açılır liste yerine aramalı seçici (K-100): ad, telefon veya köyle süzülür */}
+      <div className="no-print">
+        <CustomerPicker value={customerId} onChange={setCustomerId} label="Müşteri" allowAdd={false} includeArchived />
+      </div>
       {lines ? (
         <>
           <ReportTable columns={STATEMENT_COLUMNS} rows={lines} rowKey={(_, i) => String(i)} empty="Bu müşterinin hareketi yok." />
