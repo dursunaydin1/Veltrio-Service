@@ -48,7 +48,7 @@ export function LoginForm({ notice }: { notice?: string }) {
   }
 
   return (
-    <form onSubmit={handleSubmit} className="stack stack-lg" noValidate>
+    <form onSubmit={handleSubmit} className="stack stack-lg" noValidate aria-busy={isPending}>
       {/* Hata mesajı */}
       {error && (
         <div className="alert alert-error" role="alert">

@@ -5,6 +5,10 @@
 
 ## 2026-11-06
 
+### K-096 · Bekleme / açık menü sırasında arka kilitli
+- **Giriş:** "Giriş Yap"a basıldıktan sonra "Şifremi unuttum" ve "Hesap oluştur" bağlantıları da kilitlenir ve sönükleşir (alanlar zaten kilitliydi).
+- **Hızlı seçim:** Ortadaki logolu düğmeyle menü açıkken alt çubuktaki Ana Sayfa / Servisler / Müşteriler / Menü sönük ve dokunulamaz; dokunuş arkadaki karartmaya gider ve menüyü kapatır. Yalnızca logolu düğme (kapat) çalışır.
+
 ### K-095 · Onaylar ekran ortasında modal; borç yokken tahsilat düğmesi yok
 - **Modal:** Tarayıcının sade `confirm()` kutusu ve satır içi onay yerine ortak `confirmDialog` (yerel `<dialog>` + `showModal`): ekranın ortasında kart, arkası karartılır ve kilitlenir, karar verilmeden başka yere dokunulamaz; geri tuşu "Vazgeç" sayılır. Kullanıldığı yerler: çıkış, arşivleme / geri alma (müşteri, makine, ürün, tedarikçi), işlem / parça satırı kaldırma, PIN'i unuttum. AppShell'de PIN ekranının dışında çizilir.
 - **Servis ödemeleri:** "Tahsilat al" yalnızca kalan borç varken (ana düğme). Borç sıfırsa "Ödeme tamamlandı." ve katlanmış "Diğer işlemler" altında "Ek / ön ödeme al". Boş tahsilat formu açılıp "tutar sıfırdan büyük olmalı" uyarısı alınmaz.

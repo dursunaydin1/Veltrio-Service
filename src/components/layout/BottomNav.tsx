@@ -89,7 +89,7 @@ export function BottomNav() {
   return (
     <>
       <QuickDial open={dialOpen} onClose={closeDial} />
-      <nav className="bottom-nav" aria-label="Ana gezinme">
+      <nav className="bottom-nav" aria-label="Ana gezinme" data-dial-open={dialOpen ? "" : undefined}>
         <div className="nav-mobile">
           {LEFT.map(tab)}
           <button

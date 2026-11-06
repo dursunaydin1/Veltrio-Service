@@ -979,6 +979,14 @@ section > .row.row-between:first-child > h1 { flex: 1; min-width: 0; }
 .nav-fab[data-open] .fab-close { opacity: 1; transform: none; }
 
 /* Hızlı seçim (K-049): düğmenin üstünde tek satır yuvarlak ikonlar, altında kısa ad; Servis ortada, düğmenin üstünde */
+/* Hızlı seçim açıkken alt çubuk sekmeleri kilitli ve sönük (K-096); dokunuş arkadaki karartmaya düşer ve menüyü kapatır.
+   Yalnızca logolu düğme (kapat) çalışır. */
+.bottom-nav[data-dial-open] { pointer-events: none; }
+.bottom-nav[data-dial-open] .nav-fab { pointer-events: auto; }
+.bottom-nav[data-dial-open] .nav-mobile > a { opacity: 0.35; }
+/* Gönderilen formda bağlantılar da kilitli (ör. girişte "Şifremi unuttum") */
+form[aria-busy="true"] a { pointer-events: none; opacity: 0.45; }
+
 .dial-backdrop {
   position: fixed;
   inset: 0;
