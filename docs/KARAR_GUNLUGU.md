@@ -5,6 +5,10 @@
 
 ## 2026-11-06
 
+### K-098 · Miktar alanları − / +; satışta borç yokken tahsilat düğmesi yok
+- **Miktar:** Ortak `QuantityStepper` (yazılabilir kutu + − / + düğmeleri, 1'in altına inmez, boş alanda + ilk dokunuşta 1). Satış, alım satırı, servis işlem / parça ekleme ve parça düzenleme, stok girişi, hasar / onarım formlarında. Stok sayımı (yeni miktar yazılır, 0 olabilir) düz kutu kaldı.
+- **Satış detayı:** "Tahsilat al" yalnızca kalan > 0 iken, turuncu büyük düğme; kalan yoksa "Ödeme tamamlandı." K-095'te servis ve müşteri sayfası düzeltilmişti, satış detayı atlanmıştı.
+
 ### K-097 · Hızlı tezgâh satışı, borç kartı, iptal düğmesi, yapışkan liste çubuğu
 - **Satış formu:** Aynı ürün yeniden seçilince yeni satır açılmaz, miktar artar. Miktar − / + düğmeleriyle, fiyat yanında; satır indirimi "+ İndirim" çipinde; satır X ile kaldırılır. Ödeme yöntemi açılır liste yerine çip (Nakit / Kart / Havale / Diğer); "Tamamı" düğmesi tutarı doldurur. "Farklı tarih" alanına X'in bugüne döndürdüğü yazıldı.
 - **Bakiye:** Müşteri borçlu / tedarikçiye borçluyken bakiye turuncu çerçeveli kartta; "Tahsilat al" / "Ödeme yap" kartın içinde büyük turuncu düğme.

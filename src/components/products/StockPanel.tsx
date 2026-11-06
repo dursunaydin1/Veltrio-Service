@@ -6,6 +6,7 @@ import { useLiveQuery } from "dexie-react-hooks";
 import { db } from "@/lib/db";
 import { useProductBalance, useStockContext } from "@/hooks/useStock";
 import { parseMoneyInput, parseQuantityInput } from "@/lib/calc";
+import { QuantityStepper } from "@/components/common/QuantityStepper";
 import { unitLabel } from "@/lib/products/constants";
 import { isCriticalStock } from "@/lib/products/stock";
 import { MOVEMENT_LABELS } from "@/lib/stock/labels";
@@ -165,7 +166,7 @@ function EntryForm({ product, ctx, onDone }: FormProps) {
       <h3>Stok girişi (açılış stoğu / elle giriş)</h3>
       <div className="form-group">
         <label className="form-label" htmlFor="entry-qty">Miktar ({unitLabel(product.unit)}) *</label>
-        <input id="entry-qty" className="form-input" inputMode="decimal" value={quantity} onChange={(e) => setQuantity(e.target.value)} autoFocus />
+        <QuantityStepper id="entry-qty" value={quantity} onChange={setQuantity} autoFocus />
       </div>
       <div className="form-group">
         <label className="form-label" htmlFor="entry-cost">Birim maliyet (₺)</label>
@@ -330,7 +331,7 @@ function DamageForm({
       </p>
       <div className="form-group">
         <label className="form-label" htmlFor="dmg-qty">Miktar ({unit}) *</label>
-        <input id="dmg-qty" className="form-input" inputMode="decimal" value={quantity} onChange={(e) => setQuantity(e.target.value)} autoFocus />
+        <QuantityStepper id="dmg-qty" value={quantity} onChange={setQuantity} autoFocus />
       </div>
       <div className="form-group">
         <label className="form-label" htmlFor="dmg-reason">Neden *</label>

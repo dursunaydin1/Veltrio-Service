@@ -23,7 +23,8 @@ import type { PaymentMethod, Product, TaxMode } from "@/types";
 import { useAppNav } from "@/lib/nav/useAppNav";
 import { OptionalField, OptionalGroup } from "@/components/common/OptionalField";
 import { DateQuickPick } from "@/components/common/DateQuickPick";
-import { Minus, Plus, X } from "lucide-react";
+import { X } from "lucide-react";
+import { QuantityStepper, stepQuantity } from "@/components/common/QuantityStepper";
 
 type DraftLine = {
   key: string;
@@ -40,15 +41,7 @@ type DraftLine = {
   serialUnitId: string;
 };
 
-const fieldMoney = (tl: number) => tl.toFixed(2).replace(".", ",");
-
-/** − / + düğmesi: miktarı bir azaltır / artırır, 1'in altına inmez. Geçersiz yazılmış miktar 1 kabul edilir. */
-function stepQuantity(value: string, delta: number): string {
-  const current = parseQuantityInput(value) ?? 1;
-  const next = Math.max(1, Math.round((current + delta) * 1000) / 1000);
-  return String(next).replace(".", ",");
-}
-let keySeq = 0;
+const fieldMoney = (tl: number) => tl.toFixed(2).replace(".", ",");let keySeq = 0;
 const nextKey = () => `s${++keySeq}`;
 
 function fromItems(items: SaleItem[]): DraftLine[] {
@@ -274,15 +267,7 @@ export function SaleForm({
                   {l.isSerial ? (
                     <span className="badge badge-gray">1 adet</span>
                   ) : (
-                    <span className="qty-stepper">
-                      <button type="button" className="icon-btn" aria-label="Miktarı azalt" onClick={() => update(l.key, { quantity: stepQuantity(l.quantity, -1) })}>
-                        <Minus size={18} aria-hidden="true" />
-                      </button>
-                      <input className="form-input" inputMode="decimal" aria-label={`${l.name}: miktar`} value={l.quantity} onChange={(e) => update(l.key, { quantity: e.target.value })} />
-                      <button type="button" className="icon-btn" aria-label="Miktarı artır" onClick={() => update(l.key, { quantity: stepQuantity(l.quantity, 1) })}>
-                        <Plus size={18} aria-hidden="true" />
-                      </button>
-                    </span>
+                    <QuantityStepper label={`${l.name}: miktar`} value={l.quantity} onChange={(quantity) => update(l.key, { quantity })} />
                   )}
                   <label className="row row-gap-sm" style={{ flex: "1 1 140px" }}>
                     <span className="form-label" style={{ whiteSpace: "nowrap" }}>Fiyat ₺</span>

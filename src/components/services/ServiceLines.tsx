@@ -7,6 +7,7 @@ import type { LineStatus, PartSourceType, Service, ServiceOperation, ServicePart
 import { useServiceContext } from "@/hooks/useServiceContext";
 import { ProductPicker } from "@/components/products/ProductPicker";
 import { parseMoneyInput, parseQuantityInput } from "@/lib/calc";
+import { QuantityStepper } from "@/components/common/QuantityStepper";
 import {
   EDITABLE_STATUSES,
   addOperation,
@@ -327,7 +328,7 @@ function PartRow({
 
       {editing ? (
         <span className="row row-gap-sm" style={{ flexWrap: "wrap" }}>
-          <input className="form-input" style={{ maxWidth: 90 }} inputMode="decimal" aria-label="Miktar" value={qtyText} onChange={(e) => setQtyText(e.target.value)} />
+          <QuantityStepper value={qtyText} onChange={setQtyText} />
           <input className="form-input" style={{ maxWidth: 130 }} inputMode="decimal" aria-label="Birim fiyat (₺)" value={priceText2} onChange={(e) => setPriceText2(e.target.value)} />
           <button type="button" className="btn btn-primary btn-sm" onClick={() => void saveEdit()}>Kaydet</button>
           <button type="button" className="btn btn-ghost btn-sm" onClick={() => setEditing(false)}>Vazgeç</button>
@@ -467,9 +468,9 @@ function OperationForm({
         <input id="op-desc" className="form-input" placeholder="Ör. karbüratör ayarı" value={description} onChange={(e) => setDescription(e.target.value)} autoFocus />
       </div>
       <div className="row row-gap-md">
-        <div className="form-group" style={{ flex: 1 }}>
+        <div className="form-group" style={{ flex: "0 0 auto" }}>
           <label className="form-label" htmlFor="op-qty">Miktar</label>
-          <input id="op-qty" className="form-input" inputMode="decimal" value={quantity} onChange={(e) => setQuantity(e.target.value)} />
+          <QuantityStepper id="op-qty" value={quantity} onChange={setQuantity} />
         </div>
         <div className="form-group" style={{ flex: 2 }}>
           <label className="form-label" htmlFor="op-price">Birim fiyat (₺)</label>
@@ -585,9 +586,9 @@ function PartForm({
       )}
 
       <div className="row row-gap-md">
-        <div className="form-group" style={{ flex: 1 }}>
+        <div className="form-group" style={{ flex: "0 0 auto" }}>
           <label className="form-label" htmlFor="pt-qty">Miktar</label>
-          <input id="pt-qty" className="form-input" inputMode="decimal" value={quantity} onChange={(e) => setQuantity(e.target.value)} />
+          <QuantityStepper id="pt-qty" value={quantity} onChange={setQuantity} />
         </div>
         <div className="form-group" style={{ flex: 2 }}>
           <label className="form-label" htmlFor="pt-price">Birim fiyat (₺)</label>

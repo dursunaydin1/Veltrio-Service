@@ -4,6 +4,7 @@ import { useState } from "react";
 import { useBusinessContext } from "@/hooks/useBusinessContext";
 import { ProductPicker } from "@/components/products/ProductPicker";
 import { SupplierPicker } from "@/components/suppliers/SupplierPicker";
+import { QuantityStepper } from "@/components/common/QuantityStepper";
 import { calcLine, parseMoneyInput, parseQuantityInput } from "@/lib/calc";
 import { PAYMENT_METHOD_LABELS } from "@/lib/finance/service";
 import {
@@ -236,10 +237,11 @@ export function PurchaseForm({
                     <span>{totals[i].ok ? formatCurrency(totals[i].total / 100) : "—"}</span>
                   </span>
                   <span className="row row-gap-sm">
-                    <label className="form-group" style={{ flex: 1 }}>
+                    {/* label değil: içindeki − düğmesine dokunuşu aktarmasın */}
+                    <div className="form-group" style={{ flex: "0 0 auto" }}>
                       <span className="form-label">Miktar ({l.unit})</span>
-                      <input className="form-input" inputMode="decimal" value={l.quantity} onChange={(e) => update(l.key, { quantity: e.target.value })} />
-                    </label>
+                      <QuantityStepper label={`${l.name}: miktar`} value={l.quantity} onChange={(quantity) => update(l.key, { quantity })} />
+                    </div>
                     <label className="form-group" style={{ flex: 1 }}>
                       <span className="form-label">Birim fiyat (₺)</span>
                       <input className="form-input" inputMode="decimal" value={l.price} onChange={(e) => update(l.key, { price: e.target.value })} />

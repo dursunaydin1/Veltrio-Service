@@ -22,7 +22,7 @@ import {
   getSalePayments,
 } from "@/lib/sales/service";
 import { formatCurrency, formatDate, formatDateTime, formatQuantity } from "@/lib/utils";
-import { XCircle } from "lucide-react";
+import { Wallet, XCircle } from "lucide-react";
 import type { PaymentMethod } from "@/types";
 
 const money = (kurus: number) => formatCurrency(kurus / 100);
@@ -287,11 +287,14 @@ function SalePayments({ sale }: { sale: Sale }) {
             <button type="submit" className="btn btn-primary" style={{ flex: 1 }} disabled={busy}>{busy ? "Kaydediliyor…" : "Kaydet"}</button>
           </div>
         </form>
-      ) : (
-        <button type="button" className="btn btn-secondary btn-full" onClick={() => setOpen(true)}>
-          Tahsilat al
+      ) : remaining > 0 ? (
+        // Kalan varken öne çıkar; borç yokken düğme hiç görünmez (K-098)
+        <button type="button" className="btn btn-warning btn-full btn-lg" onClick={() => setOpen(true)}>
+          <Wallet size={20} aria-hidden="true" /> Tahsilat al
         </button>
-      )}
+      ) : balance ? (
+        <div className="alert alert-success" role="status">Ödeme tamamlandı.</div>
+      ) : null}
 
       {payments === undefined ? null : payments.length === 0 ? (
         <p>Bu satışa bağlı tahsilat yok.</p>
