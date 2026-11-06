@@ -1784,3 +1784,52 @@ input.form-input[type="search"] {
 .skeleton-short { width: 34%; height: 10px; }
 @keyframes skeleton-pulse { 50% { opacity: 0.45; } }
 @media (prefers-reduced-motion: reduce) { .skeleton { animation: none; } }
+
+/* ============================================================
+   K-097: liste araç çubuğu, borç kartı, tehlikeli işlem düğmesi, hızlı satış
+   ============================================================ */
+/* Liste sayfası: aşağı kaydırınca sekmeler ve arama ekranın üstünde kalır; liste sayfayla birlikte kayar */
+.list-toolbar {
+  position: sticky;
+  top: 0;
+  z-index: 20;
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  margin: 0 -16px;
+  padding: max(8px, env(safe-area-inset-top)) 16px 10px;
+  background: var(--bg-base);
+}
+
+/* Borç varken bakiye kartı: turuncu çerçeve, büyük tahsilat düğmesi */
+.debt-callout {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+  padding: 16px;
+  border-radius: var(--radius-lg);
+  border: 1px solid color-mix(in srgb, var(--accent-warning) 40%, transparent);
+  border-left: 4px solid var(--accent-warning);
+  background: var(--warning-soft);
+}
+.debt-callout .tile-label { color: var(--warning-fg); font-weight: 650; }
+.debt-callout .tile-value { color: var(--warning-fg); font-size: 1.875rem; }
+.btn-warning { background: var(--accent-warning); color: #fff; }
+@media (hover: hover) { .btn-warning:hover:not(:disabled) { filter: brightness(1.08); color: #fff; } }
+
+/* Geri alınması zor işlem (iptal): kırmızı çerçeveli, sönük kırmızı zemin; kazara dokunuşa karşı ana düğmeden ayrı */
+.btn-danger-soft {
+  background: var(--danger-soft);
+  color: var(--danger-fg);
+  border: 1px solid color-mix(in srgb, var(--accent-danger) 35%, transparent);
+}
+@media (hover: hover) { .btn-danger-soft:hover:not(:disabled) { background: color-mix(in srgb, var(--accent-danger) 22%, transparent); color: var(--danger-fg); } }
+
+/* Hızlı satış: miktar − / + düğmeleri */
+.qty-stepper { display: inline-flex; align-items: center; gap: 4px; }
+.qty-stepper .icon-btn { width: 44px; height: 44px; border-radius: var(--radius-md); background: var(--bg-elevated); }
+.qty-stepper input { width: 64px; text-align: center; font-weight: 700; font-variant-numeric: tabular-nums; }
+.sale-line { display: flex; flex-direction: column; gap: 10px; padding: 12px 0 !important; }
+.sale-line-foot { display: flex; align-items: center; justify-content: space-between; gap: 12px; flex-wrap: wrap; }
+.sale-line-total { font-weight: 750; font-variant-numeric: tabular-nums; }
+.sale-line-foot label .form-input { flex: 1; min-width: 0; }

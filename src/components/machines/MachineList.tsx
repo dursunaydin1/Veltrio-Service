@@ -63,14 +63,17 @@ export function MachineList() {
     <section className="stack stack-md">
       <PageHead title="Makineler" addHref="/machines/new" addLabel="Makine ekle" />
 
-      <input
-        className="form-input"
-        type="search"
-        placeholder="Marka, model, seri no veya sahip ara"
-        aria-label="Makine ara"
-        value={query}
-        onChange={(e) => setQuery(e.target.value)}
-      />
+      {/* Aşağı kaydırınca arama kutusu üstte kalır (K-097) */}
+      <div className="list-toolbar">
+        <input
+          className="form-input"
+          type="search"
+          placeholder="Marka, model, seri no veya sahip ara"
+          aria-label="Makine ara"
+          value={query}
+          onChange={(e) => setQuery(e.target.value)}
+        />
+      </div>
 
       <label className="row row-gap-sm" style={{ minHeight: 44 }}>
         <input type="checkbox" checked={showArchived} onChange={(e) => setShowArchived(e.target.checked)} />

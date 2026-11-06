@@ -54,14 +54,17 @@ export function ProductList() {
     <section className="stack stack-md">
       <PageHead title="Stok" addHref="/products/new" addLabel="Ürün ekle" />
 
-      <input
-        className="form-input"
-        type="search"
-        placeholder="Ürün adı, kod, marka veya kategori ara"
-        aria-label="Ürün ara"
-        value={query}
-        onChange={(e) => setQuery(e.target.value)}
-      />
+      {/* Aşağı kaydırınca arama kutusu üstte kalır (K-097) */}
+      <div className="list-toolbar">
+        <input
+          className="form-input"
+          type="search"
+          placeholder="Ürün adı, kod, marka veya kategori ara"
+          aria-label="Ürün ara"
+          value={query}
+          onChange={(e) => setQuery(e.target.value)}
+        />
+      </div>
 
       <label className="row row-gap-sm" style={{ minHeight: 44 }}>
         <input

@@ -353,8 +353,7 @@ function StatusActions({ service, onGoTab }: { service: Service; onGoTab: (tab: 
             <button
               key={to}
               type="button"
-              className={`btn btn-sm ${to === "CANCELLED" ? "btn-ghost" : "btn-secondary"}`}
-              style={to === "CANCELLED" ? { color: "var(--danger-fg)" } : undefined}
+              className={`btn btn-sm ${to === "CANCELLED" ? "btn-danger-soft" : "btn-secondary"}`}
               onClick={() => choose(to)}
               disabled={busy}
             >
@@ -485,8 +484,7 @@ function StatusActions({ service, onGoTab }: { service: Service; onGoTab: (tab: 
                 <button
                   key={to}
                   type="button"
-                  className={`btn btn-sm ${to === "CANCELLED" ? "btn-ghost" : "btn-secondary"}`}
-                  style={to === "CANCELLED" ? { color: "var(--danger-fg)" } : undefined}
+                  className={`btn btn-sm ${to === "CANCELLED" ? "btn-danger-soft" : "btn-secondary"}`}
                   onClick={() => choose(to)}
                   disabled={busy}
                 >

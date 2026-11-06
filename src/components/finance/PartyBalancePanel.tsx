@@ -2,6 +2,7 @@
 
 import { useState } from "react";
 import { useLiveQuery } from "dexie-react-hooks";
+import { Wallet } from "lucide-react";
 import { db } from "@/lib/db";
 import { useBusinessContext } from "@/hooks/useBusinessContext";
 import { CollectionForm, OpenItemsPanel } from "@/components/finance/OpenItemsPanel";
@@ -93,24 +94,31 @@ export function PartyBalancePanel({
     <section className="card stack stack-md" aria-labelledby="balance-title">
       <h2 id="balance-title">Bakiye</h2>
 
-      <div className="tile">
-        <div className="tile-label">{state === "DEBT" ? cfg.debtLabel : state === "CREDIT" ? cfg.creditLabel : "Bakiye yok"}</div>
-        <div
-          className="tile-value"
-          style={{ color: state === "DEBT" ? "var(--accent-warning)" : state === "CREDIT" ? "var(--accent-success)" : undefined }}
-        >
-          {formatCurrency(Math.abs(balance?.balance ?? 0) / 100)}
+      {/* Borç varken kart turuncu çerçeveyle öne çıkar, tahsilat / ödeme düğmesi kartın içinde (K-097) */}
+      {state === "DEBT" ? (
+        <div className="debt-callout">
+          <div className="stack" style={{ gap: 4 }}>
+            <div className="tile-label">{cfg.debtLabel}</div>
+            <div className="tile-value">{formatCurrency(Math.abs(balance?.balance ?? 0) / 100)}</div>
+          </div>
+          {mode === null ? (
+            <button type="button" className="btn btn-warning btn-full btn-lg" onClick={() => setMode("primary")}>
+              <Wallet size={20} aria-hidden="true" /> {cfg.primary.button}
+            </button>
+          ) : null}
         </div>
-      </div>
+      ) : (
+        <div className="tile">
+          <div className="tile-label">{state === "CREDIT" ? cfg.creditLabel : "Bakiye yok"}</div>
+          <div className="tile-value" style={{ color: state === "CREDIT" ? "var(--accent-success)" : undefined }}>
+            {formatCurrency(Math.abs(balance?.balance ?? 0) / 100)}
+          </div>
+        </div>
+      )}
 
       {mode === null ? (
         <div className="stack stack-sm">
-          {/* Borç varken ana işlem tahsilat / ödeme; borç yokken ön ödeme seyrek olduğu için "Diğer işlemler"de (K-094) */}
-          {state === "DEBT" ? (
-            <button type="button" className="btn btn-primary btn-full" onClick={() => setMode("primary")}>
-              {cfg.primary.button}
-            </button>
-          ) : null}
+          {/* Borç yokken ön ödeme seyrek olduğu için "Diğer işlemler"de (K-094) */}
           {/* Seyrek işlemler katlanmış durur (K-090) */}
           <details className="more-actions">
             <summary>Diğer işlemler</summary>

@@ -70,28 +70,30 @@ export function PurchaseList() {
     <section className="stack stack-md">
       <PageHead title="Satın Almalar" addHref="/purchases/new" addLabel="Satın al" />
 
-      <div role="tablist" aria-label="Alım durumu">
-        {TABS.map((t) => (
-          <button
-            key={t.id}
-            type="button"
-            role="tab"
-            aria-selected={tab === t.id}
-            onClick={() => setTab(t.id)}
-          >
-            {t.label}
-          </button>
-        ))}
+      {/* Aşağı kaydırınca sekmeler ve arama üstte kalır (K-097) */}
+      <div className="list-toolbar">
+        <div role="tablist" aria-label="Alım durumu">
+          {TABS.map((t) => (
+            <button
+              key={t.id}
+              type="button"
+              role="tab"
+              aria-selected={tab === t.id}
+              onClick={() => setTab(t.id)}
+            >
+              {t.label}
+            </button>
+          ))}
+        </div>
+        <input
+          className="form-input"
+          type="search"
+          placeholder="Belge no, tedarikçi veya fatura no ara"
+          aria-label="Alım ara"
+          value={query}
+          onChange={(e) => setQuery(e.target.value)}
+        />
       </div>
-
-      <input
-        className="form-input"
-        type="search"
-        placeholder="Belge no, tedarikçi veya fatura no ara"
-        aria-label="Alım ara"
-        value={query}
-        onChange={(e) => setQuery(e.target.value)}
-      />
 
       {data === undefined || (pullingAll && visible.length === 0) ? <ListSkeleton /> : visible.length === 0 ? (
         <div className="empty-state" role="note">

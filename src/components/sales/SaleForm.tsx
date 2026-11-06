@@ -23,6 +23,7 @@ import type { PaymentMethod, Product, TaxMode } from "@/types";
 import { useAppNav } from "@/lib/nav/useAppNav";
 import { OptionalField, OptionalGroup } from "@/components/common/OptionalField";
 import { DateQuickPick } from "@/components/common/DateQuickPick";
+import { Minus, Plus, X } from "lucide-react";
 
 type DraftLine = {
   key: string;
@@ -40,6 +41,13 @@ type DraftLine = {
 };
 
 const fieldMoney = (tl: number) => tl.toFixed(2).replace(".", ",");
+
+/** − / + düğmesi: miktarı bir azaltır / artırır, 1'in altına inmez. Geçersiz yazılmış miktar 1 kabul edilir. */
+function stepQuantity(value: string, delta: number): string {
+  const current = parseQuantityInput(value) ?? 1;
+  const next = Math.max(1, Math.round((current + delta) * 1000) / 1000);
+  return String(next).replace(".", ",");
+}
 let keySeq = 0;
 const nextKey = () => `s${++keySeq}`;
 
@@ -111,22 +119,27 @@ export function SaleForm({
   const [busy, setBusy] = useState(false);
 
   function addProduct(product: Product) {
-    setLines((current) => [
-      ...current,
-      {
-        key: nextKey(),
-        productId: product.id,
-        name: product.name,
-        unit: product.unit,
-        quantity: "1",
-        price: fieldMoney(product.default_sale_price),
-        discount: "",
-        taxMode: product.default_tax_mode,
-        taxRate: String(product.default_tax_rate).replace(".", ","),
-        isSerial: product.is_serial_tracked,
-        serialUnitId: "",
-      },
-    ]);
+    setLines((current) => {
+      // Aynı ürün yeniden seçilirse yeni satır açılmaz, miktarı bir artar (K-097)
+      const same = product.is_serial_tracked ? undefined : current.find((l) => l.productId === product.id);
+      if (same) return current.map((l) => (l.key === same.key ? { ...l, quantity: stepQuantity(l.quantity, 1) } : l));
+      return [
+        ...current,
+        {
+          key: nextKey(),
+          productId: product.id,
+          name: product.name,
+          unit: product.unit,
+          quantity: "1",
+          price: fieldMoney(product.default_sale_price),
+          discount: "",
+          taxMode: product.default_tax_mode,
+          taxRate: String(product.default_tax_rate).replace(".", ","),
+          isSerial: product.is_serial_tracked,
+          serialUnitId: "",
+        },
+      ];
+    });
     setPickerKey((k) => k + 1);
   }
 
@@ -240,32 +253,47 @@ export function SaleForm({
             const available = balances?.get(l.productId)?.available ?? 0;
             const short = !l.isSerial && p.ok && p.quantity > available;
             return (
-              <li key={l.key} style={{ display: "flex", flexDirection: "column", gap: 8, padding: "8px 0" }}>
-                <span className="row row-between">
-                  <strong>{l.name}</strong>
-                  <span className="badge badge-gray">Stok: {formatQuantity(available)} {l.unit}</span>
+              <li key={l.key} className="sale-line">
+                <span className="row row-between" style={{ alignItems: "flex-start" }}>
+                  <span className="stack" style={{ gap: 4, minWidth: 0 }}>
+                    <strong>{l.name}</strong>
+                    <span className="row row-gap-sm">
+                      <span className="badge badge-gray">Stok: {formatQuantity(available)} {l.unit}</span>
+                      {short ? <span className="badge badge-red" role="status">Stok yetersiz</span> : null}
+                    </span>
+                  </span>
+                  <button type="button" className="icon-btn" aria-label={`${l.name}: satırı kaldır`} onClick={() => setLines((c) => c.filter((x) => x.key !== l.key))}>
+                    <X size={18} aria-hidden="true" />
+                  </button>
                 </span>
                 {l.isSerial ? (
                   <SerialUnitSelect productId={l.productId} value={l.serialUnitId} onChange={(id) => update(l.key, { serialUnitId: id, quantity: "1" })} />
                 ) : null}
-                {short ? <span className="badge badge-red" role="status">Stok yetersiz</span> : null}
-                <span className="row row-gap-sm">
-                  <label className="form-group" style={{ flex: 1 }}>
-                    <span className="form-label">Miktar</span>
-                    <input className="form-input" inputMode="decimal" value={l.quantity} onChange={(e) => update(l.key, { quantity: e.target.value })} disabled={l.isSerial} />
-                  </label>
-                  <label className="form-group" style={{ flex: 1 }}>
-                    <span className="form-label">Birim fiyat (₺)</span>
-                    <input className="form-input" inputMode="decimal" value={l.price} onChange={(e) => update(l.key, { price: e.target.value })} />
-                  </label>
-                  <label className="form-group" style={{ flex: 1 }}>
-                    <span className="form-label">İndirim (₺)</span>
-                    <input className="form-input" inputMode="decimal" value={l.discount} onChange={(e) => update(l.key, { discount: e.target.value })} />
+                {/* Tezgâh hızı (K-097): miktar − / + ile, fiyat yanında; indirim nadir olduğu için çipte */}
+                <span className="sale-line-foot">
+                  {l.isSerial ? (
+                    <span className="badge badge-gray">1 adet</span>
+                  ) : (
+                    <span className="qty-stepper">
+                      <button type="button" className="icon-btn" aria-label="Miktarı azalt" onClick={() => update(l.key, { quantity: stepQuantity(l.quantity, -1) })}>
+                        <Minus size={18} aria-hidden="true" />
+                      </button>
+                      <input className="form-input" inputMode="decimal" aria-label={`${l.name}: miktar`} value={l.quantity} onChange={(e) => update(l.key, { quantity: e.target.value })} />
+                      <button type="button" className="icon-btn" aria-label="Miktarı artır" onClick={() => update(l.key, { quantity: stepQuantity(l.quantity, 1) })}>
+                        <Plus size={18} aria-hidden="true" />
+                      </button>
+                    </span>
+                  )}
+                  <label className="row row-gap-sm" style={{ flex: "1 1 140px" }}>
+                    <span className="form-label" style={{ whiteSpace: "nowrap" }}>Fiyat ₺</span>
+                    <input className="form-input" inputMode="decimal" aria-label={`${l.name}: birim fiyat`} value={l.price} onChange={(e) => update(l.key, { price: e.target.value })} />
                   </label>
                 </span>
-                <button type="button" className="btn btn-ghost btn-sm" style={{ alignSelf: "flex-start" }} onClick={() => setLines((c) => c.filter((x) => x.key !== l.key))}>
-                  Satırı kaldır
-                </button>
+                <OptionalGroup>
+                  <OptionalField label="Satır indirimi (₺)" chip="İndirim" filled={!!l.discount} onClear={() => update(l.key, { discount: "" })}>
+                    <input className="form-input" inputMode="decimal" placeholder="0,00" aria-label={`${l.name}: indirim`} value={l.discount} onChange={(e) => update(l.key, { discount: e.target.value })} />
+                  </OptionalField>
+                </OptionalGroup>
               </li>
             );
           })}
@@ -296,21 +324,20 @@ export function SaleForm({
 
       <fieldset className="stack stack-sm" style={{ border: 0, padding: 0 }}>
         <legend className="form-label">Ödeme</legend>
-        <div className="row row-gap-md">
-          <div className="form-group" style={{ flex: 2 }}>
-            <input className="form-input" inputMode="decimal" placeholder="Alınan tutar (₺)" aria-label="Alınan tutar" value={received} onChange={(e) => setReceived(e.target.value)} />
-          </div>
-          <div className="form-group" style={{ flex: 1 }}>
-            <select className="form-input" aria-label="Ödeme yöntemi" value={method} onChange={(e) => setMethod(e.target.value as PaymentMethod)}>
-              {(Object.keys(PAYMENT_METHOD_LABELS) as PaymentMethod[]).map((m) => (
-                <option key={m} value={m}>{PAYMENT_METHOD_LABELS[m]}</option>
-              ))}
-            </select>
-          </div>
+        {/* Yöntem tek dokunuşla (K-097); açılır liste yok */}
+        <div className="chip-group" role="group" aria-label="Ödeme yöntemi">
+          {(Object.keys(PAYMENT_METHOD_LABELS) as PaymentMethod[]).map((m) => (
+            <button key={m} type="button" className="chip chip-toggle" aria-pressed={method === m} onClick={() => setMethod(m)}>
+              {PAYMENT_METHOD_LABELS[m]}
+            </button>
+          ))}
         </div>
-        <button type="button" className="btn btn-ghost btn-sm" style={{ alignSelf: "flex-start" }} onClick={() => setReceived(fieldMoney(totalKurus / 100))} disabled={totalKurus === 0}>
-          Tamamı peşin: {formatCurrency(totalKurus / 100)}
-        </button>
+        <div className="row row-gap-sm">
+          <input className="form-input" style={{ flex: 1 }} inputMode="decimal" placeholder="Alınan tutar (₺)" aria-label="Alınan tutar" value={received} onChange={(e) => setReceived(e.target.value)} />
+          <button type="button" className="btn btn-secondary" onClick={() => setReceived(fieldMoney(totalKurus / 100))} disabled={totalKurus === 0}>
+            Tamamı
+          </button>
+        </div>
         {unpaidKurus > 0 && totalKurus > 0 ? (
           <div className={`alert ${customerId ? "alert-warning" : "alert-error"}`} role="status">
             {customerId
@@ -331,6 +358,7 @@ export function SaleForm({
       <OptionalGroup>
         <OptionalField label="Satış tarihi" chip="Farklı tarih" htmlFor="sl-date" filled={date !== todayLocalDate()} onClear={() => setDate(todayLocalDate())}>
           <input id="sl-date" className="form-input" type="date" value={date} onChange={(e) => setDate(e.target.value)} />
+          <small style={{ color: "var(--text-muted)" }}>Geçmiş tarihli satış içindir. X ile kapatırsanız satış bugünün tarihiyle kaydedilir.</small>
         </OptionalField>
         <OptionalField label="Not" htmlFor="sl-notes" filled={!!notes} onClear={() => setNotes("")}>
           <input id="sl-notes" className="form-input" value={notes} onChange={(e) => setNotes(e.target.value)} />

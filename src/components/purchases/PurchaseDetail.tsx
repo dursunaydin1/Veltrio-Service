@@ -188,7 +188,7 @@ function DraftActions({ purchase, onEdit }: { purchase: Purchase; onEdit: () => 
           </button>
           <div className="row row-gap-md">
             <button type="button" className="btn btn-secondary" style={{ flex: 1 }} onClick={onEdit} disabled={busy}>Düzenle</button>
-            <button type="button" className="btn btn-ghost" style={{ flex: 1 }} onClick={() => setCancelling(true)} disabled={busy}>İptal et</button>
+            <button type="button" className="btn btn-danger-soft" style={{ flex: 1 }} onClick={() => setCancelling(true)} disabled={busy}>İptal et</button>
           </div>
         </>
       )}

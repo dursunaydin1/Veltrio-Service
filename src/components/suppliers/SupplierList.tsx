@@ -54,14 +54,17 @@ export function SupplierList() {
     <section className="stack stack-md">
       <PageHead title="Tedarikçiler" addHref="/suppliers/new" addLabel="Tedarikçi ekle" />
 
-      <input
-        className="form-input"
-        type="search"
-        placeholder="Ad veya telefon ara"
-        aria-label="Tedarikçi ara"
-        value={query}
-        onChange={(e) => setQuery(e.target.value)}
-      />
+      {/* Aşağı kaydırınca arama kutusu üstte kalır (K-097) */}
+      <div className="list-toolbar">
+        <input
+          className="form-input"
+          type="search"
+          placeholder="Ad veya telefon ara"
+          aria-label="Tedarikçi ara"
+          value={query}
+          onChange={(e) => setQuery(e.target.value)}
+        />
+      </div>
 
       <label className="toggle-row toggle-inline">
         <span>Arşivlenmiş tedarikçileri de göster</span>

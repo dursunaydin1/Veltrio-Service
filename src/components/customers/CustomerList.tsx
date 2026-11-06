@@ -56,14 +56,17 @@ export function CustomerList() {
     <section className="stack stack-md">
       <PageHead title="Müşteriler" addHref="/customers/new" addLabel="Müşteri ekle" />
 
-      <input
-        className="form-input"
-        type="search"
-        placeholder="Ad, telefon veya köy ara"
-        aria-label="Müşteri ara"
-        value={query}
-        onChange={(e) => setQuery(e.target.value)}
-      />
+      {/* Aşağı kaydırınca arama kutusu üstte kalır (K-097) */}
+      <div className="list-toolbar">
+        <input
+          className="form-input"
+          type="search"
+          placeholder="Ad, telefon veya köy ara"
+          aria-label="Müşteri ara"
+          value={query}
+          onChange={(e) => setQuery(e.target.value)}
+        />
+      </div>
 
       <label className="toggle-row toggle-inline">
         <span>Arşivlenmiş müşterileri de göster</span>

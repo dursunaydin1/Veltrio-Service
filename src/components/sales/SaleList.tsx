@@ -70,28 +70,30 @@ export function SaleList() {
     <section className="stack stack-md">
       <PageHead title="Satışlar" addHref="/sales/new" addLabel="Satış yap" />
 
-      <div role="tablist" aria-label="Satış durumu">
-        {TABS.map((t) => (
-          <button
-            key={t.id}
-            type="button"
-            role="tab"
-            aria-selected={tab === t.id}
-            onClick={() => setTab(t.id)}
-          >
-            {t.label}
-          </button>
-        ))}
+      {/* Aşağı kaydırınca sekmeler ve arama üstte kalır (K-097) */}
+      <div className="list-toolbar">
+        <div role="tablist" aria-label="Satış durumu">
+          {TABS.map((t) => (
+            <button
+              key={t.id}
+              type="button"
+              role="tab"
+              aria-selected={tab === t.id}
+              onClick={() => setTab(t.id)}
+            >
+              {t.label}
+            </button>
+          ))}
+        </div>
+        <input
+          className="form-input"
+          type="search"
+          placeholder="Belge no veya müşteri ara"
+          aria-label="Satış ara"
+          value={query}
+          onChange={(e) => setQuery(e.target.value)}
+        />
       </div>
-
-      <input
-        className="form-input"
-        type="search"
-        placeholder="Belge no veya müşteri ara"
-        aria-label="Satış ara"
-        value={query}
-        onChange={(e) => setQuery(e.target.value)}
-      />
 
       {data === undefined || (pullingAll && visible.length === 0) ? <ListSkeleton /> : visible.length === 0 ? (
         <div className="empty-state" role="note">

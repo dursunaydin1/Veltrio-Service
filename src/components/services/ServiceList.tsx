@@ -93,28 +93,30 @@ export function ServiceList() {
     <section className="stack stack-md">
       <PageHead title="Servisler" addHref="/services/new" addLabel="Servis aç" />
 
-      <div role="tablist" aria-label="Servis durumu">
-        {TABS.map((t) => (
-          <button
-            key={t.id}
-            type="button"
-            role="tab"
-            aria-selected={tab === t.id}
-            onClick={() => setTab(t.id)}
-          >
-            {t.label}
-          </button>
-        ))}
+      {/* Aşağı kaydırınca sekmeler ve arama üstte kalır (K-097) */}
+      <div className="list-toolbar">
+        <div role="tablist" aria-label="Servis durumu">
+          {TABS.map((t) => (
+            <button
+              key={t.id}
+              type="button"
+              role="tab"
+              aria-selected={tab === t.id}
+              onClick={() => setTab(t.id)}
+            >
+              {t.label}
+            </button>
+          ))}
+        </div>
+        <input
+          className="form-input"
+          type="search"
+          placeholder="Servis no, müşteri veya makine ara"
+          aria-label="Servis ara"
+          value={query}
+          onChange={(e) => setQuery(e.target.value)}
+        />
       </div>
-
-      <input
-        className="form-input"
-        type="search"
-        placeholder="Servis no, müşteri veya makine ara"
-        aria-label="Servis ara"
-        value={query}
-        onChange={(e) => setQuery(e.target.value)}
-      />
 
       {data === undefined || (pullingAll && visible.length === 0) ? <ListSkeleton /> : visible.length === 0 ? (
         <div className="empty-state" role="note">

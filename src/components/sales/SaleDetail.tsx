@@ -22,6 +22,7 @@ import {
   getSalePayments,
 } from "@/lib/sales/service";
 import { formatCurrency, formatDate, formatDateTime, formatQuantity } from "@/lib/utils";
+import { XCircle } from "lucide-react";
 import type { PaymentMethod } from "@/types";
 
 const money = (kurus: number) => formatCurrency(kurus / 100);
@@ -200,7 +201,7 @@ function DraftActions({ sale, onEdit }: { sale: Sale; onEdit: () => void }) {
           </button>
           <div className="row row-gap-md">
             <button type="button" className="btn btn-secondary" style={{ flex: 1 }} onClick={onEdit} disabled={busy}>Düzenle</button>
-            <button type="button" className="btn btn-ghost" style={{ flex: 1 }} onClick={() => setCancelling(true)} disabled={busy}>İptal et</button>
+            <button type="button" className="btn btn-danger-soft" style={{ flex: 1 }} onClick={() => setCancelling(true)} disabled={busy}>İptal et</button>
           </div>
         </>
       )}
@@ -343,30 +344,33 @@ function FinalCancel({ sale }: { sale: Sale }) {
     }
   }
 
+  // Kapalıyken yalnızca kırmızı çerçeveli düğme; başlıklı boş kart gibi durmaz (K-097)
+  if (!open) {
+    return (
+      <button type="button" className="btn btn-danger-soft btn-full" onClick={() => setOpen(true)}>
+        <XCircle size={18} aria-hidden="true" /> Satışı iptal et
+      </button>
+    );
+  }
+
   return (
     <section className="card stack stack-md" aria-labelledby="fc-title">
       <h2 id="fc-title">Satışı iptal et</h2>
-      {open ? (
-        <div className="stack stack-md">
-          <p>
-            Ürünler stoğa geri döner (makine birimi stokta olur), alınan tahsilatlar ters kaydedilir, makine satışıysa makine
-            kaydı geri alınır. Belge silinmez, “İptal” olarak kalır.
-          </p>
-          <div className="form-group">
-            <label className="form-label" htmlFor="fc-reason">İptal nedeni *</label>
-            <input id="fc-reason" className="form-input" value={reason} onChange={(e) => setReason(e.target.value)} autoFocus />
-          </div>
-          {error ? <div className="alert alert-error" role="alert">{error}</div> : null}
-          <div className="row row-gap-md">
-            <button type="button" className="btn btn-secondary" style={{ flex: 1 }} onClick={() => setOpen(false)} disabled={busy}>Vazgeç</button>
-            <button type="button" className="btn btn-danger" style={{ flex: 1 }} onClick={cancel} disabled={busy}>
-              {busy ? "İptal ediliyor…" : "Satışı iptal et"}
-            </button>
-          </div>
-        </div>
-      ) : (
-        <button type="button" className="btn btn-ghost btn-full" onClick={() => setOpen(true)}>İptal et…</button>
-      )}
+      <p>
+        Ürünler stoğa geri döner (makine birimi stokta olur), alınan tahsilatlar ters kaydedilir, makine satışıysa makine
+        kaydı geri alınır. Belge silinmez, “İptal” olarak kalır.
+      </p>
+      <div className="form-group">
+        <label className="form-label" htmlFor="fc-reason">İptal nedeni *</label>
+        <input id="fc-reason" className="form-input" value={reason} onChange={(e) => setReason(e.target.value)} autoFocus />
+      </div>
+      {error ? <div className="alert alert-error" role="alert">{error}</div> : null}
+      <div className="row row-gap-md">
+        <button type="button" className="btn btn-secondary" style={{ flex: 1 }} onClick={() => setOpen(false)} disabled={busy}>Vazgeç</button>
+        <button type="button" className="btn btn-danger" style={{ flex: 1 }} onClick={cancel} disabled={busy}>
+          {busy ? "İptal ediliyor…" : "Satışı iptal et"}
+        </button>
+      </div>
     </section>
   );
 }

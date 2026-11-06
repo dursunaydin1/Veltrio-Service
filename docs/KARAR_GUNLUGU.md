@@ -5,6 +5,12 @@
 
 ## 2026-11-06
 
+### K-097 · Hızlı tezgâh satışı, borç kartı, iptal düğmesi, yapışkan liste çubuğu
+- **Satış formu:** Aynı ürün yeniden seçilince yeni satır açılmaz, miktar artar. Miktar − / + düğmeleriyle, fiyat yanında; satır indirimi "+ İndirim" çipinde; satır X ile kaldırılır. Ödeme yöntemi açılır liste yerine çip (Nakit / Kart / Havale / Diğer); "Tamamı" düğmesi tutarı doldurur. "Farklı tarih" alanına X'in bugüne döndürdüğü yazıldı.
+- **Bakiye:** Müşteri borçlu / tedarikçiye borçluyken bakiye turuncu çerçeveli kartta; "Tahsilat al" / "Ödeme yap" kartın içinde büyük turuncu düğme.
+- **İptal:** Kesinleşmiş satışta başlıklı kart yerine tek kırmızı çerçeveli "Satışı iptal et" düğmesi; dokununca neden alanı açılır. Taslak satış / alım ve servisteki "İptal et" de aynı kırmızı stil (`btn-danger-soft`).
+- **Listeler:** İç içe kayan kutu yerine (telefonda iki kaydırma çakışır) sekmeler + arama `list-toolbar` ile ekranın üstüne yapışır; liste sayfayla kayar, 30'ar yüklenir. Satış, servis, müşteri, stok, tedarikçi, alım, makine listelerinde.
+
 ### K-096 · Bekleme / açık menü sırasında arka kilitli
 - **Giriş:** "Giriş Yap"a basıldıktan sonra "Şifremi unuttum" ve "Hesap oluştur" bağlantıları da kilitlenir ve sönükleşir (alanlar zaten kilitliydi).
 - **Hızlı seçim:** Ortadaki logolu düğmeyle menü açıkken alt çubuktaki Ana Sayfa / Servisler / Müşteriler / Menü sönük ve dokunulamaz; dokunuş arkadaki karartmaya gider ve menüyü kapatır. Yalnızca logolu düğme (kapat) çalışır.
