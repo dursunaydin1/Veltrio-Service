@@ -8,6 +8,7 @@ import { confirmDialog } from "@/components/common/ConfirmDialog";
 import { normalizeBarcode, setProductBarcode } from "@/lib/products/service";
 import { parseScan } from "@/lib/qr/payload";
 import type { Product } from "@/types";
+import { NO_CONTEXT_MESSAGE, errorMessage } from "@/lib/errors/message";
 
 /**
  * Ürün sayfasında fabrika barkodu (K-102): kutudaki barkod bir kez okutulup ürüne tanıtılır.
@@ -21,7 +22,7 @@ export function ProductBarcodePanel({ product }: { product: Product }) {
   const [saved, setSaved] = useState(false);
 
   async function save(raw: string | null) {
-    if (!ctx) return setError("Cihaz bilgisi henüz yüklenmedi, lütfen tekrar deneyin.");
+    if (!ctx) return setError(NO_CONTEXT_MESSAGE);
     setError(null);
     if (raw != null && parseScan(raw).ok) return setError("Bu bir Veltrio QR etiketi; ürünün kutusundaki çizgili barkodu okutun.");
     try {
@@ -30,7 +31,7 @@ export function ProductBarcodePanel({ product }: { product: Product }) {
       setTyped("");
       setSaved(raw != null);
     } catch (e) {
-      setError(e instanceof Error ? e.message : "Barkod kaydedilemedi.");
+      setError(errorMessage(e, "Barkod kaydedilemedi."));
     }
   }
 

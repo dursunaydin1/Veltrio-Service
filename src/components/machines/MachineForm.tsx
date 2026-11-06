@@ -17,6 +17,7 @@ import {
 import type { Machine } from "@/types";
 import { useAppNav } from "@/lib/nav/useAppNav";
 import { OptionalField, OptionalGroup } from "@/components/common/OptionalField";
+import { NO_CONTEXT_MESSAGE, errorMessage } from "@/lib/errors/message";
 
 function toFormInput(machine: Machine | undefined, customerId: string): MachineFormInput {
   return {
@@ -92,7 +93,7 @@ export function MachineForm({
       return;
     }
     if (!ctx) {
-      setFormError("Cihaz bilgisi henüz yüklenmedi, lütfen tekrar deneyin.");
+      setFormError(NO_CONTEXT_MESSAGE);
       return;
     }
 
@@ -110,7 +111,7 @@ export function MachineForm({
       }
     } catch (e) {
       setFormError(
-        e instanceof DuplicateSerialError ? e.message : e instanceof Error ? e.message : "Kaydedilemedi."
+        e instanceof DuplicateSerialError ? e.message : errorMessage(e, "Kaydedilemedi.")
       );
       setBusy(false);
     }

@@ -16,6 +16,7 @@ import { formatCurrency, formatDateTime, formatKurus, moneyInputFromKurus } from
 import type { PaymentMethod } from "@/types";
 import { OptionalField, OptionalGroup } from "@/components/common/OptionalField";
 import { DateQuickPick } from "@/components/common/DateQuickPick";
+import { NO_CONTEXT_MESSAGE, errorMessage } from "@/lib/errors/message";
 
 
 function useBalance(serviceId: string) {
@@ -130,14 +131,14 @@ function CollectForm({ service, onDone, onSaved }: { service: Service; onDone: (
     setError(null);
     const kurus = parseMoneyInput(amount);
     if (kurus === null || kurus <= 0) return setError("Tutar sıfırdan büyük geçerli bir tutar olmalıdır.");
-    if (!ctx) return setError("Cihaz bilgisi henüz yüklenmedi, lütfen tekrar deneyin.");
+    if (!ctx) return setError(NO_CONTEXT_MESSAGE);
 
     setBusy(true);
     try {
       await collectServicePayment(ctx, service.id, { amountKurus: kurus, method, note });
       onSaved();
     } catch (e) {
-      setError(e instanceof Error ? e.message : "Kaydedilemedi.");
+      setError(errorMessage(e, "Kaydedilemedi."));
       setBusy(false);
     }
   }
@@ -202,13 +203,13 @@ export function DeliveryPanel({ service }: { service: Service }) {
       if (kurus === null || kurus <= 0) return setError("Tahsilat tutarı sıfırdan büyük geçerli bir tutar olmalıdır.");
       payment = { amountKurus: kurus, method };
     }
-    if (!ctx) return setError("Cihaz bilgisi henüz yüklenmedi, lütfen tekrar deneyin.");
+    if (!ctx) return setError(NO_CONTEXT_MESSAGE);
 
     setBusy(true);
     try {
       await deliverService(ctx, service.id, { payment, receiverName: receiver, debtAcknowledged: ack, dueDate: dueDate || undefined });
     } catch (e) {
-      setError(e instanceof Error ? e.message : "Teslim edilemedi.");
+      setError(errorMessage(e, "Teslim edilemedi."));
       setBusy(false);
     }
   }

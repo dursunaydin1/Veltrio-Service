@@ -3,6 +3,7 @@
 import { useRef, useState } from "react";
 import { ImagePlus } from "lucide-react";
 import { resizeImageFile } from "@/lib/images/resize";
+import { errorMessage } from "@/lib/errors/message";
 
 /**
  * İsteğe bağlı fotoğraf alanı (FR-028): tek "Fotoğraf ekle" düğmesi telefonun kendi seçicisini açar;
@@ -32,7 +33,7 @@ export function PhotoField({
     try {
       onChange(await resizeImageFile(file));
     } catch (e) {
-      setError(e instanceof Error ? e.message : "Fotoğraf işlenemedi.");
+      setError(errorMessage(e, "Fotoğraf işlenemedi."));
     }
     setBusy(false);
     if (input.current) input.current.value = "";

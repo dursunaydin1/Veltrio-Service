@@ -33,6 +33,7 @@ import {
 } from "@/lib/services/status";
 import { formatCurrency, formatDate, formatDateTime } from "@/lib/utils";
 import { OptionalField, OptionalGroup } from "@/components/common/OptionalField";
+import { NO_CONTEXT_MESSAGE, errorMessage } from "@/lib/errors/message";
 
 /** Servis detayı: özet, durum geçişleri, bilgiler (şikâyet / teşhis / yapılan iş) ve durum geçmişi (Adım 3.7, 3.17). */
 export function ServiceDetail({ id }: { id: string }) {
@@ -258,7 +259,7 @@ function StatusActions({ service, onGoTab }: { service: Service; onGoTab: (tab: 
   const guide = serviceGuide({ status: from, diagnosis: service.diagnosis, lineCount: allLines.length, needsDecision });
 
   async function saveDiagnosis() {
-    if (!ctx) return setError("Cihaz bilgisi henüz yüklenmedi, lütfen tekrar deneyin.");
+    if (!ctx) return setError(NO_CONTEXT_MESSAGE);
     if (!diagnosisText.trim()) return setError("Teşhisi yazın.");
     setBusy(true);
     setError(null);
@@ -266,7 +267,7 @@ function StatusActions({ service, onGoTab }: { service: Service; onGoTab: (tab: 
       await updateServiceDetails(ctx, service.id, detailsOf(service, { diagnosis: diagnosisText }));
       await changeServiceStatus(ctx, service.id, "DIAGNOSED", undefined);
     } catch (e) {
-      setError(e instanceof Error ? e.message : "Kaydedilemedi.");
+      setError(errorMessage(e, "Kaydedilemedi."));
     }
     setBusy(false);
   }
@@ -285,14 +286,14 @@ function StatusActions({ service, onGoTab }: { service: Service; onGoTab: (tab: 
   }
 
   async function complete() {
-    if (!ctx) return setError("Cihaz bilgisi henüz yüklenmedi, lütfen tekrar deneyin.");
+    if (!ctx) return setError(NO_CONTEXT_MESSAGE);
     setBusy(true);
     setError(null);
     try {
       await updateServiceDetails(ctx, service.id, detailsOf(service, { resolution: resolutionText }));
     } catch (e) {
       setBusy(false);
-      return setError(e instanceof Error ? e.message : "Kaydedilemedi.");
+      return setError(errorMessage(e, "Kaydedilemedi."));
     }
     setBusy(false);
     setCompleting(false);
@@ -307,7 +308,7 @@ function StatusActions({ service, onGoTab }: { service: Service; onGoTab: (tab: 
   const others = options.filter((to) => to !== main).sort((a, b) => Number(a === "CANCELLED") - Number(b === "CANCELLED"));
 
   async function go(to: ServiceStatus, note?: string, ignoreChecklist = false) {
-    if (!ctx) return setError("Cihaz bilgisi henüz yüklenmedi, lütfen tekrar deneyin.");
+    if (!ctx) return setError(NO_CONTEXT_MESSAGE);
     let diagnosticFeeKurus: number | undefined;
     if (to === "CANCELLED" && fee.trim() !== "") {
       const kurus = parseMoneyInput(fee);
@@ -327,7 +328,7 @@ function StatusActions({ service, onGoTab }: { service: Service; onGoTab: (tab: 
         // Uyarı: kullanıcı onaylarsa zorunlu maddeler tamamlanmadan da devam edilir.
         setChecklistWarning({ to, titles: e.titles });
       } else {
-        setError(e instanceof Error ? e.message : "Durum değiştirilemedi.");
+        setError(errorMessage(e, "Durum değiştirilemedi."));
       }
     }
     setBusy(false);
@@ -529,7 +530,7 @@ function DetailsForm({ service, onSaved }: { service: Service; onSaved: (next: D
 
   async function submit(event: React.FormEvent) {
     event.preventDefault();
-    if (!ctx) return setError("Cihaz bilgisi henüz yüklenmedi, lütfen tekrar deneyin.");
+    if (!ctx) return setError(NO_CONTEXT_MESSAGE);
     setBusy(true);
     setError(null);
     try {
@@ -546,7 +547,7 @@ function DetailsForm({ service, onSaved }: { service: Service; onSaved: (next: D
       });
       onSaved(started ? "summary" : "lines");
     } catch (e) {
-      setError(e instanceof Error ? e.message : "Kaydedilemedi.");
+      setError(errorMessage(e, "Kaydedilemedi."));
     }
     setBusy(false);
   }

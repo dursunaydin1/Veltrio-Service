@@ -16,6 +16,7 @@ import {
 import { unitLabel } from "@/lib/serial/service";
 import { formatCurrency, formatDateTime, formatQuantity } from "@/lib/utils";
 import type { PaymentMethod, ProductSerialUnit, StockBucket } from "@/types";
+import { NO_CONTEXT_MESSAGE, errorMessage } from "@/lib/errors/message";
 
 type Row = { item: PurchaseItem; remaining: number; serial: boolean; units: ProductSerialUnit[] };
 
@@ -53,7 +54,7 @@ export function PurchaseReturnPanel({ purchase }: { purchase: Purchase }) {
   async function submit(event: React.FormEvent) {
     event.preventDefault();
     setError(null);
-    if (!ctx) return setError("Cihaz bilgisi henüz yüklenmedi, lütfen tekrar deneyin.");
+    if (!ctx) return setError(NO_CONTEXT_MESSAGE);
     const lines = [];
     for (const { item, remaining, serial, units } of returnable) {
       const b = bucket[item.id] ?? "AVAILABLE";
@@ -78,7 +79,7 @@ export function PurchaseReturnPanel({ purchase }: { purchase: Purchase }) {
       setPicked({});
       setReason("");
     } catch (e) {
-      setError(e instanceof Error ? e.message : "İade kaydedilemedi.");
+      setError(errorMessage(e, "İade kaydedilemedi."));
     }
     setBusy(false);
   }
@@ -92,7 +93,7 @@ export function PurchaseReturnPanel({ purchase }: { purchase: Purchase }) {
       setReversing(null);
       setReverseReason("");
     } catch (e) {
-      setError(e instanceof Error ? e.message : "Geri alınamadı.");
+      setError(errorMessage(e, "Geri alınamadı."));
     }
     setBusy(false);
   }

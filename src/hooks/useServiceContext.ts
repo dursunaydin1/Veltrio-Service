@@ -2,32 +2,30 @@
 
 import { useMemo } from "react";
 import { useSessionStore } from "@/stores/session";
+import { useBusinessContext } from "@/hooks/useBusinessContext";
 import { DEFAULT_APPROVAL_THRESHOLD, type ServiceContext } from "@/lib/services/service";
 
 /**
- * Servis işlemleri için bağlam: işletme/cihaz/kullanıcı + işletme ayarları
- * (onay eşiği, negatif stok). Oturum veya cihaz yüklenmediyse null döner.
+ * Servis, satış ve stok işlemleri için bağlam: işletme bağlamı (`useBusinessContext`) + işletme
+ * ayarları (onay eşiği, negatif stok). Oturum veya cihaz yüklenmediyse null döner.
+ * İşletme / cihaz / kullanıcı bilgisi tek yerden okunur (K-108).
  */
 export function useServiceContext(): ServiceContext | null {
-  const businessId = useSessionStore((s) => s.business?.id);
-  const deviceCode = useSessionStore((s) => s.device?.device_code);
-  const actorId = useSessionStore((s) => s.user?.id);
+  const base = useBusinessContext();
   const threshold = useSessionStore((s) => s.business?.settings?.service_approval_threshold);
   const tolerance = useSessionStore((s) => s.business?.settings?.service_approval_tolerance);
   const allowNegative = useSessionStore((s) => s.business?.settings?.allow_negative_stock);
 
   return useMemo(
     () =>
-      businessId && deviceCode
+      base
         ? {
-            businessId,
-            deviceCode,
-            actorId,
+            ...base,
             approvalThreshold: typeof threshold === "number" ? threshold : DEFAULT_APPROVAL_THRESHOLD,
             approvalTolerance: typeof tolerance === "number" ? tolerance : 0,
             allowNegativeStock: allowNegative === true,
           }
         : null,
-    [businessId, deviceCode, actorId, threshold, tolerance, allowNegative]
+    [base, threshold, tolerance, allowNegative]
   );
 }

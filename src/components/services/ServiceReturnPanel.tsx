@@ -18,6 +18,7 @@ import { getServiceBalance } from "@/lib/services/service";
 import { formatCurrency, formatDateTime, formatQuantity, moneyInputFromKurus } from "@/lib/utils";
 import type { PaymentMethod } from "@/types";
 import { OptionalField, OptionalGroup } from "@/components/common/OptionalField";
+import { NO_CONTEXT_MESSAGE, errorMessage } from "@/lib/errors/message";
 
 const DISPOSITION_LABEL: Record<StockDisposition, string> = {
   SELLABLE: "Satılabilir stoğa dön",
@@ -51,14 +52,14 @@ function CancelledRefund({ service }: { service: Service }) {
     setError(null);
     const kurus = parseMoneyInput(amount);
     if (kurus === null || kurus <= 0) return setError("Tutar sıfırdan büyük geçerli bir tutar olmalıdır.");
-    if (!ctx) return setError("Cihaz bilgisi henüz yüklenmedi, lütfen tekrar deneyin.");
+    if (!ctx) return setError(NO_CONTEXT_MESSAGE);
     setBusy(true);
     try {
       await refundCancelledServicePayment(ctx, service.id, { amountKurus: kurus, method });
       setOpen(false);
       setAmount("");
     } catch (e) {
-      setError(e instanceof Error ? e.message : "İade kaydedilemedi.");
+      setError(errorMessage(e, "İade kaydedilemedi."));
     }
     setBusy(false);
   }
@@ -126,7 +127,7 @@ function DeliveredReturn({ service }: { service: Service }) {
   async function submit(event: React.FormEvent) {
     event.preventDefault();
     setError(null);
-    if (!ctx) return setError("Cihaz bilgisi henüz yüklenmedi, lütfen tekrar deneyin.");
+    if (!ctx) return setError(NO_CONTEXT_MESSAGE);
     const lines = [];
     for (const { part, remaining } of parts ?? []) {
       const raw = (qty[part.id] ?? "").trim().replace(",", ".");
@@ -150,7 +151,7 @@ function DeliveredReturn({ service }: { service: Service }) {
       setExtra("");
       setReason("");
     } catch (e) {
-      setError(e instanceof Error ? e.message : "İade kaydedilemedi.");
+      setError(errorMessage(e, "İade kaydedilemedi."));
     }
     setBusy(false);
   }
@@ -164,7 +165,7 @@ function DeliveredReturn({ service }: { service: Service }) {
       setReversing(null);
       setReverseReason("");
     } catch (e) {
-      setError(e instanceof Error ? e.message : "Geri alınamadı.");
+      setError(errorMessage(e, "Geri alınamadı."));
     }
     setBusy(false);
   }

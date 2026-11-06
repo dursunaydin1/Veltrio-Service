@@ -33,6 +33,7 @@ import {
   type ValidatedRow,
 } from "@/lib/import/validate";
 import { PageHead } from "@/components/layout/PageHead";
+import { errorMessage } from "@/lib/errors/message";
 
 type Step = "pick" | "map" | "preview" | "done";
 
@@ -97,7 +98,7 @@ export function ImportWizard() {
       setMapping(suggestMapping(parsed.headers, def.fields));
       setStep("map");
     } catch (e) {
-      setError(e instanceof Error ? e.message : "Dosya okunamadı.");
+      setError(errorMessage(e, "Dosya okunamadı."));
     }
     setBusy(false);
   }
@@ -117,7 +118,7 @@ export function ImportWizard() {
       setChoices(new Map(validated.filter((r) => r.decisions.length > 1).map((r) => [r.rowNumber, r.defaultDecision])));
       setStep("preview");
     } catch (e) {
-      setError(e instanceof Error ? e.message : "Doğrulama yapılamadı.");
+      setError(errorMessage(e, "Doğrulama yapılamadı."));
     }
     setBusy(false);
   }
@@ -136,7 +137,7 @@ export function ImportWizard() {
       setResult(res);
       setStep("done");
     } catch (e) {
-      setError(e instanceof Error ? e.message : "İçe aktarma yapılamadı.");
+      setError(errorMessage(e, "İçe aktarma yapılamadı."));
     }
     setBusy(false);
   }

@@ -7,6 +7,7 @@ import { createSupplier, updateSupplier } from "@/lib/suppliers/service";
 import type { Supplier } from "@/types";
 import { useAppNav } from "@/lib/nav/useAppNav";
 import { OptionalField, OptionalGroup } from "@/components/common/OptionalField";
+import { NO_CONTEXT_MESSAGE, errorMessage } from "@/lib/errors/message";
 
 type Errors = Partial<Record<keyof SupplierFormInput, string>>;
 
@@ -41,7 +42,7 @@ export function SupplierForm({ supplier, initial }: { supplier?: Supplier; initi
     }
     setErrors({});
     if (!ctx) {
-      setFormError("Cihaz bilgisi henüz yüklenmedi, lütfen tekrar deneyin.");
+      setFormError(NO_CONTEXT_MESSAGE);
       return;
     }
 
@@ -54,7 +55,7 @@ export function SupplierForm({ supplier, initial }: { supplier?: Supplier; initi
       } else id = (await createSupplier(ctx, parsed.fields)).id;
       nav.replace(`/suppliers/${id}`);
     } catch (e) {
-      setFormError(e instanceof Error ? e.message : "Kaydedilemedi.");
+      setFormError(errorMessage(e, "Kaydedilemedi."));
       setBusy(false);
     }
   }

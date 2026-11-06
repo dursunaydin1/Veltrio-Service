@@ -19,6 +19,7 @@ import {
 import { useSessionStore } from "@/stores/session";
 import { formatCurrency, moneyInput } from "@/lib/utils";
 import { PageHead } from "@/components/layout/PageHead";
+import { NO_CONTEXT_MESSAGE, errorMessage } from "@/lib/errors/message";
 
 type Kind = "OPERATION" | "ISSUE";
 type Entry = (OperationCatalogEntry | IssueCatalogEntry) & { suggested_price?: number; default_duration?: number };
@@ -94,7 +95,7 @@ function EntryRow({ kind, entry, onEdit }: { kind: Kind; entry: Entry; onEdit: (
       if (kind === "OPERATION") await setOperationActive(ctx, entry.id, !entry.active);
       else await setIssueActive(ctx, entry.id, !entry.active);
     } catch (e) {
-      setError(e instanceof Error ? e.message : "Değiştirilemedi.");
+      setError(errorMessage(e, "Değiştirilemedi."));
     }
   }
 
@@ -133,7 +134,7 @@ function EntryForm({ kind, entry, onDone }: { kind: Kind; entry?: Entry; onDone:
   async function submit(event: React.FormEvent) {
     event.preventDefault();
     setError(null);
-    if (!ctx) return setError("Cihaz bilgisi henüz yüklenmedi, lütfen tekrar deneyin.");
+    if (!ctx) return setError(NO_CONTEXT_MESSAGE);
     const priceKurus = price.trim() === "" ? undefined : parseMoneyInput(price);
     if (priceKurus === null) return setError("Önerilen fiyat geçerli bir tutar olmalıdır.");
     const minutes = duration.trim() === "" ? undefined : Number(duration);
@@ -149,7 +150,7 @@ function EntryForm({ kind, entry, onDone }: { kind: Kind; entry?: Entry; onDone:
       else await createIssueEntry(ctx, { name, category });
       onDone();
     } catch (e) {
-      setError(e instanceof Error ? e.message : "Kaydedilemedi.");
+      setError(errorMessage(e, "Kaydedilemedi."));
       setBusy(false);
     }
   }

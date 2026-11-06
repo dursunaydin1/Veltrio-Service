@@ -16,6 +16,7 @@ import {
 } from "@/lib/returns/service";
 import { formatCurrency, formatDateTime, formatQuantity } from "@/lib/utils";
 import type { PaymentMethod } from "@/types";
+import { NO_CONTEXT_MESSAGE, errorMessage } from "@/lib/errors/message";
 
 const DISPOSITION_LABEL: Record<StockDisposition, string> = {
   SELLABLE: "Satılabilir stoğa dön",
@@ -53,7 +54,7 @@ export function SaleReturnPanel({ sale }: { sale: Sale }) {
   async function submit(event: React.FormEvent) {
     event.preventDefault();
     setError(null);
-    if (!ctx) return setError("Cihaz bilgisi henüz yüklenmedi, lütfen tekrar deneyin.");
+    if (!ctx) return setError(NO_CONTEXT_MESSAGE);
     const lines = [];
     for (const { item, remaining } of returnable) {
       const raw = (qty[item.id] ?? "").trim().replace(",", ".");
@@ -71,7 +72,7 @@ export function SaleReturnPanel({ sale }: { sale: Sale }) {
       setQty({});
       setReason("");
     } catch (e) {
-      setError(e instanceof Error ? e.message : "İade kaydedilemedi.");
+      setError(errorMessage(e, "İade kaydedilemedi."));
     }
     setBusy(false);
   }
@@ -85,7 +86,7 @@ export function SaleReturnPanel({ sale }: { sale: Sale }) {
       setReversing(null);
       setReverseReason("");
     } catch (e) {
-      setError(e instanceof Error ? e.message : "Geri alınamadı.");
+      setError(errorMessage(e, "Geri alınamadı."));
     }
     setBusy(false);
   }

@@ -8,6 +8,7 @@ import { parseMoneyInput } from "@/lib/calc";
 import { addOpeningSerialUnit, getSerialUnits, unitLabel } from "@/lib/serial/service";
 import { formatDate } from "@/lib/utils";
 import type { Product, SerialUnitStatus } from "@/types";
+import { NO_CONTEXT_MESSAGE, errorMessage } from "@/lib/errors/message";
 
 const STATUS_LABEL: Record<SerialUnitStatus, string> = {
   IN_STOCK: "Stokta",
@@ -44,7 +45,7 @@ export function SerialUnitsPanel({ product }: { product: Product }) {
     setError(null);
     const costKurus = cost.trim() === "" ? undefined : parseMoneyInput(cost);
     if (costKurus === null) return setError("Birim maliyet geçerli bir tutar olmalıdır.");
-    if (!ctx) return setError("Cihaz bilgisi henüz yüklenmedi, lütfen tekrar deneyin.");
+    if (!ctx) return setError(NO_CONTEXT_MESSAGE);
     setBusy(true);
     try {
       await addOpeningSerialUnit(ctx, {
@@ -56,7 +57,7 @@ export function SerialUnitsPanel({ product }: { product: Product }) {
       setCost("");
       setOpen(false);
     } catch (e) {
-      setError(e instanceof Error ? e.message : "Birim eklenemedi.");
+      setError(errorMessage(e, "Birim eklenemedi."));
     }
     setBusy(false);
   }

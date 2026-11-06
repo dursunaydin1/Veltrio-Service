@@ -31,6 +31,7 @@ import { findProductByBarcode, normalizeBarcode } from "@/lib/products/service";
 import { db } from "@/lib/db";
 import { ProductThumb } from "@/components/products/ProductThumb";
 import { QuantityStepper, stepQuantity } from "@/components/common/QuantityStepper";
+import { NO_CONTEXT_MESSAGE, errorMessage } from "@/lib/errors/message";
 
 type DraftLine = {
   key: string;
@@ -190,7 +191,7 @@ export function SaleForm({
         docDiscountKurus
       ).totals.total;
     } catch (e) {
-      totalError = e instanceof Error ? e.message : "Tutar hesaplanamadı.";
+      totalError = errorMessage(e, "Tutar hesaplanamadı.");
     }
   }
 
@@ -228,7 +229,7 @@ export function SaleForm({
     setError(null);
     const input = buildInput();
     if (typeof input === "string") return setError(input);
-    if (!ctx) return setError("Cihaz bilgisi henüz yüklenmedi, lütfen tekrar deneyin.");
+    if (!ctx) return setError(NO_CONTEXT_MESSAGE);
 
     let payment: { amountKurus: number; method: PaymentMethod } | undefined;
     if (finalize && received.trim() !== "") {
@@ -253,7 +254,7 @@ export function SaleForm({
       else nav.replace(`/sales/${saved.id}`);
     } catch (e) {
       if (e instanceof NegativeStockReasonRequiredError) setNeedsReason(true);
-      setError(e instanceof Error ? e.message : "Kaydedilemedi.");
+      setError(errorMessage(e, "Kaydedilemedi."));
       setBusy(false);
     }
   }

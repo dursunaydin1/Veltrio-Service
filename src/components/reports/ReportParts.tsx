@@ -9,6 +9,7 @@ import { writeAuditLog } from "@/lib/sync/audit";
 import { exportFileName, formatTrDate, toCsv, toXlsx, type Column } from "@/lib/export/export";
 import { monthRange, type DateRange, type Granularity } from "@/lib/reports/calc";
 import { formatCurrency, formatQuantity, todayLocalDate } from "@/lib/utils";
+import { errorMessage } from "@/lib/errors/message";
 
 /** Tarih aralığı ve (isteğe bağlı) gün/ay gruplaması seçimi; varsayılan: bu ay. */
 export function useReportRange() {
@@ -186,7 +187,7 @@ export function ExportPanel<T extends Record<string, unknown>>({
       setSecret("");
       setAck(false);
     } catch (e) {
-      setError(e instanceof Error ? e.message : "Dışa aktarılamadı.");
+      setError(errorMessage(e, "Dışa aktarılamadı."));
     }
     setBusy(false);
   }

@@ -3,6 +3,7 @@
 import { useEffect, useRef, useState } from "react";
 import { useDevice } from "@/hooks/useDevice";
 import { suggestDeviceName } from "@/lib/device";
+import { errorMessage } from "@/lib/errors/message";
 
 /**
  * Cihaz kaydı kendiliğinden (K-093): tarayıcı tanınmıyorsa (ilk giriş ya da telefon temizleyicisi
@@ -51,7 +52,7 @@ export function DeviceSetup() {
     try {
       await registerDevice(name.trim());
     } catch (e) {
-      setError(e instanceof Error ? e.message : "Cihaz kaydedilemedi.");
+      setError(errorMessage(e, "Cihaz kaydedilemedi."));
       setBusy(false);
     }
   }

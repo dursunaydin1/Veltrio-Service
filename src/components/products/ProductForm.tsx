@@ -15,6 +15,7 @@ import {
 import type { Product, TaxMode } from "@/types";
 import { useAppNav } from "@/lib/nav/useAppNav";
 import { OptionalField, OptionalGroup } from "@/components/common/OptionalField";
+import { NO_CONTEXT_MESSAGE, errorMessage } from "@/lib/errors/message";
 
 const money = (n: number | null | undefined) => (n == null ? "" : moneyInput(n));
 const decimal = (n: number | null | undefined) =>
@@ -78,7 +79,7 @@ export function ProductForm({ product, initial }: { product?: Product; initial?:
     }
     setErrors({});
     if (!ctx) {
-      setFormError("Cihaz bilgisi henüz yüklenmedi, lütfen tekrar deneyin.");
+      setFormError(NO_CONTEXT_MESSAGE);
       return;
     }
 
@@ -92,7 +93,7 @@ export function ProductForm({ product, initial }: { product?: Product; initial?:
       nav.replace(`/products/${id}`);
     } catch (e) {
       if (e instanceof ProductCodeTakenError) setErrors({ code: e.message });
-      else setFormError(e instanceof Error ? e.message : "Kaydedilemedi.");
+      else setFormError(errorMessage(e, "Kaydedilemedi."));
       setBusy(false);
     }
   }

@@ -28,6 +28,7 @@ import { formatDate, todayLocalDate } from "@/lib/utils";
 import type { PaymentMethod } from "@/types";
 import { useAppNav } from "@/lib/nav/useAppNav";
 import { ISSUE_CATEGORIES } from "@/lib/catalog/service";
+import { NO_CONTEXT_MESSAGE, errorMessage } from "@/lib/errors/message";
 
 
 type Extra = "damage" | "accessories" | "photo";
@@ -152,7 +153,7 @@ export function ServiceForm({
       if (kurus === null || kurus <= 0) return setError("Kapora tutarı sıfırdan büyük geçerli bir tutar olmalıdır.");
       depositInput = { amountKurus: kurus, method };
     }
-    if (!ctx) return setError("Cihaz bilgisi henüz yüklenmedi, lütfen tekrar deneyin.");
+    if (!ctx) return setError(NO_CONTEXT_MESSAGE);
 
     setBusy(true);
     setError(null);
@@ -171,7 +172,7 @@ export function ServiceForm({
       });
       nav.replace(`/services/${service.id}`);
     } catch (e) {
-      setError(e instanceof Error ? e.message : "Servis açılamadı.");
+      setError(errorMessage(e, "Servis açılamadı."));
       setBusy(false);
     }
   }

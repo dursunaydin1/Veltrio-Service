@@ -21,6 +21,7 @@ import { enqueue } from "@/lib/sync/queue";
 import { generateId, nowISO } from "@/lib/utils";
 import type { BusinessContext } from "@/hooks/useBusinessContext";
 import type { Payment, PaymentMethod, Product, TaxMode } from "@/types";
+import { errorMessage } from "@/lib/errors/message";
 
 export type SaleContext = BusinessContext & {
   /** İşletme ayarı: stok eksiye düşebilir mi? (varsayılan false, ST-002) */
@@ -189,7 +190,7 @@ async function buildItems(ctx: SaleContext, saleId: string, input: SaleInput, cr
     try {
       gross = lineGross(line.unitPriceKurus, line.quantity);
     } catch (e) {
-      throw new SaleRuleError(e instanceof Error ? e.message : "Tutar hesaplanamadı.");
+      throw new SaleRuleError(errorMessage(e, "Tutar hesaplanamadı."));
     }
     if ((line.discountKurus ?? 0) > gross || (line.discountKurus ?? 0) < 0) {
       throw new SaleRuleError(`“${product.name}”: indirim satır tutarından büyük olamaz.`);
@@ -202,7 +203,7 @@ async function buildItems(ctx: SaleContext, saleId: string, input: SaleInput, cr
   try {
     computed = computeSaleTotals(input.lines, input.documentDiscountKurus ?? 0);
   } catch (e) {
-    throw new SaleRuleError(e instanceof Error ? e.message : "Tutar hesaplanamadı.");
+    throw new SaleRuleError(errorMessage(e, "Tutar hesaplanamadı."));
   }
 
   const items: SaleItem[] = input.lines.map((line, i) => {

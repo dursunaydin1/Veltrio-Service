@@ -13,6 +13,7 @@ import {
   setChecklistItemDone,
 } from "@/lib/services/checklist";
 import { formatDateTime } from "@/lib/utils";
+import { errorMessage } from "@/lib/errors/message";
 
 /** Servis kontrol listesi: şablon uygula, madde ekle / kaldır / tamamla (Adım 3.10). */
 export function ChecklistPanel({ service }: { service: Service }) {
@@ -35,7 +36,7 @@ export function ChecklistPanel({ service }: { service: Service }) {
     try {
       await action();
     } catch (e) {
-      setError(e instanceof Error ? e.message : "İşlem yapılamadı.");
+      setError(errorMessage(e, "İşlem yapılamadı."));
     }
   }
 

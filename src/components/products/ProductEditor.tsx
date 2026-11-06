@@ -16,6 +16,7 @@ import { formatCurrency, formatQuantity } from "@/lib/utils";
 import { unitLabel } from "@/lib/products/constants";
 import { useAppNav } from "@/lib/nav/useAppNav";
 import { confirmDialog } from "@/components/common/ConfirmDialog";
+import { errorMessage } from "@/lib/errors/message";
 
 /** Ürün düzenleme sayfasının içeriği: form + pasifleştirme / yeniden etkinleştirme. */
 export function ProductEditor({ id }: { id: string }) {
@@ -50,7 +51,7 @@ export function ProductEditor({ id }: { id: string }) {
       await setProductArchived(ctx, product.id, !archived);
       nav.replace("/products");
     } catch (e) {
-      setError(e instanceof Error ? e.message : "İşlem yapılamadı.");
+      setError(errorMessage(e, "İşlem yapılamadı."));
     }
   }
 

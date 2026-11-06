@@ -8,6 +8,7 @@ import { useBusinessContext } from "@/hooks/useBusinessContext";
 import { createTemplate, getTemplateItems, setTemplateActive, updateTemplate } from "@/lib/catalog/service";
 import { useSessionStore } from "@/stores/session";
 import { PageHead } from "@/components/layout/PageHead";
+import { NO_CONTEXT_MESSAGE, errorMessage } from "@/lib/errors/message";
 
 type Row = { title: string; required: boolean };
 
@@ -95,7 +96,7 @@ function TemplateForm({ template, initial, onDone }: { template?: ServiceTemplat
   async function submit(event: React.FormEvent) {
     event.preventDefault();
     setError(null);
-    if (!ctx) return setError("Cihaz bilgisi henüz yüklenmedi, lütfen tekrar deneyin.");
+    if (!ctx) return setError(NO_CONTEXT_MESSAGE);
     setBusy(true);
     try {
       const input = { name, machineType, items };
@@ -103,7 +104,7 @@ function TemplateForm({ template, initial, onDone }: { template?: ServiceTemplat
       else await createTemplate(ctx, input);
       onDone();
     } catch (e) {
-      setError(e instanceof Error ? e.message : "Kaydedilemedi.");
+      setError(errorMessage(e, "Kaydedilemedi."));
       setBusy(false);
     }
   }

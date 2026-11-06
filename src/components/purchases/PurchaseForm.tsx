@@ -18,6 +18,7 @@ import type { Purchase, PurchaseItem } from "@/lib/db";
 import type { PaymentMethod, Product, TaxMode } from "@/types";
 import { useAppNav } from "@/lib/nav/useAppNav";
 import { OptionalField, OptionalGroup } from "@/components/common/OptionalField";
+import { NO_CONTEXT_MESSAGE, errorMessage } from "@/lib/errors/message";
 
 type DraftLine = {
   key: string;
@@ -69,7 +70,7 @@ function lineTotal(line: DraftLine): Parsed {
   try {
     return { ok: true, total: calcLine({ unitPrice: price, quantity: qty, discount, taxMode: line.taxMode, taxRate: rate }).total };
   } catch (e) {
-    return { ok: false, error: `“${line.name}”: ${e instanceof Error ? e.message : "tutar hesaplanamadı"}` };
+    return { ok: false, error: `“${line.name}”: ${errorMessage(e, "tutar hesaplanamadı")}` };
   }
 }
 
@@ -162,7 +163,7 @@ export function PurchaseForm({
     setError(null);
     const input = buildInput();
     if (typeof input === "string") return setError(input);
-    if (!ctx) return setError("Cihaz bilgisi henüz yüklenmedi, lütfen tekrar deneyin.");
+    if (!ctx) return setError(NO_CONTEXT_MESSAGE);
 
     let payment: { amountKurus: number; method: PaymentMethod } | undefined;
     if (receive && paid.trim() !== "") {
@@ -183,7 +184,7 @@ export function PurchaseForm({
       if (onDone) onDone();
       else nav.replace(`/purchases/${saved.id}`);
     } catch (e) {
-      setError(e instanceof Error ? e.message : "Kaydedilemedi.");
+      setError(errorMessage(e, "Kaydedilemedi."));
       setBusy(false);
     }
   }

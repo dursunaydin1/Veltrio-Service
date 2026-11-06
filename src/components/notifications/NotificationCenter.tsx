@@ -9,11 +9,12 @@ import { useBusinessContext } from "@/hooks/useBusinessContext";
 import { useSessionStore } from "@/stores/session";
 import { markAllRead, markRead, markResolved } from "@/lib/notifications/center";
 import { getIssueCount } from "@/lib/sync/queue";
-import { ConflictResolveError, resolveKeepMine, resolveKeepServer, retryItem } from "@/lib/sync/conflicts";
+import { resolveKeepMine, resolveKeepServer, retryItem } from "@/lib/sync/conflicts";
 import { readLastBackup } from "@/lib/backup/backup";
 import { formatDateTime } from "@/lib/utils";
 import type { SyncQueueItem } from "@/types";
 import { PageHead } from "@/components/layout/PageHead";
+import { errorMessage } from "@/lib/errors/message";
 
 const TYPE_LABEL: Record<string, string> = {
   CUSTOMER_APPROVAL_NEEDED: "Onay bekleniyor",
@@ -73,7 +74,7 @@ export function NotificationCenter() {
     try {
       await action();
     } catch (e) {
-      setError(e instanceof ConflictResolveError || e instanceof Error ? e.message : "İşlem yapılamadı.");
+      setError(errorMessage(e, "İşlem yapılamadı."));
     }
     setBusy(null);
   }

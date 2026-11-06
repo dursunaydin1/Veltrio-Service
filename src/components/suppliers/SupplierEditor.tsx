@@ -12,6 +12,7 @@ import { setSupplierArchived } from "@/lib/suppliers/service";
 import { telLink } from "@/lib/utils/phone";
 import { useAppNav } from "@/lib/nav/useAppNav";
 import { confirmDialog } from "@/components/common/ConfirmDialog";
+import { errorMessage } from "@/lib/errors/message";
 
 /** Tedarikçi detayı: ara, bakiye / ödemeler, düzenleme, arşivleme (Adım 4.5-4.7). */
 export function SupplierEditor({ id }: { id: string }) {
@@ -44,7 +45,7 @@ export function SupplierEditor({ id }: { id: string }) {
       await setSupplierArchived(ctx, supplier.id, !archived);
       nav.replace("/suppliers");
     } catch (e) {
-      setError(e instanceof Error ? e.message : "İşlem yapılamadı.");
+      setError(errorMessage(e, "İşlem yapılamadı."));
     }
   }
 

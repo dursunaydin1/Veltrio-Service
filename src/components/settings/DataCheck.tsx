@@ -5,6 +5,7 @@ import { useBusinessContext } from "@/hooks/useBusinessContext";
 import { findStockMismatches, repairStockMismatches, type StockMismatch } from "@/lib/stock/integrity";
 import { formatQuantity } from "@/lib/utils";
 import { PageHead } from "@/components/layout/PageHead";
+import { NO_CONTEXT_MESSAGE, errorMessage } from "@/lib/errors/message";
 
 /**
  * Veri denetimi (ST-013, TC-054): stok özetini hareket defteriyle karşılaştırır;
@@ -17,14 +18,14 @@ export function DataCheck() {
   const [error, setError] = useState<string | null>(null);
 
   async function run(fix: boolean) {
-    if (!ctx) return setError("Cihaz bilgisi henüz yüklenmedi, lütfen tekrar deneyin.");
+    if (!ctx) return setError(NO_CONTEXT_MESSAGE);
     setBusy(true);
     setError(null);
     try {
       const found = fix ? await repairStockMismatches(ctx) : await findStockMismatches(ctx.businessId);
       setResult({ found, fixed: fix });
     } catch (e) {
-      setError(e instanceof Error ? e.message : "Denetim yapılamadı.");
+      setError(errorMessage(e, "Denetim yapılamadı."));
     }
     setBusy(false);
   }

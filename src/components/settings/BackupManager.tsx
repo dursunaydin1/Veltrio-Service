@@ -19,6 +19,7 @@ import {
 } from "@/lib/backup/backup";
 import { formatDateTime } from "@/lib/utils";
 import { PageHead } from "@/components/layout/PageHead";
+import { NO_CONTEXT_MESSAGE, errorMessage } from "@/lib/errors/message";
 
 type ServerBackup = { id: string; kind: string; status: string; created_at: string; size_bytes: number | null; error: string | null };
 
@@ -69,7 +70,7 @@ export function BackupManager() {
   }, [isOnline, loadServer]);
 
   async function takeBackup(kind: "MANUAL" | "PRE_RESTORE") {
-    if (!ctx) throw new Error("Cihaz bilgisi henüz yüklenmedi, lütfen tekrar deneyin.");
+    if (!ctx) throw new Error(NO_CONTEXT_MESSAGE);
     const backup = await createBackup(ctx);
     download(backupFileName(backup, kind === "PRE_RESTORE" ? "geri-yukleme-oncesi" : "yedek"), backup);
     const status: BackupStatus = { at: backup.created_at, deviceCode: ctx.deviceCode, total: backupTotal(backup), kind };
@@ -94,7 +95,7 @@ export function BackupManager() {
       const backup = await takeBackup("MANUAL");
       setInfo(`Yedek indirildi (${backupTotal(backup)} kayıt). Dosyayı güvenli bir yerde saklayın.`);
     } catch (e) {
-      setError(e instanceof Error ? e.message : "Yedek alınamadı.");
+      setError(errorMessage(e, "Yedek alınamadı."));
     }
     setBusy(false);
   }
@@ -118,7 +119,7 @@ export function BackupManager() {
       setResult(await restoreBackup(ctx, pending));
       setPending(null);
     } catch (e) {
-      setError(e instanceof Error ? e.message : "Geri yükleme yapılamadı.");
+      setError(errorMessage(e, "Geri yükleme yapılamadı."));
     }
     setBusy(false);
   }

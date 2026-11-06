@@ -1,5 +1,6 @@
 import { createClient } from "@supabase/supabase-js";
 import { backupAllBusinesses } from "@/lib/backup/server";
+import { errorMessage } from "@/lib/errors/message";
 
 /**
  * Günlük otomatik yedek görevi (Adım 1.11). Zamanlayıcı (ör. Vercel Cron, `vercel.json`)
@@ -22,6 +23,6 @@ export async function GET(request: Request) {
     const results = await backupAllBusinesses(client);
     return Response.json({ results });
   } catch (e) {
-    return Response.json({ error: e instanceof Error ? e.message : "Yedek alınamadı." }, { status: 500 });
+    return Response.json({ error: errorMessage(e, "Yedek alınamadı.") }, { status: 500 });
   }
 }

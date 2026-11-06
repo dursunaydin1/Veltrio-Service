@@ -18,6 +18,7 @@ import { PAYMENT_METHOD_LABELS } from "@/lib/finance/service";
 import { formatDate, formatKurus, moneyInputFromKurus } from "@/lib/utils";
 import type { PaymentMethod } from "@/types";
 import { OptionalField, OptionalGroup } from "@/components/common/OptionalField";
+import { NO_CONTEXT_MESSAGE, errorMessage } from "@/lib/errors/message";
 
 
 const itemHref = (item: OpenItem) =>
@@ -137,13 +138,13 @@ function OffsetForm({
     const { allocations, error: parseError } = parseAllocations(items, values);
     if (parseError) return setError(parseError);
     if (allocations.length === 0) return setError("Mahsup edilecek tutarı girin.");
-    if (!ctx) return setError("Cihaz bilgisi henüz yüklenmedi, lütfen tekrar deneyin.");
+    if (!ctx) return setError(NO_CONTEXT_MESSAGE);
     setBusy(true);
     try {
       await applyCustomerCredit(ctx, party.id, allocations);
       onDone();
     } catch (e) {
-      setError(e instanceof Error ? e.message : "Mahsup yapılamadı.");
+      setError(errorMessage(e, "Mahsup yapılamadı."));
       setBusy(false);
     }
   }
@@ -227,13 +228,13 @@ export function CollectionForm({ party, onDone }: { party: { id: string; busines
     if (amountKurus === null || amountKurus <= 0) return setError("Tutar sıfırdan büyük geçerli bir tutar olmalıdır (ör. 1.250,50).");
     if (parsed.error) return setError(parsed.error);
     if (allocated > amountKurus) return setError("Tahsis toplamı tahsilat tutarını aşıyor.");
-    if (!ctx) return setError("Cihaz bilgisi henüz yüklenmedi, lütfen tekrar deneyin.");
+    if (!ctx) return setError(NO_CONTEXT_MESSAGE);
     setBusy(true);
     try {
       await recordCustomerCollection(ctx, { customerId: party.id, method, amountKurus, note, allocations: parsed.allocations });
       onDone();
     } catch (e) {
-      setError(e instanceof Error ? e.message : "Kaydedilemedi.");
+      setError(errorMessage(e, "Kaydedilemedi."));
       setBusy(false);
     }
   }

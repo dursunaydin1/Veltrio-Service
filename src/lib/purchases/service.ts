@@ -12,6 +12,7 @@ import { enqueue } from "@/lib/sync/queue";
 import { generateId, nowISO } from "@/lib/utils";
 import type { BusinessContext } from "@/hooks/useBusinessContext";
 import type { Payment, PaymentMethod, TaxMode } from "@/types";
+import { errorMessage } from "@/lib/errors/message";
 
 export class PurchaseRuleError extends Error {
   constructor(message: string) {
@@ -164,7 +165,7 @@ async function buildItems(
         taxRate: line.taxRate,
       }).total;
     } catch (e) {
-      throw new PurchaseRuleError(e instanceof Error ? e.message : "Tutar hesaplanamadı.");
+      throw new PurchaseRuleError(errorMessage(e, "Tutar hesaplanamadı."));
     }
 
     totalKurus += lineKurus;

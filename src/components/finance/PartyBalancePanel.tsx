@@ -21,6 +21,7 @@ import {
 import { formatCurrency, formatDateTime, moneyInput, todayLocalDate } from "@/lib/utils";
 import type { Payment, PaymentDirection, PaymentMethod } from "@/types";
 import { OptionalField, OptionalGroup } from "@/components/common/OptionalField";
+import { NO_CONTEXT_MESSAGE, errorMessage } from "@/lib/errors/message";
 
 type Mode = null | "primary" | "secondary" | "opening";
 type OpeningDirection = "OWED_BY_PARTY" | "OWED_TO_PARTY";
@@ -55,7 +56,6 @@ const CONFIG = {
   },
 } as const;
 
-const errorText = (e: unknown, fallback: string) => (e instanceof Error ? e.message : fallback);
 
 async function loadBalance(kind: PartyType, businessId: string, id: string) {
   return kind === "CUSTOMER" ? getCustomerBalance(businessId, id) : getSupplierBalance(businessId, id);
@@ -186,7 +186,7 @@ function PaymentRow({ kind, payment, cancelled }: { kind: PartyType; payment: Pa
       await reversePayment(ctx, payment.id, reason);
       setOpen(false);
     } catch (e) {
-      setError(errorText(e, "Ters kayıt yapılamadı."));
+      setError(errorMessage(e, "Ters kayıt yapılamadı."));
       setBusy(false);
     }
   }
@@ -261,14 +261,14 @@ function PaymentForm({
     setError(null);
     const kurus = parseMoneyInput(amount);
     if (kurus === null || kurus <= 0) return setError("Tutar sıfırdan büyük geçerli bir tutar olmalıdır (ör. 1.250,50).");
-    if (!ctx) return setError("Cihaz bilgisi henüz yüklenmedi, lütfen tekrar deneyin.");
+    if (!ctx) return setError(NO_CONTEXT_MESSAGE);
 
     setBusy(true);
     try {
       await recordPartyPayment(ctx, { partyType: kind, partyId: party.id, direction, method, amountKurus: kurus, note });
       onDone();
     } catch (e) {
-      setError(errorText(e, "Kaydedilemedi."));
+      setError(errorMessage(e, "Kaydedilemedi."));
       setBusy(false);
     }
   }
@@ -349,7 +349,7 @@ function OpeningForm({
     const kurus = parseMoneyInput(amount);
     if (kurus === null) return setError("Tutar geçerli bir sayı olmalıdır (ör. 1.250,50).");
     if (existing && !reason.trim()) return setError("Açılış bakiyesini değiştirirken neden zorunludur.");
-    if (!ctx) return setError("Cihaz bilgisi henüz yüklenmedi, lütfen tekrar deneyin.");
+    if (!ctx) return setError(NO_CONTEXT_MESSAGE);
 
     setBusy(true);
     try {
@@ -364,7 +364,7 @@ function OpeningForm({
       });
       onDone();
     } catch (e) {
-      setError(errorText(e, "Kaydedilemedi."));
+      setError(errorMessage(e, "Kaydedilemedi."));
       setBusy(false);
     }
   }

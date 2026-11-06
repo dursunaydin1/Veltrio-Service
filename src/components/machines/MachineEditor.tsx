@@ -15,6 +15,7 @@ import { formatCurrency, formatDate, formatDateTime, todayLocalDate } from "@/li
 import type { Machine } from "@/types";
 import { useAppNav } from "@/lib/nav/useAppNav";
 import { confirmDialog } from "@/components/common/ConfirmDialog";
+import { NO_CONTEXT_MESSAGE, errorMessage } from "@/lib/errors/message";
 
 /** Makine profili: sahibi, bilgiler, sahiplik geçmişi, sahip değiştirme, arşivleme (Adım 3.3). */
 export function MachineEditor({ id }: { id: string }) {
@@ -53,7 +54,7 @@ export function MachineEditor({ id }: { id: string }) {
       await setMachineArchived(ctx, machine.id, !archived);
       nav.replace("/machines");
     } catch (e) {
-      setError(e instanceof Error ? e.message : "İşlem yapılamadı.");
+      setError(errorMessage(e, "İşlem yapılamadı."));
     }
   }
 
@@ -158,13 +159,13 @@ function MergeSection({ machine }: { machine: Machine }) {
     event.preventDefault();
     setError(null);
     if (!target) return setError("Birleştirilecek makineyi seçin.");
-    if (!ctx) return setError("Cihaz bilgisi henüz yüklenmedi, lütfen tekrar deneyin.");
+    if (!ctx) return setError(NO_CONTEXT_MESSAGE);
     setBusy(true);
     try {
       await mergeTemporaryMachine(ctx, machine.id, target, reason);
       nav.replace(`/machines/${target}`);
     } catch (e) {
-      setError(e instanceof Error ? e.message : "Birleştirilemedi.");
+      setError(errorMessage(e, "Birleştirilemedi."));
       setBusy(false);
     }
   }
@@ -219,7 +220,7 @@ function OwnerSection({ machine }: { machine: Machine }) {
     setError(null);
     if (!newOwner) return setError("Yeni sahibi seçin.");
     if (!reason.trim()) return setError("Sahip değiştirme nedeni zorunludur.");
-    if (!ctx) return setError("Cihaz bilgisi henüz yüklenmedi, lütfen tekrar deneyin.");
+    if (!ctx) return setError(NO_CONTEXT_MESSAGE);
 
     setBusy(true);
     try {
@@ -228,7 +229,7 @@ function OwnerSection({ machine }: { machine: Machine }) {
       setNewOwner("");
       setReason("");
     } catch (e) {
-      setError(e instanceof Error ? e.message : "Sahip değiştirilemedi.");
+      setError(errorMessage(e, "Sahip değiştirilemedi."));
     }
     setBusy(false);
   }

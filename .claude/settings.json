@@ -14,7 +14,10 @@
       "Bash(sed -i '/^import { SALE_STATUS_BADGE, SALE_STATUS_LABEL } from \"@\\\\/lib\\\\/sales\\\\/status\";\\\\r\\\\?$/d' src/components/sales/SaleList.tsx)",
       "Bash(sed -i '/^import { PURCHASE_STATUS_BADGE, PURCHASE_STATUS_LABEL } from \"@\\\\/lib\\\\/purchases\\\\/status\";\\\\r\\\\?$/d' src/components/purchases/PurchaseList.tsx)",
       "Bash(sed -i '/^import type { Service } from \"@\\\\/lib\\\\/db\";\\\\r\\\\?$/d' src/components/services/ServiceList.tsx)",
-      "Bash(git commit -q -m 'refactor: move business constants and rules out of UI components into lib *)"
+      "Bash(git commit -q -m 'refactor: move business constants and rules out of UI components into lib *)",
+      "Bash(python -I \"C:/Users/Admin/AppData/Local/Temp/claude/d--Projeler-SOFTWARE-Projeler-Veltrio-Service/1c2923fd-0585-4cbe-8eb4-34427dbb12f8/scratchpad/errors.py\")",
+      "Bash(git commit -q -m 'refactor\\(errors\\): shared error message helper and no-context message; service context builds on business context *)",
+      "Bash(git config *)"
     ]
   }
 }

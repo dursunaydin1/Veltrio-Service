@@ -21,6 +21,7 @@ import {
   type ServiceContext,
 } from "./service";
 import type { TaxMode } from "@/types";
+import { errorMessage } from "@/lib/errors/message";
 
 /** Satır eklenip değiştirilebilen durumlar; tamamlanmış servis önce yeniden açılmalıdır. */
 export const EDITABLE_STATUSES = [
@@ -132,7 +133,7 @@ function buildOperationValues(input: OperationInput) {
   try {
     lineKurus = totalKurus({ unitPriceKurus, discountKurus, taxMode: input.taxMode, taxRate: input.taxRate, quantity });
   } catch (e) {
-    throw new ServiceRuleError(e instanceof Error ? e.message : "Tutar hesaplanamadı.");
+    throw new ServiceRuleError(errorMessage(e, "Tutar hesaplanamadı."));
   }
   return {
     description,
@@ -308,7 +309,7 @@ export async function addPart(
         quantity: input.quantity,
       });
     } catch (e) {
-      throw new ServiceRuleError(e instanceof Error ? e.message : "Tutar hesaplanamadı.");
+      throw new ServiceRuleError(errorMessage(e, "Tutar hesaplanamadı."));
     }
 
     const now = nowISO();
@@ -368,7 +369,7 @@ export async function updatePart(
         quantity,
       });
     } catch (e) {
-      throw new ServiceRuleError(e instanceof Error ? e.message : "Tutar hesaplanamadı.");
+      throw new ServiceRuleError(errorMessage(e, "Tutar hesaplanamadı."));
     }
 
     const next: ServicePart = {

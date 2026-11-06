@@ -10,6 +10,7 @@ import { useBusinessContext } from "@/hooks/useBusinessContext";
 import { CodeScanner } from "@/components/qr/CodeScanner";
 import { ProductPicker } from "@/components/products/ProductPicker";
 import { findProductByBarcode, normalizeBarcode, setProductBarcode } from "@/lib/products/service";
+import { errorMessage } from "@/lib/errors/message";
 
 /**
  * QR / barkod tarama (Adım 3.4, AC-003, K-102). Makine veya ürün QR etiketi ilgili ekranı açar;
@@ -54,7 +55,7 @@ export function QrScanner() {
       handled.current = true;
       nav.replace(`/products/${productId}`);
     } catch (e) {
-      setError(e instanceof Error ? e.message : "Barkod kaydedilemedi.");
+      setError(errorMessage(e, "Barkod kaydedilemedi."));
     }
   }
 

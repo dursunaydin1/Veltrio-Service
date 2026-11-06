@@ -9,6 +9,7 @@ import { useSessionStore } from "@/stores/session";
 import { formatDateTime } from "@/lib/utils";
 import type { Device } from "@/types";
 import { PageHead } from "@/components/layout/PageHead";
+import { errorMessage } from "@/lib/errors/message";
 
 type Row = Device & { wipe_confirmed_at?: string };
 
@@ -31,7 +32,7 @@ export function DeviceManager() {
       setDevices(await listDevices(createClient()));
       setError(null);
     } catch (e) {
-      setError(e instanceof Error ? e.message : "Cihazlar yüklenemedi.");
+      setError(errorMessage(e, "Cihazlar yüklenemedi."));
     }
   }, []);
 
@@ -61,7 +62,7 @@ export function DeviceManager() {
       setConfirming(null);
       await load();
     } catch (e) {
-      setError(e instanceof Error ? e.message : "Cihaz iptal edilemedi.");
+      setError(errorMessage(e, "Cihaz iptal edilemedi."));
     }
     setBusy(false);
   }

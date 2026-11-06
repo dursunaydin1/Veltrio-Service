@@ -20,6 +20,7 @@ import {
 import { formatDateTime, formatQuantity } from "@/lib/utils";
 import type { Product } from "@/types";
 import { OptionalField, OptionalGroup } from "@/components/common/OptionalField";
+import { NO_CONTEXT_MESSAGE, errorMessage } from "@/lib/errors/message";
 
 type Mode = "entry" | "adjust" | "damage" | null;
 
@@ -144,7 +145,7 @@ function EntryForm({ product, ctx, onDone }: FormProps) {
     if (qty === null || qty <= 0) return setError("Giriş miktarı sıfırdan büyük bir sayı olmalıdır.");
     const costKurus = cost.trim() === "" ? undefined : parseMoneyInput(cost);
     if (costKurus === null) return setError("Birim maliyet geçerli bir tutar olmalıdır.");
-    if (!ctx) return setError("Cihaz bilgisi henüz yüklenmedi, lütfen tekrar deneyin.");
+    if (!ctx) return setError(NO_CONTEXT_MESSAGE);
 
     setBusy(true);
     try {
@@ -156,7 +157,7 @@ function EntryForm({ product, ctx, onDone }: FormProps) {
       });
       onDone();
     } catch (e) {
-      setError(e instanceof Error ? e.message : "Stok girişi yapılamadı.");
+      setError(errorMessage(e, "Stok girişi yapılamadı."));
       setBusy(false);
     }
   }
@@ -216,7 +217,7 @@ function AdjustForm({ product, current, ctx, onDone }: FormProps & { current: nu
       await adjustStock(ctx, { productId: product.id, newQuantity: parsed, reason });
       onDone();
     } catch (e) {
-      setError(e instanceof Error ? e.message : "Düzeltme yapılamadı.");
+      setError(errorMessage(e, "Düzeltme yapılamadı."));
       setBusy(false);
       setConfirming(false);
     }
@@ -297,7 +298,7 @@ function DamageForm({
     const qty = parseQuantityInput(quantity);
     if (qty === null || qty <= 0) return setError("Miktar sıfırdan büyük bir sayı olmalıdır.");
     if (!reason.trim()) return setError("Neden zorunludur.");
-    if (!ctx) return setError("Cihaz bilgisi henüz yüklenmedi, lütfen tekrar deneyin.");
+    if (!ctx) return setError(NO_CONTEXT_MESSAGE);
 
     setBusy(true);
     try {

@@ -16,6 +16,7 @@ import { formatPhone, isPlausiblePhone, normalizePhone } from "@/lib/utils/phone
 import type { Customer } from "@/types";
 import { useAppNav } from "@/lib/nav/useAppNav";
 import { OptionalField, OptionalGroup } from "@/components/common/OptionalField";
+import { NO_CONTEXT_MESSAGE } from "@/lib/errors/message";
 
 function toFormInput(customer?: Customer): CustomerFormInput {
   return {
@@ -74,7 +75,7 @@ export function CustomerForm({ customer, initial }: { customer?: Customer; initi
       return;
     }
     if (!ctx) {
-      setFormError("Cihaz bilgisi henüz yüklenmedi, lütfen tekrar deneyin.");
+      setFormError(NO_CONTEXT_MESSAGE);
       return;
     }
 

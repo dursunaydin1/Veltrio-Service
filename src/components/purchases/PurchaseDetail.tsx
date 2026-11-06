@@ -21,6 +21,7 @@ import {
 } from "@/lib/purchases/service";
 import { formatCurrency, formatDate, formatDateTime, formatKurus, formatQuantity, moneyInputFromKurus } from "@/lib/utils";
 import type { PaymentMethod } from "@/types";
+import { NO_CONTEXT_MESSAGE, errorMessage } from "@/lib/errors/message";
 
 
 /** Satın alma detayı: satırlar, teslim alma, iptal, ödemeler (Adım 4.6-4.7). */
@@ -127,12 +128,12 @@ function DraftActions({ purchase, onEdit }: { purchase: Purchase; onEdit: () => 
       if (kurus === null || kurus <= 0) return setError("Ödenen tutar sıfırdan büyük geçerli bir tutar olmalıdır.");
       payment = { amountKurus: kurus, method };
     }
-    if (!ctx) return setError("Cihaz bilgisi henüz yüklenmedi, lütfen tekrar deneyin.");
+    if (!ctx) return setError(NO_CONTEXT_MESSAGE);
     setBusy(true);
     try {
       await receivePurchase(ctx, purchase.id, payment);
     } catch (e) {
-      setError(e instanceof Error ? e.message : "Teslim alınamadı.");
+      setError(errorMessage(e, "Teslim alınamadı."));
       setBusy(false);
     }
   }
@@ -144,7 +145,7 @@ function DraftActions({ purchase, onEdit }: { purchase: Purchase; onEdit: () => 
     try {
       await cancelDraftPurchase(ctx, purchase.id, reason);
     } catch (e) {
-      setError(e instanceof Error ? e.message : "İptal edilemedi.");
+      setError(errorMessage(e, "İptal edilemedi."));
       setBusy(false);
     }
   }
@@ -217,14 +218,14 @@ function PurchasePayments({ purchase }: { purchase: Purchase }) {
     setError(null);
     const kurus = parseMoneyInput(amount);
     if (kurus === null || kurus <= 0) return setError("Tutar sıfırdan büyük geçerli bir tutar olmalıdır.");
-    if (!ctx) return setError("Cihaz bilgisi henüz yüklenmedi, lütfen tekrar deneyin.");
+    if (!ctx) return setError(NO_CONTEXT_MESSAGE);
     setBusy(true);
     try {
       await payPurchase(ctx, purchase.id, { amountKurus: kurus, method });
       setOpen(false);
       setAmount("");
     } catch (e) {
-      setError(e instanceof Error ? e.message : "Kaydedilemedi.");
+      setError(errorMessage(e, "Kaydedilemedi."));
     }
     setBusy(false);
   }

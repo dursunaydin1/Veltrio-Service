@@ -24,6 +24,7 @@ import {
 import { formatCurrency, formatDate, formatDateTime, formatKurus, formatQuantity, moneyInput, moneyInputFromKurus } from "@/lib/utils";
 import { Wallet, XCircle } from "lucide-react";
 import type { PaymentMethod } from "@/types";
+import { NO_CONTEXT_MESSAGE, errorMessage } from "@/lib/errors/message";
 
 
 /** Satış detayı: satırlar, toplamlar, taslak işlemleri, tahsilat (Adım 4.8). */
@@ -129,13 +130,13 @@ function DraftActions({ sale, onEdit }: { sale: Sale; onEdit: () => void }) {
       if (kurus === null || kurus <= 0) return setError("Alınan tutar sıfırdan büyük geçerli bir tutar olmalıdır.");
       payment = { amountKurus: kurus, method };
     }
-    if (!ctx) return setError("Cihaz bilgisi henüz yüklenmedi, lütfen tekrar deneyin.");
+    if (!ctx) return setError(NO_CONTEXT_MESSAGE);
     setBusy(true);
     try {
       await finalizeSale(ctx, sale.id, { payment, negativeStockReason: needsNeg ? negReason : undefined });
     } catch (e) {
       if (e instanceof NegativeStockReasonRequiredError) setNeedsNeg(true);
-      setError(e instanceof Error ? e.message : "Satış tamamlanamadı.");
+      setError(errorMessage(e, "Satış tamamlanamadı."));
       setBusy(false);
     }
   }
@@ -147,7 +148,7 @@ function DraftActions({ sale, onEdit }: { sale: Sale; onEdit: () => void }) {
     try {
       await cancelDraftSale(ctx, sale.id, reason);
     } catch (e) {
-      setError(e instanceof Error ? e.message : "İptal edilemedi.");
+      setError(errorMessage(e, "İptal edilemedi."));
       setBusy(false);
     }
   }
@@ -229,14 +230,14 @@ function SalePayments({ sale }: { sale: Sale }) {
     setError(null);
     const kurus = parseMoneyInput(amount);
     if (kurus === null || kurus <= 0) return setError("Tutar sıfırdan büyük geçerli bir tutar olmalıdır.");
-    if (!ctx) return setError("Cihaz bilgisi henüz yüklenmedi, lütfen tekrar deneyin.");
+    if (!ctx) return setError(NO_CONTEXT_MESSAGE);
     setBusy(true);
     try {
       await collectSalePayment(ctx, sale.id, { amountKurus: kurus, method });
       setOpen(false);
       setAmount("");
     } catch (e) {
-      setError(e instanceof Error ? e.message : "Kaydedilemedi.");
+      setError(errorMessage(e, "Kaydedilemedi."));
     }
     setBusy(false);
   }
@@ -335,13 +336,13 @@ function FinalCancel({ sale }: { sale: Sale }) {
   const [busy, setBusy] = useState(false);
 
   async function cancel() {
-    if (!ctx) return setError("Cihaz bilgisi henüz yüklenmedi, lütfen tekrar deneyin.");
+    if (!ctx) return setError(NO_CONTEXT_MESSAGE);
     setBusy(true);
     setError(null);
     try {
       await cancelFinalSale(ctx, sale.id, reason);
     } catch (e) {
-      setError(e instanceof Error ? e.message : "İptal edilemedi.");
+      setError(errorMessage(e, "İptal edilemedi."));
       setBusy(false);
     }
   }

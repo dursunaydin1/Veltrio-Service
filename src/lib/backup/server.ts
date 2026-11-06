@@ -2,6 +2,7 @@ import { localDateOf } from "@/lib/utils/date";
 import type { SupabaseClient } from "@supabase/supabase-js";
 import { SYNC_TABLES, type SyncTableName } from "@/lib/sync/tables";
 import { BACKUP_FORMAT, BACKUP_VERSION, backupTotal, type BackupFile } from "./backup";
+import { errorMessage } from "@/lib/errors/message";
 
 /**
  * Sunucu tarafı günlük otomatik yedek (Adım 1.11, NFR-006). Zamanlanmış görev
@@ -68,7 +69,7 @@ export async function backupBusiness(client: SupabaseClient, businessId: string,
 
     return { businessId, ok: true, path, total: backupTotal(backup) };
   } catch (e) {
-    const error = e instanceof Error ? e.message : "Bilinmeyen hata";
+    const error = errorMessage(e, "Bilinmeyen hata");
     await client.from("business_backups").insert({
       business_id: businessId, kind: "AUTO", status: "FAILED", error, created_by: "SUNUCU",
     });

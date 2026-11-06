@@ -13,6 +13,7 @@ import { setCustomerArchived } from "@/lib/customers/service";
 import { telLink, whatsappLink } from "@/lib/utils/phone";
 import { useAppNav } from "@/lib/nav/useAppNav";
 import { confirmDialog } from "@/components/common/ConfirmDialog";
+import { errorMessage } from "@/lib/errors/message";
 
 /** Müşteri detay sayfası: ara / WhatsApp, düzenleme formu, arşivleme (Adım 3.2). */
 export function CustomerEditor({ id }: { id: string }) {
@@ -47,7 +48,7 @@ export function CustomerEditor({ id }: { id: string }) {
       await setCustomerArchived(ctx, customer.id, !archived);
       nav.replace("/customers");
     } catch (e) {
-      setError(e instanceof Error ? e.message : "İşlem yapılamadı.");
+      setError(errorMessage(e, "İşlem yapılamadı."));
     }
   }
 

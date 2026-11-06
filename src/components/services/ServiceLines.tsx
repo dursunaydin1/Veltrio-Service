@@ -29,6 +29,7 @@ import { formatCurrency, formatDateTime, formatKurus, formatQuantity, moneyInput
 import type { Product, TaxMode } from "@/types";
 import { OptionalField, OptionalGroup } from "@/components/common/OptionalField";
 import { confirmDialog } from "@/components/common/ConfirmDialog";
+import { NO_CONTEXT_MESSAGE, errorMessage } from "@/lib/errors/message";
 
 const STATUS_LABEL: Record<LineStatus, string> = {
   PENDING: "Karar bekliyor",
@@ -80,7 +81,7 @@ export function ServiceLines({ service, onApproved, onNext }: { service: Service
     try {
       await action();
     } catch (e) {
-      setError(e instanceof Error ? e.message : "İşlem yapılamadı.");
+      setError(errorMessage(e, "İşlem yapılamadı."));
     }
   }
 
@@ -420,7 +421,7 @@ function OperationForm({
     if (price.trim() !== "" && priceKurus === null) return setError("Fiyat geçerli bir tutar olmalıdır (ör. 450,00).");
     if (discountKurus === null) return setError("İndirim geçerli bir tutar olmalıdır.");
     if (rate === null || rate > 100) return setError("KDV oranı 0 ile 100 arasında olmalıdır.");
-    if (!ctx) return setError("Cihaz bilgisi henüz yüklenmedi, lütfen tekrar deneyin.");
+    if (!ctx) return setError(NO_CONTEXT_MESSAGE);
 
     const input = { description, quantity: qty, unitPriceKurus: priceKurus, discountKurus, taxMode, taxRate: rate };
     setBusy(true);
@@ -429,7 +430,7 @@ function OperationForm({
       else await addOperation(ctx, service.id, input);
       onDone();
     } catch (e) {
-      setError(e instanceof Error ? e.message : "Kaydedilemedi.");
+      setError(errorMessage(e, "Kaydedilemedi."));
       setBusy(false);
     }
   }
@@ -542,7 +543,7 @@ function PartForm({
     if (price.trim() !== "" && priceKurus === null) return setError("Fiyat geçerli bir tutar olmalıdır (ör. 125,50).");
     if (source === "STOCK_PRODUCT" && !productId) return setError("Ürün seçin.");
     if (source !== "STOCK_PRODUCT" && !description.trim()) return setError("Parça açıklaması zorunludur.");
-    if (!ctx) return setError("Cihaz bilgisi henüz yüklenmedi, lütfen tekrar deneyin.");
+    if (!ctx) return setError(NO_CONTEXT_MESSAGE);
 
     setBusy(true);
     try {
@@ -557,7 +558,7 @@ function PartForm({
       });
       onDone();
     } catch (e) {
-      setError(e instanceof Error ? e.message : "Kaydedilemedi.");
+      setError(errorMessage(e, "Kaydedilemedi."));
       setBusy(false);
     }
   }
@@ -636,7 +637,7 @@ function ApprovalForm({
 
   async function submit(event: React.FormEvent) {
     event.preventDefault();
-    if (!ctx) return setError("Cihaz bilgisi henüz yüklenmedi, lütfen tekrar deneyin.");
+    if (!ctx) return setError(NO_CONTEXT_MESSAGE);
     setBusy(true);
     setError(null);
     try {
@@ -647,7 +648,7 @@ function ApprovalForm({
       });
       onSaved();
     } catch (e) {
-      setError(e instanceof Error ? e.message : "Kaydedilemedi.");
+      setError(errorMessage(e, "Kaydedilemedi."));
       setBusy(false);
     }
   }
