@@ -5,6 +5,18 @@
 
 ## 2026-11-06
 
+### K-094 · Telefon denemesinden 11 madde
+- **Çıkış onayı:** Menü'de "Çıkış yap" önce satır içinde "Çıkış yapılsın mı?" sorar (Vazgeç / Çıkış yap). K-078'deki onay uygulamadan çıkış (geri hareketi) içindi; oturumdan çıkışta yoktu.
+- **Makine türü / marka / model:** Açılır öneri listesi (datalist) Android Chrome'da sağda ok gösterip açılmıyordu. Yerine hazır türler, en çok kullanılan 6 marka ve markanın modelleri çip; listede yoksa yazılır.
+- **Büyük harf:** Makine marka, model ve seri no (ürünlerde marka / model) yazarken büyük harfe döner (Türkçe kuralıyla).
+- **Seri no:** İsteğe bağlı çip; girilmezse sistem iç numara (MK-…) verir.
+- **Parça düzenleme:** Parça satırında "Düzenle" (miktar, birim fiyat). Açıklama değişecekse satır kaldırılıp yeniden eklenir (stok ürününe bağlı olabileceği için). Kullanılmış parça kaldırılamaz, yalnızca düzenlenir.
+- **Temin durumu:** Parçanın tedarik takibi (Stokta / Sipariş edilecek / Sipariş verildi / Geldi; siparişte beklenen tarih). "Parça bekleniyor" durumu ve hatırlatmalar buna dayanır. Seçicinin üstüne "Temin durumu" etiketi kondu.
+- **Kalan borçla teslim:** Ödenmemiş tutarla teslimde müşterinin borcu kabul ettiğinin kaydı zorunlu (AC-025); yanlışlıkla borçlu teslimi önler. Anahtarın adı "Kalan borçla teslim et", açıklaması "tutarı sonra ödeyecek; hesabına borç yazılır".
+- **Takvim:** Telefonun takvim penceresi tarih seçilince kapanmaz (Android "Tamam" ister; uygulamadan değiştirilemez). Ödeme sözü ve vade için "1 hafta / 2 hafta / 1 ay" çipleri; takvim yalnızca "Başka tarih" için (`DateQuickPick`).
+- **Diğer işlemler:** Seyrek işlemler (serviste yeniden aç / iptal; bakiyede iade, açılış bakiyesi, avans) burada. Varsayılan üçgen yazıya yapışıyordu; yerine boşluklu, dönen ok.
+- **Borç sıfırken "Tahsilat al":** Ana düğme yalnızca borç varken çıkar; borç yokken ön ödeme / avans "Diğer işlemler" altında.
+
 ### K-093 · Cihaz kaydı kendiliğinden
 - **Neden:** Xiaomi temizleyicisi Chrome verisini siliyor ve Chrome istisnaya eklenemiyor; her seferinde "Bu cihazı kaydet" ekranıyla uğraşmak istenmedi.
 - **Ne:** Tanınmayan tarayıcıda telefon önerilen adla (ör. "Android telefon") hemen kaydedilir; "Bu telefon hazırlanıyor" görünür, sonra veriler iner. Kayıt olmazsa (internet yok vb.) elle kayıt formu çıkar.

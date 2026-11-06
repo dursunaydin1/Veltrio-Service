@@ -5,17 +5,16 @@ import {
   CircleHelp,
   Cog,
   DatabaseBackup,
-  LogOut,
   Package,
   Settings,
   ShoppingBag,
   ShoppingCart,
   Truck,
 } from "lucide-react";
-import { logoutAction } from "@/app/(auth)/login/actions";
 import { AppInfo } from "@/components/layout/AppInfo";
 import { version } from "../../../../package.json";
 import { PageHead } from "@/components/layout/PageHead";
+import { LogoutItem } from "@/components/layout/LogoutItem";
 
 export const metadata: Metadata = { title: "Menü" };
 
@@ -64,16 +63,7 @@ export default function MorePage() {
             </Link>
           </li>
         ))}
-        <li>
-          <form action={logoutAction}>
-            <button type="submit" style={{ color: "var(--danger-fg)" }}>
-              <span className="avatar avatar-sm menu-avatar" aria-hidden="true">
-                <LogOut size={18} />
-              </span>
-              Çıkış yap
-            </button>
-          </form>
-        </li>
+        <LogoutItem />
       </ul>
 
       <AppInfo version={version} />

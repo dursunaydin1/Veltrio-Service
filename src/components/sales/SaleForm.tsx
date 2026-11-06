@@ -22,6 +22,7 @@ import type { Sale, SaleItem } from "@/lib/db";
 import type { PaymentMethod, Product, TaxMode } from "@/types";
 import { useAppNav } from "@/lib/nav/useAppNav";
 import { OptionalField, OptionalGroup } from "@/components/common/OptionalField";
+import { DateQuickPick } from "@/components/common/DateQuickPick";
 
 type DraftLine = {
   key: string;
@@ -320,7 +321,7 @@ export function SaleForm({
         {unpaidKurus > 0 && totalKurus > 0 && customerId ? (
           <OptionalGroup>
             <OptionalField label="Vade tarihi" chip="Vade tarihi" htmlFor="sl-due" filled={!!dueDate} onClear={() => setDueDate("")}>
-              <input id="sl-due" className="form-input" type="date" value={dueDate} onChange={(e) => setDueDate(e.target.value)} />
+              <DateQuickPick id="sl-due" value={dueDate} onChange={setDueDate} />
               <small style={{ color: "var(--text-muted)" }}>Girilirse vade gününde ve 7 gün gecikince hatırlatılır.</small>
             </OptionalField>
           </OptionalGroup>

@@ -171,8 +171,8 @@ export function ProductForm({ product, initial }: { product?: Product; initial?:
           }}
         >
           <div className="row row-gap-md">
-            <input {...field("brand")} className="form-input" style={{ flex: 1 }} placeholder="Marka" value={values.brand} onChange={(e) => set("brand", e.target.value)} />
-            <input {...field("model")} className="form-input" style={{ flex: 1 }} placeholder="Model" aria-label="Model" value={values.model} onChange={(e) => set("model", e.target.value)} />
+            <input {...field("brand")} className="form-input" style={{ flex: 1 }} placeholder="Marka" value={values.brand} onChange={(e) => set("brand", e.target.value.toLocaleUpperCase("tr"))} autoCapitalize="characters" />
+            <input {...field("model")} className="form-input" style={{ flex: 1 }} placeholder="Model" aria-label="Model" value={values.model} onChange={(e) => set("model", e.target.value.toLocaleUpperCase("tr"))} autoCapitalize="characters" />
           </div>
         </OptionalField>
         <OptionalField label="Son alış fiyatı (₺)" chip="Alış fiyatı" htmlFor="f-lastPurchasePrice" filled={!!values.lastPurchasePrice} onClear={() => set("lastPurchasePrice", "")}>

@@ -1198,7 +1198,29 @@ a.item-card::after {
 .extra-field { animation: fade-in 160ms ease both; }
 /* Seyrek servis işlemleri (yeniden aç, iptal) katlanmış durur (K-085) */
 .more-actions { padding: 0 4px; color: var(--text-secondary); }
-.more-actions summary { min-height: var(--touch-min); display: flex; align-items: center; cursor: pointer; font-weight: 600; font-size: 0.875rem; }
+/* Kendi oku: varsayılan üçgen yazıya yapışıyordu (K-094) */
+.more-actions summary {
+  min-height: var(--touch-min);
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  cursor: pointer;
+  font-weight: 600;
+  font-size: 0.875rem;
+  list-style: none;
+}
+.more-actions summary::-webkit-details-marker { display: none; }
+.more-actions summary::after {
+  content: "";
+  width: 8px;
+  height: 8px;
+  margin-top: -4px;
+  border-right: 2px solid currentColor;
+  border-bottom: 2px solid currentColor;
+  transform: rotate(45deg);
+  transition: transform var(--transition-fast);
+}
+.more-actions[open] summary::after { margin-top: 4px; transform: rotate(-135deg); }
 .more-actions[open] summary { margin-bottom: 8px; }
 /* Seçici listeleri (K-088, K-089): yaklaşık 4 satır görünür, gerisi kutunun içinde kayar.
    Kutu çerçeveli ve sayfadan ayrı görünür; kutunun sonuna gelince kaydırma sayfaya geçer (takılma hissi olmaz). */
@@ -1212,6 +1234,18 @@ a.item-card::after {
   background: var(--bg-subtle);
   touch-action: pan-y;
 }
+
+/* Büyük harfli alanlar (marka, model, seri no) */
+.form-input.upper { text-transform: uppercase; }
+/* Hızlı tarih seçicinin görünmez takvim kaynağı */
+.date-quick-native { position: absolute; width: 1px; height: 1px; opacity: 0; pointer-events: none; }
+/* Parçanın temin durumu satırı */
+.supply-row { display: flex; flex-direction: column; gap: 4px; }
+.supply-row > small { color: var(--text-muted); font-weight: 600; }
+/* Satır içi onay (ör. çıkış) */
+.confirm-row { display: flex; flex-direction: column; gap: 10px; padding: 14px 16px; }
+.confirm-row > span { display: flex; flex-direction: column; gap: 2px; }
+.confirm-row small { color: var(--text-muted); }
 
 .optional-group-wrap { display: flex; flex-direction: column; gap: 8px; }
 .optional-group { display: flex; flex-wrap: wrap; gap: 8px; }

@@ -15,6 +15,7 @@ import {
 import { formatCurrency, formatDateTime } from "@/lib/utils";
 import type { PaymentMethod } from "@/types";
 import { OptionalField, OptionalGroup } from "@/components/common/OptionalField";
+import { DateQuickPick } from "@/components/common/DateQuickPick";
 
 const money = (kurus: number) => formatCurrency(kurus / 100);
 const fieldMoney = (kurus: number) => (kurus / 100).toFixed(2).replace(".", ",");
@@ -236,8 +237,8 @@ export function DeliveryPanel({ service }: { service: Service }) {
         <div className="toggle-card">
           <label className="toggle-row">
             <span>
-              <strong>Borçlu teslim</strong>
-              <small>Müşteri kalan {money(after)} borcu kabul ediyor</small>
+              <strong>Kalan borçla teslim et</strong>
+              <small>Müşteri kalan {money(after)} tutarı sonra ödeyecek; hesabına borç yazılır</small>
             </span>
             <input type="checkbox" className="switch" checked={ack} onChange={(e) => setAck(e.target.checked)} />
           </label>
@@ -250,7 +251,7 @@ export function DeliveryPanel({ service }: { service: Service }) {
         </OptionalField>
         {after > 0 ? (
           <OptionalField label="Ödeme sözü / vade tarihi" chip="Ödeme sözü tarihi" htmlFor="dl-due" filled={!!dueDate} onClear={() => setDueDate("")}>
-            <input id="dl-due" className="form-input" type="date" value={dueDate} onChange={(e) => setDueDate(e.target.value)} />
+            <DateQuickPick id="dl-due" value={dueDate} onChange={setDueDate} />
           </OptionalField>
         ) : null}
       </OptionalGroup>

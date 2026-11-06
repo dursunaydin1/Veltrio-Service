@@ -105,13 +105,21 @@ export function PartyBalancePanel({
 
       {mode === null ? (
         <div className="stack stack-sm">
-          <button type="button" className="btn btn-primary btn-full" onClick={() => setMode("primary")}>
-            {cfg.primary.button}
-          </button>
+          {/* Borç varken ana işlem tahsilat / ödeme; borç yokken ön ödeme seyrek olduğu için "Diğer işlemler"de (K-094) */}
+          {state === "DEBT" ? (
+            <button type="button" className="btn btn-primary btn-full" onClick={() => setMode("primary")}>
+              {cfg.primary.button}
+            </button>
+          ) : null}
           {/* Seyrek işlemler katlanmış durur (K-090) */}
           <details className="more-actions">
             <summary>Diğer işlemler</summary>
             <div className="stack stack-sm">
+              {state !== "DEBT" ? (
+                <button type="button" className="btn btn-secondary btn-full" onClick={() => setMode("primary")}>
+                  {kind === "CUSTOMER" ? "Ön ödeme / avans al" : "Avans ödemesi yap"}
+                </button>
+              ) : null}
               <button type="button" className="btn btn-secondary btn-full" onClick={() => setMode("secondary")}>
                 {cfg.secondary.button}
               </button>

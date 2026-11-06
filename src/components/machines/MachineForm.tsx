@@ -34,6 +34,9 @@ function toFormInput(machine: Machine | undefined, customerId: string): MachineF
 
 type Errors = Partial<Record<keyof MachineFormInput, string>>;
 
+/** Marka, model ve seri no büyük harf (Türkçe kuralıyla: i → İ). */
+const upper = (v: string) => v.toLocaleUpperCase("tr");
+
 /** Makine oluşturma / düzenleme formu (Adım 3.3). Düzenlemede sahip değiştirilemez. */
 export function MachineForm({
   machine,
@@ -133,10 +136,15 @@ export function MachineForm({
 
       <div className="form-group">
         <label className="form-label" htmlFor="m-type">Makine türü *</label>
-        <input {...field("type")} className="form-input" list="machine-types" value={values.type} onChange={(e) => set("type", e.target.value)} autoComplete="off" />
-        <datalist id="machine-types">
-          {MACHINE_TYPES.map((t) => <option key={t} value={t} />)}
-        </datalist>
+        {/* Açılır liste (datalist) telefonda çalışmıyordu: hazır türler çip, listede yoksa yazılır (K-094) */}
+        <div className="chip-group" aria-label="Hazır makine türleri">
+          {MACHINE_TYPES.map((t) => (
+            <button key={t} type="button" className="chip chip-toggle" aria-pressed={values.type === t} onClick={() => set("type", t)}>
+              {t}
+            </button>
+          ))}
+        </div>
+        <input {...field("type")} className="form-input" placeholder="Listede yoksa yazın" value={values.type} onChange={(e) => set("type", e.target.value)} autoComplete="off" />
         {err("type")}
       </div>
 
@@ -145,31 +153,33 @@ export function MachineForm({
         Geçici kayıt (marka / model henüz bilinmiyor)
       </label>
 
-      <div className="row row-gap-md">
-        <div className="form-group" style={{ flex: 1 }}>
-          <label className="form-label" htmlFor="m-brand">Marka {values.isTemporary ? "" : "*"}</label>
-          <input {...field("brand")} className="form-input" list="machine-brands" autoComplete="off" value={values.brand} onChange={(e) => set("brand", e.target.value)} />
-          <datalist id="machine-brands">
-            {brands.map((b) => <option key={b} value={b} />)}
-          </datalist>
-          {err("brand")}
-        </div>
-        <div className="form-group" style={{ flex: 1 }}>
-          <label className="form-label" htmlFor="m-model">Model {values.isTemporary ? "" : "*"}</label>
-          <input {...field("model")} className="form-input" list="machine-models" autoComplete="off" value={values.model} onChange={(e) => set("model", e.target.value)} />
-          <datalist id="machine-models">
-            {models.map((m) => <option key={m} value={m} />)}
-          </datalist>
-          {err("model")}
-        </div>
-      </div>
-
+      {/* Marka / model büyük harfle tutulur (STIHL, MS 250); öneriler çip (K-094) */}
       <div className="form-group">
-        <label className="form-label" htmlFor="m-serialNumber">Seri numarası</label>
-        <input {...field("serialNumber")} className="form-input" value={values.serialNumber} onChange={(e) => set("serialNumber", e.target.value)} autoComplete="off" />
-        {err("serialNumber")}
+        <label className="form-label" htmlFor="m-brand">Marka {values.isTemporary ? "" : "*"}</label>
+        <input {...field("brand")} className="form-input upper" autoComplete="off" autoCapitalize="characters" value={values.brand} onChange={(e) => set("brand", upper(e.target.value))} />
+        <div className="chip-group" aria-label="Marka önerileri">
+          {brands.slice(0, 6).map((b) => (
+            <button key={b} type="button" className="chip chip-toggle" aria-pressed={values.brand === upper(b)} onClick={() => set("brand", upper(b))}>
+              {upper(b)}
+            </button>
+          ))}
+        </div>
+        {err("brand")}
       </div>
-      {!serial ? <p>Seri numarası yoksa makine sistemin atadığı iç numarayla (MK-…) tanınır.</p> : null}
+      <div className="form-group">
+        <label className="form-label" htmlFor="m-model">Model {values.isTemporary ? "" : "*"}</label>
+        <input {...field("model")} className="form-input upper" autoComplete="off" autoCapitalize="characters" value={values.model} onChange={(e) => set("model", upper(e.target.value))} />
+        {models.length > 0 ? (
+          <div className="chip-group" aria-label="Model önerileri">
+            {models.slice(0, 6).map((m) => (
+              <button key={m} type="button" className="chip chip-toggle" aria-pressed={values.model === upper(m)} onClick={() => set("model", upper(m))}>
+                {upper(m)}
+              </button>
+            ))}
+          </div>
+        ) : null}
+        {err("model")}
+      </div>
 
       {duplicates.length > 0 ? (
         <div className="alert alert-warning" role="alert">
@@ -190,7 +200,12 @@ export function MachineForm({
         </div>
       ) : null}
 
+      {!serial ? <small style={{ color: "var(--text-muted)" }}>Seri numarası girilmezse makine sistemin verdiği iç numarayla (MK-…) tanınır.</small> : null}
       <OptionalGroup title="Eklemek isterseniz">
+        <OptionalField label="Seri numarası" chip="Seri no" htmlFor="m-serialNumber" filled={!!values.serialNumber} onClear={() => set("serialNumber", "")}>
+          <input {...field("serialNumber")} className="form-input upper" autoCapitalize="characters" value={values.serialNumber} onChange={(e) => set("serialNumber", upper(e.target.value))} autoComplete="off" />
+          {err("serialNumber")}
+        </OptionalField>
         <OptionalField label="Yıl" htmlFor="m-year" filled={!!values.year} onClear={() => set("year", "")}>
           <input {...field("year")} className="form-input" inputMode="numeric" maxLength={4} value={values.year} onChange={(e) => set("year", e.target.value)} />
           {err("year")}

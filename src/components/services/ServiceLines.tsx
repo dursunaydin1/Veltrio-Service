@@ -15,6 +15,7 @@ import {
   recordApproval,
   removeOperation,
   removePart,
+  updatePart,
   setPartSupply,
   setPartUsedQuantity,
   updateOperation,
@@ -267,6 +268,20 @@ function PartRow({
 }) {
   const ctx = useServiceContext();
   const [used, setUsed] = useState(String(part.used_quantity).replace(".", ","));
+  // Yanlış girilen miktar / fiyat düzeltilir (K-094); açıklama değişecekse satır kaldırılıp yeniden eklenir
+  const [editing, setEditing] = useState(false);
+  const [qtyText, setQtyText] = useState(String(part.quantity).replace(".", ","));
+  const [priceText2, setPriceText2] = useState(String(part.unit_price_snapshot).replace(".", ","));
+
+  async function saveEdit() {
+    if (!ctx) return;
+    const qty = parseQuantityInput(qtyText);
+    const kurus = parseMoneyInput(priceText2);
+    if (qty === null || qty <= 0) return run(async () => { throw new Error("Miktar sıfırdan büyük olmalıdır."); });
+    if (kurus === null) return run(async () => { throw new Error("Fiyat geçerli bir tutar olmalıdır (ör. 450,00)."); });
+    await run(() => updatePart(ctx, part.id, { quantity: qty, unitPriceKurus: kurus }));
+    setEditing(false);
+  }
   const canUse = service.status === "IN_PROGRESS" && part.status !== "REJECTED" && part.status !== "DEFERRED";
 
   async function apply() {
@@ -303,7 +318,19 @@ function PartRow({
       </span>
 
       {part.source_type !== "CUSTOMER_SUPPLIED" && !["DELIVERED", "CANCELLED"].includes(service.status) ? (
-        <SupplyControl part={part} run={run} />
+        <span className="supply-row">
+          <small>Temin durumu</small>
+          <SupplyControl part={part} run={run} />
+        </span>
+      ) : null}
+
+      {editing ? (
+        <span className="row row-gap-sm" style={{ flexWrap: "wrap" }}>
+          <input className="form-input" style={{ maxWidth: 90 }} inputMode="decimal" aria-label="Miktar" value={qtyText} onChange={(e) => setQtyText(e.target.value)} />
+          <input className="form-input" style={{ maxWidth: 130 }} inputMode="decimal" aria-label="Birim fiyat (₺)" value={priceText2} onChange={(e) => setPriceText2(e.target.value)} />
+          <button type="button" className="btn btn-primary btn-sm" onClick={() => void saveEdit()}>Kaydet</button>
+          <button type="button" className="btn btn-ghost btn-sm" onClick={() => setEditing(false)}>Vazgeç</button>
+        </span>
       ) : null}
 
       {canUse ? (
@@ -320,15 +347,19 @@ function PartRow({
         </span>
       ) : null}
 
-      {editable && part.used_quantity === 0 ? (
-        <button
-          type="button"
-          className="btn btn-ghost btn-sm"
-          style={{ alignSelf: "flex-start" }}
-          onClick={() => ctx && window.confirm("Bu parça satırı kaldırılsın mı?") && run(() => removePart(ctx, part.id))}
-        >
-          Kaldır
-        </button>
+      {editable && !editing ? (
+        <span className="row row-gap-sm">
+          <button type="button" className="btn btn-ghost btn-sm" onClick={() => setEditing(true)}>Düzenle</button>
+          {part.used_quantity === 0 ? (
+            <button
+              type="button"
+              className="btn btn-ghost btn-sm"
+              onClick={() => ctx && window.confirm("Bu parça satırı kaldırılsın mı?") && run(() => removePart(ctx, part.id))}
+            >
+              Kaldır
+            </button>
+          ) : null}
+        </span>
       ) : null}
     </li>
   );
