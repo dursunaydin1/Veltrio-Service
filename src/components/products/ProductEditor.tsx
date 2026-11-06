@@ -9,6 +9,7 @@ import { ProductForm } from "@/components/products/ProductForm";
 import { SerialUnitsPanel } from "@/components/products/SerialUnitsPanel";
 import { ProductPurchases, ProductSales } from "@/components/products/ProductDocuments";
 import { StockPanel } from "@/components/products/StockPanel";
+import { ProductBarcodePanel } from "@/components/products/ProductBarcodePanel";
 import { setProductArchived } from "@/lib/products/service";
 import { getProductBalance } from "@/lib/stock/ledger";
 import { formatCurrency, formatQuantity } from "@/lib/utils";
@@ -79,6 +80,8 @@ export function ProductEditor({ id }: { id: string }) {
           <div className="tile-value">{product.last_purchase_price != null ? formatCurrency(product.last_purchase_price) : "—"}</div>
         </div>
       </div>
+      {/* Kutulu üründe fabrika barkodu, açık üründe raf için QR etiketi (K-102) */}
+      {product.is_serial_tracked ? null : <ProductBarcodePanel product={product} />}
       <Link href={`/products/${product.id}/qr`} className="btn btn-secondary btn-full">QR etiketi göster / yazdır</Link>
 
       <div role="tablist" aria-label="Ürün bölümleri">

@@ -43,6 +43,8 @@ Bu kılavuz günlük kullanım içindir. Uygulama içindeki **Menü → Yardım*
 ## 5. QR etiketi
 Makine veya ürün sayfası → *QR etiketi göster / yazdır* → etiket boyutunu seçin → *Yazdır*. QR yalnızca adres taşır; fiyat/stok değişse de etiketi yeniden basmanız gerekmez. Okutmak için Ana ekran → *QR Tara* (telefon kamerası).
 
+**Fabrika barkodu (etiket basmadan):** Kutulu üründe ürün sayfası → *Barkodu tanıt* → kutudaki barkodu okutun (ya da numarayı elle yazın). Sonra *QR / Barkod Tara*'da okutunca ürün açılır; *Satış yap* → *Barkod okut* ile okuttukça ürün satışa eklenir (aynı ürün tekrar okununca miktar artar). Tanınmayan barkod okutursanız *Mevcut ürüne bağla* veya *Yeni ürün olarak ekle* seçilir. Açık / dökme ürünlerde (metreyle zincir, vida) ürün başına değil, rafa bir QR etiketi yeterlidir.
+
 ## 6. Yedekleme
 Sunucu her gece otomatik yedek alır. Ayrıca **Ayarlar → Yedekleme → Yedek al ve indir** ile dosya alabilirsiniz (güvenli saklayın). Geri yükleme **ekleyicidir** (var olanı bozmaz) ve öncesinde otomatik ek yedek indirir.
 

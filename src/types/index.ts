@@ -176,6 +176,8 @@ export interface Product {
   business_id: UUID;
   name: string;
   code?: string;
+  /** Kutudaki fabrika barkodu (EAN / UPC / Code 128); işletmede tekil (K-102) */
+  barcode?: string;
   category?: string;
   brand?: string;
   model?: string;

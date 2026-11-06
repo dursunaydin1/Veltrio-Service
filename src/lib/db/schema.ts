@@ -518,6 +518,11 @@ export class VeltrioDatabase extends Dexie {
     this.version(5).stores({
       return_items: "id, business_id, return_id, product_id, serial_unit_id, original_line_id",
     });
+
+    // Şema sürüm 7: ürün fabrika barkoduyla bulunur (K-102)
+    this.version(7).stores({
+      products: "id, business_id, code, category, archived_at, barcode",
+    });
   }
 }
 

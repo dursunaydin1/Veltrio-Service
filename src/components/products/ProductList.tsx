@@ -21,7 +21,7 @@ import { NoMatchAdd } from "@/components/common/NoMatchAdd";
 
 function matches(product: Product, query: string): boolean {
   if (!query.trim()) return true;
-  const haystack = [product.name, product.code, product.category, product.brand, product.model]
+  const haystack = [product.name, product.code, product.barcode, product.category, product.brand, product.model]
     .filter(Boolean)
     .map((v) => foldText(String(v)))
     .join(" ");

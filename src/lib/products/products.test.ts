@@ -4,10 +4,13 @@ import { db } from "@/lib/db";
 import { parseProductForm, type ProductFormInput } from "./schema";
 import { isCriticalStock } from "./stock";
 import {
+  ProductBarcodeTakenError,
   ProductCodeTakenError,
   ProductNotFoundError,
   createProduct,
+  findProductByBarcode,
   setProductArchived,
+  setProductBarcode,
   updateProduct,
 } from "./service";
 
@@ -174,5 +177,43 @@ describe("ürün servisi", () => {
     const updates = (await db.sync_queue.toArray()).filter((q) => q.table_name === "products");
     expect(updates).toHaveLength(1); // arka arkaya düzenlemeler tek pakette
     expect(updates[0].payload).toMatchObject({ archived_at: null, version: 2 });
+  });
+});
+
+
+describe("ürün barkodu (K-102)", () => {
+  beforeEach(async () => {
+    await db.products.clear();
+    await db.sync_queue.clear();
+  });
+
+  it("barkod tanıtılır, boşluklar atılır ve barkodla ürün bulunur", async () => {
+    const p = await createProduct(ctx, fieldsOf());
+    await setProductBarcode(ctx, p.id, " 8690 1234 56789 ");
+    expect((await findProductByBarcode(ctx.businessId, "8690123456789"))?.id).toBe(p.id);
+    const q = (await db.sync_queue.toArray()).filter((x) => x.table_name === "products");
+    expect(q.at(-1)?.payload).toMatchObject({ barcode: "8690123456789" });
+  });
+
+  it("aynı barkod ikinci ürüne tanıtılamaz, yeni üründe de", async () => {
+    const a = await createProduct(ctx, fieldsOf());
+    const b = await createProduct(ctx, fieldsOf({ code: "BJ-002" }));
+    await setProductBarcode(ctx, a.id, "8690000000001");
+    await expect(setProductBarcode(ctx, b.id, "8690000000001")).rejects.toBeInstanceOf(ProductBarcodeTakenError);
+    await expect(createProduct(ctx, { ...fieldsOf({ code: "BJ-003" }), barcode: "8690000000001" })).rejects.toBeInstanceOf(ProductBarcodeTakenError);
+  });
+
+  it("kaldırınca sunucuya açıkça null gider; barkodsuz düzenleme barkod göndermez", async () => {
+    const p = await createProduct(ctx, fieldsOf());
+    await setProductBarcode(ctx, p.id, "8690000000002");
+    await setProductBarcode(ctx, p.id, null);
+    expect(await findProductByBarcode(ctx.businessId, "8690000000002")).toBeUndefined();
+    const q = (await db.sync_queue.toArray()).filter((x) => x.table_name === "products");
+    expect(q.at(-1)?.payload).toMatchObject({ barcode: null });
+
+    await db.sync_queue.clear();
+    const c = await createProduct(ctx, fieldsOf({ code: "BJ-009" }));
+    await updateProduct(ctx, c.id, fieldsOf({ code: "BJ-009", name: "Yeni ad" }));
+    for (const item of await db.sync_queue.toArray()) expect(item.payload).not.toHaveProperty("barcode");
   });
 });

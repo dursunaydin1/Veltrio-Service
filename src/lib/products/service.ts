@@ -19,6 +19,13 @@ export class ProductCodeTakenError extends Error {
   }
 }
 
+export class ProductBarcodeTakenError extends Error {
+  constructor(public readonly existing: Product) {
+    super(`Bu barkod zaten “${existing.name}” ürününde kayıtlı.`);
+    this.name = "ProductBarcodeTakenError";
+  }
+}
+
 export class ProductNotFoundError extends Error {
   constructor() {
     super("Ürün bulunamadı.");
@@ -60,7 +67,49 @@ function editablePayload(product: Product): Record<string, unknown> {
   for (const column of EDITABLE_COLUMNS) {
     payload[column] = product[column] ?? null;
   }
+  // Barkod yalnızca doluysa gider (K-102); silme `setProductBarcode` ile açıkça null gönderir.
+  if (product.barcode) payload.barcode = product.barcode;
   return payload;
+}
+
+/** Okunan barkodu karşılaştırılabilir hâle getirir: boşluk ve kontrol karakterleri atılır. */
+export function normalizeBarcode(raw: string): string {
+  return raw.replace(/[\s\u0000-\u001f]+/g, "").trim();
+}
+
+/** İşletmede bu barkodu taşıyan ürün (arşivdekiler dahil). */
+export async function findProductByBarcode(businessId: string, raw: string): Promise<Product | undefined> {
+  const barcode = normalizeBarcode(raw);
+  if (!barcode) return undefined;
+  return db.products.where("barcode").equals(barcode).filter((p) => p.business_id === businessId).first();
+}
+
+/**
+ * Ürüne fabrika barkodunu tanıtır ya da kaldırır (`null`). Aynı barkod başka üründeyse
+ * `ProductBarcodeTakenError`; böylece okutunca hangi ürünün açılacağı hep belli olur.
+ */
+export async function setProductBarcode(ctx: ProductContext, id: string, raw: string | null): Promise<Product> {
+  const barcode = raw == null ? undefined : normalizeBarcode(raw) || undefined;
+  if (barcode && (barcode.length < 4 || barcode.length > 64)) throw new Error("Barkod 4-64 karakter olmalıdır.");
+  return db.transaction("rw", db.products, db.sync_queue, async () => {
+    const existing = await db.products.get(id);
+    if (!existing || existing.business_id !== ctx.businessId) throw new ProductNotFoundError();
+    if (barcode) {
+      const other = await findProductByBarcode(ctx.businessId, barcode);
+      if (other && other.id !== id) throw new ProductBarcodeTakenError(other);
+    }
+    if ((existing.barcode ?? undefined) === barcode) return existing;
+    const next: Product = { ...existing, barcode, updated_at: nowISO() };
+    await db.products.put(next);
+    await enqueue(
+      "products",
+      id,
+      "UPDATE",
+      { ...editablePayload(next), barcode: barcode ?? null, version: existing.version ?? 1 },
+      ctx.deviceCode
+    );
+    return next;
+  });
 }
 
 /** Aynı işletmede (büyük/küçük harf ayrımsız) bu kodu kullanan başka ürün var mı? */
@@ -100,6 +149,11 @@ export async function createProduct(
   await db.transaction("rw", db.products, db.sync_queue, async () => {
     if (fields.code && (await isProductCodeTaken(ctx.businessId, fields.code))) {
       throw new ProductCodeTakenError(fields.code);
+    }
+    if (product.barcode) {
+      product.barcode = normalizeBarcode(product.barcode) || undefined;
+      const other = product.barcode ? await findProductByBarcode(ctx.businessId, product.barcode) : undefined;
+      if (other) throw new ProductBarcodeTakenError(other);
     }
     await db.products.add(product);
     await enqueue(

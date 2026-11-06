@@ -23,7 +23,12 @@ import type { PaymentMethod, Product, TaxMode } from "@/types";
 import { useAppNav } from "@/lib/nav/useAppNav";
 import { OptionalField, OptionalGroup } from "@/components/common/OptionalField";
 import { DateQuickPick } from "@/components/common/DateQuickPick";
-import { X } from "lucide-react";
+import { ScanBarcode, X } from "lucide-react";
+import { CodeScanner } from "@/components/qr/CodeScanner";
+import { haptic } from "@/components/layout/QuickDial";
+import { parseScan } from "@/lib/qr/payload";
+import { findProductByBarcode, normalizeBarcode } from "@/lib/products/service";
+import { db } from "@/lib/db";
 import { QuantityStepper, stepQuantity } from "@/components/common/QuantityStepper";
 
 type DraftLine = {
@@ -110,6 +115,8 @@ export function SaleForm({
   const [negativeReason, setNegativeReason] = useState("");
   const [error, setError] = useState<string | null>(null);
   const [busy, setBusy] = useState(false);
+  const [scanning, setScanning] = useState(false);
+  const [scanNote, setScanNote] = useState<{ ok: boolean; text: string } | null>(null);
 
   function addProduct(product: Product) {
     setLines((current) => {
@@ -134,6 +141,26 @@ export function SaleForm({
       ];
     });
     setPickerKey((k) => k + 1);
+  }
+
+  /** Okutulan barkod / ürün QR'ı: ürün bulunursa satışa eklenir (aynıysa miktar artar) */
+  async function addScanned(text: string) {
+    if (!ctx) return;
+    const qr = parseScan(text);
+    let product: Product | undefined;
+    if (qr.ok) {
+      if (qr.kind !== "product") return setScanNote({ ok: false, text: "Bu bir makine etiketi; ürün barkodu ya da ürün QR'ı okutun." });
+      product = await db.products.get(qr.path.split("/").pop() ?? "");
+    } else {
+      product = await findProductByBarcode(ctx.businessId, text);
+    }
+    if (!product || product.business_id !== ctx.businessId) {
+      return setScanNote({ ok: false, text: `Bu barkod kayıtlı değil (${normalizeBarcode(text)}). Ürünü yukarıdan arayıp ekleyin; ürün sayfasında “Barkodu tanıt” ile bağlarsanız bir dahakine okunur.` });
+    }
+    if (product.archived_at) return setScanNote({ ok: false, text: `“${product.name}” pasif; satışa eklenemez.` });
+    haptic();
+    addProduct(product);
+    setScanNote({ ok: true, text: `Eklendi: ${product.name}` });
   }
 
   const update = (key: string, patch: Partial<DraftLine>) =>
@@ -237,6 +264,18 @@ export function SaleForm({
       noValidate
     >
       <OfflineStockNotice />
+      {/* Tezgâhta en hızlı yol (K-102): kutudaki barkod ya da raf QR etiketi okutulur, kamera açık kalır */}
+      {scanning ? (
+        <div className="card stack stack-sm">
+          <CodeScanner label="Barkod ya da QR etiketi" onCode={(text) => void addScanned(text)} />
+          {scanNote ? <div className={`alert ${scanNote.ok ? "alert-success" : "alert-warning"}`} role="status">{scanNote.text}</div> : null}
+          <button type="button" className="btn btn-secondary btn-full" onClick={() => { setScanning(false); setScanNote(null); }}>Okutma bitti</button>
+        </div>
+      ) : (
+        <button type="button" className="btn btn-secondary btn-full" onClick={() => setScanning(true)}>
+          <ScanBarcode size={18} aria-hidden="true" /> Barkod okut
+        </button>
+      )}
       <ProductPicker key={pickerKey} value="" onChange={addProduct} label="Ürün ekle" includeSerial />
 
       {lines.length > 0 ? (

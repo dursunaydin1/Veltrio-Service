@@ -5,9 +5,18 @@
 
 ## 2026-11-06
 
+### K-102 · Fabrika barkodu: tanıt, okut, satışa ekle
+- **Neden:** Her ürüne işletme etiketi basmak israf. Kutulu üründe fabrika barkodu kullanılır; açık / dökme üründe rafa tek QR etiketi; makinede makine QR'ı; nadir ürün aramayla bulunur.
+- **Veri:** Migration 026 `products.barcode` (4-64 karakter, işletmede tekil kısmi indeks). Dexie sürüm 7 `products.barcode` indeksi. Barkod yalnızca doluyken eşitleme paketine girer; kaldırma `setProductBarcode(null)` ile açık `null` gönderir. Böylece 026 uygulanmadan önce de olağan ürün eşitlemesi bozulmaz.
+- **Okuyucu:** QR Tara ekranının kamera / izin / fotoğrafla okutma akışı ortak `CodeScanner`a taşındı; QR'a ek EAN-13/8, UPC-A/E, Code 128/39, ITF okur (Android'de tarayıcının yerleşik barkod algılayıcısı kullanılır). Aynı kod 2 sn içinde ikinci kez bildirilmez.
+- **QR / Barkod Tara:** QR etiketi → kayıt; barkod → tanıtılmış ürün. Tanınmayan barkod: "Mevcut ürüne bağla" (ürün seçici) ya da "Yeni ürün olarak ekle" (`/products/new?barcode=`; barkod yeni ürüne yazılır).
+- **Ürün sayfası:** "Barkod" kartı: Barkodu tanıt (kamera) / numarayı elle yaz / değiştir / kaldır (onaylı). Seri takipli (makine) üründe yok.
+- **Satış:** "Barkod okut" kamerayı açık tutar; her okutma ürünü ekler, aynı ürün miktarı artırır; ürün QR etiketi (raf) de çalışır; makine etiketi ve pasif ürün reddedilir.
+- **Arama:** Ürün listesi, ürün seçici ve genel arama barkod numarasıyla da bulur.
+
 ### K-101 · Uzun listede "Başa dön"; kutu içi kaydırma yok
 - **Soru:** Müşteri / servis listesi uzayınca 5 satırlık kutu içinde kaydırma daha mı iyi? **Karar:** Hayır. Telefonda iç kutu ile sayfa kaydırması çakışır, ekranın küçük bir kısmı kullanılır; profesyonel uygulamalar (Rehber, Gmail, WhatsApp) listeyi sayfayla kaydırır. Mevcut düzen korunur: sekmeler + arama üstte yapışık (K-097), 30'ar yükleme.
-- **Eklenen:** Sayfa biraz (200 px, K-102; ilk hâli 900 px) aşağı inince alt çubuğun üstünde sağda yuvarlak "Başa dön" düğmesi (`ScrollTopButton`, AppShell'de, her uzun sayfada). Açık sekmeye yeniden dokunmak da başa döndürür (K-076, zaten vardı). Hızlı seçim açıkken ve yazdırmada gizli.
+- **Eklenen:** Sayfa biraz (200 px; ilk hâli 900 px) aşağı inince alt çubuğun üstünde sağda yuvarlak "Başa dön" düğmesi (`ScrollTopButton`, AppShell'de, her uzun sayfada). Açık sekmeye yeniden dokunmak da başa döndürür (K-076, zaten vardı). Hızlı seçim açıkken ve yazdırmada gizli.
 
 ### K-100 · Raporlarda aramalı seçici
 - **Hesap ekstresi:** Müşteri açılır listesi yerine `CustomerPicker` (ad, telefon, köyle süzülür). Raporda "+ Yeni müşteri" yok (`allowAdd={false}`); arşivlenmiş müşteriler de seçilebilir (`includeArchived`), eski hesabın ekstresi alınabilsin.

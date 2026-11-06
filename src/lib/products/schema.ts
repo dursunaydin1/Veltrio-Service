@@ -70,6 +70,8 @@ export type ProductFields = {
   compatible_models_note?: string;
   storage_location?: string;
   photo?: string;
+  /** Yalnızca yeni üründe (okutulan barkoddan açılınca) verilir; sonradan `setProductBarcode` ile değişir */
+  barcode?: string;
 };
 
 export type ProductFormResult =

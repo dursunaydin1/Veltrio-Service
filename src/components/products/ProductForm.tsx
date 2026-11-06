@@ -43,7 +43,9 @@ function toFormInput(product: Product | undefined, taxMode: TaxMode, taxRate: nu
 type Errors = Partial<Record<keyof ProductFormInput, string>>;
 
 /** Ürün oluşturma ve düzenleme formu (Adım 2.1). */
-export function ProductForm({ product, initial }: { product?: Product; initial?: { name?: string } }) {
+export function ProductForm({ product, initial }: { product?: Product; initial?: { name?: string; barcode?: string } }) {
+  // QR / Barkod Tara'da tanınmayan barkoddan açıldıysa yeni ürüne kaydedilir (K-102)
+  const barcode = !product ? initial?.barcode?.trim() || undefined : undefined;
   // Kaydedince form geçmişten çıkar; geri hareketi formu yeniden açmaz (K-076)
   const nav = useAppNav();
   const ctx = useBusinessContext();
@@ -86,7 +88,7 @@ export function ProductForm({ product, initial }: { product?: Product; initial?:
       if (product) {
         await updateProduct(ctx, product.id, parsed.fields);
         id = product.id;
-      } else id = (await createProduct(ctx, parsed.fields)).id;
+      } else id = (await createProduct(ctx, { ...parsed.fields, barcode })).id;
       nav.replace(`/products/${id}`);
     } catch (e) {
       if (e instanceof ProductCodeTakenError) setErrors({ code: e.message });
@@ -111,6 +113,11 @@ export function ProductForm({ product, initial }: { product?: Product; initial?:
 
   return (
     <form className="stack stack-md" onSubmit={handleSubmit} noValidate>
+      {barcode ? (
+        <div className="alert alert-info" role="note">
+          Okutulan barkod <b className="mono">{barcode}</b> bu ürüne kaydedilecek.
+        </div>
+      ) : null}
       <div className="form-group">
         <label className="form-label" htmlFor="f-name">Ürün adı *</label>
         <input

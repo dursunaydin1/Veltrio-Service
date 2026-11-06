@@ -3,7 +3,7 @@
 import { useEffect, useState } from "react";
 import { ArrowUp } from "lucide-react";
 
-/** Biraz aşağı inince belirir (yaklaşık 3 liste satırı, K-102); en baştayken görünmez */
+/** Biraz aşağı inince belirir (yaklaşık 3 liste satırı, K-101); en baştayken görünmez */
 const SHOW_AFTER = 200;
 
 /**

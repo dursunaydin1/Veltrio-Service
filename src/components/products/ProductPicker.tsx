@@ -69,7 +69,7 @@ export function ProductPicker({
   const words = foldText(query.trim()).split(/\s+/).filter(Boolean);
   const matches = (products ?? [])
     .filter((p) => {
-      const haystack = foldText([p.name, p.code, p.brand, p.model, p.category].filter(Boolean).join(" "));
+      const haystack = foldText([p.name, p.code, p.barcode, p.brand, p.model, p.category].filter(Boolean).join(" "));
       return words.every((w) => haystack.includes(w));
     })
     // Arama yokken en son eklenen / güncellenen önde (yeni kayıt hemen görünür); aranırken alfabetik.

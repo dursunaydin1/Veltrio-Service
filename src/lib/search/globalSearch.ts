@@ -111,7 +111,7 @@ export async function searchAll(
   }
 
   for (const p of take(
-    products.filter((p) => (withArchived || !p.archived_at) && matchesWords(words, p.name, p.code, p.brand, p.model, p.category))
+    products.filter((p) => (withArchived || !p.archived_at) && matchesWords(words, p.name, p.code, p.barcode, p.brand, p.model, p.category))
   )) {
     push("product", { id: p.id, title: p.name, subtitle: [p.code, p.brand, p.model].filter(Boolean).join(" · "), href: `/products/${p.id}`, archived: !!p.archived_at });
   }
