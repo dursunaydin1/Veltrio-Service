@@ -21,11 +21,10 @@ import {
   getSaleItems,
   getSalePayments,
 } from "@/lib/sales/service";
-import { formatCurrency, formatDate, formatDateTime, formatQuantity } from "@/lib/utils";
+import { formatCurrency, formatDate, formatDateTime, formatKurus, formatQuantity, moneyInput, moneyInputFromKurus } from "@/lib/utils";
 import { Wallet, XCircle } from "lucide-react";
 import type { PaymentMethod } from "@/types";
 
-const money = (kurus: number) => formatCurrency(kurus / 100);
 
 /** Satış detayı: satırlar, toplamlar, taslak işlemleri, tahsilat (Adım 4.8). */
 export function SaleDetail({ id }: { id: string }) {
@@ -186,7 +185,7 @@ function DraftActions({ sale, onEdit }: { sale: Sale; onEdit: () => void }) {
               </select>
             </div>
           </div>
-          <button type="button" className="btn btn-ghost btn-sm" style={{ alignSelf: "flex-start" }} onClick={() => setReceived(sale.total_amount.toFixed(2).replace(".", ","))}>
+          <button type="button" className="btn btn-ghost btn-sm" style={{ alignSelf: "flex-start" }} onClick={() => setReceived(moneyInput(sale.total_amount))}>
             Tamamı peşin: {formatCurrency(sale.total_amount)}
           </button>
           {needsNeg ? (
@@ -248,16 +247,16 @@ function SalePayments({ sale }: { sale: Sale }) {
       <div className="tile-grid">
         <div className="tile">
           <div className="tile-label">Satış tutarı</div>
-          <div className="tile-value">{money(balance?.total ?? 0)}</div>
+          <div className="tile-value">{formatKurus(balance?.total ?? 0)}</div>
         </div>
         <div className="tile">
           <div className="tile-label">Tahsil edilen</div>
-          <div className="tile-value">{money(balance?.paid ?? 0)}</div>
+          <div className="tile-value">{formatKurus(balance?.paid ?? 0)}</div>
         </div>
         <div className="tile">
           <div className="tile-label">{remaining < 0 ? "Fazla ödeme" : "Kalan (veresiye)"}</div>
           <div className="tile-value" style={{ color: remaining > 0 ? "var(--accent-warning)" : remaining < 0 ? "var(--accent-success)" : undefined }}>
-            {money(Math.abs(remaining))}
+            {formatKurus(Math.abs(remaining))}
           </div>
         </div>
       </div>
@@ -268,8 +267,8 @@ function SalePayments({ sale }: { sale: Sale }) {
             <label className="form-label" htmlFor="sp-amount">Tutar (₺) *</label>
             <input id="sp-amount" className="form-input" inputMode="decimal" placeholder="0,00" value={amount} onChange={(e) => setAmount(e.target.value)} autoFocus />
             {remaining > 0 ? (
-              <button type="button" className="btn btn-ghost btn-sm" onClick={() => setAmount((remaining / 100).toFixed(2).replace(".", ","))}>
-                Kalanın tamamı: {money(remaining)}
+              <button type="button" className="btn btn-ghost btn-sm" onClick={() => setAmount(moneyInputFromKurus(remaining))}>
+                Kalanın tamamı: {formatKurus(remaining)}
               </button>
             ) : null}
           </div>

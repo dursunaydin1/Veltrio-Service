@@ -2,7 +2,7 @@ import { db } from "@/lib/db";
 import { getSaleBalance } from "@/lib/sales/service";
 import { getServiceBalance } from "@/lib/services/service";
 import { daysOverdue } from "@/lib/finance/aging";
-import { formatCurrency, todayLocalDate } from "@/lib/utils";
+import { formatKurus, todayLocalDate } from "@/lib/utils";
 import { reconcileNotifications } from "./core";
 import type { BusinessContext } from "@/hooks/useBusinessContext";
 
@@ -27,7 +27,6 @@ export type PlannedReminder = {
   message: string;
 };
 
-const money = (kurus: number) => formatCurrency(kurus / 100);
 
 /** Bugüne göre üretilmesi gereken hatırlatmalar (saf fonksiyon). */
 export function planDueReminders(candidates: DueCandidate[], today: string): PlannedReminder[] {
@@ -40,14 +39,14 @@ export function planDueReminders(candidates: DueCandidate[], today: string): Pla
       out.push({
         dedupeKey: `${base}:DUE`,
         relatedId: c.id,
-        message: `Vade günü: ${c.customerName} — ${c.label}, kalan ${money(c.remainingKurus)}`,
+        message: `Vade günü: ${c.customerName} — ${c.label}, kalan ${formatKurus(c.remainingKurus)}`,
       });
     }
     if (days > 7) {
       out.push({
         dedupeKey: `${base}:OVERDUE7`,
         relatedId: c.id,
-        message: `${days} gün gecikti: ${c.customerName} — ${c.label}, kalan ${money(c.remainingKurus)}`,
+        message: `${days} gün gecikti: ${c.customerName} — ${c.label}, kalan ${formatKurus(c.remainingKurus)}`,
       });
     }
   }

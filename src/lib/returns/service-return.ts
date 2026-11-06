@@ -8,7 +8,7 @@ import { getServiceBalance, type ServiceContext } from "@/lib/services/service";
 import { recordMovement } from "@/lib/stock/service";
 import { writeAuditLog } from "@/lib/sync/audit";
 import { enqueue } from "@/lib/sync/queue";
-import { generateId, nowISO } from "@/lib/utils";
+import { formatKurus, generateId, nowISO } from "@/lib/utils";
 import type { Payment, PaymentMethod } from "@/types";
 import {
   ReturnRuleError,
@@ -205,7 +205,7 @@ export async function refundCancelledServicePayment(
     }
     const { paid } = await getServiceBalance(serviceId);
     if (params.amountKurus > paid) {
-      throw new ReturnRuleError(`İade edilebilecek en fazla tutar ${fromKurus(Math.max(paid, 0)).toFixed(2).replace(".", ",")} ₺.`);
+      throw new ReturnRuleError(`İade edilebilecek en fazla tutar ${formatKurus(Math.max(paid, 0))}.`);
     }
     const payment = await recordCustomerPayment(ctx, {
       customerId: service.customer_id,

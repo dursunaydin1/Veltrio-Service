@@ -13,7 +13,7 @@ import {
   updateDraftPurchase,
   type PurchaseInput,
 } from "@/lib/purchases/service";
-import { formatCurrency, todayLocalDate } from "@/lib/utils";
+import { formatCurrency, moneyInput, todayLocalDate } from "@/lib/utils";
 import type { Purchase, PurchaseItem } from "@/lib/db";
 import type { PaymentMethod, Product, TaxMode } from "@/types";
 import { useAppNav } from "@/lib/nav/useAppNav";
@@ -34,7 +34,6 @@ type DraftLine = {
   serial: string;
 };
 
-const fieldMoney = (tl: number) => tl.toFixed(2).replace(".", ",");
 let keySeq = 0;
 const nextKey = () => `l${++keySeq}`;
 
@@ -45,8 +44,8 @@ function fromItems(items: PurchaseItem[]): DraftLine[] {
     name: i.description_snapshot,
     unit: i.unit,
     quantity: String(i.quantity).replace(".", ","),
-    price: fieldMoney(i.unit_price),
-    discount: i.line_discount > 0 ? fieldMoney(i.line_discount) : "",
+    price: moneyInput(i.unit_price),
+    discount: i.line_discount > 0 ? moneyInput(i.line_discount) : "",
     taxMode: i.tax_mode as TaxMode,
     taxRate: String(i.tax_rate).replace(".", ","),
     isSerial: Array.isArray(i.serial_numbers),
@@ -98,7 +97,7 @@ export function PurchaseForm({
   const [supplierRef, setSupplierRef] = useState(purchase?.supplier_ref ?? "");
   const [notes, setNotes] = useState(purchase?.notes ?? "");
   const [quick, setQuick] = useState(!!purchase && items.length === 0);
-  const [manualTotal, setManualTotal] = useState(purchase && items.length === 0 ? fieldMoney(purchase.total_amount) : "");
+  const [manualTotal, setManualTotal] = useState(purchase && items.length === 0 ? moneyInput(purchase.total_amount) : "");
   const [lines, setLines] = useState<DraftLine[]>(() => fromItems(items));
   const [pickerKey, setPickerKey] = useState(0);
   const [paid, setPaid] = useState("");
@@ -115,7 +114,7 @@ export function PurchaseForm({
         name: product.name,
         unit: product.unit,
         quantity: "1",
-        price: product.last_purchase_price ? fieldMoney(product.last_purchase_price) : "",
+        price: product.last_purchase_price ? moneyInput(product.last_purchase_price) : "",
         discount: "",
         taxMode: product.default_tax_mode,
         taxRate: String(product.default_tax_rate).replace(".", ","),

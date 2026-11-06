@@ -1,5 +1,6 @@
 "use client";
 
+import { moneyInput } from "@/lib/utils";
 import { PhotoField } from "@/components/common/PhotoField";
 import { useState } from "react";
 import { useBusinessContext } from "@/hooks/useBusinessContext";
@@ -15,8 +16,7 @@ import type { Product, TaxMode } from "@/types";
 import { useAppNav } from "@/lib/nav/useAppNav";
 import { OptionalField, OptionalGroup } from "@/components/common/OptionalField";
 
-const money = (n: number | null | undefined) =>
-  n == null ? "" : n.toFixed(2).replace(".", ",");
+const money = (n: number | null | undefined) => (n == null ? "" : moneyInput(n));
 const decimal = (n: number | null | undefined) =>
   n == null ? "" : String(n).replace(".", ",");
 

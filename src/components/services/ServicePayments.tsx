@@ -12,13 +12,11 @@ import {
   getServiceBalance,
   getServicePayments,
 } from "@/lib/services/service";
-import { formatCurrency, formatDateTime } from "@/lib/utils";
+import { formatCurrency, formatDateTime, formatKurus, moneyInputFromKurus } from "@/lib/utils";
 import type { PaymentMethod } from "@/types";
 import { OptionalField, OptionalGroup } from "@/components/common/OptionalField";
 import { DateQuickPick } from "@/components/common/DateQuickPick";
 
-const money = (kurus: number) => formatCurrency(kurus / 100);
-const fieldMoney = (kurus: number) => (kurus / 100).toFixed(2).replace(".", ",");
 
 function useBalance(serviceId: string) {
   return useLiveQuery(() => getServiceBalance(serviceId), [serviceId]);
@@ -44,11 +42,11 @@ export function ServicePayments({ service, onCollected }: { service: Service; on
       <div className="tile-grid">
         <div className="tile">
           <div className="tile-label">Servis tutarı</div>
-          <div className="tile-value">{money(balance?.total ?? 0)}</div>
+          <div className="tile-value">{formatKurus(balance?.total ?? 0)}</div>
         </div>
         <div className="tile">
           <div className="tile-label">Tahsil edilen</div>
-          <div className="tile-value">{money(balance?.paid ?? 0)}</div>
+          <div className="tile-value">{formatKurus(balance?.paid ?? 0)}</div>
         </div>
         <div className="tile">
           <div className="tile-label">{remaining < 0 ? "Fazla ödeme" : "Kalan"}</div>
@@ -56,7 +54,7 @@ export function ServicePayments({ service, onCollected }: { service: Service; on
             className="tile-value"
             style={{ color: remaining > 0 ? "var(--accent-warning)" : remaining < 0 ? "var(--accent-success)" : undefined }}
           >
-            {money(Math.abs(remaining))}
+            {formatKurus(Math.abs(remaining))}
           </div>
         </div>
       </div>
@@ -151,8 +149,8 @@ function CollectForm({ service, onDone, onSaved }: { service: Service; onDone: (
         <label className="form-label" htmlFor="col-amount">Tutar (₺) *</label>
         <input id="col-amount" className="form-input" inputMode="decimal" placeholder="0,00" value={amount} onChange={(e) => setAmount(e.target.value)} autoFocus />
         {balance && balance.remaining > 0 ? (
-          <button type="button" className="btn btn-ghost btn-sm" onClick={() => setAmount(fieldMoney(balance.remaining))}>
-            Kalanın tamamı: {money(balance.remaining)}
+          <button type="button" className="btn btn-ghost btn-sm" onClick={() => setAmount(moneyInputFromKurus(balance.remaining))}>
+            Kalanın tamamı: {formatKurus(balance.remaining)}
           </button>
         ) : null}
       </div>
@@ -220,8 +218,8 @@ export function DeliveryPanel({ service }: { service: Service }) {
       <h2 id="dl-title">Teslim et</h2>
 
       <div className={`alert ${after > 0 ? "alert-warning" : "alert-success"}`} role="status">
-        Kalan bakiye: <strong>{money(Math.max(balance?.remaining ?? 0, 0))}</strong>
-        {planned > 0 ? <> · Bu tahsilattan sonra: <strong>{after > 0 ? money(after) : "borç yok"}</strong></> : null}
+        Kalan bakiye: <strong>{formatKurus(Math.max(balance?.remaining ?? 0, 0))}</strong>
+        {planned > 0 ? <> · Bu tahsilattan sonra: <strong>{after > 0 ? formatKurus(after) : "borç yok"}</strong></> : null}
       </div>
 
       <div className="row row-gap-md">
@@ -239,7 +237,7 @@ export function DeliveryPanel({ service }: { service: Service }) {
         </div>
       </div>
       {balance && balance.remaining > 0 ? (
-        <button type="button" className="btn btn-ghost btn-sm" style={{ alignSelf: "flex-start" }} onClick={() => setAmount(fieldMoney(balance.remaining))}>
+        <button type="button" className="btn btn-ghost btn-sm" style={{ alignSelf: "flex-start" }} onClick={() => setAmount(moneyInputFromKurus(balance.remaining))}>
           Kalanın tamamını tahsil et
         </button>
       ) : null}
@@ -249,7 +247,7 @@ export function DeliveryPanel({ service }: { service: Service }) {
           <label className="toggle-row">
             <span>
               <strong>Kalan borçla teslim et</strong>
-              <small>Müşteri kalan {money(after)} tutarı sonra ödeyecek; hesabına borç yazılır</small>
+              <small>Müşteri kalan {formatKurus(after)} tutarı sonra ödeyecek; hesabına borç yazılır</small>
             </span>
             <input type="checkbox" className="switch" checked={ack} onChange={(e) => setAck(e.target.checked)} />
           </label>

@@ -4,7 +4,7 @@ import { getSaleBalance } from "@/lib/sales/service";
 import { getServiceBalance } from "@/lib/services/service";
 import { writeAuditLog } from "@/lib/sync/audit";
 import { enqueue } from "@/lib/sync/queue";
-import { generateId, nowISO, todayLocalDate } from "@/lib/utils";
+import { formatKurus, generateId, nowISO, todayLocalDate } from "@/lib/utils";
 import type { BusinessContext } from "@/hooks/useBusinessContext";
 import type { PaymentMethod } from "@/types";
 import { AGING_BANDS, ageItems, type AgingBandId } from "./aging";
@@ -151,7 +151,7 @@ function validateAllocations(open: CustomerOpenItems, allocations: CollectionAll
     const item = open.items.find((i) => i.key === key);
     if (!item) throw new FinanceRuleError("Tahsis edilen kalem açık değil.");
     if (a.amountKurus > item.remainingKurus) {
-      throw new FinanceRuleError(`“${item.label}” için en fazla ${fromKurus(item.remainingKurus).toFixed(2).replace(".", ",")} ₺ tahsis edilebilir.`);
+      throw new FinanceRuleError(`“${item.label}” için en fazla ${formatKurus(item.remainingKurus)} tahsis edilebilir.`);
     }
     sum += a.amountKurus;
   }

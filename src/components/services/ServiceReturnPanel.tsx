@@ -15,7 +15,7 @@ import {
   refundCancelledServicePayment,
 } from "@/lib/returns/service-return";
 import { getServiceBalance } from "@/lib/services/service";
-import { formatCurrency, formatDateTime, formatQuantity } from "@/lib/utils";
+import { formatCurrency, formatDateTime, formatQuantity, moneyInputFromKurus } from "@/lib/utils";
 import type { PaymentMethod } from "@/types";
 import { OptionalField, OptionalGroup } from "@/components/common/OptionalField";
 
@@ -86,7 +86,7 @@ function CancelledRefund({ service }: { service: Service }) {
               </select>
             </div>
           </div>
-          <button type="button" className="btn btn-ghost btn-sm" style={{ alignSelf: "flex-start" }} onClick={() => setAmount((refundable / 100).toFixed(2).replace(".", ","))}>
+          <button type="button" className="btn btn-ghost btn-sm" style={{ alignSelf: "flex-start" }} onClick={() => setAmount(moneyInputFromKurus(refundable))}>
             Tamamı: {formatCurrency(refundable / 100)}
           </button>
           {error ? <div className="alert alert-error" role="alert">{error}</div> : null}

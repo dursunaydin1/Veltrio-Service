@@ -7,7 +7,7 @@ import { createMachine } from "@/lib/machines/service";
 import { nextDocumentNo } from "@/lib/numbering";
 import { writeAuditLog } from "@/lib/sync/audit";
 import { enqueue } from "@/lib/sync/queue";
-import { generateId, nowISO } from "@/lib/utils";
+import { formatKurus, generateId, nowISO } from "@/lib/utils";
 import type { BusinessContext } from "@/hooks/useBusinessContext";
 import type { Payment, PaymentMethod } from "@/types";
 import { isBilled, needsApprovalBeforeWork, summarizeLines } from "./lines";
@@ -644,14 +644,14 @@ export async function deliverService(
       const indebted = remaining > 0;
       if (indebted && !params.debtAcknowledged) {
         throw new ServiceRuleError(
-          `Kalan bakiye ${fromKurus(remaining).toFixed(2).replace(".", ",")} ₺. Tahsilat alın veya müşterinin borcu kabul ettiğini işaretleyin.`
+          `Kalan bakiye ${formatKurus(remaining)}. Tahsilat alın veya müşterinin borcu kabul ettiğini işaretleyin.`
         );
       }
 
       const receiver = params.receiverName?.trim() || undefined;
       const note = [
         receiver ? `Teslim alan: ${receiver}` : undefined,
-        indebted ? `Borçlu teslim: kalan ${fromKurus(remaining).toFixed(2).replace(".", ",")} ₺ (müşteri borcu kabul etti)` : undefined,
+        indebted ? `Borçlu teslim: kalan ${formatKurus(remaining)} (müşteri borcu kabul etti)` : undefined,
       ]
         .filter(Boolean)
         .join(" · ");

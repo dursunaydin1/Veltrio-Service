@@ -19,10 +19,9 @@ import {
   payPurchase,
   receivePurchase,
 } from "@/lib/purchases/service";
-import { formatCurrency, formatDate, formatDateTime, formatQuantity } from "@/lib/utils";
+import { formatCurrency, formatDate, formatDateTime, formatKurus, formatQuantity, moneyInputFromKurus } from "@/lib/utils";
 import type { PaymentMethod } from "@/types";
 
-const money = (kurus: number) => formatCurrency(kurus / 100);
 
 /** Satın alma detayı: satırlar, teslim alma, iptal, ödemeler (Adım 4.6-4.7). */
 export function PurchaseDetail({ id }: { id: string }) {
@@ -236,16 +235,16 @@ function PurchasePayments({ purchase }: { purchase: Purchase }) {
       <div className="tile-grid">
         <div className="tile">
           <div className="tile-label">Alım tutarı</div>
-          <div className="tile-value">{money(balance?.total ?? 0)}</div>
+          <div className="tile-value">{formatKurus(balance?.total ?? 0)}</div>
         </div>
         <div className="tile">
           <div className="tile-label">Ödenen</div>
-          <div className="tile-value">{money(balance?.paid ?? 0)}</div>
+          <div className="tile-value">{formatKurus(balance?.paid ?? 0)}</div>
         </div>
         <div className="tile">
           <div className="tile-label">{remaining < 0 ? "Fazla ödeme" : "Kalan borç"}</div>
           <div className="tile-value" style={{ color: remaining > 0 ? "var(--accent-warning)" : remaining < 0 ? "var(--accent-success)" : undefined }}>
-            {money(Math.abs(remaining))}
+            {formatKurus(Math.abs(remaining))}
           </div>
         </div>
       </div>
@@ -256,8 +255,8 @@ function PurchasePayments({ purchase }: { purchase: Purchase }) {
             <label className="form-label" htmlFor="pp-amount">Tutar (₺) *</label>
             <input id="pp-amount" className="form-input" inputMode="decimal" placeholder="0,00" value={amount} onChange={(e) => setAmount(e.target.value)} autoFocus />
             {remaining > 0 ? (
-              <button type="button" className="btn btn-ghost btn-sm" onClick={() => setAmount((remaining / 100).toFixed(2).replace(".", ","))}>
-                Kalanın tamamı: {money(remaining)}
+              <button type="button" className="btn btn-ghost btn-sm" onClick={() => setAmount(moneyInputFromKurus(remaining))}>
+                Kalanın tamamı: {formatKurus(remaining)}
               </button>
             ) : null}
           </div>

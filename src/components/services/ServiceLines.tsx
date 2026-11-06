@@ -25,7 +25,7 @@ import {
 import { DEFAULT_APPROVAL_THRESHOLD } from "@/lib/services/service";
 import { approvalRequired, summarizeLines } from "@/lib/services/lines";
 import { useSessionStore } from "@/stores/session";
-import { formatCurrency, formatDateTime, formatQuantity } from "@/lib/utils";
+import { formatCurrency, formatDateTime, formatKurus, formatQuantity, moneyInput } from "@/lib/utils";
 import type { Product, TaxMode } from "@/types";
 import { OptionalField, OptionalGroup } from "@/components/common/OptionalField";
 import { confirmDialog } from "@/components/common/ConfirmDialog";
@@ -50,8 +50,6 @@ const SOURCE_LABEL: Record<PartSourceType, string> = {
 };
 const SUPPLY_LABEL = { IN_STOCK: "Stokta", TO_ORDER: "Sipariş edilecek", ORDERED: "Sipariş verildi", ARRIVED: "Geldi" } as const;
 
-const money = (kurus: number) => formatCurrency(kurus / 100);
-const priceText = (tl: number) => tl.toFixed(2).replace(".", ",");
 
 type Mode = null | { type: "op"; edit?: ServiceOperation } | { type: "part" } | { type: "approval" };
 
@@ -93,11 +91,11 @@ export function ServiceLines({ service, onApproved, onNext }: { service: Service
       <div className="tile-grid">
         <div className="tile">
           <div className="tile-label">Teklif toplamı</div>
-          <div className="tile-value">{money(summary.quote)}</div>
+          <div className="tile-value">{formatKurus(summary.quote)}</div>
         </div>
         <div className="tile">
           <div className="tile-label">Onaylanan</div>
-          <div className="tile-value">{money(summary.approved)}</div>
+          <div className="tile-value">{formatKurus(summary.approved)}</div>
         </div>
       </div>
 
@@ -381,8 +379,8 @@ function OperationForm({
   const ctx = useServiceContext();
   const [description, setDescription] = useState(edit?.description ?? "");
   const [quantity, setQuantity] = useState(edit ? String(edit.quantity).replace(".", ",") : "1");
-  const [price, setPrice] = useState(edit && !edit.price_pending ? priceText(edit.unit_price) : "");
-  const [discount, setDiscount] = useState(edit && edit.discount_amount > 0 ? priceText(edit.discount_amount) : "");
+  const [price, setPrice] = useState(edit && !edit.price_pending ? moneyInput(edit.unit_price) : "");
+  const [discount, setDiscount] = useState(edit && edit.discount_amount > 0 ? moneyInput(edit.discount_amount) : "");
   const [taxMode, setTaxMode] = useState<TaxMode>((edit?.tax_mode as TaxMode) ?? defaultTax.mode);
   const [taxRate, setTaxRate] = useState(String(edit?.tax_rate ?? defaultTax.rate).replace(".", ","));
   const [error, setError] = useState<string | null>(null);
@@ -406,7 +404,7 @@ function OperationForm({
     const entry = catalog?.find((o) => o.id === id);
     if (!entry) return;
     setDescription(entry.name);
-    if (entry.suggested_price !== undefined) setPrice(priceText(entry.suggested_price));
+    if (entry.suggested_price !== undefined) setPrice(moneyInput(entry.suggested_price));
   }
 
   async function submit(event: React.FormEvent) {
@@ -453,7 +451,7 @@ function OperationForm({
                   onClick={() => pickFromCatalog(o.id)}
                 >
                   {o.name}
-                  {o.suggested_price !== undefined ? <small style={{ color: "var(--text-muted)", fontWeight: 500 }}>{priceText(o.suggested_price)} ₺</small> : null}
+                  {o.suggested_price !== undefined ? <small style={{ color: "var(--text-muted)", fontWeight: 500 }}>{moneyInput(o.suggested_price)} ₺</small> : null}
                 </button>
               ))}
               {!showAllCatalog && catalog.length > QUICK ? (
@@ -531,7 +529,7 @@ function PartForm({
 
   function pickProduct(p: Product) {
     setProductId(p.id);
-    setPrice(priceText(p.default_sale_price));
+    setPrice(moneyInput(p.default_sale_price));
   }
 
   async function submit(event: React.FormEvent) {

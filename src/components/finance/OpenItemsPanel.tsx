@@ -15,12 +15,10 @@ import {
   type OpenItem,
 } from "@/lib/finance/openItems";
 import { PAYMENT_METHOD_LABELS } from "@/lib/finance/service";
-import { formatCurrency, formatDate } from "@/lib/utils";
+import { formatDate, formatKurus, moneyInputFromKurus } from "@/lib/utils";
 import type { PaymentMethod } from "@/types";
 import { OptionalField, OptionalGroup } from "@/components/common/OptionalField";
 
-const money = (kurus: number) => formatCurrency(kurus / 100);
-const field = (kurus: number) => (kurus / 100).toFixed(2).replace(".", ",");
 
 const itemHref = (item: OpenItem) =>
   item.kind === "SALE" ? `/sales/${item.id}` : item.kind === "SERVICE" ? `/services/${item.id}` : null;
@@ -37,7 +35,7 @@ function parseAllocations(
     const kurus = parseMoneyInput(raw);
     if (kurus === null || kurus < 0) return { allocations, error: `“${item.label}” için tutar geçersiz.` };
     if (kurus === 0) continue;
-    if (kurus > item.remainingKurus) return { allocations, error: `“${item.label}” için en fazla ${money(item.remainingKurus)} tahsis edilebilir.` };
+    if (kurus > item.remainingKurus) return { allocations, error: `“${item.label}” için en fazla ${formatKurus(item.remainingKurus)} tahsis edilebilir.` };
     allocations.push({ kind: item.kind, id: item.id, amountKurus: kurus });
   }
   return { allocations };
@@ -67,7 +65,7 @@ export function OpenItemsPanel({ party }: { party: { id: string; business_id: st
                 <div className="tile" key={b.id}>
                   <div className="tile-label">{b.label}</div>
                   <div className="tile-value" style={{ color: b.id === "NOT_DUE" || b.id === "D0_7" ? undefined : "var(--accent-warning)" }}>
-                    {money(data.aging[b.id])}
+                    {formatKurus(data.aging[b.id])}
                   </div>
                 </div>
               ))}
@@ -80,12 +78,12 @@ export function OpenItemsPanel({ party }: { party: { id: string; business_id: st
                 <li key={item.key} style={{ display: "flex", flexDirection: "column", gap: 2, padding: "8px 0" }}>
                   <span className="row row-between">
                     {href ? <Link href={href}><strong>{item.label}</strong></Link> : <strong>{item.label}</strong>}
-                    <strong>{money(item.remainingKurus)}</strong>
+                    <strong>{formatKurus(item.remainingKurus)}</strong>
                   </span>
                   <small style={{ color: "var(--text-muted)" }}>
                     {formatDate(item.docDate)}
                     {item.dueDate ? ` · vade ${formatDate(item.dueDate)}` : ""}
-                    {item.paidKurus > 0 ? ` · ${money(item.paidKurus)} ödendi` : ""}
+                    {item.paidKurus > 0 ? ` · ${formatKurus(item.paidKurus)} ödendi` : ""}
                   </small>
                 </li>
               );
@@ -96,7 +94,7 @@ export function OpenItemsPanel({ party }: { party: { id: string; business_id: st
 
       {data.creditKurus > 0 ? (
         <div className="alert alert-success" role="note">
-          Müşteri alacağı: <strong>{money(data.creditKurus)}</strong> (avans, iade veya fazla ödeme). Net bakiyeye zaten yansır.
+          Müşteri alacağı: <strong>{formatKurus(data.creditKurus)}</strong> (avans, iade veya fazla ödeme). Net bakiyeye zaten yansır.
         </div>
       ) : null}
 
@@ -105,7 +103,7 @@ export function OpenItemsPanel({ party }: { party: { id: string; business_id: st
           <OffsetForm party={party} items={data.items} advanceKurus={advanceKurus} onDone={() => setOffsetting(false)} />
         ) : (
           <button type="button" className="btn btn-secondary btn-full" onClick={() => setOffsetting(true)}>
-            Avansı ({money(advanceKurus)}) borçlara mahsup et
+            Avansı ({formatKurus(advanceKurus)}) borçlara mahsup et
           </button>
         )
       ) : null}
@@ -127,7 +125,7 @@ function OffsetForm({
   const ctx = useBusinessContext();
   const initial = useMemo(() => {
     const parts = fifoAllocate(items.map((i) => ({ key: i.key, refDate: i.refDate, remainingKurus: i.remainingKurus })), advanceKurus);
-    return Object.fromEntries(parts.map((p) => [p.key, field(p.amountKurus)]));
+    return Object.fromEntries(parts.map((p) => [p.key, moneyInputFromKurus(p.amountKurus)]));
   }, [items, advanceKurus]);
   const [values, setValues] = useState<Record<string, string>>(initial);
   const [error, setError] = useState<string | null>(null);
@@ -153,7 +151,7 @@ function OffsetForm({
   return (
     <form className="stack stack-md" onSubmit={submit} noValidate>
       <h3>Avans mahsubu</h3>
-      <p>Kullanılabilir avans {money(advanceKurus)}. Varsayılan dağıtım en eski borçtan başlar; tutarları değiştirebilirsiniz.</p>
+      <p>Kullanılabilir avans {formatKurus(advanceKurus)}. Varsayılan dağıtım en eski borçtan başlar; tutarları değiştirebilirsiniz.</p>
       <AllocationFields items={items} values={values} onChange={setValues} />
       {error ? <div className="alert alert-error" role="alert">{error}</div> : null}
       <div className="row row-gap-md">
@@ -179,7 +177,7 @@ function AllocationFields({
         <li key={item.key} style={{ display: "flex", flexDirection: "column", gap: 4, padding: "8px 0" }}>
           <span className="row row-between">
             <span>{item.label}</span>
-            <small style={{ color: "var(--text-muted)" }}>kalan {money(item.remainingKurus)}</small>
+            <small style={{ color: "var(--text-muted)" }}>kalan {formatKurus(item.remainingKurus)}</small>
           </span>
           <input
             className="form-input"
@@ -215,7 +213,7 @@ export function CollectionForm({ party, onDone }: { party: { id: string; busines
   const suggested = useMemo(() => {
     if (!amountKurus || amountKurus <= 0) return {} as Record<string, string>;
     const parts = fifoAllocate(items.map((i) => ({ key: i.key, refDate: i.refDate, remainingKurus: i.remainingKurus })), amountKurus);
-    return Object.fromEntries(parts.map((p) => [p.key, field(p.amountKurus)]));
+    return Object.fromEntries(parts.map((p) => [p.key, moneyInputFromKurus(p.amountKurus)]));
   }, [items, amountKurus]);
 
   const values = manual ?? suggested;
@@ -275,10 +273,10 @@ export function CollectionForm({ party, onDone }: { party: { id: string; busines
           {amountKurus && amountKurus > 0 ? (
             <div className={`alert ${advance < 0 ? "alert-error" : "alert-warning"}`} role="status">
               {advance < 0
-                ? `Tahsis toplamı ${money(-advance)} fazla.`
+                ? `Tahsis toplamı ${formatKurus(-advance)} fazla.`
                 : advance === 0
                   ? "Tahsilatın tamamı borçlara sayılacak."
-                  : `${money(advance)} borca sayılmayacak; müşteri avansı olarak kalır.`}
+                  : `${formatKurus(advance)} borca sayılmayacak; müşteri avansı olarak kalır.`}
             </div>
           ) : null}
         </div>

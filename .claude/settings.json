@@ -1,0 +1,9 @@
+{
+  "permissions": {
+    "allow": [
+      "Bash(git rm *)",
+      "Bash(python -I \"C:/Users/Admin/AppData/Local/Temp/claude/d--Projeler-SOFTWARE-Projeler-Veltrio-Service/1c2923fd-0585-4cbe-8eb4-34427dbb12f8/scratchpad/money.py\")",
+      "Bash(git commit -q -m 'refactor\\(money\\): one set of money formatters, remove dead tax helpers *)"
+    ]
+  }
+}

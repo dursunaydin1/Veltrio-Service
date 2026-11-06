@@ -1,7 +1,7 @@
 /**
  * Para birimi formatlama yardımcı araçları.
- * PRD §3: Tüm para tutarları decimal(15,4) hassasiyetle saklanır.
- * Gösterim: Türkiye locale, TL sembolü.
+ * PRD §3: Tüm para tutarları decimal(15,4) hassasiyetle saklanır; hesap `@/lib/calc` ile kuruşla yapılır.
+ * Gösterim: Türkiye locale, TL sembolü. Burada yalnızca gösterim ve form biçimi var, hesap yok.
  */
 
 const TRY_FORMATTER = new Intl.NumberFormat("tr-TR", {
@@ -9,11 +9,6 @@ const TRY_FORMATTER = new Intl.NumberFormat("tr-TR", {
   currency: "TRY",
   minimumFractionDigits: 2,
   maximumFractionDigits: 2,
-});
-
-const NUMBER_FORMATTER = new Intl.NumberFormat("tr-TR", {
-  minimumFractionDigits: 2,
-  maximumFractionDigits: 4,
 });
 
 /**
@@ -38,43 +33,22 @@ export function formatQuantity(value: number): string {
 }
 
 /**
- * Sayıyı Türkçe ondalık formatında gösterir.
- * Örnek: 1234.567 → "1.234,567"
+ * Kuruş cinsinden tutarı TL olarak gösterir (para hesabı kuruşla yapılır, `@/lib/calc`).
+ * Örnek: 123450 → "₺1.234,50"
  */
-export function formatNumber(value: number): string {
-  return NUMBER_FORMATTER.format(value);
+export function formatKurus(kurus: number): string {
+  return formatCurrency(kurus / 100);
 }
 
 /**
- * @deprecated Para hesabı için `@/lib/calc` kullanın (kuruş cinsinden tam sayı).
- * Para tutarını 4 ondalık basamakla yuvarlar (veritabanı hassasiyeti).
+ * Form kutusuna yazılacak tutar: binlik ayırıcısız, virgüllü (`parseMoneyInput` geri okur).
+ * Örnek: 1234.5 → "1234,50"
  */
-export function roundAmount(value: number): number {
-  return Math.round(value * 10000) / 10000;
+export function moneyInput(tl: number): string {
+  return tl.toFixed(2).replace(".", ",");
 }
 
-/**
- * @deprecated Para hesabı için `calcLine` (`@/lib/calc`) kullanın.
- * KDV hesaplar.
- * taxMode INCLUSIVE: tutar KDV dahil → KDV = tutar - tutar / (1 + oran/100)
- * taxMode EXCLUSIVE: tutar KDV hariç → KDV = tutar * oran / 100
- * taxMode NONE: 0
- */
-export function calculateTax(
-  amount: number,
-  taxRate: number,
-  taxMode: "INCLUSIVE" | "EXCLUSIVE" | "NONE"
-): { netAmount: number; taxAmount: number; grossAmount: number } {
-  if (taxMode === "NONE" || taxRate === 0) {
-    return { netAmount: amount, taxAmount: 0, grossAmount: amount };
-  }
-  if (taxMode === "INCLUSIVE") {
-    const netAmount = roundAmount(amount / (1 + taxRate / 100));
-    const taxAmount = roundAmount(amount - netAmount);
-    return { netAmount, taxAmount, grossAmount: amount };
-  }
-  // EXCLUSIVE
-  const taxAmount = roundAmount(amount * (taxRate / 100));
-  const grossAmount = roundAmount(amount + taxAmount);
-  return { netAmount: amount, taxAmount, grossAmount };
+/** Kuruştan form kutusu tutarı. Örnek: 123450 → "1234,50" */
+export function moneyInputFromKurus(kurus: number): string {
+  return moneyInput(kurus / 100);
 }

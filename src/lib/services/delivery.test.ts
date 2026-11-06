@@ -140,7 +140,7 @@ describe("deliverService (§5.2, AC-025, AC-033)", () => {
     const s = await completedService();
     await expect(
       deliverService(ctx, s.id, { payment: { amountKurus: 40000, method: "CASH" } })
-    ).rejects.toThrow(/Kalan bakiye 600,00/);
+    ).rejects.toThrow(/Kalan bakiye ₺\s?600,00/);
 
     expect((await db.services.get(s.id))?.status).toBe("COMPLETED");
     expect(await db.payments.count()).toBe(0);
@@ -154,7 +154,7 @@ describe("deliverService (§5.2, AC-025, AC-033)", () => {
     });
 
     expect(r).toMatchObject({ status: "DELIVERED", delivery_balance: 500, debt_acknowledged: true });
-    expect((await lastHistory(s.id)).note).toMatch(/Borçlu teslim: kalan 500,00/);
+    expect((await lastHistory(s.id)).note).toMatch(/Borçlu teslim: kalan ₺\s?500,00/);
     // 1.000 − 100 kapora − 400 teslim tahsilatı = 500
     expect((await getCustomerBalance(ctx.businessId, ali)).balance).toBe(50000);
   });

@@ -8,10 +8,9 @@ import { useSessionStore } from "@/stores/session";
 import { AGING_BANDS, type AgingBandId } from "@/lib/finance/aging";
 import { getCustomerOpenItems } from "@/lib/finance/openItems";
 import { getSupplierBalance } from "@/lib/finance/service";
-import { formatCurrency } from "@/lib/utils";
+import { formatKurus } from "@/lib/utils";
 import { PageHead } from "@/components/layout/PageHead";
 
-const money = (kurus: number) => formatCurrency(kurus / 100);
 
 type CustomerRow = {
   id: string;
@@ -90,18 +89,18 @@ export function BalanceReport() {
           <div className="tile-grid">
             <div className="tile">
               <div className="tile-label">Toplam alacağınız</div>
-              <div className="tile-value" style={{ color: customerTotals.debt > 0 ? "var(--accent-warning)" : undefined }}>{money(customerTotals.debt)}</div>
+              <div className="tile-value" style={{ color: customerTotals.debt > 0 ? "var(--accent-warning)" : undefined }}>{formatKurus(customerTotals.debt)}</div>
             </div>
             <div className="tile">
               <div className="tile-label">Müşteri alacakları (size borçlu olmayan)</div>
-              <div className="tile-value" style={{ color: customerTotals.credit > 0 ? "var(--accent-success)" : undefined }}>{money(customerTotals.credit)}</div>
+              <div className="tile-value" style={{ color: customerTotals.credit > 0 ? "var(--accent-success)" : undefined }}>{formatKurus(customerTotals.credit)}</div>
             </div>
           </div>
           <div className="tile-grid" aria-label="Yaşlandırma">
             {AGING_BANDS.map((b) => (
               <div className="tile" key={b.id}>
                 <div className="tile-label">{b.label}</div>
-                <div className="tile-value">{money(customerTotals.aging[b.id])}</div>
+                <div className="tile-value">{formatKurus(customerTotals.aging[b.id])}</div>
               </div>
             ))}
           </div>
@@ -115,11 +114,11 @@ export function BalanceReport() {
                     <span className="row row-between" style={{ width: "100%", gap: 8 }}>
                       <span>{r.name}</span>
                       <strong style={{ color: r.balanceKurus > 0 ? "var(--accent-warning)" : "var(--accent-success)" }}>
-                        {r.balanceKurus > 0 ? money(r.balanceKurus) : `${money(-r.balanceKurus)} alacaklı`}
+                        {r.balanceKurus > 0 ? formatKurus(r.balanceKurus) : `${formatKurus(-r.balanceKurus)} alacaklı`}
                       </strong>
                     </span>
                     {r.overdueKurus > 0 ? (
-                      <span style={{ fontWeight: 500, color: "var(--text-secondary)" }}>8 günü geçen: {money(r.overdueKurus)}</span>
+                      <span style={{ fontWeight: 500, color: "var(--text-secondary)" }}>8 günü geçen: {formatKurus(r.overdueKurus)}</span>
                     ) : null}
                   </Link>
                 </li>
@@ -132,11 +131,11 @@ export function BalanceReport() {
           <div className="tile-grid">
             <div className="tile">
               <div className="tile-label">Tedarikçilere borcunuz</div>
-              <div className="tile-value" style={{ color: supplierTotals.owed > 0 ? "var(--accent-warning)" : undefined }}>{money(supplierTotals.owed)}</div>
+              <div className="tile-value" style={{ color: supplierTotals.owed > 0 ? "var(--accent-warning)" : undefined }}>{formatKurus(supplierTotals.owed)}</div>
             </div>
             <div className="tile">
               <div className="tile-label">Tedarikçilerden alacağınız</div>
-              <div className="tile-value" style={{ color: supplierTotals.receivable > 0 ? "var(--accent-success)" : undefined }}>{money(supplierTotals.receivable)}</div>
+              <div className="tile-value" style={{ color: supplierTotals.receivable > 0 ? "var(--accent-success)" : undefined }}>{formatKurus(supplierTotals.receivable)}</div>
             </div>
           </div>
           {suppliers === undefined ? null : suppliers.length === 0 ? (
@@ -149,7 +148,7 @@ export function BalanceReport() {
                     <span className="row row-between" style={{ width: "100%", gap: 8 }}>
                       <span>{r.name}</span>
                       <strong style={{ color: r.balanceKurus > 0 ? "var(--accent-warning)" : "var(--accent-success)" }}>
-                        {r.balanceKurus > 0 ? `${money(r.balanceKurus)} borç` : `${money(-r.balanceKurus)} alacak`}
+                        {r.balanceKurus > 0 ? `${formatKurus(r.balanceKurus)} borç` : `${formatKurus(-r.balanceKurus)} alacak`}
                       </strong>
                     </span>
                   </Link>

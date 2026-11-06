@@ -17,7 +17,7 @@ import {
   updateOperationEntry,
 } from "@/lib/catalog/service";
 import { useSessionStore } from "@/stores/session";
-import { formatCurrency } from "@/lib/utils";
+import { formatCurrency, moneyInput } from "@/lib/utils";
 import { PageHead } from "@/components/layout/PageHead";
 
 type Kind = "OPERATION" | "ISSUE";
@@ -125,7 +125,7 @@ function EntryForm({ kind, entry, onDone }: { kind: Kind; entry?: Entry; onDone:
   const categories = kind === "OPERATION" ? OPERATION_CATEGORIES : ISSUE_CATEGORIES;
   const [name, setName] = useState(entry?.name ?? "");
   const [category, setCategory] = useState(entry?.category ?? "Diğer");
-  const [price, setPrice] = useState(entry?.suggested_price !== undefined ? entry.suggested_price.toFixed(2).replace(".", ",") : "");
+  const [price, setPrice] = useState(entry?.suggested_price !== undefined ? moneyInput(entry.suggested_price) : "");
   const [duration, setDuration] = useState(entry?.default_duration !== undefined ? String(entry.default_duration) : "");
   const [error, setError] = useState<string | null>(null);
   const [busy, setBusy] = useState(false);

@@ -17,7 +17,7 @@ import {
   type SaleInput,
 } from "@/lib/sales/service";
 import { computeSaleTotals } from "@/lib/sales/totals";
-import { formatCurrency, formatQuantity, todayLocalDate } from "@/lib/utils";
+import { formatCurrency, formatQuantity, moneyInput, todayLocalDate } from "@/lib/utils";
 import type { Sale, SaleItem } from "@/lib/db";
 import type { PaymentMethod, Product, TaxMode } from "@/types";
 import { useAppNav } from "@/lib/nav/useAppNav";
@@ -49,7 +49,7 @@ type DraftLine = {
   photo?: string;
 };
 
-const fieldMoney = (tl: number) => tl.toFixed(2).replace(".", ",");let keySeq = 0;
+let keySeq = 0;
 const nextKey = () => `s${++keySeq}`;
 
 function fromItems(items: SaleItem[]): DraftLine[] {
@@ -59,9 +59,9 @@ function fromItems(items: SaleItem[]): DraftLine[] {
     name: i.description_snapshot,
     unit: i.unit,
     quantity: String(i.quantity).replace(".", ","),
-    price: fieldMoney(i.unit_price_snapshot),
+    price: moneyInput(i.unit_price_snapshot),
     // Belge indirimi satırlara yazıldığından taslak düzenlemede satır indirimi olarak görünür.
-    discount: i.discount_amount > 0 ? fieldMoney(i.discount_amount) : "",
+    discount: i.discount_amount > 0 ? moneyInput(i.discount_amount) : "",
     taxMode: i.tax_mode as TaxMode,
     taxRate: String(i.tax_rate).replace(".", ","),
     isSerial: !!i.serial_unit_id,
@@ -134,7 +134,7 @@ export function SaleForm({
           name: product.name,
           unit: product.unit,
           quantity: "1",
-          price: fieldMoney(product.default_sale_price),
+          price: moneyInput(product.default_sale_price),
           discount: "",
           taxMode: product.default_tax_mode,
           taxRate: String(product.default_tax_rate).replace(".", ","),
@@ -369,7 +369,7 @@ export function SaleForm({
           </div>
           <div className="row row-gap-sm">
             <input className="form-input" style={{ flex: 1 }} inputMode="decimal" placeholder="Alınan tutar (₺)" aria-label="Alınan tutar" value={received} onChange={(e) => setReceived(e.target.value)} />
-            <button type="button" className="btn btn-secondary" onClick={() => setReceived(fieldMoney(totalKurus / 100))} disabled={totalKurus === 0}>
+            <button type="button" className="btn btn-secondary" onClick={() => setReceived(moneyInput(totalKurus / 100))} disabled={totalKurus === 0}>
               Tamamı
             </button>
           </div>

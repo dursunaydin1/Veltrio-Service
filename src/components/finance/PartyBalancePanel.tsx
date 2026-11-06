@@ -18,7 +18,7 @@ import {
   setPartyOpeningBalance,
   type PartyType,
 } from "@/lib/finance/service";
-import { formatCurrency, formatDateTime, todayLocalDate } from "@/lib/utils";
+import { formatCurrency, formatDateTime, moneyInput, todayLocalDate } from "@/lib/utils";
 import type { Payment, PaymentDirection, PaymentMethod } from "@/types";
 import { OptionalField, OptionalGroup } from "@/components/common/OptionalField";
 
@@ -338,7 +338,7 @@ function OpeningForm({
   if (existing && loadedFor !== existing.id) {
     setLoadedFor(existing.id);
     setDirection(existing.direction);
-    setAmount(existing.amount.toFixed(2).replace(".", ","));
+    setAmount(moneyInput(existing.amount));
     setAsOf(existing.as_of_date);
     setNote(existing.source_note ?? "");
   }
