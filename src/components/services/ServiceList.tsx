@@ -152,7 +152,7 @@ export function ServiceList() {
                   ) : null}
                   {s.promised_date ? (
                     <small style={{ color: overdue ? "var(--accent-danger)" : "var(--text-muted)" }}>
-                      Teslim sözü: {formatDate(s.promised_date + "T00:00:00")}
+                      Teslim sözü: {formatDate(s.promised_date)}
                       {overdue ? " (gecikmiş)" : ""}
                     </small>
                   ) : null}

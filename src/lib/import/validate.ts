@@ -1,6 +1,7 @@
 import { fromKurus, parseMoneyInput, parseQuantityInput } from "@/lib/calc";
 import { PRODUCT_UNITS } from "@/lib/products/constants";
 import { foldText } from "@/lib/utils/search";
+import { todayLocalDate } from "@/lib/utils/date";
 import { isPlausiblePhone, normalizePhone } from "@/lib/utils/phone";
 import type { ImportKind, RawRow } from "./definitions";
 
@@ -30,7 +31,7 @@ export const DECISION_LABEL: Record<Decision, string> = {
   SKIP: "Atla",
 };
 
-const today = () => new Date().toISOString().slice(0, 10);
+const today = () => todayLocalDate();
 
 function parseDate(raw: string): string | null {
   if (!raw) return null;

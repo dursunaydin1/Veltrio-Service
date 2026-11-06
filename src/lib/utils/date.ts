@@ -25,11 +25,25 @@ const TR_TIME_FORMATTER = new Intl.DateTimeFormat("tr-TR", {
   timeZone: "Europe/Istanbul",
 });
 
+const CALENDAR_DATE_FORMATTER = new Intl.DateTimeFormat("tr-TR", {
+  day: "2-digit",
+  month: "2-digit",
+  year: "numeric",
+  timeZone: "UTC",
+});
+
+const DATE_ONLY = /^\d{4}-\d{2}-\d{2}$/;
+
 /**
- * UTC ISO string'i Türkiye tarihine formatlar.
- * Örnek: "2025-06-15T10:30:00Z" → "15.06.2025"
+ * Tarihi Türkiye biçiminde gösterir.
+ * - Anı (UTC ISO) İstanbul saatine çevirir: "2025-06-15T22:30:00Z" → "16.06.2025"
+ * - Yalnızca tarih ("2025-06-15", satış / vade / teslim sözü) takvim günüdür, saat dilimiyle kaymaz.
  */
 export function formatDate(isoString: string | Date): string {
+  if (typeof isoString === "string" && DATE_ONLY.test(isoString)) {
+    const [y, m, d] = isoString.split("-").map(Number);
+    return CALENDAR_DATE_FORMATTER.format(new Date(Date.UTC(y, m - 1, d)));
+  }
   const date = typeof isoString === "string" ? new Date(isoString) : isoString;
   return TR_DATE_FORMATTER.format(date);
 }
@@ -59,11 +73,10 @@ export function nowISO(): string {
 }
 
 /**
- * Türkiye yerel tarihini YYYY-MM-DD formatında döner.
- * Filtreler ve raporlar için kullanılır.
+ * Verilen anın Türkiye takvimindeki günü (YYYY-MM-DD). `toISOString().slice(0, 10)` UTC günü verir;
+ * gece 00:00-03:00 arası bir önceki gün çıkar, bu yüzden kullanılmaz (K-105).
  */
-export function todayLocalDate(): string {
-  const now = new Date();
+export function localDateOf(now: Date): string {
   const trDate = new Intl.DateTimeFormat("tr-TR", {
     year: "numeric",
     month: "2-digit",
@@ -73,6 +86,18 @@ export function todayLocalDate(): string {
 
   const parts = Object.fromEntries(trDate.map((p) => [p.type, p.value]));
   return `${parts.year}-${parts.month}-${parts.day}`;
+}
+
+/** Türkiye'de bugünün tarihi (YYYY-MM-DD). Filtreler, raporlar ve varsayılan belge tarihi için. */
+export function todayLocalDate(): string {
+  return localDateOf(new Date());
+}
+
+/** YYYY-AA-GG tarihine gün ekler (saat dilimi kaymasından etkilenmez). */
+export function addDaysToLocalDate(ymd: string, days: number): string {
+  const [y, m, d] = ymd.split("-").map(Number);
+  const date = new Date(Date.UTC(y, m - 1, d + days));
+  return date.toISOString().slice(0, 10);
 }
 
 /**

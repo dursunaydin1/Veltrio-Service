@@ -125,7 +125,7 @@ function MachineStats({ machine }: { machine: Machine }) {
       {summary?.lastService ? ` · Son servis: ${formatDate(summary.lastService.received_date)}` : ""}
       {machine.warranty_until ? (
         <>
-          {" · "}Garanti bitişi: {formatDate(machine.warranty_until + "T00:00:00")}
+          {" · "}Garanti bitişi: {formatDate(machine.warranty_until)}
           {warrantyOver ? " (süresi geçmiş görünüyor)" : ""}
         </>
       ) : null}

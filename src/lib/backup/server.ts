@@ -1,3 +1,4 @@
+import { localDateOf } from "@/lib/utils/date";
 import type { SupabaseClient } from "@supabase/supabase-js";
 import { SYNC_TABLES, type SyncTableName } from "@/lib/sync/tables";
 import { BACKUP_FORMAT, BACKUP_VERSION, backupTotal, type BackupFile } from "./backup";
@@ -46,7 +47,8 @@ export async function dumpBusiness(client: SupabaseClient, businessId: string): 
 
 /** Bir işletmenin yedeğini alır, depoya yazar, durumu kaydeder ve eski yedekleri temizler. */
 export async function backupBusiness(client: SupabaseClient, businessId: string, now: Date = new Date()): Promise<ServerBackupResult> {
-  const day = now.toISOString().slice(0, 10);
+  // Dosya adı Türkiye günü: gece 03:00'ten önce alınan yedek önceki güne yazılmasın (K-105)
+  const day = localDateOf(now);
   const path = `${businessId}/${day}.json`;
   try {
     const backup = await dumpBusiness(client, businessId);

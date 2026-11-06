@@ -1,4 +1,5 @@
 import { v4 as uuidv4 } from "uuid";
+import { localDateOf } from "./date";
 
 /**
  * UUID v4 üretir.
@@ -67,6 +68,6 @@ export function generateDedupeKey(
   relatedId: string,
   date: Date = new Date()
 ): string {
-  const dateStr = date.toISOString().split("T")[0]; // YYYY-MM-DD
+  const dateStr = localDateOf(date); // Türkiye günü (K-105)
   return `${type}-${relatedId}-${dateStr}`;
 }

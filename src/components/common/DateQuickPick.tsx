@@ -2,8 +2,7 @@
 
 import { useRef } from "react";
 import { CalendarDays } from "lucide-react";
-import { addDaysToLocalDate } from "@/lib/services/wizard";
-import { formatDate, todayLocalDate } from "@/lib/utils";
+import { addDaysToLocalDate, formatDate, todayLocalDate } from "@/lib/utils";
 
 const QUICK = [
   { label: "1 hafta", days: 7 },
@@ -42,7 +41,7 @@ export function DateQuickPick({ id, value, onChange }: { id: string; value: stri
           }}
         >
           <CalendarDays size={16} aria-hidden="true" />
-          {custom ? formatDate(value + "T00:00:00") : "Başka tarih"}
+          {custom ? formatDate(value) : "Başka tarih"}
         </button>
       </div>
       {/* Takvim penceresinin kaynağı; görünmez ama telefonun takvimi bundan açılır */}
@@ -56,7 +55,7 @@ export function DateQuickPick({ id, value, onChange }: { id: string; value: stri
         value={value}
         onChange={(e) => onChange(e.target.value)}
       />
-      {value ? <small style={{ color: "var(--text-muted)" }}>Seçilen: {formatDate(value + "T00:00:00")}</small> : null}
+      {value ? <small style={{ color: "var(--text-muted)" }}>Seçilen: {formatDate(value)}</small> : null}
     </div>
   );
 }

@@ -95,7 +95,7 @@ export function ServiceDetail({ id }: { id: string }) {
           </p>
           <small style={{ color: "var(--text-muted)" }}>
             Kabul: {formatDateTime(service.received_date)}
-            {service.promised_date ? ` · Teslim sözü: ${formatDate(service.promised_date + "T00:00:00")}` : ""}
+            {service.promised_date ? ` · Teslim sözü: ${formatDate(service.promised_date)}` : ""}
             {service.deposit_amount > 0 ? ` · Kapora: ${formatCurrency(service.deposit_amount)}` : ""}
           </small>
         </div>

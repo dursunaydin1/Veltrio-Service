@@ -31,12 +31,8 @@ export function initialWizardStep(s: Pick<ServiceWizardState, "customerId" | "ma
   return 0;
 }
 
-/** YYYY-AA-GG tarihine gün ekler (saat dilimi kaymasından etkilenmez). */
-export function addDaysToLocalDate(ymd: string, days: number): string {
-  const [y, m, d] = ymd.split("-").map(Number);
-  const date = new Date(Date.UTC(y, m - 1, d + days));
-  return date.toISOString().slice(0, 10);
-}
+/** Ortak tarih modülüne taşındı (K-105); servis sihirbazı eski adıyla kullanmaya devam eder. */
+export { addDaysToLocalDate } from "@/lib/utils/date";
 
 /** Teslim sözü için hızlı seçenekler. */
 export const PROMISE_SHORTCUTS = [

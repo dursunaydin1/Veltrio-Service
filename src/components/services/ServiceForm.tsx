@@ -428,7 +428,7 @@ export function ServiceForm({
                 <div className="stack stack-sm">
                   {selectedMachine?.warranty_until ? (
                     <div className={`alert ${selectedMachine.warranty_until < today ? "alert-warning" : "alert-success"}`} role="note">
-                      Makine kartında garanti bitişi: {formatDate(selectedMachine.warranty_until + "T00:00:00")}
+                      Makine kartında garanti bitişi: {formatDate(selectedMachine.warranty_until)}
                       {selectedMachine.warranty_until < today ? " (süresi geçmiş görünüyor)" : ""}. Bu bilgi yalnızca bilgilendirmedir; kapsamı siz doğrulayın.
                     </div>
                   ) : null}

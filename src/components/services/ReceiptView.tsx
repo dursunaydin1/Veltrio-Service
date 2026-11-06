@@ -110,7 +110,7 @@ function ReceiptPaper({ model, size }: { model: ReceiptModel; size: PaperSize })
             Garanti kapsamında{[model.warranty.source, model.warranty.coverage].filter(Boolean).length > 0 ? ` — ${[model.warranty.source, model.warranty.coverage].filter(Boolean).join(" · ")}` : ""}
           </Row>
         ) : null}
-        {model.promisedDate ? <Row label="Teslim sözü">{formatDate(model.promisedDate + "T00:00:00")}</Row> : null}
+        {model.promisedDate ? <Row label="Teslim sözü">{formatDate(model.promisedDate)}</Row> : null}
         {model.type === "intake" && model.deposit > 0 ? <Row label="Alınan kapora">{formatCurrency(model.deposit)}</Row> : null}
       </section>
 
