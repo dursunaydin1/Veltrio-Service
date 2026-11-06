@@ -12,6 +12,7 @@ import { EMPTY_BALANCE } from "@/lib/stock/ledger";
 import { formatCurrency, formatQuantity } from "@/lib/utils";
 import { unitLabel } from "@/lib/products/constants";
 import { foldText } from "@/lib/utils/search";
+import { ProductThumb } from "@/components/products/ProductThumb";
 import { isCriticalStock } from "@/lib/products/stock";
 import type { Product } from "@/types";
 import { PageHead } from "@/components/layout/PageHead";
@@ -90,7 +91,9 @@ export function ProductList() {
             const balance = balances?.get(p.id) ?? EMPTY_BALANCE;
             return (
             <li key={p.id}>
-              <Link href={`/products/${p.id}`} style={{ alignItems: "flex-start", flexDirection: "column", gap: 4 }}>
+              <Link href={`/products/${p.id}`} style={{ alignItems: "flex-start", gap: 12 }}>
+                <ProductThumb product={p} />
+                <span className="stack" style={{ flex: 1, minWidth: 0, gap: 4 }}>
                 <span className="row row-between" style={{ width: "100%", gap: 8 }}>
                   <span>{p.name}</span>
                   <span>{formatCurrency(p.default_sale_price)}</span>
@@ -111,6 +114,7 @@ export function ProductList() {
                     <span className="badge badge-red">Kritik stok</span>
                   ) : null}
                   {p.archived_at ? <span className="badge badge-gray">Pasif</span> : null}
+                </span>
                 </span>
               </Link>
             </li>

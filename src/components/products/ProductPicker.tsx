@@ -8,6 +8,7 @@ import { useSessionStore } from "@/stores/session";
 import { unitLabel } from "@/lib/products/constants";
 import { formatCurrency, formatQuantity } from "@/lib/utils";
 import { foldText } from "@/lib/utils/search";
+import { ProductThumb } from "@/components/products/ProductThumb";
 import type { Product } from "@/types";
 
 /**
@@ -48,8 +49,9 @@ export function ProductPicker({
     return (
       <div className="form-group">
         <span className="form-label">{label} *</span>
-        <div className="row row-between card" style={{ padding: 12 }}>
-          <span>
+        <div className="row row-between card" style={{ padding: 12, gap: 12 }}>
+          <ProductThumb product={selected} />
+          <span style={{ flex: 1, minWidth: 0 }}>
             <strong>{selected.name}</strong>
             <br />
             <small style={{ color: "var(--text-muted)" }}>
@@ -99,13 +101,16 @@ export function ProductPicker({
                 setChanging(false);
                 setQuery("");
               }}
-              style={{ flexDirection: "column", alignItems: "flex-start", gap: 2 }}
+              style={{ alignItems: "center", gap: 12 }}
             >
-              <span>{p.name}</span>
-              <small style={{ color: "var(--text-muted)", fontWeight: 500 }}>
-                Stok: {formatQuantity(balances?.get(p.id)?.available ?? 0)} {unitLabel(p.unit)} ·{" "}
-                {formatCurrency(p.default_sale_price)}
-              </small>
+              <ProductThumb product={p} size={40} />
+              <span className="stack" style={{ gap: 2, minWidth: 0, alignItems: "flex-start" }}>
+                <span>{p.name}</span>
+                <small style={{ color: "var(--text-muted)", fontWeight: 500 }}>
+                  Stok: {formatQuantity(balances?.get(p.id)?.available ?? 0)} {unitLabel(p.unit)} ·{" "}
+                  {formatCurrency(p.default_sale_price)}
+                </small>
+              </span>
             </button>
           </li>
         ))}

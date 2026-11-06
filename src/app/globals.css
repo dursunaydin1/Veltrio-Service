@@ -1859,3 +1859,7 @@ input.form-input[type="search"] {
 /* Kod okuyucu (K-102): kamera görüntüsü yuvarlak köşeli kutuda; numaralar eşit aralıklı */
 .code-reader { width: 100%; max-width: 360px; min-height: 240px; margin: 0 auto; border-radius: var(--radius-lg); overflow: hidden; }
 .mono { font-family: ui-monospace, "SF Mono", "Roboto Mono", Menlo, monospace; letter-spacing: 0.04em; font-variant-numeric: tabular-nums; }
+
+/* Ürün küçük fotoğrafı (K-103): listede doğru ürünü gözle seçmek için */
+.product-thumb { flex: 0 0 auto; border-radius: 12px; object-fit: cover; background: var(--bg-hover); }
+.product-thumb-empty { display: inline-flex; align-items: center; justify-content: center; color: var(--text-muted); }

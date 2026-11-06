@@ -5,6 +5,10 @@
 
 ## 2026-11-06
 
+### K-103 · Görselden ürün tanıma yok; listelerde küçük fotoğraf
+- **Soru:** Ürün fotoğrafı çekip veritabanında görselle eşleştirmek. **Karar:** Yapılmaz. Benzer parçaları (buji, filtre modelleri) ayıramaz, internet ve ücretli yapay zekâ hizmeti ister (çevrimdışı kuralını bozar), yavaş ve bakım yükü getirir. Barkod + raf QR + arama yeterli.
+- **Yerine:** Fotoğraf doğrulama için kullanılır. Ortak `ProductThumb` (fotoğraf yoksa kutu simgesi, `loading="lazy"`). Ürün listesi (44 px), ürün seçici sonuçları ve seçili kart (40 px; satış, servis parçası, alım, stok raporu), satış satırları.
+
 ### K-102 · Fabrika barkodu: tanıt, okut, satışa ekle
 - **Neden:** Her ürüne işletme etiketi basmak israf. Kutulu üründe fabrika barkodu kullanılır; açık / dökme üründe rafa tek QR etiketi; makinede makine QR'ı; nadir ürün aramayla bulunur.
 - **Veri:** Migration 026 `products.barcode` (4-64 karakter, işletmede tekil kısmi indeks). Dexie sürüm 7 `products.barcode` indeksi. Barkod yalnızca doluyken eşitleme paketine girer; kaldırma `setProductBarcode(null)` ile açık `null` gönderir. Böylece 026 uygulanmadan önce de olağan ürün eşitlemesi bozulmaz.

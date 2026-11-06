@@ -29,6 +29,7 @@ import { haptic } from "@/components/layout/QuickDial";
 import { parseScan } from "@/lib/qr/payload";
 import { findProductByBarcode, normalizeBarcode } from "@/lib/products/service";
 import { db } from "@/lib/db";
+import { ProductThumb } from "@/components/products/ProductThumb";
 import { QuantityStepper, stepQuantity } from "@/components/common/QuantityStepper";
 
 type DraftLine = {
@@ -44,6 +45,8 @@ type DraftLine = {
   /** Makine satışı: satılacak stoktaki birim */
   isSerial: boolean;
   serialUnitId: string;
+  /** Satırda küçük fotoğraf için (K-103); taslaktan açılan satırda olmayabilir */
+  photo?: string;
 };
 
 const fieldMoney = (tl: number) => tl.toFixed(2).replace(".", ",");let keySeq = 0;
@@ -137,6 +140,7 @@ export function SaleForm({
           taxRate: String(product.default_tax_rate).replace(".", ","),
           isSerial: product.is_serial_tracked,
           serialUnitId: "",
+          photo: product.photo,
         },
       ];
     });
@@ -286,8 +290,9 @@ export function SaleForm({
             const short = !l.isSerial && p.ok && p.quantity > available;
             return (
               <li key={l.key} className="sale-line">
-                <span className="row row-between" style={{ alignItems: "flex-start" }}>
-                  <span className="stack" style={{ gap: 4, minWidth: 0 }}>
+                <span className="row row-between" style={{ alignItems: "flex-start", gap: 12 }}>
+                  <ProductThumb product={l} size={40} />
+                  <span className="stack" style={{ gap: 4, minWidth: 0, flex: 1 }}>
                     <strong>{l.name}</strong>
                     <span className="row row-gap-sm">
                       <span className="badge badge-gray">Stok: {formatQuantity(available)} {l.unit}</span>
