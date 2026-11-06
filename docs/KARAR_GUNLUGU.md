@@ -5,6 +5,10 @@
 
 ## 2026-11-06
 
+### K-099 · Ürün yokken toplam ve ödeme gizli
+- **Satış:** Ürün yokken "Satış toplamı 0 ₺", belge indirimi ve ödeme bölümü görünmez; yalnızca "Henüz ürün yok" yazısı, müşteri ve kaydet düğmeleri kalır. İlk ürünle açılır, son ürün kaldırılınca yeniden gizlenir.
+- **Satın alma:** Aynı kural: satır yokken "Alım toplamı" ve teslim ödemesi gizli. Hızlı alımda toplam kutusu zaten yazıldığı için toplam kartı gösterilmez, ödeme bölümü görünür.
+
 ### K-098 · Miktar alanları − / +; satışta borç yokken tahsilat düğmesi yok
 - **Miktar:** Ortak `QuantityStepper` (yazılabilir kutu + − / + düğmeleri, 1'in altına inmez, boş alanda + ilk dokunuşta 1). Satış, alım satırı, servis işlem / parça ekleme ve parça düzenleme, stok girişi, hasar / onarım formlarında. Stok sayımı (yeni miktar yazılır, 0 olabilir) düz kutu kaldı.
 - **Satış detayı:** "Tahsilat al" yalnızca kalan > 0 iken, turuncu büyük düğme; kalan yoksa "Ödeme tamamlandı." K-095'te servis ve müşteri sayfası düzeltilmişti, satış detayı atlanmıştı.

@@ -285,10 +285,13 @@ export function PurchaseForm({
         </section>
       )}
 
-      <div className="tile">
-        <div className="tile-label">Alım toplamı</div>
-        <div className="tile-value">{formatCurrency(grand / 100)}</div>
-      </div>
+      {/* Satır yokken toplam ve ödeme gösterilmez (K-099); hızlı alımda toplam zaten yukarıda yazılır */}
+      {!quick && lines.length > 0 ? (
+        <div className="tile">
+          <div className="tile-label">Alım toplamı</div>
+          <div className="tile-value">{formatCurrency(grand / 100)}</div>
+        </div>
+      ) : null}
 
       <OptionalGroup>
         <OptionalField label="Not" htmlFor="pu-notes" filled={!!notes} onClear={() => setNotes("")}>
@@ -296,21 +299,23 @@ export function PurchaseForm({
         </OptionalField>
       </OptionalGroup>
 
-      <fieldset className="stack stack-sm" style={{ border: 0, padding: 0 }}>
-        <legend className="form-label">Teslim alırken yapılan ödeme (isteğe bağlı)</legend>
-        <div className="row row-gap-md">
-          <div className="form-group" style={{ flex: 2 }}>
-            <input className="form-input" inputMode="decimal" placeholder="Ödenen tutar (₺)" aria-label="Ödenen tutar" value={paid} onChange={(e) => setPaid(e.target.value)} />
+      {quick || lines.length > 0 ? (
+        <fieldset className="stack stack-sm" style={{ border: 0, padding: 0 }}>
+          <legend className="form-label">Teslim alırken yapılan ödeme (isteğe bağlı)</legend>
+          <div className="row row-gap-md">
+            <div className="form-group" style={{ flex: 2 }}>
+              <input className="form-input" inputMode="decimal" placeholder="Ödenen tutar (₺)" aria-label="Ödenen tutar" value={paid} onChange={(e) => setPaid(e.target.value)} />
+            </div>
+            <div className="form-group" style={{ flex: 1 }}>
+              <select className="form-input" aria-label="Ödeme yöntemi" value={method} onChange={(e) => setMethod(e.target.value as PaymentMethod)}>
+                {(Object.keys(PAYMENT_METHOD_LABELS) as PaymentMethod[]).map((m) => (
+                  <option key={m} value={m}>{PAYMENT_METHOD_LABELS[m]}</option>
+                ))}
+              </select>
+            </div>
           </div>
-          <div className="form-group" style={{ flex: 1 }}>
-            <select className="form-input" aria-label="Ödeme yöntemi" value={method} onChange={(e) => setMethod(e.target.value as PaymentMethod)}>
-              {(Object.keys(PAYMENT_METHOD_LABELS) as PaymentMethod[]).map((m) => (
-                <option key={m} value={m}>{PAYMENT_METHOD_LABELS[m]}</option>
-              ))}
-            </select>
-          </div>
-        </div>
-      </fieldset>
+        </fieldset>
+      ) : null}
 
       {error ? <div className="alert alert-error" role="alert">{error}</div> : null}
 

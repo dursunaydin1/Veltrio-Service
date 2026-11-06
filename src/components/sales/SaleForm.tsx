@@ -287,17 +287,22 @@ export function SaleForm({
         <p>Henüz ürün yok. Yukarıdan ürün arayıp ekleyin.</p>
       )}
 
-      <OptionalGroup>
-        <OptionalField label="Belge indirimi (₺, tüm satışa)" chip="Belge indirimi" htmlFor="sl-docdisc" filled={!!docDiscount} onClear={() => setDocDiscount("")}>
-          <input id="sl-docdisc" className="form-input" inputMode="decimal" placeholder="0,00" value={docDiscount} onChange={(e) => setDocDiscount(e.target.value)} />
-        </OptionalField>
-      </OptionalGroup>
+      {/* Ürün yokken toplam, indirim ve ödeme gösterilmez; ilk ürünle açılır (K-099) */}
+      {lines.length > 0 ? (
+        <>
+          <OptionalGroup>
+            <OptionalField label="Belge indirimi (₺, tüm satışa)" chip="Belge indirimi" htmlFor="sl-docdisc" filled={!!docDiscount} onClear={() => setDocDiscount("")}>
+              <input id="sl-docdisc" className="form-input" inputMode="decimal" placeholder="0,00" value={docDiscount} onChange={(e) => setDocDiscount(e.target.value)} />
+            </OptionalField>
+          </OptionalGroup>
 
-      <div className="tile">
-        <div className="tile-label">Satış toplamı</div>
-        <div className="tile-value">{formatCurrency(totalKurus / 100)}</div>
-      </div>
-      {totalError ? <div className="alert alert-error" role="alert">{totalError}</div> : null}
+          <div className="tile">
+            <div className="tile-label">Satış toplamı</div>
+            <div className="tile-value">{formatCurrency(totalKurus / 100)}</div>
+          </div>
+          {totalError ? <div className="alert alert-error" role="alert">{totalError}</div> : null}
+        </>
+      ) : null}
 
       <CustomerPicker
         value={customerId}
@@ -307,38 +312,40 @@ export function SaleForm({
         label="Müşteri (veresiye için gerekli)"
       />
 
-      <fieldset className="stack stack-sm" style={{ border: 0, padding: 0 }}>
-        <legend className="form-label">Ödeme</legend>
-        {/* Yöntem tek dokunuşla (K-097); açılır liste yok */}
-        <div className="chip-group" role="group" aria-label="Ödeme yöntemi">
-          {(Object.keys(PAYMENT_METHOD_LABELS) as PaymentMethod[]).map((m) => (
-            <button key={m} type="button" className="chip chip-toggle" aria-pressed={method === m} onClick={() => setMethod(m)}>
-              {PAYMENT_METHOD_LABELS[m]}
-            </button>
-          ))}
-        </div>
-        <div className="row row-gap-sm">
-          <input className="form-input" style={{ flex: 1 }} inputMode="decimal" placeholder="Alınan tutar (₺)" aria-label="Alınan tutar" value={received} onChange={(e) => setReceived(e.target.value)} />
-          <button type="button" className="btn btn-secondary" onClick={() => setReceived(fieldMoney(totalKurus / 100))} disabled={totalKurus === 0}>
-            Tamamı
-          </button>
-        </div>
-        {unpaidKurus > 0 && totalKurus > 0 ? (
-          <div className={`alert ${customerId ? "alert-warning" : "alert-error"}`} role="status">
-            {customerId
-              ? `Veresiye: ${formatCurrency(unpaidKurus / 100)} müşterinin borcuna yazılacak.`
-              : `Tahsil edilmeyen ${formatCurrency(unpaidKurus / 100)} var: veresiye için müşteri seçin ya da tutarı tahsil edin.`}
+      {lines.length > 0 ? (
+        <fieldset className="stack stack-sm" style={{ border: 0, padding: 0 }}>
+          <legend className="form-label">Ödeme</legend>
+          {/* Yöntem tek dokunuşla (K-097); açılır liste yok */}
+          <div className="chip-group" role="group" aria-label="Ödeme yöntemi">
+            {(Object.keys(PAYMENT_METHOD_LABELS) as PaymentMethod[]).map((m) => (
+              <button key={m} type="button" className="chip chip-toggle" aria-pressed={method === m} onClick={() => setMethod(m)}>
+                {PAYMENT_METHOD_LABELS[m]}
+              </button>
+            ))}
           </div>
-        ) : null}
-        {unpaidKurus > 0 && totalKurus > 0 && customerId ? (
-          <OptionalGroup>
-            <OptionalField label="Vade tarihi" chip="Vade tarihi" htmlFor="sl-due" filled={!!dueDate} onClear={() => setDueDate("")}>
-              <DateQuickPick id="sl-due" value={dueDate} onChange={setDueDate} />
-              <small style={{ color: "var(--text-muted)" }}>Girilirse vade gününde ve 7 gün gecikince hatırlatılır.</small>
-            </OptionalField>
-          </OptionalGroup>
-        ) : null}
-      </fieldset>
+          <div className="row row-gap-sm">
+            <input className="form-input" style={{ flex: 1 }} inputMode="decimal" placeholder="Alınan tutar (₺)" aria-label="Alınan tutar" value={received} onChange={(e) => setReceived(e.target.value)} />
+            <button type="button" className="btn btn-secondary" onClick={() => setReceived(fieldMoney(totalKurus / 100))} disabled={totalKurus === 0}>
+              Tamamı
+            </button>
+          </div>
+          {unpaidKurus > 0 && totalKurus > 0 ? (
+            <div className={`alert ${customerId ? "alert-warning" : "alert-error"}`} role="status">
+              {customerId
+                ? `Veresiye: ${formatCurrency(unpaidKurus / 100)} müşterinin borcuna yazılacak.`
+                : `Tahsil edilmeyen ${formatCurrency(unpaidKurus / 100)} var: veresiye için müşteri seçin ya da tutarı tahsil edin.`}
+            </div>
+          ) : null}
+          {unpaidKurus > 0 && totalKurus > 0 && customerId ? (
+            <OptionalGroup>
+              <OptionalField label="Vade tarihi" chip="Vade tarihi" htmlFor="sl-due" filled={!!dueDate} onClear={() => setDueDate("")}>
+                <DateQuickPick id="sl-due" value={dueDate} onChange={setDueDate} />
+                <small style={{ color: "var(--text-muted)" }}>Girilirse vade gününde ve 7 gün gecikince hatırlatılır.</small>
+              </OptionalField>
+            </OptionalGroup>
+          ) : null}
+        </fieldset>
+      ) : null}
 
       <OptionalGroup>
         <OptionalField label="Satış tarihi" chip="Farklı tarih" htmlFor="sl-date" filled={date !== todayLocalDate()} onClear={() => setDate(todayLocalDate())}>
