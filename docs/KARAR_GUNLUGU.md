@@ -5,6 +5,10 @@
 
 ## 2026-11-06
 
+### K-101 · Uzun listede "Başa dön"; kutu içi kaydırma yok
+- **Soru:** Müşteri / servis listesi uzayınca 5 satırlık kutu içinde kaydırma daha mı iyi? **Karar:** Hayır. Telefonda iç kutu ile sayfa kaydırması çakışır, ekranın küçük bir kısmı kullanılır; profesyonel uygulamalar (Rehber, Gmail, WhatsApp) listeyi sayfayla kaydırır. Mevcut düzen korunur: sekmeler + arama üstte yapışık (K-097), 30'ar yükleme.
+- **Eklenen:** Sayfa ~900 px aşağı inince alt çubuğun üstünde sağda yuvarlak "Başa dön" düğmesi (`ScrollTopButton`, AppShell'de, her uzun sayfada). Açık sekmeye yeniden dokunmak da başa döndürür (K-076, zaten vardı). Hızlı seçim açıkken ve yazdırmada gizli.
+
 ### K-100 · Raporlarda aramalı seçici
 - **Hesap ekstresi:** Müşteri açılır listesi yerine `CustomerPicker` (ad, telefon, köyle süzülür). Raporda "+ Yeni müşteri" yok (`allowAdd={false}`); arşivlenmiş müşteriler de seçilebilir (`includeArchived`), eski hesabın ekstresi alınabilsin.
 - **Stok raporu → Hareket geçmişi:** Ürün açılır listesi yerine `ProductPicker` (ad, kod, marka ile arama).

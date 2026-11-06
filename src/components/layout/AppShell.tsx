@@ -5,6 +5,7 @@ import Link from "next/link";
 import { usePathname } from "next/navigation";
 import { Search } from "lucide-react";
 import { BottomNav } from "@/components/layout/BottomNav";
+import { ScrollTopButton } from "@/components/layout/ScrollTopButton";
 import { Greeting } from "@/components/layout/Greeting";
 import { LogoGlyph, Wordmark } from "@/components/layout/Logo";
 import { AutoDeviceSetup } from "@/components/layout/DeviceSetup";
@@ -105,6 +106,7 @@ export function AppShell({ children }: { children: React.ReactNode }) {
       {exitHint ? (
         <div className="exit-hint" role="status">Çıkmak için tekrar geri yapın</div>
       ) : null}
+      <ScrollTopButton />
       <BottomNav />
     </div>
     </PinGate>
