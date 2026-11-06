@@ -4,6 +4,7 @@ import { useEffect, useRef, useState, useSyncExternalStore } from "react";
 import { createClient } from "@/lib/supabase/client";
 import { attemptUnlock, removePin, MAX_PIN_LENGTH } from "@/lib/pin/pin";
 import { RELOCK_AFTER_MS, getServerSnapshot, getSnapshot, lockApp, subscribe, unlockApp } from "@/lib/pin/lockStore";
+import { confirmDialog } from "@/components/common/ConfirmDialog";
 
 /**
  * PIN kilit ekranı (Adım 1.5, AC-020): PIN tanımlıysa uygulama açılışında ve
@@ -79,7 +80,7 @@ function LockScreen() {
   }
 
   async function forgot() {
-    if (!window.confirm("PIN kaldırılacak ve oturum kapatılacak. Şifrenizle yeniden giriş yapmanız gerekir. Devam edilsin mi?")) return;
+    if (!(await confirmDialog({ title: "PIN kaldırılsın mı?", message: "PIN kaldırılacak ve oturum kapatılacak. Şifrenizle yeniden giriş yapmanız gerekir.", confirmLabel: "Devam et", danger: true }))) return;
     removePin(window.localStorage);
     await createClient().auth.signOut().catch(() => undefined);
     window.location.replace("/login");

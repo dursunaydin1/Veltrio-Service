@@ -27,6 +27,7 @@ import { useSessionStore } from "@/stores/session";
 import { formatCurrency, formatDateTime, formatQuantity } from "@/lib/utils";
 import type { Product, TaxMode } from "@/types";
 import { OptionalField, OptionalGroup } from "@/components/common/OptionalField";
+import { confirmDialog } from "@/components/common/ConfirmDialog";
 
 const STATUS_LABEL: Record<LineStatus, string> = {
   PENDING: "Karar bekliyor",
@@ -132,7 +133,7 @@ export function ServiceLines({ service, onApproved, onNext }: { service: Service
                       <button
                         type="button"
                         className="btn btn-ghost btn-sm"
-                        onClick={() => ctx && window.confirm("Bu işlem satırı kaldırılsın mı?") && run(() => removeOperation(ctx, op.id))}
+                        onClick={async () => { if (ctx && (await confirmDialog({ title: "Bu işlem satırı kaldırılsın mı?", confirmLabel: "Kaldır", danger: true }))) await run(() => removeOperation(ctx, op.id)); }}
                       >
                         Kaldır
                       </button>
@@ -354,7 +355,7 @@ function PartRow({
             <button
               type="button"
               className="btn btn-ghost btn-sm"
-              onClick={() => ctx && window.confirm("Bu parça satırı kaldırılsın mı?") && run(() => removePart(ctx, part.id))}
+              onClick={async () => { if (ctx && (await confirmDialog({ title: "Bu parça satırı kaldırılsın mı?", confirmLabel: "Kaldır", danger: true }))) await run(() => removePart(ctx, part.id)); }}
             >
               Kaldır
             </button>

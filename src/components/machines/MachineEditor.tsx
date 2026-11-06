@@ -14,6 +14,7 @@ import { StatusBadge } from "@/components/services/StatusBadge";
 import { formatCurrency, formatDate, formatDateTime, todayLocalDate } from "@/lib/utils";
 import type { Machine } from "@/types";
 import { useAppNav } from "@/lib/nav/useAppNav";
+import { confirmDialog } from "@/components/common/ConfirmDialog";
 
 /** Makine profili: sahibi, bilgiler, sahiplik geçmişi, sahip değiştirme, arşivleme (Adım 3.3). */
 export function MachineEditor({ id }: { id: string }) {
@@ -46,7 +47,7 @@ export function MachineEditor({ id }: { id: string }) {
     const question = archived
       ? "Bu makine arşivden çıkarılsın mı?"
       : "Bu makine arşivlensin mi? Servis geçmişi korunur; makine yeni işlemlerde listelenmez.";
-    if (!ctx || !window.confirm(question)) return;
+    if (!ctx || !(await confirmDialog({ title: question, confirmLabel: archived ? "Geri al" : "Arşivle" }))) return;
     setError(null);
     try {
       await setMachineArchived(ctx, machine.id, !archived);

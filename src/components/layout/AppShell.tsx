@@ -13,6 +13,7 @@ import { UpdateNotice } from "@/components/layout/UpdateNotice";
 import { NotificationBell } from "@/components/layout/NotificationBell";
 import { PageHeadSlot } from "@/components/layout/PageHead";
 import { PinGate } from "@/components/layout/PinGate";
+import { ConfirmHost } from "@/components/common/ConfirmDialog";
 import { SetupWizard } from "@/components/layout/SetupWizard";
 import { SyncStatus } from "@/components/layout/SyncStatus";
 import { useSessionStore } from "@/stores/session";
@@ -65,6 +66,7 @@ export function AppShell({ children }: { children: React.ReactNode }) {
   if (hasUser && !hasDevice) return <AutoDeviceSetup />;
 
   return (
+    <>
     <PinGate>
     <div className="app-shell">
       <a href="#main" className="skip-link">
@@ -106,5 +108,8 @@ export function AppShell({ children }: { children: React.ReactNode }) {
       <BottomNav />
     </div>
     </PinGate>
+    {/* Onay pencereleri (K-095): PIN ekranının da üstünde açılabilsin diye dışarıda */}
+    <ConfirmHost />
+    </>
   );
 }

@@ -12,6 +12,7 @@ import { CustomerForm } from "@/components/customers/CustomerForm";
 import { setCustomerArchived } from "@/lib/customers/service";
 import { telLink, whatsappLink } from "@/lib/utils/phone";
 import { useAppNav } from "@/lib/nav/useAppNav";
+import { confirmDialog } from "@/components/common/ConfirmDialog";
 
 /** Müşteri detay sayfası: ara / WhatsApp, düzenleme formu, arşivleme (Adım 3.2). */
 export function CustomerEditor({ id }: { id: string }) {
@@ -40,7 +41,7 @@ export function CustomerEditor({ id }: { id: string }) {
     const question = archived
       ? "Bu müşteri arşivden çıkarılsın mı?"
       : "Bu müşteri arşivlensin mi? Geçmiş kayıtlar korunur; müşteri yeni işlemlerde listelenmez.";
-    if (!ctx || !window.confirm(question)) return;
+    if (!ctx || !(await confirmDialog({ title: question, confirmLabel: archived ? "Geri al" : "Arşivle" }))) return;
     setError(null);
     try {
       await setCustomerArchived(ctx, customer.id, !archived);

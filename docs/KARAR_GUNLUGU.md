@@ -5,6 +5,10 @@
 
 ## 2026-11-06
 
+### K-095 · Onaylar ekran ortasında modal; borç yokken tahsilat düğmesi yok
+- **Modal:** Tarayıcının sade `confirm()` kutusu ve satır içi onay yerine ortak `confirmDialog` (yerel `<dialog>` + `showModal`): ekranın ortasında kart, arkası karartılır ve kilitlenir, karar verilmeden başka yere dokunulamaz; geri tuşu "Vazgeç" sayılır. Kullanıldığı yerler: çıkış, arşivleme / geri alma (müşteri, makine, ürün, tedarikçi), işlem / parça satırı kaldırma, PIN'i unuttum. AppShell'de PIN ekranının dışında çizilir.
+- **Servis ödemeleri:** "Tahsilat al" yalnızca kalan borç varken (ana düğme). Borç sıfırsa "Ödeme tamamlandı." ve katlanmış "Diğer işlemler" altında "Ek / ön ödeme al". Boş tahsilat formu açılıp "tutar sıfırdan büyük olmalı" uyarısı alınmaz.
+
 ### K-094 · Telefon denemesinden 11 madde
 - **Çıkış onayı:** Menü'de "Çıkış yap" önce satır içinde "Çıkış yapılsın mı?" sorar (Vazgeç / Çıkış yap). K-078'deki onay uygulamadan çıkış (geri hareketi) içindi; oturumdan çıkışta yoktu.
 - **Makine türü / marka / model:** Açılır öneri listesi (datalist) Android Chrome'da sağda ok gösterip açılmıyordu. Yerine hazır türler, en çok kullanılan 6 marka ve markanın modelleri çip; listede yoksa yazılır.

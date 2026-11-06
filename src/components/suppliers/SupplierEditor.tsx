@@ -11,6 +11,7 @@ import { SupplierPurchases } from "@/components/suppliers/SupplierPurchases";
 import { setSupplierArchived } from "@/lib/suppliers/service";
 import { telLink } from "@/lib/utils/phone";
 import { useAppNav } from "@/lib/nav/useAppNav";
+import { confirmDialog } from "@/components/common/ConfirmDialog";
 
 /** Tedarikçi detayı: ara, bakiye / ödemeler, düzenleme, arşivleme (Adım 4.5-4.7). */
 export function SupplierEditor({ id }: { id: string }) {
@@ -37,7 +38,7 @@ export function SupplierEditor({ id }: { id: string }) {
     const question = archived
       ? "Bu tedarikçi arşivden çıkarılsın mı?"
       : "Bu tedarikçi arşivlensin mi? Geçmiş alımlar ve ödemeler korunur.";
-    if (!ctx || !window.confirm(question)) return;
+    if (!ctx || !(await confirmDialog({ title: question, confirmLabel: archived ? "Geri al" : "Arşivle" }))) return;
     setError(null);
     try {
       await setSupplierArchived(ctx, supplier.id, !archived);

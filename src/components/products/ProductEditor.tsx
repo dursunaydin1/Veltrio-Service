@@ -14,6 +14,7 @@ import { getProductBalance } from "@/lib/stock/ledger";
 import { formatCurrency, formatQuantity } from "@/lib/utils";
 import { unitLabel } from "@/lib/products/constants";
 import { useAppNav } from "@/lib/nav/useAppNav";
+import { confirmDialog } from "@/components/common/ConfirmDialog";
 
 /** Ürün düzenleme sayfasının içeriği: form + pasifleştirme / yeniden etkinleştirme. */
 export function ProductEditor({ id }: { id: string }) {
@@ -42,7 +43,7 @@ export function ProductEditor({ id }: { id: string }) {
     const question = archived
       ? "Bu ürün yeniden etkinleştirilsin mi?"
       : "Bu ürün pasifleştirilsin mi? Geçmiş kayıtlar korunur; ürün yeni işlemlerde listelenmez.";
-    if (!ctx || !window.confirm(question)) return;
+    if (!ctx || !(await confirmDialog({ title: question, confirmLabel: archived ? "Geri al" : "Arşivle" }))) return;
     setError(null);
     try {
       await setProductArchived(ctx, product.id, !archived);

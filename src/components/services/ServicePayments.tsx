@@ -70,11 +70,22 @@ export function ServicePayments({ service, onCollected }: { service: Service; on
             onCollected?.();
           }}
         />
-      ) : service.status !== "CANCELLED" ? (
-        <button type="button" className="btn btn-secondary btn-full" onClick={() => setOpen(true)}>
+      ) : service.status === "CANCELLED" ? null : remaining > 0 ? (
+        <button type="button" className="btn btn-primary btn-full" onClick={() => setOpen(true)}>
           Tahsilat al
         </button>
-      ) : null}
+      ) : (
+        // Borç kalmadıysa tahsilat ana işlem değil (K-095); ek / ön ödeme seyrek
+        <>
+          {(balance?.total ?? 0) > 0 ? <div className="alert alert-success" role="status">Ödeme tamamlandı.</div> : null}
+          <details className="more-actions">
+            <summary>Diğer işlemler</summary>
+            <button type="button" className="btn btn-secondary btn-full" onClick={() => setOpen(true)}>
+              Ek / ön ödeme al
+            </button>
+          </details>
+        </>
+      )}
 
       {payments === undefined ? null : payments.length === 0 ? (
         <p>Bu servise bağlı ödeme yok.</p>
