@@ -38,6 +38,7 @@ Bu kılavuz günlük kullanım içindir. Uygulama içindeki **Menü → Yardım*
 - **Sınırlar:** (1) Çevrimdışıyken görülen stok bu cihazın bildiği stoktur; başka cihaz aynı ürünü sattıysa eşitlemede stok eksiye düşebilir (bildirim gelir, düzeltme yaparsınız). (2) Bir cihaz 30 günden uzun süre eşitlenmezse yeni kayıt yapılamaz; internete bağlanıp eşitleyin. (3) İlk kurulum, içe aktarma, ayar kaydı, cihaz iptali ve şifre işlemleri internet ister.
 - **Çakışma:** iki cihaz aynı kaydı değiştirirse *Eşitleme ve bildirimler* ekranında seçenek sunulur: *sunucudaki sürümü al* veya *benim değişikliğimi uygula*. Hiçbir şey sessizce ezilmez.
 - Tarayıcı verisini silerseniz kayıtlar sunucudan geri iner; eşitlenmemiş kayıtlar kaybolur — bu yüzden bekleyen kayıt varken tarayıcı verisini silmeyin.
+- **Telefon temizleyicileri:** Xiaomi "Güvenlik → Temizleyici" gibi uygulamalar Chrome verisini de silebilir; o zaman uygulama telefonu yeniden kaydettirir ve verileri baştan indirir. Chrome'u temizleyicinin istisna listesine ekleyin (Güvenlik → Temizleyici → sağ üst ayarlar → "Temizlenmeyecek öğeler" / "Muaf uygulamalar" → Chrome). Temizleyiciyi çalıştırmadan önce üst kartta bekleyen kayıt göstergesi olmadığından emin olun. Eski cihaz kaydını Ayarlar → Cihazlar'dan iptal edin.
 
 ## 5. QR etiketi
 Makine veya ürün sayfası → *QR etiketi göster / yazdır* → etiket boyutunu seçin → *Yazdır*. QR yalnızca adres taşır; fiyat/stok değişse de etiketi yeniden basmanız gerekmez. Okutmak için Ana ekran → *QR Tara* (telefon kamerası).
