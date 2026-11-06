@@ -169,11 +169,26 @@ describe("applyPushItem — kurallar", () => {
     expect(del.success).toBe(false);
   });
 
-  it("silme kaydı kaldırır", async () => {
+  it("taslak satırı silinir", async () => {
+    const line = { table_name: "sale_items" as const, payload: { id: ID, business_id: BUSINESS } };
+    await applyPushItem(context(), item(line));
+    const r = await applyPushItem(context(), item({ ...line, operation: "DELETE" }));
+    expect(r.success).toBe(true);
+    expect(db.sale_items).toHaveLength(0);
+  });
+
+  it("ana kayıt (müşteri) silinemez (K-104)", async () => {
     await applyPushItem(context(), item());
     const r = await applyPushItem(context(), item({ operation: "DELETE" }));
-    expect(r.success).toBe(true);
-    expect(db.customers).toHaveLength(0);
+    expect(r.success).toBe(false);
+    expect(db.customers).toHaveLength(1);
+  });
+
+  it("stok özeti istemciden yazılmaz (K-104)", async () => {
+    db.products = [];
+    const p = { table_name: "products" as const, payload: { id: ID, business_id: BUSINESS, name: "Buji", stock_available: 999 } };
+    await applyPushItem(context(), item(p));
+    expect(db.products[0]).not.toHaveProperty("stock_available");
   });
 });
 

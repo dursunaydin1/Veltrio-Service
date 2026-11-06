@@ -1,4 +1,5 @@
 import { getSyncContext } from "@/lib/sync/server";
+import { takeWithinBytes } from "@/lib/sync/batch";
 
 const PAGE_SIZE = 500;
 
@@ -27,12 +28,15 @@ export async function GET(request: Request) {
     return Response.json({ error: "Eşitleme değişiklikleri alınamadı." }, { status: 500 });
   }
 
-  const changes = data ?? [];
+  // Fotoğraflı kayıtlar sayfayı büyütür: yanıt boyut sınırını aşmasın diye sayfa kısaltılır,
+  // kalanı bir sonraki istekte gelir (K-104)
+  const page = data ?? [];
+  const changes = takeWithinBytes(page);
   return Response.json(
     {
       changes,
       nextCursor: changes.length ? changes[changes.length - 1].id : cursor,
-      hasMore: changes.length === PAGE_SIZE,
+      hasMore: changes.length < page.length || page.length === PAGE_SIZE,
     },
     { headers: { "Cache-Control": "no-store" } }
   );

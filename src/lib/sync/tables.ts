@@ -79,6 +79,29 @@ const PUSH_ORDER: readonly SyncTableName[] = [
   "audit_logs",
 ];
 
+/**
+ * Silinebilen tablolar (K-104): yalnızca taslak belgenin satırları ve kontrol listesi gibi
+ * alt kayıtlar. Müşteri, ürün, servis, satış gibi ana kayıtlar silinmez; arşivlenir ya da
+ * iptal edilir. Sunucu bu liste dışındaki silme isteğini reddeder.
+ */
+export const DELETABLE_SYNC_TABLES = new Set<SyncTableName>([
+  "sale_items",
+  "purchase_items",
+  "service_parts",
+  "service_operations",
+  "service_checklist_items",
+  "service_template_items",
+]);
+
+/**
+ * Sunucunun kendisinin hesapladığı sütunlar (K-104): istemciden gelse de yazılmaz.
+ * Stok özeti stok hareketi tetikleyicisiyle (009), `version` güncelleme tetikleyicisiyle (006) değişir.
+ * Yeni ürün stoğu 0 ile başlar (tablo varsayılanı).
+ */
+export const SERVER_MANAGED_COLUMNS: Partial<Record<SyncTableName, readonly string[]>> = {
+  products: ["stock_available", "stock_damaged"],
+};
+
 /** Tablonun gönderim sırası (küçük önce gider). Bilinmeyen tablo en sona kalır. */
 export function pushRank(table: string): number {
   const index = PUSH_ORDER.indexOf(table as SyncTableName);

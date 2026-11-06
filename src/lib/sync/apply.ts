@@ -1,5 +1,5 @@
 import { verifyLineTotal } from "@/lib/sync/verify";
-import { APPEND_ONLY_SYNC_TABLES } from "@/lib/sync/tables";
+import { APPEND_ONLY_SYNC_TABLES, DELETABLE_SYNC_TABLES, SERVER_MANAGED_COLUMNS } from "@/lib/sync/tables";
 import type { SyncTableName } from "@/lib/sync/tables";
 import type { SyncContext } from "@/lib/sync/server";
 
@@ -49,7 +49,8 @@ const MAX_RENUMBER_TRIES = 9;
  *          çünkü kayıt arada başka cihazda güncellenmiş olabilir.
  * UPDATE : yalnızca payload.version sunucudaki sürümle aynıysa uygulanır.
  *          Aksi halde çakışmadır (sessiz ezme yok — AC-026, FR-021).
- * DELETE : kayda göre siler.
+ * DELETE : yalnızca `DELETABLE_SYNC_TABLES` (taslak satırları vb.) için kayda göre siler.
+ * Sunucunun hesapladığı sütunlar (`version`, stok özeti) istemciden alınmaz (K-104).
  */
 export async function applyPushItem(
   context: ApplyContext,
@@ -65,6 +66,9 @@ export async function applyPushItem(
   }
   if (APPEND_ONLY_SYNC_TABLES.has(item.table_name) && item.operation !== "INSERT") {
     return fail(item, "Hareket kayıtları yalnızca eklenebilir.");
+  }
+  if (item.operation === "DELETE" && !DELETABLE_SYNC_TABLES.has(item.table_name)) {
+    return fail(item, "Bu kayıt silinemez; arşivleyin ya da iptal edin.");
   }
 
   const table = supabase.from(item.table_name);
@@ -83,6 +87,7 @@ export async function applyPushItem(
 
   // version sunucuda yönetilir: eklemede varsayılan 1, güncellemede tetikleyici artırır.
   const { version, ...row } = item.payload;
+  for (const column of SERVER_MANAGED_COLUMNS[item.table_name] ?? []) delete row[column];
 
   if (item.operation === "INSERT") {
     const { error } = await table.insert(row);

@@ -1,6 +1,7 @@
 import { isSyncTableName } from "@/lib/sync/tables";
 import { applyPushItem, type PushItem, type PushResult } from "@/lib/sync/apply";
 import { getSyncContext } from "@/lib/sync/server";
+import { MAX_BATCH_ITEMS, MAX_PUSH_BODY_BYTES } from "@/lib/sync/batch";
 
 function isPushItem(value: unknown): value is PushItem {
   if (!value || typeof value !== "object") return false;
@@ -19,30 +20,29 @@ function isPushItem(value: unknown): value is PushItem {
   );
 }
 
+const tooLarge = () => Response.json({ error: "Eşitleme paketi çok büyük." }, { status: 413 });
+
 export async function POST(request: Request) {
-  const contentLength = Number(request.headers.get("content-length") ?? 0);
-  if (contentLength > 1_000_000) {
-    return Response.json({ error: "Eşitleme paketi çok büyük." }, { status: 413 });
-  }
+  // Başlık eksik ya da yanlış olabilir: önce başlığa, sonra gövdenin gerçek boyutuna bakılır (K-104)
+  if (Number(request.headers.get("content-length") ?? 0) > MAX_PUSH_BODY_BYTES) return tooLarge();
+  const text = await request.text();
+  if (new TextEncoder().encode(text).length > MAX_PUSH_BODY_BYTES) return tooLarge();
 
   let body: unknown;
   try {
-    body = await request.json();
+    body = JSON.parse(text);
   } catch {
     return Response.json({ error: "Geçersiz JSON isteği." }, { status: 400 });
   }
 
   if (!body || typeof body !== "object") {
-    return Response.json(
-      { error: "Eşitleme isteğinde en fazla 100 kayıt gönderilebilir." },
-      { status: 400 }
-    );
+    return Response.json({ error: "Eşitleme isteği geçersiz." }, { status: 400 });
   }
 
   const inputItems = (body as Record<string, unknown>).items;
-  if (!Array.isArray(inputItems) || inputItems.length > 100) {
+  if (!Array.isArray(inputItems) || inputItems.length > MAX_BATCH_ITEMS) {
     return Response.json(
-      { error: "Eşitleme isteğinde en fazla 100 kayıt gönderilebilir." },
+      { error: `Eşitleme isteğinde en fazla ${MAX_BATCH_ITEMS} kayıt gönderilebilir.` },
       { status: 400 }
     );
   }

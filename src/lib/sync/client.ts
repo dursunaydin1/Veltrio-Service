@@ -1,6 +1,7 @@
 import { db } from "@/lib/db";
 import { getPendingItems, markConflict, markError, markSynced } from "@/lib/sync/queue";
 import { isSyncTableName } from "@/lib/sync/tables";
+import { batchBySize } from "@/lib/sync/batch";
 import { useSessionStore } from "@/stores/session";
 import { nowISO } from "@/lib/utils";
 import type { SyncQueueItem } from "@/types";
@@ -78,19 +79,27 @@ async function pushPending(
 
   let pushed = 0;
   let conflicts = 0;
-  for (let start = 0; start < pending.length; start += 100) {
-    const batch = pending.slice(start, start + 100);
+  // Kayıt sayısı ve boyutla sınırlı paketler (K-104): fotoğraflı kayıtlar sınırı aşmaz
+  for (const batch of batchBySize(pending)) {
     const response = await fetch("/api/sync/push", {
       method: "POST",
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify({ deviceCode, items: batch }),
     });
 
-    const body = (await response.json()) as {
+    const body = (await response.json().catch(() => ({}))) as {
       error?: string;
       results?: PushResult[];
     };
     if (!response.ok || !body.results) {
+      // Paketin kendisi reddedildi (bozuk / çok büyük): bu paketin kayıtları deneme sayacına
+      // işlenir (5 denemede HATA'ya düşer, görünür olur); sonraki paketler gönderilmeye devam eder.
+      if (response.status === 400 || response.status === 413) {
+        const message = body.error ?? `Eşitleme paketi reddedildi (${response.status}).`;
+        for (const item of batch) await markError(item.id, message);
+        continue;
+      }
+      // Oturum, cihaz ya da geçici sunucu sorunu bütün kuyruğu ilgilendirir: dur, sonra yeniden denenir
       if (response.status === 403) requestDeviceCheck();
       throw new Error(body.error ?? "Eşitleme paketi gönderilemedi.");
     }

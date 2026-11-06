@@ -5,6 +5,17 @@
 
 ## 2026-11-06
 
+### K-104 · Kıdemli inceleme 1: eşitleme ve veri güvenliği
+- **Paket boyutu:** Gönderim paketleri 100 kayıt *ve* ~900 KB ile sınırlı (`lib/sync/batch.ts`); sınırdan büyük tek kayıt kendi başına gider. Fotoğraflı kayıtlar (data URL) önceden tek pakette 1 MB'ı aşıp paketin tamamını reddettiriyordu; istemci de hata fırlatıp kuyruğun geri kalanını hiç göndermiyordu.
+- **Reddedilen paket:** 400 / 413'te yalnızca o paketin kayıtları deneme sayacına işlenir (5'te HATA), sonraki paketler gider. 401 / 403 / 5xx'te eşitleme durur ve sonra yeniden denenir (geçici sunucu sorunu sayaç yakmaz).
+- **Sunucu sınırı:** Gövde boyutu başlığa güvenilmeden gerçekten ölçülür (en çok 4 MB). Yanlış hata metni ("en fazla 100 kayıt") düzeltildi.
+- **İndirme sayfası:** 500 satırlık sayfa ~3 MB'ı aşarsa kısaltılır, kalanı sonraki istekte gelir (Vercel yanıt sınırı 4,5 MB). En az bir kayıt her zaman gelir.
+- **Silme:** Sunucu yalnızca `DELETABLE_SYNC_TABLES` (taslak satış / alım satırı, servis işlem / parça, kontrol listesi, şablon satırı) için silme kabul eder. Migration 027: ana tablolarda oturumlu kullanıcı için kısıtlayıcı `FOR DELETE USING (false)` RLS politikası (tarayıcıdan doğrudan istek de silemez). SQL Editor / servis rolü etkilenmez (tek seferlik temizlik için).
+- **Sunucu sütunları:** `SERVER_MANAGED_COLUMNS` (ürün stok özeti) istemciden gelse de yazılmaz; `version` zaten atılıyordu.
+- **Excel:** `xlsx` 0.18.5 (npm'deki son sürüm; prototip kirletme ve ReDoS açıkları) → SheetJS 0.20.3 (resmî CDN paketi). API aynı, testler geçti.
+- **Ertelenen:** Fotoğrafları Supabase Storage'a taşımak (kayıtta yalnızca adres). Çevrimdışı yükleme kuyruğu ve önbellek gerektirir; ayrı iş olarak canlıya geçiş öncesi yapılacak. Paket / sayfa sınırları kilitlenme riskini şimdiden kapatıyor.
+- **Not:** Geliştirici bilgisayarındaki kullanıcı `.npmrc` kayıt adresi `http://` idi (proje dışı); `https://` yapılmalı.
+
 ### K-103 · Görselden ürün tanıma yok; listelerde küçük fotoğraf
 - **Soru:** Ürün fotoğrafı çekip veritabanında görselle eşleştirmek. **Karar:** Yapılmaz. Benzer parçaları (buji, filtre modelleri) ayıramaz, internet ve ücretli yapay zekâ hizmeti ister (çevrimdışı kuralını bozar), yavaş ve bakım yükü getirir. Barkod + raf QR + arama yeterli.
 - **Yerine:** Fotoğraf doğrulama için kullanılır. Ortak `ProductThumb` (fotoğraf yoksa kutu simgesi, `loading="lazy"`). Ürün listesi (44 px), ürün seçici sonuçları ve seçili kart (40 px; satış, servis parçası, alım, stok raporu), satış satırları.
