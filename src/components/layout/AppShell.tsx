@@ -18,6 +18,8 @@ import { SyncStatus } from "@/components/layout/SyncStatus";
 import { useSessionStore } from "@/stores/session";
 import { useAppNav, useNavTracker } from "@/lib/nav/useAppNav";
 
+const SUPABASE_CONFIGURED = !!process.env.NEXT_PUBLIC_SUPABASE_URL && !!process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY;
+
 const OWN_SEARCH = new Set([
   "/services",
   "/customers",
@@ -51,7 +53,8 @@ export function AppShell({ children }: { children: React.ReactNode }) {
   // Liste ekranlarının başlık + ekle satırı bu kutuya taşınır (K-066)
   const [headSlot, setHeadSlot] = useState<HTMLElement | null>(null);
 
-  if (!sessionLoaded) {
+  // Supabase varken kullanıcı bilgisi gelmeden boş ana sayfa gösterilmez (K-092)
+  if (!sessionLoaded || (SUPABASE_CONFIGURED && !hasUser && !needsSetup)) {
     return (
       <div className="page-loader" role="status" aria-label="Yükleniyor">
         <div className="loader-ring" />

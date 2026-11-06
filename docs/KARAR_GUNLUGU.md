@@ -3,6 +3,14 @@
 > Plandan (docs/00–07) veya PRD'den sapmaların, düzeltmelerin ve yeni çözümlerin kaydı. Yeni kayıtlar en üste eklenir.
 > Biçim: **Ne değişti → Neden → Sonuç / etkilenen dosyalar**
 
+## 2026-11-06
+
+### K-092 · Girişten sonra boş ana sayfa; şifre basılı tutunca görünür
+- **Sorun:** Girişten sonra ana sayfa bir süre adsız ("İyi günler") ve boş görünüyordu. Sunucu yönlendirmesi sayfayı yenilemediği için uygulama oturumu henüz "kullanıcı yok" diye yüklenmiş kalıyordu.
+- **Düzeltme:** Giriş başarılı olunca istemci tam sayfa yenilemesiyle hedefe gider (`window.location.replace`), oturum baştan yüklenir. Ayrıca Supabase varken kullanıcı bilgisi gelene kadar uygulama yerine yükleniyor görünür.
+- **"Bu cihazı kaydet" yeniden çıktı:** Cihaz kodu ve yerel veritabanı telefonda silinmişse olur (depolama temizliği, tarayıcı verisinin silinmesi ya da cihazın iptali). Veri sunucuda durur, kayıttan sonra yeniden iner. Ekrana açıklama ve eski kaydı iptal etme notu eklendi. Eski cihaz koduna yeniden bağlanma bilerek yok: yerel belge sayaçları silindiği için aynı kodla belge numaraları tekrar edebilirdi.
+- **Şifre göster:** Göz simgesi artık aç-kapa değil; yalnızca basılı tutulurken şifre görünür, parmak kalkınca gizlenir (güvenlik).
+
 ## 2026-11-05
 
 ### K-091 · Seçici liste gerçekten kayar; yeni sayfa en üstten açılır

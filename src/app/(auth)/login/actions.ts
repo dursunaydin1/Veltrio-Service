@@ -30,8 +30,9 @@ export async function loginAction(formData: FormData) {
     return { error: "Giriş yapılamadı. Lütfen tekrar deneyin." };
   }
 
-  // Giriş ve çıkış ekranı geçmişte kalmasın: geri hareketi giriş ekranına dönmesin (K-078)
-  redirect(safeNextPath(formData.get("next") as string | null), RedirectType.replace);
+  // Yönlendirmeyi istemci tam sayfa yenilemesiyle yapar (K-092): uygulama oturumu baştan,
+  // kullanıcı ve cihaz bilgisiyle yükler; giriş ekranı geçmişte kalmaz (K-078).
+  return { next: safeNextPath(formData.get("next") as string | null) };
 }
 
 export async function logoutAction() {

@@ -36,6 +36,11 @@ export function DeviceSetup() {
           Bu tarayıcı henüz kayıtlı değil. Cihaza tanıyabileceğiniz bir ad verin;
           cihaz kodu otomatik atanır.
         </p>
+        <small style={{ color: "var(--text-muted)" }}>
+          Bu telefonu daha önce kaydetmiştiniz ve yine bu ekran çıktıysa telefonun bu uygulamaya ait verileri silinmiştir
+          (ör. depolama temizliği). Verileriniz sunucuda güvende; kayıttan sonra yeniden iner. Eski kaydı
+          Ayarlar → Cihazlar’dan iptal edebilirsiniz.
+        </small>
 
         <div className="form-group">
           <label className="form-label" htmlFor="device-name">

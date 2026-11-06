@@ -42,7 +42,8 @@ export function LoginForm({ notice }: { notice?: string }) {
 
     startTransition(async () => {
       const result = await loginAction(formData);
-      if (result?.error) setError(result.error);
+      if ("error" in result && result.error) setError(result.error);
+      else if ("next" in result && result.next) window.location.replace(result.next);
     });
   }
 
