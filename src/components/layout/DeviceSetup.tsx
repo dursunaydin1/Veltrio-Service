@@ -1,8 +1,36 @@
 "use client";
 
-import { useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import { useDevice } from "@/hooks/useDevice";
 import { suggestDeviceName } from "@/lib/device";
+
+/**
+ * Cihaz kaydı kendiliğinden (K-093): tarayıcı tanınmıyorsa (ilk giriş ya da telefon temizleyicisi
+ * uygulama verisini sildiyse) telefon önerilen adla hemen kaydedilir, kullanıcı ad yazıp düğmeye basmaz.
+ * Kayıt olmazsa (ör. internet yok) aşağıdaki elle kayıt formu gösterilir.
+ */
+export function AutoDeviceSetup() {
+  const { registerDevice } = useDevice();
+  const [failed, setFailed] = useState(false);
+  const started = useRef(false);
+
+  useEffect(() => {
+    if (started.current) return;
+    started.current = true;
+    registerDevice(suggestDeviceName(navigator.userAgent)).catch(() => setFailed(true));
+  }, [registerDevice]);
+
+  if (failed) return <DeviceSetup />;
+  return (
+    <div className="page-loader" role="status" aria-live="polite">
+      <div className="stack stack-md" style={{ alignItems: "center", textAlign: "center", padding: 24 }}>
+        <div className="loader-ring" />
+        <strong>Bu telefon hazırlanıyor</strong>
+        <small style={{ color: "var(--text-muted)" }}>Cihaz kaydediliyor, ardından verileriniz sunucudan indirilecek.</small>
+      </div>
+    </div>
+  );
+}
 
 /**
  * "Bu cihazı kaydet" ekranı (FR-002). Cihaz kodu sunucuda atanır; kullanıcı

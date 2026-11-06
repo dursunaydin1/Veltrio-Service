@@ -5,6 +5,12 @@
 
 ## 2026-11-06
 
+### K-093 · Cihaz kaydı kendiliğinden
+- **Neden:** Xiaomi temizleyicisi Chrome verisini siliyor ve Chrome istisnaya eklenemiyor; her seferinde "Bu cihazı kaydet" ekranıyla uğraşmak istenmedi.
+- **Ne:** Tanınmayan tarayıcıda telefon önerilen adla (ör. "Android telefon") hemen kaydedilir; "Bu telefon hazırlanıyor" görünür, sonra veriler iner. Kayıt olmazsa (internet yok vb.) elle kayıt formu çıkar.
+- **Bilerek yapılmayan:** Eski cihaz kaydı otomatik iptal edilmez. Hangi eski kaydın bu telefona ait olduğu kesin bilinemez; yanlış cihazı (ör. dükkân bilgisayarı) iptal etmek o cihazın yerel verisini silerdi. Eski kayıt Ayarlar → Cihazlar'dan elle iptal edilir.
+- **Kalıcı çözüm:** Play Store'a yerel uygulama olarak paketleme (Capacitor); temizleyiciler yüklü uygulama verisine dokunmaz. Canlıya geçişte.
+
 ### K-092 · Girişten sonra boş ana sayfa; şifre basılı tutunca görünür
 - **Sorun:** Girişten sonra ana sayfa bir süre adsız ("İyi günler") ve boş görünüyordu. Sunucu yönlendirmesi sayfayı yenilemediği için uygulama oturumu henüz "kullanıcı yok" diye yüklenmiş kalıyordu.
 - **Düzeltme:** Giriş başarılı olunca istemci tam sayfa yenilemesiyle hedefe gider (`window.location.replace`), oturum baştan yüklenir. Ayrıca Supabase varken kullanıcı bilgisi gelene kadar uygulama yerine yükleniyor görünür.

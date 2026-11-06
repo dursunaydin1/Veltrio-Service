@@ -7,7 +7,7 @@ import { Search } from "lucide-react";
 import { BottomNav } from "@/components/layout/BottomNav";
 import { Greeting } from "@/components/layout/Greeting";
 import { LogoGlyph, Wordmark } from "@/components/layout/Logo";
-import { DeviceSetup } from "@/components/layout/DeviceSetup";
+import { AutoDeviceSetup } from "@/components/layout/DeviceSetup";
 import { PwaBanner } from "@/components/layout/PwaBanner";
 import { UpdateNotice } from "@/components/layout/UpdateNotice";
 import { NotificationBell } from "@/components/layout/NotificationBell";
@@ -62,7 +62,7 @@ export function AppShell({ children }: { children: React.ReactNode }) {
     );
   }
   if (needsSetup) return <SetupWizard />;
-  if (hasUser && !hasDevice) return <DeviceSetup />;
+  if (hasUser && !hasDevice) return <AutoDeviceSetup />;
 
   return (
     <PinGate>
