@@ -3,8 +3,8 @@
 import { useEffect, useState } from "react";
 import { ArrowUp } from "lucide-react";
 
-/** Bu kadar aşağı inilince düğme belirir (yaklaşık 10 liste satırı) */
-const SHOW_AFTER = 900;
+/** Biraz aşağı inince belirir (yaklaşık 3 liste satırı, K-102); en baştayken görünmez */
+const SHOW_AFTER = 200;
 
 /**
  * Uzun listelerde "Başa dön" (K-101): aşağı inince alt çubuğun üstünde sağda belirir, dokununca yumuşakça başa döner.
