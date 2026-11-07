@@ -1,15 +1,7 @@
 "use client";
 
 import { Minus, Plus } from "lucide-react";
-import { parseQuantityInput } from "@/lib/calc";
-
-/** Miktarı `delta` kadar değiştirir, `min`in altına inmez. Boş ya da geçersiz miktar `min` olur. */
-export function stepQuantity(value: string, delta: number, min = 1): string {
-  const current = parseQuantityInput(value);
-  if (current === null) return String(min);
-  const next = Math.max(min, Math.round((current + delta) * 1000) / 1000);
-  return String(next).replace(".", ",");
-}
+import { stepQuantity } from "@/lib/utils/quantity";
 
 /**
  * Miktar alanı (K-097, K-098): ortada yazılabilir kutu, yanlarda − / + düğmeleri.

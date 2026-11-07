@@ -7,7 +7,7 @@ import { useStockBalances } from "@/hooks/useStock";
 import { CustomerPicker } from "@/components/customers/CustomerPicker";
 import { ProductPicker } from "@/components/products/ProductPicker";
 import { SerialUnitSelect } from "@/components/products/SerialUnitSelect";
-import { parseMoneyInput, parseQuantityInput } from "@/lib/calc";
+import { parseMoneyInput } from "@/lib/calc";
 import { PAYMENT_METHOD_LABELS } from "@/lib/finance/service";
 import {
   NegativeStockReasonRequiredError,
@@ -19,7 +19,7 @@ import {
 import { computeSaleTotals } from "@/lib/sales/totals";
 import { formatCurrency, formatQuantity, moneyInput, todayLocalDate } from "@/lib/utils";
 import type { Sale, SaleItem } from "@/lib/db";
-import type { PaymentMethod, Product, TaxMode } from "@/types";
+import type { PaymentMethod, Product } from "@/types";
 import { useAppNav } from "@/lib/nav/useAppNav";
 import { OptionalField, OptionalGroup } from "@/components/common/OptionalField";
 import { DateQuickPick } from "@/components/common/DateQuickPick";
@@ -30,61 +30,9 @@ import { parseScan } from "@/lib/qr/payload";
 import { findProductByBarcode, normalizeBarcode } from "@/lib/products/service";
 import { db } from "@/lib/db";
 import { ProductThumb } from "@/components/products/ProductThumb";
-import { QuantityStepper, stepQuantity } from "@/components/common/QuantityStepper";
+import { QuantityStepper } from "@/components/common/QuantityStepper";
+import { addProductLine, linesFromItems, parseLine, type DraftLine, type ParsedLine } from "@/lib/sales/draft";
 import { NO_CONTEXT_MESSAGE, errorMessage } from "@/lib/errors/message";
-
-type DraftLine = {
-  key: string;
-  productId: string;
-  name: string;
-  unit: string;
-  quantity: string;
-  price: string;
-  discount: string;
-  taxMode: TaxMode;
-  taxRate: string;
-  /** Makine satışı: satılacak stoktaki birim */
-  isSerial: boolean;
-  serialUnitId: string;
-  /** Satırda küçük fotoğraf için (K-103); taslaktan açılan satırda olmayabilir */
-  photo?: string;
-};
-
-let keySeq = 0;
-const nextKey = () => `s${++keySeq}`;
-
-function fromItems(items: SaleItem[]): DraftLine[] {
-  return items.map((i) => ({
-    key: nextKey(),
-    productId: i.product_id ?? "",
-    name: i.description_snapshot,
-    unit: i.unit,
-    quantity: String(i.quantity).replace(".", ","),
-    price: moneyInput(i.unit_price_snapshot),
-    // Belge indirimi satırlara yazıldığından taslak düzenlemede satır indirimi olarak görünür.
-    discount: i.discount_amount > 0 ? moneyInput(i.discount_amount) : "",
-    taxMode: i.tax_mode as TaxMode,
-    taxRate: String(i.tax_rate).replace(".", ","),
-    isSerial: !!i.serial_unit_id,
-    serialUnitId: i.serial_unit_id ?? "",
-  }));
-}
-
-type ParsedLine =
-  | { ok: true; quantity: number; unitPriceKurus: number; discountKurus: number; taxRate: number }
-  | { ok: false; error: string };
-
-function parseLine(line: DraftLine): ParsedLine {
-  const quantity = parseQuantityInput(line.quantity);
-  const unitPriceKurus = parseMoneyInput(line.price);
-  const discountKurus = line.discount.trim() === "" ? 0 : parseMoneyInput(line.discount);
-  const taxRate = parseQuantityInput(line.taxRate);
-  if (quantity === null || quantity <= 0) return { ok: false, error: `“${line.name}”: miktar sıfırdan büyük olmalıdır.` };
-  if (unitPriceKurus === null) return { ok: false, error: `“${line.name}”: birim fiyat geçersiz.` };
-  if (discountKurus === null) return { ok: false, error: `“${line.name}”: indirim geçersiz.` };
-  if (taxRate === null || taxRate > 100) return { ok: false, error: `“${line.name}”: KDV oranı 0-100 olmalıdır.` };
-  return { ok: true, quantity, unitPriceKurus, discountKurus, taxRate };
-}
 
 /**
  * Satış formu (Adım 4.1-4.2): ürünleri ekle, indirim uygula, müşteri (isteğe
@@ -110,7 +58,7 @@ export function SaleForm({
   const [date, setDate] = useState(sale ? sale.sale_date.slice(0, 10) : todayLocalDate());
   const [notes, setNotes] = useState(sale?.notes ?? "");
   const [dueDate, setDueDate] = useState(sale?.due_date ?? "");
-  const [lines, setLines] = useState<DraftLine[]>(() => fromItems(items));
+  const [lines, setLines] = useState<DraftLine[]>(() => linesFromItems(items));
   const [docDiscount, setDocDiscount] = useState("");
   const [pickerKey, setPickerKey] = useState(0);
   const [received, setReceived] = useState("");
@@ -123,28 +71,7 @@ export function SaleForm({
   const [scanNote, setScanNote] = useState<{ ok: boolean; text: string } | null>(null);
 
   function addProduct(product: Product) {
-    setLines((current) => {
-      // Aynı ürün yeniden seçilirse yeni satır açılmaz, miktarı bir artar (K-097)
-      const same = product.is_serial_tracked ? undefined : current.find((l) => l.productId === product.id);
-      if (same) return current.map((l) => (l.key === same.key ? { ...l, quantity: stepQuantity(l.quantity, 1) } : l));
-      return [
-        ...current,
-        {
-          key: nextKey(),
-          productId: product.id,
-          name: product.name,
-          unit: product.unit,
-          quantity: "1",
-          price: moneyInput(product.default_sale_price),
-          discount: "",
-          taxMode: product.default_tax_mode,
-          taxRate: String(product.default_tax_rate).replace(".", ","),
-          isSerial: product.is_serial_tracked,
-          serialUnitId: "",
-          photo: product.photo,
-        },
-      ];
-    });
+    setLines((current) => addProductLine(current, product));
     setPickerKey((k) => k + 1);
   }
 

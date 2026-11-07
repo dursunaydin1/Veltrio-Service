@@ -17,7 +17,8 @@
       "Bash(git commit -q -m 'refactor: move business constants and rules out of UI components into lib *)",
       "Bash(python -I \"C:/Users/Admin/AppData/Local/Temp/claude/d--Projeler-SOFTWARE-Projeler-Veltrio-Service/1c2923fd-0585-4cbe-8eb4-34427dbb12f8/scratchpad/errors.py\")",
       "Bash(git commit -q -m 'refactor\\(errors\\): shared error message helper and no-context message; service context builds on business context *)",
-      "Bash(git config *)"
+      "Bash(git config *)",
+      "Bash(git commit -q -m 'refactor\\(ui\\): split oversized service components; sale draft line logic moves to lib with tests *)"
     ]
   }
 }
