@@ -3,6 +3,52 @@
 > Plandan (docs/00–07) veya PRD'den sapmaların, düzeltmelerin ve yeni çözümlerin kaydı. Yeni kayıtlar en üste eklenir.
 > Biçim: **Ne değişti → Neden → Sonuç / etkilenen dosyalar**
 
+## 2026-11-07
+
+### K-116 · Açık tema ve renk değişkenleri
+- **Neden:** Yalnızca koyu tema vardı; gün ışığında ve aydınlık dükkânda koyu ekran zor okunur (PRD: dış mekânda okunabilirlik).
+- **Karar:** Varsayılan koyu kalır. Ayarlar → Görünüm: Koyu / Açık / Telefonun ayarı (cihaza özel, localStorage `veltrio_theme`). `<html data-theme>` yalnızca değişkenleri değiştirir; seçim sayfa çizilmeden önce küçük bir betikle uygulanır (açılışta yanıp sönme yok), tarayıcı çubuğu rengi de değişir. Açık palet: sıcak kırık beyaz zemin, beyaz kart, koyu lacivert yazı, bir ton koyu pirinç, koyulaştırılmış durum renkleri.
+- **Değişkenler:** Ekrandaki sabit gölge / karartma / yazı renkleri `--shadow-float`, `--shadow-sticky`, `--scrim`, `--on-solid`, `--on-brand` ile değişkene bağlandı. Kullanılmayan `--accent-grad*`, `--accent-glow` ve mükerrer `--accent-danger-bg` silindi; `.mono` `--font-mono`yu kullanır. Servis fişi ve QR etiketi her temada beyaz kâğıt (bilinçli sabit renk).
+
+### K-115 · Detay ekranında yükleniyor iskeleti
+- Müşteri, makine, ürün, tedarikçi, satış, alım, servis detayı ve servis fişi yüklenirken boş ekran yerine `DetailSkeleton` (özet kutuları + satırlar).
+
+### K-114 · Detay başlıkları da üst kartta
+- `PageHead`'e `badge` (durum rozeti) ve `action` (tek yan eylem) eklendi. Detay ekranları (müşteri, makine, ürün, tedarikçi, satış, alım, QR etiketi) başlığı kendi `h1`'i yerine üst karttaki ortak yerde gösterir; liste ekranlarıyla aynı. Servis detayının özel başlığı (müşteri bağlantısı + makine) ve sihirbaz soruları kapsam dışı.
+
+### K-113 · Kontrol seçimi: anahtar ve onay kutusu
+- Ayar / görünüm açma-kapama anahtar (`toggle-row` + `switch`): arşiv / pasif göster, negatif stok, hızlı alım, geçici makine, seri takibi, telefonu yok, etikette işletme adı. Onay kutusu listeden seçme, kontrol maddesi ve onay beyanı ("yine de kaydet", dışa aktarma uyarısı) için kalır.
+- Dokunmatik: 22 `:hover` kuralı `@media (hover: hover)` içine alındı (biri odak kuralıyla ayrıldı); telefonda dokunulan öğede renk takılı kalmaz.
+
+### K-112 · Tasarım düzeni: yazı / boşluk ölçeği, sınıflar
+- **Yazı:** 26 farklı boyut → rol tabanlı 9 kademe (`--text-2xs` … `--text-3xl`); 54 bildirim değişkene bağlandı. Baskı ölçüleri (fiş px / mm) dokunulmadı.
+- **Boşluk:** `--space-1` … `--space-6` (4 px katları); düzen sınıfları bunları kullanır.
+- **Satır içi stil:** 444 → 101. Tekrar eden 331 `style={{…}}` yardımcı sınıflara çevrildi (`.muted`, `.meta`, `.grow`, `.line-item`, `.item-stack`, `[data-faded]`…). Satır içi stil her kuralı ezdiği için yardımcı sınıflar `!important` taşır; görünüm değişmedi. Kalanlar çalışma anında hesaplanan değerler ya da tek seferlik özel durumlar.
+- **Kurallar** yazıya döküldü: [TASARIM_KURALLARI.md](./TASARIM_KURALLARI.md) (renk anlamları, ölçekler, kontrol seçimi, ekran iskeleti, tema); çalışma kuralı 16.
+
+### K-111 · Uygulama içi metin sorusu
+- `ConfirmHost`'a metin kutusu desteği: `promptDialog` (zorunlu metin boşken onay düğmesi kapalı). Son `window.prompt` (servis parçası "kullanımı geri alma nedeni") buna geçti; projede tarayıcı `confirm` / `prompt` / `alert` kalmadı.
+
+### K-110 · Ortak ödeme yöntemi seçici
+- `PaymentMethodPicker` (çipler; iade ekranları için "Müşteri alacağına yaz" gibi ek seçenek). 10 açılır liste ve satıştaki elle yazılmış çipler buna geçti. Tutarın yanındaki dar sütun kalktı; çipler tutarın altında tam genişlikte.
+
+### K-109 · Büyük dosyalar bölündü
+- `ServiceLines` 700 → 180 satır (işlem formu, parça formu, parça satırı, onay formu ve etiketler ayrı dosyada); `ServiceDetail` 679 → 163 (durum eylemleri, servis bilgileri formu, küçük parçalar, ortak sekme tipi ayrı). İçerik değiştirilmeden, betikle taşındı.
+- Satış satırı mantığı (`parseLine`, taslaktan satır, "aynı ürün gelirse miktar artar") `lib/sales/draft.ts`e, `stepQuantity` `lib/utils/quantity.ts`e taşındı ve test edildi. `ServiceForm` tek bir adım adım akış olduğu için bölünmedi.
+
+### K-108 · Ortak hata iletisi
+- `lib/errors/message.ts`: `errorMessage(e, genel ileti)` ve `NO_CONTEXT_MESSAGE`. 62 `e instanceof Error ? e.message : …` ve 39 "Cihaz bilgisi henüz yüklenmedi…" kopyası buna bağlandı. `useServiceContext` artık `useBusinessContext` üzerine kurulu (işletme / cihaz / kullanıcı tek yerden).
+
+### K-107 · İş kuralları arayüzden ortak katmana
+- Satış / alım durum adları ve rozetleri `lib/sales/status.ts`, `lib/purchases/status.ts` (rapor modülündeki kopya da buraya bağlandı). Arıza başlıkları tek kaynak `lib/catalog` (servis formundaki farklı yazımlı kopya silindi). Servis listesi kuralları (`inTab`, `isOverdue`) `lib/services/status.ts`; `haptic`, `initials` `lib/utils`; `machineTitle` takma adı kaldırıldı (`machineTitleOf`). Hiçbir bileşen iş kuralı dışa vermiyor.
+
+### K-106 · Tek arama modülü
+- `lib/search/match.ts`: her kayıt türünün arandığı alanlar ve eşleştiriciler. Liste, seçici ve genel arama aynı alan tanımlarını kullanır; yeni aranabilir alan tek yere eklenir (barkodu 3 yere eklemek gerekmişti). Davranış değişmedi; genel aramada makine sahibine göre arama bilinçli olarak yok (sonuçları kalabalıklaştırır).
+
+### K-105 · Tarihte Türkiye günü
+- `formatDate` yalnızca tarih değerini ("2026-11-06") takvim günü olarak biçimler; 7 yerdeki `+ "T00:00:00"` eki kaldırıldı. UTC gününü alan üç yer (içe aktarma "bugün"ü, bildirim tekrar anahtarı, sunucu yedeği dosya adı) `localDateOf` ile İstanbul gününe geçti; gece 00:00-03:00 arası önceki gün çıkmaz. `addDaysToLocalDate` ortak tarih modülüne taşındı.
+- **Para:** `lib/utils/currency.ts` yalnızca gösterim ve form biçimi: `formatKurus`, `moneyInput`, `moneyInputFromKurus`; 11 dosyadaki kopyalar buna bağlandı. Kullanılmayan `roundAmount`, `calculateTax`, `formatNumber` silindi (hesap `lib/calc` ile kuruşla). İş kuralı iletilerindeki tutarlar da artık "₺1.250,50" biçiminde.
+
 ## 2026-11-06
 
 ### K-104 · Kıdemli inceleme 1: eşitleme ve veri güvenliği

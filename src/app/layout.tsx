@@ -1,6 +1,7 @@
 import type { Metadata, Viewport } from "next";
 import { Inter, Sora } from "next/font/google";
 import { AppProvider } from "@/components/layout/AppProvider";
+import { THEME_BOOT_SCRIPT } from "@/lib/ui/theme";
 import "./globals.css";
 
 // Yazı tipleri derlemede indirilip uygulamayla birlikte sunulur: tarayıcı Google'a istek atmaz (KVKK),
@@ -44,9 +45,11 @@ export default function RootLayout({
   children: React.ReactNode;
 }) {
   return (
-    <html lang="tr" data-scroll-behavior="smooth" className={`${inter.variable} ${sora.variable}`}>
+    // data-theme sayfa çizilmeden önce betikle konur (K-116); sunucudaki HTML'de yoktur
+    <html lang="tr" data-scroll-behavior="smooth" className={`${inter.variable} ${sora.variable}`} suppressHydrationWarning>
       <head>
         <link rel="apple-touch-icon" href="/icons/apple-touch-icon.png?v=4" />
+        <script dangerouslySetInnerHTML={{ __html: THEME_BOOT_SCRIPT }} />
       </head>
       <body>
         <AppProvider>{children}</AppProvider>

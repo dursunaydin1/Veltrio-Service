@@ -12,6 +12,7 @@ export default function Page() {
         <li><Link href="/settings/business">İşletme bilgileri ve ayarlar (onay eşiği, hatırlatma, stok…)</Link></li>
         <li><Link href="/settings/catalog">Arıza ve işlem katalogları</Link></li>
         <li><Link href="/settings/templates">Servis şablonları (kontrol listesi)</Link></li>
+        <li><Link href="/settings/appearance">Görünüm (koyu / açık tema)</Link></li>
         <li><Link href="/settings/pin">Cihaz PIN kodu</Link></li>
         <li><Link href="/settings/devices">Cihazlar (liste ve iptal)</Link></li>
         <li><Link href="/settings/backup">Yedekleme ve geri yükleme</Link></li>
