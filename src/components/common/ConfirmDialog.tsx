@@ -1,20 +1,27 @@
 "use client";
 
-import { useEffect, useRef, useSyncExternalStore } from "react";
+import { useEffect, useRef, useState, useSyncExternalStore } from "react";
 
 /**
- * Uygulama içi onay penceresi (K-095): tarayıcının sade `confirm()` kutusu yerine ekranın ortasında modal.
- * Açıkken arkadaki ekran kilitlidir (yerel `<dialog>` + `showModal`); karar verilmeden başka yere dokunulamaz.
+ * Uygulama içi onay penceresi (K-095): tarayıcının sade `confirm()` / `prompt()` kutusu yerine
+ * ekranın ortasında modal. Açıkken arkadaki ekran kilitlidir (yerel `<dialog>` + `showModal`);
+ * karar verilmeden başka yere dokunulamaz.
  *
  *   if (await confirmDialog({ title: "Çıkış yapılsın mı?", confirmLabel: "Çıkış yap", danger: true })) …
+ *   const reason = await promptDialog({ title: "Neden?", inputLabel: "Neden" }); // vazgeçilirse null
  */
-type Request = {
+type Options = {
   title: string;
   message?: string;
   confirmLabel?: string;
   cancelLabel?: string;
   danger?: boolean;
-  resolve: (ok: boolean) => void;
+};
+
+type Request = Options & {
+  /** Metin kutusu istenirse (K-111) */
+  input?: { label: string; placeholder?: string; required: boolean };
+  resolve: (result: string | null) => void;
 };
 
 let current: Request | null = null;
@@ -25,19 +32,32 @@ const subscribe = (l: () => void) => {
   return () => listeners.delete(l);
 };
 
-export function confirmDialog(options: Omit<Request, "resolve">): Promise<boolean> {
+function open(request: Omit<Request, "resolve">): Promise<string | null> {
   return new Promise((resolve) => {
-    current?.resolve(false);
-    current = { ...options, resolve };
+    current?.resolve(null);
+    current = { ...request, resolve };
     emit();
   });
 }
 
-function settle(ok: boolean) {
+/** Evet / hayır: onaylanırsa true. */
+export async function confirmDialog(options: Options): Promise<boolean> {
+  return (await open(options)) !== null;
+}
+
+/** Metin isteyen onay: girilen metin, vazgeçilirse null. `required` ise boş metinle onaylanamaz. */
+export function promptDialog(
+  options: Options & { inputLabel: string; placeholder?: string; required?: boolean }
+): Promise<string | null> {
+  const { inputLabel, placeholder, required = true, ...rest } = options;
+  return open({ ...rest, input: { label: inputLabel, placeholder, required } });
+}
+
+function settle(result: string | null) {
   const request = current;
   current = null;
   emit();
-  request?.resolve(ok);
+  request?.resolve(result);
 }
 
 /** AppShell'de bir kez çizilir. */
@@ -60,23 +80,54 @@ export function ConfirmHost() {
       onCancel={(e) => {
         // Geri tuşu / Esc: "Vazgeç" sayılır
         e.preventDefault();
-        settle(false);
+        settle(null);
       }}
     >
-      {request ? (
-        <div className="stack stack-md">
-          <h2 id="confirm-title">{request.title}</h2>
-          {request.message ? <p>{request.message}</p> : null}
-          <div className="row row-gap-md">
-            <button type="button" className="btn btn-secondary" style={{ flex: 1 }} onClick={() => settle(false)} autoFocus>
-              {request.cancelLabel ?? "Vazgeç"}
-            </button>
-            <button type="button" className={`btn ${request.danger ? "btn-danger" : "btn-primary"}`} style={{ flex: 1 }} onClick={() => settle(true)}>
-              {request.confirmLabel ?? "Evet"}
-            </button>
-          </div>
+      {/* Her istekte metin kutusu boş başlasın diye anahtar istekle değişir */}
+      {request ? <DialogBody key={request.title + (request.message ?? "")} request={request} /> : null}
+    </dialog>
+  );
+}
+
+function DialogBody({ request }: { request: Request }) {
+  const [text, setText] = useState("");
+  const blocked = !!request.input?.required && !text.trim();
+  const confirm = () => {
+    if (blocked) return;
+    settle(request.input ? text.trim() : "");
+  };
+
+  return (
+    <form
+      className="stack stack-md"
+      onSubmit={(e) => {
+        e.preventDefault();
+        confirm();
+      }}
+    >
+      <h2 id="confirm-title">{request.title}</h2>
+      {request.message ? <p>{request.message}</p> : null}
+      {request.input ? (
+        <div className="form-group">
+          <label className="form-label" htmlFor="confirm-input">{request.input.label}</label>
+          <input
+            id="confirm-input"
+            className="form-input"
+            placeholder={request.input.placeholder}
+            value={text}
+            onChange={(e) => setText(e.target.value)}
+            autoFocus
+          />
         </div>
       ) : null}
-    </dialog>
+      <div className="row row-gap-md">
+        <button type="button" className="btn btn-secondary" style={{ flex: 1 }} onClick={() => settle(null)} autoFocus={!request.input}>
+          {request.cancelLabel ?? "Vazgeç"}
+        </button>
+        <button type="submit" className={`btn ${request.danger ? "btn-danger" : "btn-primary"}`} style={{ flex: 1 }} disabled={blocked}>
+          {request.confirmLabel ?? "Evet"}
+        </button>
+      </div>
+    </form>
   );
 }

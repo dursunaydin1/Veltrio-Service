@@ -21,7 +21,8 @@
       "Bash(git commit -q -m 'refactor\\(ui\\): split oversized service components; sale draft line logic moves to lib with tests *)",
       "Bash(python -I \"C:/Users/Admin/AppData/Local/Temp/claude/d--Projeler-SOFTWARE-Projeler-Veltrio-Service/1c2923fd-0585-4cbe-8eb4-34427dbb12f8/scratchpad/methods.py\")",
       "Bash(awk -F: '{s+=$2} END {print \"kalan select:\", s}')",
-      "Bash(git commit -q -m 'refactor\\(ui\\): one PaymentMethodPicker \\(chips\\) replaces ten payment method dropdowns *)"
+      "Bash(git commit -q -m 'refactor\\(ui\\): one PaymentMethodPicker \\(chips\\) replaces ten payment method dropdowns *)",
+      "Bash(git commit -q -m 'feat\\(ui\\): in-app prompt dialog replaces the last window.prompt *)"
     ]
   }
 }

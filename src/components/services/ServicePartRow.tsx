@@ -7,7 +7,7 @@ import { parseMoneyInput, parseQuantityInput } from "@/lib/calc";
 import { QuantityStepper } from "@/components/common/QuantityStepper";
 import { removePart, updatePart, setPartSupply, setPartUsedQuantity } from "@/lib/services/quote";
 import { formatCurrency, formatQuantity } from "@/lib/utils";
-import { confirmDialog } from "@/components/common/ConfirmDialog";
+import { confirmDialog, promptDialog } from "@/components/common/ConfirmDialog";
 import { STATUS_LABEL, STATUS_BADGE, SOURCE_LABEL, SUPPLY_LABEL } from "@/components/services/serviceLineLabels";
 
 /** Parça temin durumu ve beklenen geliş tarihi (Adım 3.14, SR-019). */
@@ -89,8 +89,16 @@ export function PartRow({
     if (qty === null) return run(async () => { throw new Error("Kullanılan miktar geçerli bir sayı olmalıdır."); });
     let reason: string | undefined;
     if (qty < part.used_quantity) {
-      reason = window.prompt("Kullanımı geri alma nedeni:") ?? undefined;
-      if (reason === undefined) return;
+      // Geri alma kritik işlemdir, neden istenir (uygulama içi pencere, K-111)
+      const answer = await promptDialog({
+        title: "Kullanım geri alınsın mı?",
+        message: `Kullanılan miktar ${part.used_quantity} → ${qty}. Parça stoğa geri döner.`,
+        inputLabel: "Geri alma nedeni",
+        placeholder: "Ör. yanlış parça işaretlendi",
+        confirmLabel: "Geri al",
+      });
+      if (answer === null) return;
+      reason = answer;
     }
     await run(() => setPartUsedQuantity(ctx, part.id, qty, reason));
   }
