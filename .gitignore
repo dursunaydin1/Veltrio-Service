@@ -70,9 +70,8 @@ coverage/
 .turbo/
 
 # =============================
-# PWA / Service Worker (üretilen)
+# PWA (eski next-pwa çıktıları; public/sw.js elle yazılır ve depoda tutulur, K-118)
 # =============================
-public/sw.js
 public/workbox-*.js
 public/worker-*.js
 public/fallback-*.js

@@ -5,6 +5,10 @@
 
 ## 2026-11-07
 
+### K-118 · Servis çalışanı (sw.js) depoya eklendi
+- **Bulgu:** `public/sw.js` elle yazılan service worker, ama `.gitignore`'da eski next-pwa döneminden kalma "üretilen dosya" kuralıyla yok sayılıyordu; hiç commit edilmemişti. Vercel yayınında dosya yoktu: telefonda çevrimdışı açılış ve sayfa önbelleği çalışmıyordu, `src/test/sw.test.ts` de depodan çalışan her yerde (GitHub Actions, bulut oturumu) dosyayı bulamıyordu. Yerelde dosya olduğu için fark edilmedi.
+- **Karar:** Kural kaldırıldı, `public/sw.js` depoya eklendi (`VERSION` v5). Sahibin kalıcı tercihleri (canlı yayın, testler, gerçek kullanım dönemi, temizlik planı, birden çok oturum) çalışma kurallarına (20–24) taşındı; telefondaki bulut oturumu da aynı kurallarla çalışır.
+
 ### K-117 · Kıdemli inceleme: temizlik, ekran testleri, dokümanlar
 - **Temizlik:** Kullanılmayan `ComingSoon.tsx`, `hooks/index.ts` ve boş `components/forms|shared|ui` klasörleri silindi. Telefonda oluşan beklenmeyen hatalar (otomatik eşitleme, cihaz kaydı) `console.error` yerine `reportError` ile hata kaydına yazılır; sunucudakiler `console.error` ile Vercel kaydında kalır (kural CLAUDE.md'de).
 - **Ekran testleri:** Testing Library + jsdom eklendi; `*.test.tsx` dosyaları `npm test` / `check` ile birlikte koşar. İlk testler ortak parçalar: miktar − / +, ödeme yöntemi çipleri, onay ve metin penceresi, isteğe bağlı alan.
