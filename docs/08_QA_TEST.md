@@ -1,11 +1,12 @@
 # QA / Otomatik Test Düzeneği
 
-Amaç: Her adımdan sonra "proje sağlam mı?" sorusunu tarayıcıda elle denemeden, tek komutla yanıtlamak. Üç katman var:
+Amaç: Her adımdan sonra "proje sağlam mı?" sorusunu tarayıcıda elle denemeden, tek komutla yanıtlamak. Dört katman var:
 
 | Katman | Komut | Ne doğrular | Sunucu verisi |
 |---|---|---|---|
 | 1. Tip denetimi | `npx tsc --noEmit` | Tip/yazım hataları | yok |
 | 2. Birim + iş akışı testleri | `npm test` (günlük: `npm run check`, değişenle ilgili testler; tamamı her push'ta GitHub Actions'ta) | İş kuralları, hesaplar, stok defteri, kuyruk, servis/alım/satış akışları (yerel Dexie taklidiyle) | yok |
+| 2b. Ekran (bileşen) testleri | `npm test` (aynı komut; `*.test.tsx`) | Ortak ekran parçalarının davranışı: miktar − / +, ödeme yöntemi çipleri, onay / metin penceresi, isteğe bağlı alan çipi (Testing Library + jsdom, K-117). Yeni ortak parça eklenince testi de yazılır | yok |
 | 3. Sunucuya karşı uçtan uca | `npm run test:e2e` | Katman 2'deki iş kodunu çalıştırıp kuyruğu gerçek Supabase'e gönderir; RLS, kısıtlar, yabancı anahtar sırası, tetikleyiciler, sürüm çakışması, ikinci cihazdan çekme | **Evet** (adı `E2E-XXXX` ile başlayan test kayıtları) |
 
 ## Katman 3'ü çalıştırma

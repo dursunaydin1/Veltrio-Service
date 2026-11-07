@@ -18,20 +18,23 @@ const static_ = [
   ["tür", "npx tsc --noEmit"],
   ["lint", "npx eslint --cache --cache-location node_modules/.cache/eslint/"],
 ];
-// Hız testi (NFR-003) süre ölçer; tür denetimi ve lint ile aynı anda koşarsa makine yükünden yanlış alarm verir.
-// Günlük denetimde atlanır; tam denetimde testler ötekiler bittikten sonra, tek başına koşar.
+// Hız testi (NFR-003) süre ölçer; başka işlerle (tür denetimi, lint, öteki test dosyaları) aynı anda
+// koşarsa makine yükünden yanlış alarm verir. Günlük denetimde atlanır; tam denetimde en sonda,
+// tek başına koşar (K-117).
+const PERF = "src/test/performance.test.ts";
 const tests = full
-  ? ["test", "npx vitest run"]
-  : ["test", "npx vitest run --changed HEAD --passWithNoTests --exclude src/test/performance.test.ts"];
+  ? ["test", `npx vitest run --exclude ${PERF}`]
+  : ["test", `npx vitest run --changed HEAD --passWithNoTests --exclude ${PERF}`];
+const perf = ["hız", `npx vitest run ${PERF}`];
 
 const started = Date.now();
 const results = full
-  ? [...(await Promise.all(static_.map(run))), await run(tests)]
+  ? [...(await Promise.all(static_.map(run))), await run(tests), await run(perf)]
   : await Promise.all([...static_, tests].map(run));
 
 for (const r of results) {
   if (r.code !== 0) console.log(`\n--- ${r.name} ---\n${r.out.trim()}`);
-  const summary = r.name === "test" ? (r.out.match(/Tests\s+\d.*$/m)?.[0] ?? "") : "";
+  const summary = r.name === "test" || r.name === "hız" ? (r.out.match(/Tests\s+\d.*$/m)?.[0] ?? "") : "";
   console.log(`${r.code === 0 ? "✓" : "✗"} ${r.name} ${summary}`.trim());
 }
 console.log(`${Math.round((Date.now() - started) / 1000)} sn`);

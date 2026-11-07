@@ -5,6 +5,11 @@
 
 ## 2026-11-07
 
+### K-117 · Kıdemli inceleme: temizlik, ekran testleri, dokümanlar
+- **Temizlik:** Kullanılmayan `ComingSoon.tsx`, `hooks/index.ts` ve boş `components/forms|shared|ui` klasörleri silindi. Telefonda oluşan beklenmeyen hatalar (otomatik eşitleme, cihaz kaydı) `console.error` yerine `reportError` ile hata kaydına yazılır; sunucudakiler `console.error` ile Vercel kaydında kalır (kural CLAUDE.md'de).
+- **Ekran testleri:** Testing Library + jsdom eklendi; `*.test.tsx` dosyaları `npm test` / `check` ile birlikte koşar. İlk testler ortak parçalar: miktar − / +, ödeme yöntemi çipleri, onay ve metin penceresi, isteğe bağlı alan.
+- **Dokümanlar:** Genel plandaki ilerleme tablosu gerçeğe göre güncellendi (Faz 1–6 tamam, Faz 7 sürüyor), "Supabase Realtime" ve "react-pdf" gibi kullanılmayan teknolojiler düzeltildi. CLAUDE.md: aşama durumu, para / tarih kuralları (`roundAmount` yerine `lib/calc`), eşitleme paket sınırları, silme ve sunucu sütunu kuralları, "nerede ne var" bölümü, tasarım kuralları bağlantısı. QA dokümanına ekran testleri katmanı eklendi.
+
 ### K-116 · Açık tema ve renk değişkenleri
 - **Neden:** Yalnızca koyu tema vardı; gün ışığında ve aydınlık dükkânda koyu ekran zor okunur (PRD: dış mekânda okunabilirlik).
 - **Karar:** Varsayılan koyu kalır. Ayarlar → Görünüm: Koyu / Açık / Telefonun ayarı (cihaza özel, localStorage `veltrio_theme`). `<html data-theme>` yalnızca değişkenleri değiştirir; seçim sayfa çizilmeden önce küçük bir betikle uygulanır (açılışta yanıp sönme yok), tarayıcı çubuğu rengi de değişir. Açık palet: sıcak kırık beyaz zemin, beyaz kart, koyu lacivert yazı, bir ton koyu pirinç, koyulaştırılmış durum renkleri.

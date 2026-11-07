@@ -38,12 +38,12 @@ Aşağıdaki kararlar ilerleyen adımlarda netleştirilecektir:
 | Karar Alanı | Karar |
 |-------------|-------|
 | **Frontend framework** | ✅ **Next.js 16 (App Router)** — SSR + PWA desteği, mobil öncelikli |
-| **Backend / BaaS** | ✅ **Supabase** — PostgreSQL + Auth + Realtime + Storage |
+| **Backend / BaaS** | ✅ **Supabase** — PostgreSQL + Auth + Storage (sunucu yedekleri) |
 | **Veritabanı** | ✅ **PostgreSQL** (Supabase üzerinde) — decimal tip, UUID, audit log |
 | **Yerel depolama** | ✅ **Dexie.js** (IndexedDB wrapper) — çevrimdışı kayıt + eşitleme kuyruğu |
 | **Auth** | ✅ **Supabase Auth** — hesap/şifre + e-posta kurtarma |
-| **Eşitleme** | ✅ Custom diff + Supabase Realtime — idempotent, append-only |
-| **PDF üretimi** | ✅ **jsPDF** veya **react-pdf** — tarayıcı taraflı PDF |
+| **Eşitleme** | ✅ Kendi eşitleme API'si: `/api/sync/push` + `/api/sync/pull`, `sync_changes` günlüğü (tetikleyici), idempotent, append-only. Supabase Realtime kullanılmıyor (K-104) |
+| **PDF üretimi** | ✅ **jsPDF** + jspdf-autotable — tarayıcı taraflı PDF |
 | **XLSX üretimi** | ✅ **SheetJS (xlsx)** — Türkçe karakter desteğiyle |
 | **Hosting** | ✅ **Vercel** (Next.js) + Supabase Cloud |
 
@@ -108,13 +108,13 @@ Product ──→ ProductSerialUnit
 
 | Faz | Başlangıç | Tamamlanma | Durum |
 |-----|-----------|------------|-------|
-| FAZ 1 | 2026-10 | — | 🟡 Devam ediyor (eşitleme API, giriş akışı hazır) |
-| FAZ 2 | 2026-10 | — | 🟡 Devam ediyor (ürün kataloğu hazır) |
-| FAZ 3 | 2026-10 | — | 🟡 Başladı (müşteri, makine, servis kabulü ve durum akışı hazır) |
-| FAZ 4 | 2026-10 | — | 🟡 Başladı (tedarikçiler, satın alma, hızlı satış ve makine satışı hazır) |
-| FAZ 5 | — | — | 🔴 Başlamadı |
-| FAZ 6 | — | — | 🔴 Başlamadı |
-| FAZ 7 | — | — | 🔴 Başlamadı |
+| FAZ 1 | 2026-10 | 2026-11 | ✅ Tamamlandı (açık tek madde: klavye erişimi / erişilebilirlik denetimi → Faz 7) |
+| FAZ 2 | 2026-10 | 2026-11 | ✅ Tamamlandı |
+| FAZ 3 | 2026-10 | 2026-11 | ✅ Tamamlandı |
+| FAZ 4 | 2026-10 | 2026-11 | ✅ Tamamlandı |
+| FAZ 5 | 2026-10 | 2026-11 | ✅ Tamamlandı |
+| FAZ 6 | 2026-11 | 2026-11 | ✅ Tamamlandı |
+| FAZ 7 | 2026-11 | — | 🟡 Sürüyor: otomatik testler, güvenlik sıkılaştırması (K-104), kıdemli inceleme düzeltmeleri (K-104 – K-117) yapıldı. 2026-11-06'dan beri sahip demo yayında gerçek kayıtlarla kullanıyor (deneme / UAT). Açık: cihaz testleri, kabul kriterlerinin tek tek denenmesi, KVKK metinleri, fotoğrafların Storage'a taşınması, ayrı canlı Supabase projesi, alan adı, Play Store (Capacitor). |
 
 ---
 
