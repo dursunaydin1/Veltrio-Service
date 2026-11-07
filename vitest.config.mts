@@ -7,6 +7,7 @@ export default defineConfig({
   },
   test: {
     environment: "node",
-    include: ["src/**/*.test.ts"],
+    // Ekran (bileşen) testleri *.test.tsx: dosya başında `// @vitest-environment jsdom` (K-117)
+    include: ["src/**/*.test.ts", "src/**/*.test.tsx"],
   },
 });
