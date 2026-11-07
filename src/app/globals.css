@@ -1927,3 +1927,4 @@ input.form-input[type="search"] {
 /* Başlık şeridinde durum rozeti (K-114): başlık kısalır, rozet sağda sabit kalır */
 .card-row h1 { flex: 1; }
 .card-row-badges { display: inline-flex; gap: var(--space-1); flex-shrink: 0; }
+.skeleton-value { width: 60%; height: 22px; margin-top: 6px; }

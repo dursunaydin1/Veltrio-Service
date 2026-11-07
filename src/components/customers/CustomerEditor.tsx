@@ -15,6 +15,7 @@ import { useAppNav } from "@/lib/nav/useAppNav";
 import { confirmDialog } from "@/components/common/ConfirmDialog";
 import { errorMessage } from "@/lib/errors/message";
 import { PageHead } from "@/components/layout/PageHead";
+import { DetailSkeleton } from "@/components/common/ListSkeleton";
 
 /** Müşteri detay sayfası: ara / WhatsApp, düzenleme formu, arşivleme (Adım 3.2). */
 export function CustomerEditor({ id }: { id: string }) {
@@ -26,7 +27,7 @@ export function CustomerEditor({ id }: { id: string }) {
   // Dizi dönmesi, "yükleniyor" (undefined) ile "bulunamadı" ([]) ayrımını sağlar.
   const found = useLiveQuery(() => db.customers.where("id").equals(id).toArray(), [id]);
 
-  if (found === undefined) return null;
+  if (found === undefined) return <DetailSkeleton />;
   if (found.length === 0) {
     return (
       <div className="alert alert-warning" role="alert">

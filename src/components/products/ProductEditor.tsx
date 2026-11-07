@@ -18,6 +18,7 @@ import { useAppNav } from "@/lib/nav/useAppNav";
 import { confirmDialog } from "@/components/common/ConfirmDialog";
 import { errorMessage } from "@/lib/errors/message";
 import { PageHead } from "@/components/layout/PageHead";
+import { DetailSkeleton } from "@/components/common/ListSkeleton";
 
 /** Ürün düzenleme sayfasının içeriği: form + pasifleştirme / yeniden etkinleştirme. */
 export function ProductEditor({ id }: { id: string }) {
@@ -31,7 +32,7 @@ export function ProductEditor({ id }: { id: string }) {
   const balance = useLiveQuery(() => getProductBalance(id), [id]);
   const [tab, setTab] = useState<"stock" | "purchases" | "sales" | "general">("stock");
 
-  if (found === undefined) return null;
+  if (found === undefined) return <DetailSkeleton />;
   if (found.length === 0) {
     return (
       <div className="alert alert-warning" role="alert">

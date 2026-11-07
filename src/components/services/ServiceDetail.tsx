@@ -16,6 +16,7 @@ import { DetailTab } from "@/components/services/serviceDetailTabs";
 import { StatusActions } from "@/components/services/ServiceStatusActions";
 import { DetailsForm } from "@/components/services/ServiceDetailsForm";
 import { DeliveredCard, History, ServiceProgress } from "@/components/services/ServiceDetailParts";
+import { DetailSkeleton } from "@/components/common/ListSkeleton";
 
 /** Servis detayı: özet, durum geçişleri, bilgiler (şikâyet / teşhis / yapılan iş) ve durum geçmişi (Adım 3.7, 3.17). */
 export function ServiceDetail({ id }: { id: string }) {
@@ -45,7 +46,7 @@ export function ServiceDetail({ id }: { id: string }) {
     return { customer, machine };
   }, [found]);
 
-  if (found === undefined) return null;
+  if (found === undefined) return <DetailSkeleton />;
   if (found.length === 0) {
     return (
       <div className="alert alert-warning" role="alert">

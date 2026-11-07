@@ -27,6 +27,7 @@ import type { PaymentMethod } from "@/types";
 import { NO_CONTEXT_MESSAGE, errorMessage } from "@/lib/errors/message";
 import { PaymentMethodPicker } from "@/components/common/PaymentMethodPicker";
 import { PageHead } from "@/components/layout/PageHead";
+import { DetailSkeleton } from "@/components/common/ListSkeleton";
 
 
 /** Satış detayı: satırlar, toplamlar, taslak işlemleri, tahsilat (Adım 4.8). */
@@ -42,7 +43,7 @@ export function SaleDetail({ id }: { id: string }) {
   const items = useLiveQuery(() => getSaleItems(id), [id]);
   const [editing, setEditing] = useState(false);
 
-  if (found === undefined) return null;
+  if (found === undefined) return <DetailSkeleton />;
   if (found.length === 0) {
     return (
       <div className="alert alert-warning" role="alert">

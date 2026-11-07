@@ -14,6 +14,7 @@ import { useAppNav } from "@/lib/nav/useAppNav";
 import { confirmDialog } from "@/components/common/ConfirmDialog";
 import { errorMessage } from "@/lib/errors/message";
 import { PageHead } from "@/components/layout/PageHead";
+import { DetailSkeleton } from "@/components/common/ListSkeleton";
 
 /** Tedarikçi detayı: ara, bakiye / ödemeler, düzenleme, arşivleme (Adım 4.5-4.7). */
 export function SupplierEditor({ id }: { id: string }) {
@@ -24,7 +25,7 @@ export function SupplierEditor({ id }: { id: string }) {
 
   const found = useLiveQuery(() => db.suppliers.where("id").equals(id).toArray(), [id]);
 
-  if (found === undefined) return null;
+  if (found === undefined) return <DetailSkeleton />;
   if (found.length === 0) {
     return (
       <div className="alert alert-warning" role="alert">

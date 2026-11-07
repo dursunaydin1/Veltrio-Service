@@ -7,6 +7,7 @@ import { Printer } from "lucide-react";
 import { useSessionStore } from "@/stores/session";
 import { buildReceiptModel, loadReceiptSource, type ReceiptModel, type ReceiptType } from "@/lib/services/receipt";
 import { formatCurrency, formatDate, formatDateTime, formatQuantity } from "@/lib/utils";
+import { DetailSkeleton } from "@/components/common/ListSkeleton";
 
 type PaperSize = "a4" | "thermal";
 
@@ -25,7 +26,7 @@ export function ReceiptView({ serviceId, type }: { serviceId: string; type: Rece
     return source ? buildReceiptModel(type, source) : null;
   }, [serviceId, type, business?.id]);
 
-  if (model === undefined) return null;
+  if (model === undefined) return <DetailSkeleton />;
   if (model === null) {
     return (
       <div className="alert alert-warning" role="alert">

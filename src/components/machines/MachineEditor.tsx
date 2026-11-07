@@ -17,6 +17,7 @@ import { useAppNav } from "@/lib/nav/useAppNav";
 import { confirmDialog } from "@/components/common/ConfirmDialog";
 import { NO_CONTEXT_MESSAGE, errorMessage } from "@/lib/errors/message";
 import { PageHead } from "@/components/layout/PageHead";
+import { DetailSkeleton } from "@/components/common/ListSkeleton";
 
 /** Makine profili: sahibi, bilgiler, sahiplik geçmişi, sahip değiştirme, arşivleme (Adım 3.3). */
 export function MachineEditor({ id }: { id: string }) {
@@ -34,7 +35,7 @@ export function MachineEditor({ id }: { id: string }) {
     [found]
   );
 
-  if (found === undefined) return null;
+  if (found === undefined) return <DetailSkeleton />;
   if (found.length === 0) {
     return (
       <div className="alert alert-warning" role="alert">
