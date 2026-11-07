@@ -1923,3 +1923,7 @@ input.form-input[type="search"] {
 .line-item   { display: flex !important; flex-direction: column !important; gap: var(--space-1) !important; padding: var(--space-2) 0 !important; }
 /* İptal edilmiş / ters kaydedilmiş kayıt soluk görünür */
 [data-faded] { opacity: 0.55; }
+
+/* Başlık şeridinde durum rozeti (K-114): başlık kısalır, rozet sağda sabit kalır */
+.card-row h1 { flex: 1; }
+.card-row-badges { display: inline-flex; gap: var(--space-1); flex-shrink: 0; }

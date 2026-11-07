@@ -14,6 +14,7 @@ import { telLink, whatsappLink } from "@/lib/utils/phone";
 import { useAppNav } from "@/lib/nav/useAppNav";
 import { confirmDialog } from "@/components/common/ConfirmDialog";
 import { errorMessage } from "@/lib/errors/message";
+import { PageHead } from "@/components/layout/PageHead";
 
 /** Müşteri detay sayfası: ara / WhatsApp, düzenleme formu, arşivleme (Adım 3.2). */
 export function CustomerEditor({ id }: { id: string }) {
@@ -54,10 +55,7 @@ export function CustomerEditor({ id }: { id: string }) {
 
   return (
     <div className="stack stack-lg">
-      <div className="row row-between">
-        <h1>{customer.name}</h1>
-        {archived ? <span className="badge badge-gray">Arşivde</span> : null}
-      </div>
+      <PageHead title={customer.name} badge={archived ? <span className="badge badge-gray">Arşivde</span> : null} />
 
       {customer.photo ? (
         // eslint-disable-next-line @next/next/no-img-element

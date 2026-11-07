@@ -17,6 +17,7 @@ import { unitLabel } from "@/lib/products/constants";
 import { useAppNav } from "@/lib/nav/useAppNav";
 import { confirmDialog } from "@/components/common/ConfirmDialog";
 import { errorMessage } from "@/lib/errors/message";
+import { PageHead } from "@/components/layout/PageHead";
 
 /** Ürün düzenleme sayfasının içeriği: form + pasifleştirme / yeniden etkinleştirme. */
 export function ProductEditor({ id }: { id: string }) {
@@ -57,10 +58,7 @@ export function ProductEditor({ id }: { id: string }) {
 
   return (
     <div className="stack stack-lg">
-      <div className="row row-between">
-        <h1>{product.name}</h1>
-        {archived ? <span className="badge badge-gray">Pasif</span> : null}
-      </div>
+      <PageHead title={product.name} badge={archived ? <span className="badge badge-gray">Pasif</span> : null} />
 
       {product.photo ? (
         // eslint-disable-next-line @next/next/no-img-element

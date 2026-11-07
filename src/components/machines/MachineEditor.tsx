@@ -16,6 +16,7 @@ import type { Machine } from "@/types";
 import { useAppNav } from "@/lib/nav/useAppNav";
 import { confirmDialog } from "@/components/common/ConfirmDialog";
 import { NO_CONTEXT_MESSAGE, errorMessage } from "@/lib/errors/message";
+import { PageHead } from "@/components/layout/PageHead";
 
 /** Makine profili: sahibi, bilgiler, sahiplik geçmişi, sahip değiştirme, arşivleme (Adım 3.3). */
 export function MachineEditor({ id }: { id: string }) {
@@ -61,13 +62,17 @@ export function MachineEditor({ id }: { id: string }) {
   return (
     <div className="stack stack-lg">
       <div className="stack stack-sm">
-        <div className="row row-between">
-          <h1>{machineTitleOf(machine)}</h1>
-          <span className="row row-gap-sm">
-            {machine.is_temporary ? <span className="badge badge-yellow">Geçici</span> : null}
-            {archived ? <span className="badge badge-gray">Arşivde</span> : null}
-          </span>
-        </div>
+        <PageHead
+          title={machineTitleOf(machine)}
+          badge={
+            machine.is_temporary || archived ? (
+              <>
+                {machine.is_temporary ? <span className="badge badge-yellow">Geçici</span> : null}
+                {archived ? <span className="badge badge-gray">Arşivde</span> : null}
+              </>
+            ) : null
+          }
+        />
         <p>
           {machine.type} · İç no: <strong>{machine.internal_number ?? "—"}</strong>
           {machine.serial_number ? ` · Seri no: ${machine.serial_number}` : ""}

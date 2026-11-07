@@ -26,6 +26,7 @@ import { Wallet, XCircle } from "lucide-react";
 import type { PaymentMethod } from "@/types";
 import { NO_CONTEXT_MESSAGE, errorMessage } from "@/lib/errors/message";
 import { PaymentMethodPicker } from "@/components/common/PaymentMethodPicker";
+import { PageHead } from "@/components/layout/PageHead";
 
 
 /** Satış detayı: satırlar, toplamlar, taslak işlemleri, tahsilat (Adım 4.8). */
@@ -54,7 +55,7 @@ export function SaleDetail({ id }: { id: string }) {
   if (editing && sale.status === "DRAFT") {
     return (
       <div className="stack stack-md">
-        <h1>{sale.document_no} — düzenle</h1>
+        <PageHead title={`${sale.document_no} — düzenle`} />
         <SaleForm sale={sale} items={items ?? []} onDone={() => setEditing(false)} />
       </div>
     );
@@ -63,10 +64,7 @@ export function SaleDetail({ id }: { id: string }) {
   return (
     <div className="stack stack-lg">
       <div className="stack stack-sm">
-        <div className="row row-between">
-          <h1>{sale.document_no}</h1>
-          <span className={`badge ${SALE_STATUS_BADGE[sale.status]}`}>{SALE_STATUS_LABEL[sale.status]}</span>
-        </div>
+        <PageHead title={sale.document_no} badge={<span className={`badge ${SALE_STATUS_BADGE[sale.status]}`}>{SALE_STATUS_LABEL[sale.status]}</span>} />
         <p>
           {customer ? <Link href={`/customers/${customer.id}`}>{customer.name}</Link> : "Müşterisiz satış"}
           {" · "}

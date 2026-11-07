@@ -13,6 +13,7 @@ import { telLink } from "@/lib/utils/phone";
 import { useAppNav } from "@/lib/nav/useAppNav";
 import { confirmDialog } from "@/components/common/ConfirmDialog";
 import { errorMessage } from "@/lib/errors/message";
+import { PageHead } from "@/components/layout/PageHead";
 
 /** Tedarikçi detayı: ara, bakiye / ödemeler, düzenleme, arşivleme (Adım 4.5-4.7). */
 export function SupplierEditor({ id }: { id: string }) {
@@ -51,10 +52,7 @@ export function SupplierEditor({ id }: { id: string }) {
 
   return (
     <div className="stack stack-lg">
-      <div className="row row-between">
-        <h1>{supplier.name}</h1>
-        {archived ? <span className="badge badge-gray">Arşivde</span> : null}
-      </div>
+      <PageHead title={supplier.name} badge={archived ? <span className="badge badge-gray">Arşivde</span> : null} />
 
       {tel ? (
         <a href={tel} className="btn btn-secondary btn-full">

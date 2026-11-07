@@ -23,6 +23,7 @@ import { formatCurrency, formatDate, formatDateTime, formatKurus, formatQuantity
 import type { PaymentMethod } from "@/types";
 import { NO_CONTEXT_MESSAGE, errorMessage } from "@/lib/errors/message";
 import { PaymentMethodPicker } from "@/components/common/PaymentMethodPicker";
+import { PageHead } from "@/components/layout/PageHead";
 
 
 /** Satın alma detayı: satırlar, teslim alma, iptal, ödemeler (Adım 4.6-4.7). */
@@ -51,7 +52,7 @@ export function PurchaseDetail({ id }: { id: string }) {
   if (editing && purchase.status === "DRAFT") {
     return (
       <div className="stack stack-md">
-        <h1>{purchase.document_no} — düzenle</h1>
+        <PageHead title={`${purchase.document_no} — düzenle`} />
         <PurchaseForm purchase={purchase} items={items ?? []} onDone={() => setEditing(false)} />
       </div>
     );
@@ -60,10 +61,7 @@ export function PurchaseDetail({ id }: { id: string }) {
   return (
     <div className="stack stack-lg">
       <div className="stack stack-sm">
-        <div className="row row-between">
-          <h1>{purchase.document_no}</h1>
-          <span className={`badge ${PURCHASE_STATUS_BADGE[purchase.status]}`}>{PURCHASE_STATUS_LABEL[purchase.status]}</span>
-        </div>
+        <PageHead title={purchase.document_no} badge={<span className={`badge ${PURCHASE_STATUS_BADGE[purchase.status]}`}>{PURCHASE_STATUS_LABEL[purchase.status]}</span>} />
         <p>
           {supplier ? <Link href={`/suppliers/${supplier.id}`}>{supplier.name}</Link> : "—"}
           {" · "}
