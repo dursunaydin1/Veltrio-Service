@@ -4,6 +4,7 @@ import { useCallback } from "react";
 import { useSessionStore } from "@/stores/session";
 import { nowISO } from "@/lib/utils";
 import type { Device } from "@/types";
+import { reportError } from "@/lib/errors/report";
 
 /**
  * Cihaz kayıt ve iptal işlemleri.
@@ -37,7 +38,7 @@ export function useDevice() {
       });
 
       if (error || !data) {
-        console.error("Cihaz kaydedilemedi:", error?.message);
+        void reportError(new Error(`Cihaz kaydedilemedi: ${error?.message ?? "yanıt yok"}`));
         throw new Error("Cihaz kaydedilemedi. Lütfen tekrar deneyin.");
       }
 

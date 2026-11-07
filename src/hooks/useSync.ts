@@ -3,6 +3,7 @@
 import { useCallback, useEffect, useRef } from "react";
 import { useSessionStore } from "@/stores/session";
 import { syncNow, type SyncSummary } from "@/lib/sync/client";
+import { reportError } from "@/lib/errors/report";
 
 const SYNC_REQUEST_EVENT = "veltrio:sync-requested";
 /** Başarısız eşitlemeden sonra yeniden deneme aralıkları (ms); son değer tekrar eder. */
@@ -49,7 +50,8 @@ export function useSync() {
 
     const handleSyncRequest = () => {
       void runSync().catch((error: unknown) => {
-        console.error("Otomatik eşitleme başarısız:", error);
+        // Telefondaki hata geliştiricinin görebileceği kayda yazılır (çevrimdışıyken yazılmaz, K-117)
+        void reportError(error instanceof Error ? error : new Error(`Otomatik eşitleme: ${String(error)}`));
       });
     };
 
