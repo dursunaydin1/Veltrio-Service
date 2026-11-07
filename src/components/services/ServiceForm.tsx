@@ -10,7 +10,6 @@ import { useBusinessContext } from "@/hooks/useBusinessContext";
 import { CustomerPicker } from "@/components/customers/CustomerPicker";
 import { machineTitleOf } from "@/lib/machines/title";
 import { parseMoneyInput } from "@/lib/calc";
-import { PAYMENT_METHOD_LABELS } from "@/lib/finance/service";
 import { getMachineServiceSummary, openService } from "@/lib/services/service";
 import { statusLabel } from "@/lib/services/status";
 import {
@@ -29,6 +28,7 @@ import type { PaymentMethod } from "@/types";
 import { useAppNav } from "@/lib/nav/useAppNav";
 import { ISSUE_CATEGORIES } from "@/lib/catalog/service";
 import { NO_CONTEXT_MESSAGE, errorMessage } from "@/lib/errors/message";
+import { PaymentMethodPicker } from "@/components/common/PaymentMethodPicker";
 
 
 type Extra = "damage" | "accessories" | "photo";
@@ -443,19 +443,12 @@ export function ServiceForm({
                 <input type="checkbox" className="switch" checked={depositOn} onChange={(e) => setDepositOn(e.target.checked)} />
               </label>
               {depositOn ? (
-                <div className="row row-gap-md">
-                  <div className="form-group" style={{ flex: 1 }}>
+                <div className="stack stack-md">
+                  <div className="form-group">
                     <label className="form-label" htmlFor="sv-dep">Tutar (₺)</label>
                     <input id="sv-dep" className="form-input" inputMode="decimal" placeholder="0,00" value={deposit} onChange={(e) => setDeposit(e.target.value)} />
                   </div>
-                  <div className="form-group" style={{ flex: 1 }}>
-                    <label className="form-label" htmlFor="sv-method">Yöntem</label>
-                    <select id="sv-method" className="form-input" value={method} onChange={(e) => setMethod(e.target.value as PaymentMethod)}>
-                      {(Object.keys(PAYMENT_METHOD_LABELS) as PaymentMethod[]).map((m) => (
-                        <option key={m} value={m}>{PAYMENT_METHOD_LABELS[m]}</option>
-                      ))}
-                    </select>
-                  </div>
+                  <PaymentMethodPicker value={method} onChange={setMethod} />
                 </div>
               ) : null}
             </div>

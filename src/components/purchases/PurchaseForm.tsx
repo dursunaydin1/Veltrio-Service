@@ -6,7 +6,6 @@ import { ProductPicker } from "@/components/products/ProductPicker";
 import { SupplierPicker } from "@/components/suppliers/SupplierPicker";
 import { QuantityStepper } from "@/components/common/QuantityStepper";
 import { calcLine, parseMoneyInput, parseQuantityInput } from "@/lib/calc";
-import { PAYMENT_METHOD_LABELS } from "@/lib/finance/service";
 import {
   createPurchase,
   receivePurchase,
@@ -19,6 +18,7 @@ import type { PaymentMethod, Product, TaxMode } from "@/types";
 import { useAppNav } from "@/lib/nav/useAppNav";
 import { OptionalField, OptionalGroup } from "@/components/common/OptionalField";
 import { NO_CONTEXT_MESSAGE, errorMessage } from "@/lib/errors/message";
+import { PaymentMethodPicker } from "@/components/common/PaymentMethodPicker";
 
 type DraftLine = {
   key: string;
@@ -302,18 +302,10 @@ export function PurchaseForm({
       {quick || lines.length > 0 ? (
         <fieldset className="stack stack-sm" style={{ border: 0, padding: 0 }}>
           <legend className="form-label">Teslim alırken yapılan ödeme (isteğe bağlı)</legend>
-          <div className="row row-gap-md">
-            <div className="form-group" style={{ flex: 2 }}>
-              <input className="form-input" inputMode="decimal" placeholder="Ödenen tutar (₺)" aria-label="Ödenen tutar" value={paid} onChange={(e) => setPaid(e.target.value)} />
-            </div>
-            <div className="form-group" style={{ flex: 1 }}>
-              <select className="form-input" aria-label="Ödeme yöntemi" value={method} onChange={(e) => setMethod(e.target.value as PaymentMethod)}>
-                {(Object.keys(PAYMENT_METHOD_LABELS) as PaymentMethod[]).map((m) => (
-                  <option key={m} value={m}>{PAYMENT_METHOD_LABELS[m]}</option>
-                ))}
-              </select>
-            </div>
+          <div className="form-group">
+            <input className="form-input" inputMode="decimal" placeholder="Ödenen tutar (₺)" aria-label="Ödenen tutar" value={paid} onChange={(e) => setPaid(e.target.value)} />
           </div>
+          <PaymentMethodPicker value={method} onChange={setMethod} />
         </fieldset>
       ) : null}
 

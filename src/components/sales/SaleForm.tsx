@@ -8,7 +8,6 @@ import { CustomerPicker } from "@/components/customers/CustomerPicker";
 import { ProductPicker } from "@/components/products/ProductPicker";
 import { SerialUnitSelect } from "@/components/products/SerialUnitSelect";
 import { parseMoneyInput } from "@/lib/calc";
-import { PAYMENT_METHOD_LABELS } from "@/lib/finance/service";
 import {
   NegativeStockReasonRequiredError,
   createSale,
@@ -31,6 +30,7 @@ import { findProductByBarcode, normalizeBarcode } from "@/lib/products/service";
 import { db } from "@/lib/db";
 import { ProductThumb } from "@/components/products/ProductThumb";
 import { QuantityStepper } from "@/components/common/QuantityStepper";
+import { PaymentMethodPicker } from "@/components/common/PaymentMethodPicker";
 import { addProductLine, linesFromItems, parseLine, type DraftLine, type ParsedLine } from "@/lib/sales/draft";
 import { NO_CONTEXT_MESSAGE, errorMessage } from "@/lib/errors/message";
 
@@ -287,14 +287,7 @@ export function SaleForm({
       {lines.length > 0 ? (
         <fieldset className="stack stack-sm" style={{ border: 0, padding: 0 }}>
           <legend className="form-label">Ödeme</legend>
-          {/* Yöntem tek dokunuşla (K-097); açılır liste yok */}
-          <div className="chip-group" role="group" aria-label="Ödeme yöntemi">
-            {(Object.keys(PAYMENT_METHOD_LABELS) as PaymentMethod[]).map((m) => (
-              <button key={m} type="button" className="chip chip-toggle" aria-pressed={method === m} onClick={() => setMethod(m)}>
-                {PAYMENT_METHOD_LABELS[m]}
-              </button>
-            ))}
-          </div>
+          <PaymentMethodPicker value={method} onChange={setMethod} />
           <div className="row row-gap-sm">
             <input className="form-input" style={{ flex: 1 }} inputMode="decimal" placeholder="Alınan tutar (₺)" aria-label="Alınan tutar" value={received} onChange={(e) => setReceived(e.target.value)} />
             <button type="button" className="btn btn-secondary" onClick={() => setReceived(moneyInput(totalKurus / 100))} disabled={totalKurus === 0}>

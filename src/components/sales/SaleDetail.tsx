@@ -25,6 +25,7 @@ import { formatCurrency, formatDate, formatDateTime, formatKurus, formatQuantity
 import { Wallet, XCircle } from "lucide-react";
 import type { PaymentMethod } from "@/types";
 import { NO_CONTEXT_MESSAGE, errorMessage } from "@/lib/errors/message";
+import { PaymentMethodPicker } from "@/components/common/PaymentMethodPicker";
 
 
 /** Satış detayı: satırlar, toplamlar, taslak işlemleri, tahsilat (Adım 4.8). */
@@ -172,20 +173,11 @@ function DraftActions({ sale, onEdit }: { sale: Sale; onEdit: () => void }) {
         </div>
       ) : (
         <>
-          <div className="row row-gap-md">
-            <div className="form-group" style={{ flex: 2 }}>
-              <label className="form-label" htmlFor="sf-received">Alınan tutar (₺)</label>
-              <input id="sf-received" className="form-input" inputMode="decimal" placeholder="0,00" value={received} onChange={(e) => setReceived(e.target.value)} />
-            </div>
-            <div className="form-group" style={{ flex: 1 }}>
-              <label className="form-label" htmlFor="sf-method">Yöntem</label>
-              <select id="sf-method" className="form-input" value={method} onChange={(e) => setMethod(e.target.value as PaymentMethod)}>
-                {(Object.keys(PAYMENT_METHOD_LABELS) as PaymentMethod[]).map((m) => (
-                  <option key={m} value={m}>{PAYMENT_METHOD_LABELS[m]}</option>
-                ))}
-              </select>
-            </div>
+          <div className="form-group">
+            <label className="form-label" htmlFor="sf-received">Alınan tutar (₺)</label>
+            <input id="sf-received" className="form-input" inputMode="decimal" placeholder="0,00" value={received} onChange={(e) => setReceived(e.target.value)} />
           </div>
+          <PaymentMethodPicker value={method} onChange={setMethod} />
           <button type="button" className="btn btn-ghost btn-sm" style={{ alignSelf: "flex-start" }} onClick={() => setReceived(moneyInput(sale.total_amount))}>
             Tamamı peşin: {formatCurrency(sale.total_amount)}
           </button>
@@ -273,14 +265,7 @@ function SalePayments({ sale }: { sale: Sale }) {
               </button>
             ) : null}
           </div>
-          <div className="form-group">
-            <label className="form-label" htmlFor="sp-method">Yöntem</label>
-            <select id="sp-method" className="form-input" value={method} onChange={(e) => setMethod(e.target.value as PaymentMethod)}>
-              {(Object.keys(PAYMENT_METHOD_LABELS) as PaymentMethod[]).map((m) => (
-                <option key={m} value={m}>{PAYMENT_METHOD_LABELS[m]}</option>
-              ))}
-            </select>
-          </div>
+          <PaymentMethodPicker value={method} onChange={setMethod} />
           {error ? <div className="alert alert-error" role="alert">{error}</div> : null}
           <div className="row row-gap-md">
             <button type="button" className="btn btn-secondary" style={{ flex: 1 }} onClick={() => setOpen(false)} disabled={busy}>Vazgeç</button>

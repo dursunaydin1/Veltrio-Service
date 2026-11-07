@@ -22,6 +22,7 @@ import { formatCurrency, formatDateTime, moneyInput, todayLocalDate } from "@/li
 import type { Payment, PaymentDirection, PaymentMethod } from "@/types";
 import { OptionalField, OptionalGroup } from "@/components/common/OptionalField";
 import { NO_CONTEXT_MESSAGE, errorMessage } from "@/lib/errors/message";
+import { PaymentMethodPicker } from "@/components/common/PaymentMethodPicker";
 
 type Mode = null | "primary" | "secondary" | "opening";
 type OpeningDirection = "OWED_BY_PARTY" | "OWED_TO_PARTY";
@@ -280,14 +281,7 @@ function PaymentForm({
         <label className="form-label" htmlFor="pay-amount">Tutar (₺) *</label>
         <input id="pay-amount" className="form-input" inputMode="decimal" placeholder="0,00" value={amount} onChange={(e) => setAmount(e.target.value)} autoFocus />
       </div>
-      <div className="form-group">
-        <label className="form-label" htmlFor="pay-method">Ödeme yöntemi</label>
-        <select id="pay-method" className="form-input" value={method} onChange={(e) => setMethod(e.target.value as PaymentMethod)}>
-          {(Object.keys(PAYMENT_METHOD_LABELS) as PaymentMethod[]).map((m) => (
-            <option key={m} value={m}>{PAYMENT_METHOD_LABELS[m]}</option>
-          ))}
-        </select>
-      </div>
+      <PaymentMethodPicker value={method} onChange={setMethod} />
       <OptionalGroup>
         <OptionalField label="Not" htmlFor="pay-note" filled={!!note} onClear={() => setNote("")}>
           <input id="pay-note" className="form-input" value={note} onChange={(e) => setNote(e.target.value)} />

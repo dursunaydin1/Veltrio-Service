@@ -14,11 +14,11 @@ import {
   type CollectionAllocation,
   type OpenItem,
 } from "@/lib/finance/openItems";
-import { PAYMENT_METHOD_LABELS } from "@/lib/finance/service";
 import { formatDate, formatKurus, moneyInputFromKurus } from "@/lib/utils";
 import type { PaymentMethod } from "@/types";
 import { OptionalField, OptionalGroup } from "@/components/common/OptionalField";
 import { NO_CONTEXT_MESSAGE, errorMessage } from "@/lib/errors/message";
+import { PaymentMethodPicker } from "@/components/common/PaymentMethodPicker";
 
 
 const itemHref = (item: OpenItem) =>
@@ -257,14 +257,7 @@ export function CollectionForm({ party, onDone }: { party: { id: string; busines
           autoFocus
         />
       </div>
-      <div className="form-group">
-        <label className="form-label" htmlFor="col-method">Ödeme yöntemi</label>
-        <select id="col-method" className="form-input" value={method} onChange={(e) => setMethod(e.target.value as PaymentMethod)}>
-          {(Object.keys(PAYMENT_METHOD_LABELS) as PaymentMethod[]).map((m) => (
-            <option key={m} value={m}>{PAYMENT_METHOD_LABELS[m]}</option>
-          ))}
-        </select>
-      </div>
+      <PaymentMethodPicker value={method} onChange={setMethod} />
 
       {items.length > 0 ? (
         <div className="stack stack-sm">

@@ -22,6 +22,7 @@ import {
 import { formatCurrency, formatDate, formatDateTime, formatKurus, formatQuantity, moneyInputFromKurus } from "@/lib/utils";
 import type { PaymentMethod } from "@/types";
 import { NO_CONTEXT_MESSAGE, errorMessage } from "@/lib/errors/message";
+import { PaymentMethodPicker } from "@/components/common/PaymentMethodPicker";
 
 
 /** Satın alma detayı: satırlar, teslim alma, iptal, ödemeler (Adım 4.6-4.7). */
@@ -168,20 +169,11 @@ function DraftActions({ purchase, onEdit }: { purchase: Purchase; onEdit: () => 
         </div>
       ) : (
         <>
-          <div className="row row-gap-md">
-            <div className="form-group" style={{ flex: 2 }}>
-              <label className="form-label" htmlFor="pr-paid">Teslimde ödenen (₺)</label>
-              <input id="pr-paid" className="form-input" inputMode="decimal" placeholder="0,00" value={paid} onChange={(e) => setPaid(e.target.value)} />
-            </div>
-            <div className="form-group" style={{ flex: 1 }}>
-              <label className="form-label" htmlFor="pr-method">Yöntem</label>
-              <select id="pr-method" className="form-input" value={method} onChange={(e) => setMethod(e.target.value as PaymentMethod)}>
-                {(Object.keys(PAYMENT_METHOD_LABELS) as PaymentMethod[]).map((m) => (
-                  <option key={m} value={m}>{PAYMENT_METHOD_LABELS[m]}</option>
-                ))}
-              </select>
-            </div>
+          <div className="form-group">
+            <label className="form-label" htmlFor="pr-paid">Teslimde ödenen (₺)</label>
+            <input id="pr-paid" className="form-input" inputMode="decimal" placeholder="0,00" value={paid} onChange={(e) => setPaid(e.target.value)} />
           </div>
+          <PaymentMethodPicker value={method} onChange={setMethod} />
           {error ? <div className="alert alert-error" role="alert">{error}</div> : null}
           <button type="button" className="btn btn-primary btn-full btn-lg" onClick={receive} disabled={busy}>
             {busy ? "İşleniyor…" : "Teslim al"}
@@ -261,14 +253,7 @@ function PurchasePayments({ purchase }: { purchase: Purchase }) {
               </button>
             ) : null}
           </div>
-          <div className="form-group">
-            <label className="form-label" htmlFor="pp-method">Yöntem</label>
-            <select id="pp-method" className="form-input" value={method} onChange={(e) => setMethod(e.target.value as PaymentMethod)}>
-              {(Object.keys(PAYMENT_METHOD_LABELS) as PaymentMethod[]).map((m) => (
-                <option key={m} value={m}>{PAYMENT_METHOD_LABELS[m]}</option>
-              ))}
-            </select>
-          </div>
+          <PaymentMethodPicker value={method} onChange={setMethod} />
           {error ? <div className="alert alert-error" role="alert">{error}</div> : null}
           <div className="row row-gap-md">
             <button type="button" className="btn btn-secondary" style={{ flex: 1 }} onClick={() => setOpen(false)} disabled={busy}>Vazgeç</button>

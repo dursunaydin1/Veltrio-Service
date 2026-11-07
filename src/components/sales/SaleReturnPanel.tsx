@@ -5,7 +5,6 @@ import { useLiveQuery } from "dexie-react-hooks";
 import { db } from "@/lib/db";
 import type { Sale, SaleItem } from "@/lib/db";
 import { useServiceContext } from "@/hooks/useServiceContext";
-import { PAYMENT_METHOD_LABELS } from "@/lib/finance/service";
 import {
   createSaleReturn,
   getReturnableQuantity,
@@ -17,6 +16,8 @@ import {
 import { formatCurrency, formatDateTime, formatQuantity } from "@/lib/utils";
 import type { PaymentMethod } from "@/types";
 import { NO_CONTEXT_MESSAGE, errorMessage } from "@/lib/errors/message";
+import { PaymentMethodPicker } from "@/components/common/PaymentMethodPicker";
+import { PAYMENT_METHOD_LABELS } from "@/lib/finance/service";
 
 const DISPOSITION_LABEL: Record<StockDisposition, string> = {
   SELLABLE: "Satılabilir stoğa dön",
@@ -128,13 +129,7 @@ export function SaleReturnPanel({ sale }: { sale: Sale }) {
             </div>
           ))}
           <div className="form-group">
-            <label className="form-label" htmlFor="sr-method">Para iadesi</label>
-            <select id="sr-method" className="form-input" value={method} onChange={(e) => setMethod(e.target.value as RefundMethod)}>
-              {sale.customer_id ? <option value="CUSTOMER_CREDIT">Müşteri alacağına yaz (nakit çıkmaz)</option> : null}
-              {(Object.keys(PAYMENT_METHOD_LABELS) as PaymentMethod[]).map((m) => (
-                <option key={m} value={m}>{PAYMENT_METHOD_LABELS[m]} ile iade et</option>
-              ))}
-            </select>
+            <PaymentMethodPicker value={method} onChange={setMethod} label="Para iadesi" extra={[...(sale.customer_id ? [{ value: "CUSTOMER_CREDIT", label: "Müşteri alacağına yaz (nakit çıkmaz)" }] as const : [])]} />
             <small style={{ color: "var(--text-muted)" }}>
               Satış tamamen ödenmediyse iade önce müşterinin borcunu düşürür; yalnızca fazla ödenen kısım iade edilir.
             </small>

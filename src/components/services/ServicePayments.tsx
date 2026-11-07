@@ -17,6 +17,7 @@ import type { PaymentMethod } from "@/types";
 import { OptionalField, OptionalGroup } from "@/components/common/OptionalField";
 import { DateQuickPick } from "@/components/common/DateQuickPick";
 import { NO_CONTEXT_MESSAGE, errorMessage } from "@/lib/errors/message";
+import { PaymentMethodPicker } from "@/components/common/PaymentMethodPicker";
 
 
 function useBalance(serviceId: string) {
@@ -155,14 +156,7 @@ function CollectForm({ service, onDone, onSaved }: { service: Service; onDone: (
           </button>
         ) : null}
       </div>
-      <div className="form-group">
-        <label className="form-label" htmlFor="col-method">Ödeme yöntemi</label>
-        <select id="col-method" className="form-input" value={method} onChange={(e) => setMethod(e.target.value as PaymentMethod)}>
-          {(Object.keys(PAYMENT_METHOD_LABELS) as PaymentMethod[]).map((m) => (
-            <option key={m} value={m}>{PAYMENT_METHOD_LABELS[m]}</option>
-          ))}
-        </select>
-      </div>
+      <PaymentMethodPicker value={method} onChange={setMethod} />
       <OptionalGroup>
         <OptionalField label="Not" htmlFor="col-note" filled={!!note} onClear={() => setNote("")}>
           <input id="col-note" className="form-input" value={note} onChange={(e) => setNote(e.target.value)} />
@@ -223,20 +217,11 @@ export function DeliveryPanel({ service }: { service: Service }) {
         {planned > 0 ? <> · Bu tahsilattan sonra: <strong>{after > 0 ? formatKurus(after) : "borç yok"}</strong></> : null}
       </div>
 
-      <div className="row row-gap-md">
-        <div className="form-group" style={{ flex: 2 }}>
-          <label className="form-label" htmlFor="dl-amount">Teslimde tahsilat (₺)</label>
-          <input id="dl-amount" className="form-input" inputMode="decimal" placeholder="0,00" value={amount} onChange={(e) => setAmount(e.target.value)} />
-        </div>
-        <div className="form-group" style={{ flex: 1 }}>
-          <label className="form-label" htmlFor="dl-method">Yöntem</label>
-          <select id="dl-method" className="form-input" value={method} onChange={(e) => setMethod(e.target.value as PaymentMethod)}>
-            {(Object.keys(PAYMENT_METHOD_LABELS) as PaymentMethod[]).map((m) => (
-              <option key={m} value={m}>{PAYMENT_METHOD_LABELS[m]}</option>
-            ))}
-          </select>
-        </div>
+      <div className="form-group">
+        <label className="form-label" htmlFor="dl-amount">Teslimde tahsilat (₺)</label>
+        <input id="dl-amount" className="form-input" inputMode="decimal" placeholder="0,00" value={amount} onChange={(e) => setAmount(e.target.value)} />
       </div>
+      <PaymentMethodPicker value={method} onChange={setMethod} />
       {balance && balance.remaining > 0 ? (
         <button type="button" className="btn btn-ghost btn-sm" style={{ alignSelf: "flex-start" }} onClick={() => setAmount(moneyInputFromKurus(balance.remaining))}>
           Kalanın tamamını tahsil et

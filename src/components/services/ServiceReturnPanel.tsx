@@ -6,7 +6,6 @@ import { db } from "@/lib/db";
 import type { Service } from "@/lib/db";
 import { useServiceContext } from "@/hooks/useServiceContext";
 import { parseMoneyInput } from "@/lib/calc";
-import { PAYMENT_METHOD_LABELS } from "@/lib/finance/service";
 import { reverseReturn, type RefundMethod, type StockDisposition } from "@/lib/returns/service";
 import {
   createServiceReturn,
@@ -19,6 +18,8 @@ import { formatCurrency, formatDateTime, formatQuantity, moneyInputFromKurus } f
 import type { PaymentMethod } from "@/types";
 import { OptionalField, OptionalGroup } from "@/components/common/OptionalField";
 import { NO_CONTEXT_MESSAGE, errorMessage } from "@/lib/errors/message";
+import { PaymentMethodPicker } from "@/components/common/PaymentMethodPicker";
+import { PAYMENT_METHOD_LABELS } from "@/lib/finance/service";
 
 const DISPOSITION_LABEL: Record<StockDisposition, string> = {
   SELLABLE: "Satılabilir stoğa dön",
@@ -73,20 +74,11 @@ function CancelledRefund({ service }: { service: Service }) {
       </p>
       {open ? (
         <form className="stack stack-md" onSubmit={submit} noValidate>
-          <div className="row row-gap-md">
-            <div className="form-group" style={{ flex: 2 }}>
-              <label className="form-label" htmlFor="cr-amount">İade tutarı (₺) *</label>
-              <input id="cr-amount" className="form-input" inputMode="decimal" value={amount} onChange={(e) => setAmount(e.target.value)} autoFocus />
-            </div>
-            <div className="form-group" style={{ flex: 1 }}>
-              <label className="form-label" htmlFor="cr-method">Yöntem</label>
-              <select id="cr-method" className="form-input" value={method} onChange={(e) => setMethod(e.target.value as PaymentMethod)}>
-                {(Object.keys(PAYMENT_METHOD_LABELS) as PaymentMethod[]).map((m) => (
-                  <option key={m} value={m}>{PAYMENT_METHOD_LABELS[m]}</option>
-                ))}
-              </select>
-            </div>
+          <div className="form-group">
+            <label className="form-label" htmlFor="cr-amount">İade tutarı (₺) *</label>
+            <input id="cr-amount" className="form-input" inputMode="decimal" value={amount} onChange={(e) => setAmount(e.target.value)} autoFocus />
           </div>
+          <PaymentMethodPicker value={method} onChange={setMethod} />
           <button type="button" className="btn btn-ghost btn-sm" style={{ alignSelf: "flex-start" }} onClick={() => setAmount(moneyInputFromKurus(refundable))}>
             Tamamı: {formatCurrency(refundable / 100)}
           </button>
@@ -213,13 +205,7 @@ function DeliveredReturn({ service }: { service: Service }) {
             </OptionalField>
           </OptionalGroup>
           <div className="form-group">
-            <label className="form-label" htmlFor="dr-method">Para iadesi</label>
-            <select id="dr-method" className="form-input" value={method} onChange={(e) => setMethod(e.target.value as RefundMethod)}>
-              <option value="CUSTOMER_CREDIT">Müşteri alacağına yaz / borcundan düş</option>
-              {(Object.keys(PAYMENT_METHOD_LABELS) as PaymentMethod[]).map((m) => (
-                <option key={m} value={m}>{PAYMENT_METHOD_LABELS[m]} ile iade et</option>
-              ))}
-            </select>
+            <PaymentMethodPicker value={method} onChange={setMethod} label="Para iadesi" extra={[{ value: "CUSTOMER_CREDIT", label: "Müşteri alacağına yaz / borcundan düş" }]} />
             <small style={{ color: "var(--text-muted)" }}>
               Servis tamamen ödenmediyse tutar önce müşterinin borcunu düşürür; yalnızca fazla ödenen kısım iade edilir.
             </small>

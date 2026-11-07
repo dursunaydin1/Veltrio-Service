@@ -5,7 +5,6 @@ import { useLiveQuery } from "dexie-react-hooks";
 import { db } from "@/lib/db";
 import type { Purchase, PurchaseItem } from "@/lib/db";
 import { useBusinessContext } from "@/hooks/useBusinessContext";
-import { PAYMENT_METHOD_LABELS } from "@/lib/finance/service";
 import { reverseReturn } from "@/lib/returns/service";
 import {
   createPurchaseReturn,
@@ -17,6 +16,8 @@ import { unitLabel } from "@/lib/serial/service";
 import { formatCurrency, formatDateTime, formatQuantity } from "@/lib/utils";
 import type { PaymentMethod, ProductSerialUnit, StockBucket } from "@/types";
 import { NO_CONTEXT_MESSAGE, errorMessage } from "@/lib/errors/message";
+import { PaymentMethodPicker } from "@/components/common/PaymentMethodPicker";
+import { PAYMENT_METHOD_LABELS } from "@/lib/finance/service";
 
 type Row = { item: PurchaseItem; remaining: number; serial: boolean; units: ProductSerialUnit[] };
 
@@ -145,13 +146,7 @@ export function PurchaseReturnPanel({ purchase }: { purchase: Purchase }) {
             </div>
           ))}
           <div className="form-group">
-            <label className="form-label" htmlFor="pr-method">Tedarikçiden para</label>
-            <select id="pr-method" className="form-input" value={method} onChange={(e) => setMethod(e.target.value as SupplierRefundMethod)}>
-              <option value="SUPPLIER_CREDIT">Para almadım, borcumdan düş</option>
-              {(Object.keys(PAYMENT_METHOD_LABELS) as PaymentMethod[]).map((m) => (
-                <option key={m} value={m}>{PAYMENT_METHOD_LABELS[m]} ile geri aldım</option>
-              ))}
-            </select>
+            <PaymentMethodPicker value={method} onChange={setMethod} label="Tedarikçiden para" extra={[{ value: "SUPPLIER_CREDIT", label: "Para almadım, borcumdan düş" }]} />
             <small style={{ color: "var(--text-muted)" }}>
               İade önce tedarikçiye olan borcunuzu düşürür; yalnızca alıma fazladan ödediğiniz kısım geri alınmış sayılır.
             </small>
