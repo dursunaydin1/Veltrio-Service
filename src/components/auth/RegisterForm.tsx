@@ -70,7 +70,7 @@ export function RegisterForm() {
       <div className="form-group">
         <label className="form-label" htmlFor="reg-password">Şifre *</label>
         <PasswordInput id="reg-password" autoComplete="new-password" value={password} onChange={(e) => setPassword(e.target.value)} />
-        <small style={{ color: "var(--text-muted)" }}>En az 10 karakter, harf ve rakam içermeli.</small>
+        <small className="muted">En az 10 karakter, harf ve rakam içermeli.</small>
       </div>
       <div className="form-group">
         <label className="form-label" htmlFor="reg-confirm">Şifre (tekrar) *</label>

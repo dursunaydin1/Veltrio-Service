@@ -86,8 +86,8 @@ export function SerialUnitsPanel({ product }: { product: Product }) {
           </div>
           {error ? <div className="alert alert-error" role="alert">{error}</div> : null}
           <div className="row row-gap-md">
-            <button type="button" className="btn btn-secondary" style={{ flex: 1 }} onClick={() => setOpen(false)} disabled={busy}>Vazgeç</button>
-            <button type="submit" className="btn btn-primary" style={{ flex: 1 }} disabled={busy}>{busy ? "Ekleniyor…" : "Birimi ekle"}</button>
+            <button type="button" className="btn btn-secondary grow" onClick={() => setOpen(false)} disabled={busy}>Vazgeç</button>
+            <button type="submit" className="btn btn-primary grow" disabled={busy}>{busy ? "Ekleniyor…" : "Birimi ekle"}</button>
           </div>
         </form>
       ) : (
@@ -101,12 +101,12 @@ export function SerialUnitsPanel({ product }: { product: Product }) {
       ) : (
         <ul className="menu-list" aria-label="Seri birimler">
           {units.map((u) => (
-            <li key={u.id} style={{ display: "flex", flexDirection: "column", gap: 2, padding: "8px 0" }}>
+            <li key={u.id} className="line-item">
               <span className="row row-between">
                 <strong>{unitLabel(u)}</strong>
                 <span className={`badge ${STATUS_BADGE[u.status]}`}>{STATUS_LABEL[u.status]}</span>
               </span>
-              <small style={{ color: "var(--text-muted)" }}>
+              <small className="muted">
                 {u.serial_number && u.internal_number ? `${u.internal_number} · ` : ""}
                 {formatDate(u.created_at)}
                 {u.machine_id ? (

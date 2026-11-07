@@ -121,7 +121,7 @@ function DialogBody({ request }: { request: Request }) {
         </div>
       ) : null}
       <div className="row row-gap-md">
-        <button type="button" className="btn btn-secondary" style={{ flex: 1 }} onClick={() => settle(null)} autoFocus={!request.input}>
+        <button type="button" className="btn btn-secondary grow" onClick={() => settle(null)} autoFocus={!request.input}>
           {request.cancelLabel ?? "Vazgeç"}
         </button>
         <button type="submit" className={`btn ${request.danger ? "btn-danger" : "btn-primary"}`} style={{ flex: 1 }} disabled={blocked}>

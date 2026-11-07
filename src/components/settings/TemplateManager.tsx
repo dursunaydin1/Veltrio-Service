@@ -62,7 +62,7 @@ export function TemplateManager() {
                 <strong>{t.name}</strong>
                 {!t.active ? <span className="badge badge-gray">Pasif</span> : null}
               </span>
-              <small style={{ color: "var(--text-muted)" }}>
+              <small className="muted">
                 {count} madde{t.machine_type ? ` · ${t.machine_type}` : ""}
               </small>
               <span className="row row-gap-sm">
@@ -124,15 +124,15 @@ function TemplateForm({ template, initial, onDone }: { template?: ServiceTemplat
       <div className="stack stack-sm">
         <strong>Maddeler</strong>
         {items.map((row, index) => (
-          <div key={index} className="row row-gap-sm" style={{ alignItems: "center" }}>
+          <div key={index} className="row row-gap-sm items-center" >
             <input
-              className="form-input"
-              style={{ flex: 1 }}
+              className="form-input grow"
+              
               aria-label={`Madde ${index + 1}`}
               value={row.title}
               onChange={(e) => patch(index, { title: e.target.value })}
             />
-            <label className="row row-gap-sm" style={{ alignItems: "center", whiteSpace: "nowrap" }}>
+            <label className="row row-gap-sm items-center nowrap" >
               <input type="checkbox" checked={row.required} onChange={(e) => patch(index, { required: e.target.checked })} />
               Zorunlu
             </label>
@@ -141,15 +141,15 @@ function TemplateForm({ template, initial, onDone }: { template?: ServiceTemplat
             </button>
           </div>
         ))}
-        <button type="button" className="btn btn-secondary btn-sm" style={{ alignSelf: "flex-start" }} onClick={() => setItems([...items, { title: "", required: false }])}>
+        <button type="button" className="btn btn-secondary btn-sm self-start" onClick={() => setItems([...items, { title: "", required: false }])}>
           Madde ekle
         </button>
       </div>
 
       {error ? <div className="alert alert-error" role="alert">{error}</div> : null}
       <div className="row row-gap-md">
-        <button type="button" className="btn btn-secondary" style={{ flex: 1 }} onClick={onDone} disabled={busy}>Vazgeç</button>
-        <button type="submit" className="btn btn-primary" style={{ flex: 1 }} disabled={busy}>{busy ? "Kaydediliyor…" : "Kaydet"}</button>
+        <button type="button" className="btn btn-secondary grow" onClick={onDone} disabled={busy}>Vazgeç</button>
+        <button type="submit" className="btn btn-primary grow" disabled={busy}>{busy ? "Kaydediliyor…" : "Kaydet"}</button>
       </div>
     </form>
   );

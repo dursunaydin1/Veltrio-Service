@@ -110,15 +110,15 @@ export function BalanceReport() {
             <ul className="menu-list" aria-label="Müşteri bakiyeleri">
               {customers.map((r) => (
                 <li key={r.id}>
-                  <Link href={`/customers/${r.id}`} style={{ alignItems: "flex-start", flexDirection: "column", gap: 4 }}>
-                    <span className="row row-between" style={{ width: "100%", gap: 8 }}>
+                  <Link href={`/customers/${r.id}`} className="item-stack">
+                    <span className="row row-between w-full gap-2" >
                       <span>{r.name}</span>
                       <strong style={{ color: r.balanceKurus > 0 ? "var(--accent-warning)" : "var(--accent-success)" }}>
                         {r.balanceKurus > 0 ? formatKurus(r.balanceKurus) : `${formatKurus(-r.balanceKurus)} alacaklı`}
                       </strong>
                     </span>
                     {r.overdueKurus > 0 ? (
-                      <span style={{ fontWeight: 500, color: "var(--text-secondary)" }}>8 günü geçen: {formatKurus(r.overdueKurus)}</span>
+                      <span className="meta-strong">8 günü geçen: {formatKurus(r.overdueKurus)}</span>
                     ) : null}
                   </Link>
                 </li>
@@ -145,7 +145,7 @@ export function BalanceReport() {
               {suppliers.map((r) => (
                 <li key={r.id}>
                   <Link href={`/suppliers/${r.id}`}>
-                    <span className="row row-between" style={{ width: "100%", gap: 8 }}>
+                    <span className="row row-between w-full gap-2" >
                       <span>{r.name}</span>
                       <strong style={{ color: r.balanceKurus > 0 ? "var(--accent-warning)" : "var(--accent-success)" }}>
                         {r.balanceKurus > 0 ? `${formatKurus(r.balanceKurus)} borç` : `${formatKurus(-r.balanceKurus)} alacak`}

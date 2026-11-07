@@ -30,12 +30,12 @@ export function ProductPurchases({ productId }: { productId: string }) {
         <ul className="menu-list" aria-label="Alışlar">
           {rows.slice(0, LIMIT).map(({ item, purchase }) => (
             <li key={item.id}>
-              <Link href={`/purchases/${purchase.id}`} style={{ flexDirection: "column", alignItems: "flex-start", gap: 2 }}>
-                <span className="row row-between" style={{ width: "100%" }}>
+              <Link href={`/purchases/${purchase.id}`} className="item-stack">
+                <span className="row row-between w-full" >
                   <span>{purchase.document_no}</span>
                   <strong>{formatCurrency(item.line_total)}</strong>
                 </span>
-                <small style={{ color: "var(--text-muted)", fontWeight: 500 }}>
+                <small className="meta">
                   {formatDate(purchase.purchase_date)} · {formatQuantity(item.quantity)} {item.unit} × {formatCurrency(item.unit_price)} ·{" "}
                   {PURCHASE_STATUS_LABEL[purchase.status]}
                 </small>
@@ -69,12 +69,12 @@ export function ProductSales({ productId }: { productId: string }) {
         <ul className="menu-list" aria-label="Satışlar">
           {rows.slice(0, LIMIT).map(({ item, sale }) => (
             <li key={item.id}>
-              <Link href={`/sales/${sale.id}`} style={{ flexDirection: "column", alignItems: "flex-start", gap: 2 }}>
-                <span className="row row-between" style={{ width: "100%" }}>
+              <Link href={`/sales/${sale.id}`} className="item-stack">
+                <span className="row row-between w-full" >
                   <span>{sale.document_no}</span>
                   <strong>{formatCurrency(item.line_total)}</strong>
                 </span>
-                <small style={{ color: "var(--text-muted)", fontWeight: 500 }}>
+                <small className="meta">
                   {formatDate(sale.sale_date)} · {formatQuantity(item.quantity)} {item.unit} × {formatCurrency(item.unit_price_snapshot)} ·{" "}
                   {SALE_STATUS_LABEL[sale.status]}
                 </small>

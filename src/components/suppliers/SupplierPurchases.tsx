@@ -30,13 +30,13 @@ export function SupplierPurchases({ supplier }: { supplier: Supplier }) {
         <ul className="menu-list" aria-label="Tedarikçinin alımları">
           {purchases.slice(0, 20).map((p) => (
             <li key={p.id}>
-              <Link href={`/purchases/${p.id}`} style={{ flexDirection: "column", alignItems: "flex-start", gap: 2 }}>
-                <span className="row row-between" style={{ width: "100%" }}>
+              <Link href={`/purchases/${p.id}`} className="item-stack">
+                <span className="row row-between w-full" >
                   <span>{p.document_no}</span>
                   <strong>{formatCurrency(p.total_amount)}</strong>
                 </span>
                 <span className="row row-gap-sm">
-                  <small style={{ color: "var(--text-muted)", fontWeight: 500 }}>{formatDate(p.purchase_date)}</small>
+                  <small className="meta">{formatDate(p.purchase_date)}</small>
                   <span className={`badge ${PURCHASE_STATUS_BADGE[p.status]}`}>{PURCHASE_STATUS_LABEL[p.status]}</span>
                 </span>
               </Link>

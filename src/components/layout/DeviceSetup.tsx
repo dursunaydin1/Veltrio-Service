@@ -27,7 +27,7 @@ export function AutoDeviceSetup() {
       <div className="stack stack-md" style={{ alignItems: "center", textAlign: "center", padding: 24 }}>
         <div className="loader-ring" />
         <strong>Bu telefon hazırlanıyor</strong>
-        <small style={{ color: "var(--text-muted)" }}>Cihaz kaydediliyor, ardından verileriniz sunucudan indirilecek.</small>
+        <small className="muted">Cihaz kaydediliyor, ardından verileriniz sunucudan indirilecek.</small>
       </div>
     </div>
   );
@@ -65,7 +65,7 @@ export function DeviceSetup() {
           Bu tarayıcı henüz kayıtlı değil. Cihaza tanıyabileceğiniz bir ad verin;
           cihaz kodu otomatik atanır.
         </p>
-        <small style={{ color: "var(--text-muted)" }}>
+        <small className="muted">
           Bu telefonu daha önce kaydetmiştiniz ve yine bu ekran çıktıysa telefonun bu uygulamaya ait verileri silinmiştir
           (ör. depolama temizliği). Verileriniz sunucuda güvende; kayıttan sonra yeniden iner. Eski kaydı
           Ayarlar → Cihazlar’dan iptal edebilirsiniz.

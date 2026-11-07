@@ -58,8 +58,8 @@ export function ServiceDetail({ id }: { id: string }) {
   return (
     <div className="stack stack-lg">
       <div className="card stack stack-md">
-        <div className="stack" style={{ gap: 4 }}>
-          <div className="row row-between" style={{ gap: 8 }}>
+        <div className="stack gap-1" >
+          <div className="row row-between gap-2" >
             <small style={{ color: "var(--text-muted)", fontWeight: 600, letterSpacing: "0.02em" }}>{service.document_no}</small>
             <span className="row row-gap-sm">
               {service.is_warranty_claim ? <span className="badge badge-yellow">Garanti</span> : null}
@@ -76,7 +76,7 @@ export function ServiceDetail({ id }: { id: string }) {
           <p style={{ fontWeight: 500 }}>
             {related?.machine ? <Link href={`/machines/${related.machine.id}`}>{machineTitleOf(related.machine)}</Link> : "Makine bilgisi yok"}
           </p>
-          <small style={{ color: "var(--text-muted)" }}>
+          <small className="muted">
             Kabul: {formatDateTime(service.received_date)}
             {service.promised_date ? ` · Teslim sözü: ${formatDate(service.promised_date)}` : ""}
             {service.deposit_amount > 0 ? ` · Kapora: ${formatCurrency(service.deposit_amount)}` : ""}
@@ -95,7 +95,7 @@ export function ServiceDetail({ id }: { id: string }) {
         {service.status === "CANCELLED" && service.cancel_reason ? (
           <div className="alert alert-error" role="note">İptal nedeni: {service.cancel_reason}</div>
         ) : null}
-        <div className="row row-gap-sm" style={{ flexWrap: "wrap" }}>
+        <div className="row row-gap-sm row-wrap" >
           <Link href={`/services/${service.id}/receipt?type=intake`} className="btn btn-secondary btn-sm">
             <Printer size={16} aria-hidden="true" />
             Kabul fişi

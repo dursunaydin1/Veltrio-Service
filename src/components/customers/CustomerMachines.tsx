@@ -34,9 +34,9 @@ export function CustomerMachines({ customer }: { customer: Customer }) {
         <ul className="menu-list" aria-label="Müşterinin makineleri">
           {machines.map((m) => (
             <li key={m.id}>
-              <Link href={`/machines/${m.id}`} style={{ flexDirection: "column", alignItems: "flex-start", gap: 2 }}>
+              <Link href={`/machines/${m.id}`} className="item-stack">
                 <span>{machineTitleOf(m)}</span>
-                <small style={{ color: "var(--text-muted)", fontWeight: 500 }}>
+                <small className="meta">
                   {[m.type, m.serial_number ?? m.internal_number].filter(Boolean).join(" · ")}
                 </small>
               </Link>

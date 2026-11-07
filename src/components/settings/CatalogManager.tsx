@@ -108,7 +108,7 @@ function EntryRow({ kind, entry, onEdit }: { kind: Kind; entry: Entry; onEdit: (
           {entry.suggested_price !== undefined ? <span className="badge badge-gray">{formatCurrency(entry.suggested_price)}</span> : null}
         </span>
       </span>
-      <small style={{ color: "var(--text-muted)" }}>
+      <small className="muted">
         {entry.category}
         {entry.default_duration ? ` · ${entry.default_duration} dk` : ""}
       </small>
@@ -171,11 +171,11 @@ function EntryForm({ kind, entry, onDone }: { kind: Kind; entry?: Entry; onDone:
       </div>
       {kind === "OPERATION" ? (
         <div className="row row-gap-md">
-          <div className="form-group" style={{ flex: 1 }}>
+          <div className="form-group grow" >
             <label className="form-label" htmlFor="cat-price">Önerilen fiyat (₺)</label>
             <input id="cat-price" className="form-input" inputMode="decimal" value={price} onChange={(e) => setPrice(e.target.value)} />
           </div>
-          <div className="form-group" style={{ flex: 1 }}>
+          <div className="form-group grow" >
             <label className="form-label" htmlFor="cat-duration">Süre (dk)</label>
             <input id="cat-duration" className="form-input" inputMode="numeric" value={duration} onChange={(e) => setDuration(e.target.value)} />
           </div>
@@ -183,8 +183,8 @@ function EntryForm({ kind, entry, onDone }: { kind: Kind; entry?: Entry; onDone:
       ) : null}
       {error ? <div className="alert alert-error" role="alert">{error}</div> : null}
       <div className="row row-gap-md">
-        <button type="button" className="btn btn-secondary" style={{ flex: 1 }} onClick={onDone} disabled={busy}>Vazgeç</button>
-        <button type="submit" className="btn btn-primary" style={{ flex: 1 }} disabled={busy}>{busy ? "Kaydediliyor…" : "Kaydet"}</button>
+        <button type="button" className="btn btn-secondary grow" onClick={onDone} disabled={busy}>Vazgeç</button>
+        <button type="submit" className="btn btn-primary grow" disabled={busy}>{busy ? "Kaydediliyor…" : "Kaydet"}</button>
       </div>
     </form>
   );

@@ -142,7 +142,7 @@ export function StatusActions({ service, onGoTab }: { service: Service; onGoTab:
     return (
       <details className="more-actions">
         <summary>Diğer işlemler</summary>
-        <div className="row row-gap-sm" style={{ flexWrap: "wrap" }}>
+        <div className="row row-gap-sm row-wrap" >
           {others.map((to) => (
             <button
               key={to}
@@ -167,7 +167,7 @@ export function StatusActions({ service, onGoTab }: { service: Service; onGoTab:
       {checklistWarning ? (
         <div className="alert alert-warning" role="alert">
           <p>Tamamlanmamış zorunlu kontrol maddesi var: <strong>{checklistWarning.titles.join(", ")}</strong></p>
-          <div className="row row-gap-md" style={{ marginTop: 8 }}>
+          <div className="row row-gap-md mt-2" >
             <button type="button" className="btn btn-secondary btn-sm" onClick={() => setChecklistWarning(null)}>Geri dön</button>
             <button type="button" className="btn btn-primary btn-sm" disabled={busy} onClick={() => void go(checklistWarning.to, undefined, true)}>
               Yine de tamamla
@@ -203,13 +203,13 @@ export function StatusActions({ service, onGoTab }: { service: Service; onGoTab:
             <OptionalGroup>
               <OptionalField label="İnceleme / teşhis ücreti (₺)" chip="İnceleme ücreti" htmlFor="st-fee" filled={!!fee} onClear={() => setFee("")}>
                 <input id="st-fee" className="form-input" inputMode="decimal" placeholder="0,00" value={fee} onChange={(e) => setFee(e.target.value)} />
-                <small style={{ color: "var(--text-muted)" }}>Girilirse servis iptal olarak kalır ve sayaç artmaz; ücret müşteri bakiyesine yazılır.</small>
+                <small className="muted">Girilirse servis iptal olarak kalır ve sayaç artmaz; ücret müşteri bakiyesine yazılır.</small>
               </OptionalField>
             </OptionalGroup>
           ) : null}
           {error ? <div className="alert alert-error" role="alert">{error}</div> : null}
           <div className="row row-gap-md">
-            <button type="button" className="btn btn-secondary" style={{ flex: 1 }} onClick={() => setPending(null)} disabled={busy}>Vazgeç</button>
+            <button type="button" className="btn btn-secondary grow" onClick={() => setPending(null)} disabled={busy}>Vazgeç</button>
             <button type="submit" className={`btn ${pending === "CANCELLED" ? "btn-danger" : "btn-primary"}`} style={{ flex: 1 }} disabled={busy}>
               Onayla
             </button>
@@ -226,12 +226,12 @@ export function StatusActions({ service, onGoTab }: { service: Service; onGoTab:
           <div className="form-group">
             <label className="form-label" htmlFor="st-resolution">Yapılan iş</label>
             <textarea id="st-resolution" className="form-input" rows={3} value={resolutionText} onChange={(e) => setResolutionText(e.target.value)} autoFocus />
-            <small style={{ color: "var(--text-muted)" }}>Kalemlerden önerildi; düzeltebilirsiniz. Müşteriye verilen sonuç özetinde görünür.</small>
+            <small className="muted">Kalemlerden önerildi; düzeltebilirsiniz. Müşteriye verilen sonuç özetinde görünür.</small>
           </div>
           {error ? <div className="alert alert-error" role="alert">{error}</div> : null}
           <div className="row row-gap-md">
-            <button type="button" className="btn btn-secondary" style={{ flex: 1 }} onClick={() => setCompleting(false)} disabled={busy}>Vazgeç</button>
-            <button type="submit" className="btn btn-primary" style={{ flex: 1 }} disabled={busy}>İşi tamamla</button>
+            <button type="button" className="btn btn-secondary grow" onClick={() => setCompleting(false)} disabled={busy}>Vazgeç</button>
+            <button type="submit" className="btn btn-primary grow" disabled={busy}>İşi tamamla</button>
           </div>
         </form>
       ) : (
@@ -273,7 +273,7 @@ export function StatusActions({ service, onGoTab }: { service: Service; onGoTab:
             </button>
           ) : null}
           {others.length > 0 ? (
-            <div className="row row-gap-sm" style={{ flexWrap: "wrap" }}>
+            <div className="row row-gap-sm row-wrap" >
               {others.map((to) => (
                 <button
                   key={to}

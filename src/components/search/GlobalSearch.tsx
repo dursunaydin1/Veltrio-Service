@@ -36,7 +36,7 @@ export function GlobalSearch() {
         onChange={(e) => setQuery(e.target.value)}
         autoFocus
       />
-      <label className="row row-gap-sm" style={{ minHeight: 44 }}>
+      <label className="row row-gap-sm touch-row" >
         <input type="checkbox" checked={includeArchived} onChange={(e) => setIncludeArchived(e.target.checked)} />
         Arşivdeki kayıtlarda da ara
       </label>
@@ -57,12 +57,12 @@ export function GlobalSearch() {
             <ul className="menu-list">
               {g.items.map((hit: SearchHit) => (
                 <li key={`${hit.kind}:${hit.id}`}>
-                  <Link href={hit.href} style={{ flexDirection: "column", alignItems: "flex-start", gap: 2 }}>
-                    <span className="row row-between" style={{ width: "100%" }}>
+                  <Link href={hit.href} className="item-stack">
+                    <span className="row row-between w-full" >
                       <span>{hit.title}</span>
                       {hit.archived ? <span className="badge badge-gray">Arşivde</span> : null}
                     </span>
-                    {hit.subtitle ? <small style={{ color: "var(--text-muted)", fontWeight: 500 }}>{hit.subtitle}</small> : null}
+                    {hit.subtitle ? <small className="meta">{hit.subtitle}</small> : null}
                   </Link>
                 </li>
               ))}

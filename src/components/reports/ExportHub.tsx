@@ -34,7 +34,7 @@ export function ExportHub() {
         <>
           <p>{rows.length} satır.</p>
           <ReportTable columns={dataset.columns} rows={rows.slice(0, 50)} rowKey={(_, i) => String(i)} empty="Bu hedefte kayıt yok." />
-          {rows.length > 50 ? <small style={{ color: "var(--text-muted)" }}>Önizlemede ilk 50 satır gösterilir; dosyada tüm satırlar bulunur.</small> : null}
+          {rows.length > 50 ? <small className="muted">Önizlemede ilk 50 satır gösterilir; dosyada tüm satırlar bulunur.</small> : null}
           <ExportPanel title={dataset.label} base={dataset.id} columns={dataset.columns} rows={rows} />
         </>
       ) : null}

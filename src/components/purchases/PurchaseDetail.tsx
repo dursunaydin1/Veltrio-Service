@@ -70,7 +70,7 @@ export function PurchaseDetail({ id }: { id: string }) {
           {formatDate(purchase.purchase_date)}
           {purchase.supplier_ref ? ` · ${purchase.supplier_ref}` : ""}
         </p>
-        {purchase.notes ? <small style={{ color: "var(--text-muted)" }}>{purchase.notes}</small> : null}
+        {purchase.notes ? <small className="muted">{purchase.notes}</small> : null}
         {purchase.status === "CANCELLED" && purchase.cancel_reason ? (
           <div className="alert alert-error" role="note">İptal nedeni: {purchase.cancel_reason}</div>
         ) : null}
@@ -86,12 +86,12 @@ export function PurchaseDetail({ id }: { id: string }) {
         ) : (
           <ul className="menu-list" aria-label="Alım kalemleri">
             {items.map((i) => (
-              <li key={i.id} style={{ display: "flex", flexDirection: "column", gap: 2, padding: "8px 0" }}>
+              <li key={i.id} className="line-item">
                 <span className="row row-between">
                   <strong>{i.description_snapshot}</strong>
                   <strong>{formatCurrency(i.line_total)}</strong>
                 </span>
-                <small style={{ color: "var(--text-muted)" }}>
+                <small className="muted">
                   {formatQuantity(i.quantity)} × {formatCurrency(i.unit_price)}
                   {i.line_discount > 0 ? ` − ${formatCurrency(i.line_discount)} indirim` : ""}
                 </small>
@@ -163,8 +163,8 @@ function DraftActions({ purchase, onEdit }: { purchase: Purchase; onEdit: () => 
             <input id="pc-reason" className="form-input" value={reason} onChange={(e) => setReason(e.target.value)} autoFocus />
           </div>
           <div className="row row-gap-md">
-            <button type="button" className="btn btn-secondary" style={{ flex: 1 }} onClick={() => setCancelling(false)} disabled={busy}>Vazgeç</button>
-            <button type="button" className="btn btn-danger" style={{ flex: 1 }} onClick={cancel} disabled={busy}>İptal et</button>
+            <button type="button" className="btn btn-secondary grow" onClick={() => setCancelling(false)} disabled={busy}>Vazgeç</button>
+            <button type="button" className="btn btn-danger grow" onClick={cancel} disabled={busy}>İptal et</button>
           </div>
         </div>
       ) : (
@@ -179,8 +179,8 @@ function DraftActions({ purchase, onEdit }: { purchase: Purchase; onEdit: () => 
             {busy ? "İşleniyor…" : "Teslim al"}
           </button>
           <div className="row row-gap-md">
-            <button type="button" className="btn btn-secondary" style={{ flex: 1 }} onClick={onEdit} disabled={busy}>Düzenle</button>
-            <button type="button" className="btn btn-danger-soft" style={{ flex: 1 }} onClick={() => setCancelling(true)} disabled={busy}>İptal et</button>
+            <button type="button" className="btn btn-secondary grow" onClick={onEdit} disabled={busy}>Düzenle</button>
+            <button type="button" className="btn btn-danger-soft grow" onClick={() => setCancelling(true)} disabled={busy}>İptal et</button>
           </div>
         </>
       )}
@@ -256,8 +256,8 @@ function PurchasePayments({ purchase }: { purchase: Purchase }) {
           <PaymentMethodPicker value={method} onChange={setMethod} />
           {error ? <div className="alert alert-error" role="alert">{error}</div> : null}
           <div className="row row-gap-md">
-            <button type="button" className="btn btn-secondary" style={{ flex: 1 }} onClick={() => setOpen(false)} disabled={busy}>Vazgeç</button>
-            <button type="submit" className="btn btn-primary" style={{ flex: 1 }} disabled={busy}>{busy ? "Kaydediliyor…" : "Kaydet"}</button>
+            <button type="button" className="btn btn-secondary grow" onClick={() => setOpen(false)} disabled={busy}>Vazgeç</button>
+            <button type="submit" className="btn btn-primary grow" disabled={busy}>{busy ? "Kaydediliyor…" : "Kaydet"}</button>
           </div>
         </form>
       ) : (
@@ -271,7 +271,7 @@ function PurchasePayments({ purchase }: { purchase: Purchase }) {
       ) : (
         <ul className="menu-list" aria-label="Alım ödemeleri">
           {payments.map((p) => (
-            <li key={p.id} style={{ display: "flex", flexDirection: "column", gap: 2, padding: "8px 0", opacity: reversed.has(p.id) ? 0.55 : 1 }}>
+            <li key={p.id} className="line-item" data-faded={reversed.has(p.id) || undefined}>
               <span className="row row-between">
                 <strong style={reversed.has(p.id) ? { textDecoration: "line-through" } : undefined}>
                   {p.direction === "OUT" ? "−" : "+"} {formatCurrency(p.amount)}
@@ -282,7 +282,7 @@ function PurchasePayments({ purchase }: { purchase: Purchase }) {
                   <span className="badge badge-gray">{PAYMENT_METHOD_LABELS[p.method]}</span>
                 </span>
               </span>
-              <small style={{ color: "var(--text-muted)" }}>
+              <small className="muted">
                 {formatDateTime(p.payment_date)}
                 {p.note ? ` · ${p.note}` : ""}
               </small>
@@ -290,7 +290,7 @@ function PurchasePayments({ purchase }: { purchase: Purchase }) {
           ))}
         </ul>
       )}
-      <small style={{ color: "var(--text-muted)" }}>
+      <small className="muted">
         Hatalı ödeme, tedarikçi sayfasındaki ödeme geçmişinden “ters kaydet” ile düzeltilir. Teslim alınmış alımdaki hatalar
         tedarikçiye iade ile düzeltilir (Faz 5).
       </small>

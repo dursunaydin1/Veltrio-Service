@@ -89,12 +89,12 @@ export function PurchaseList() {
         <ul className="menu-list" aria-label="Alımlar">
           {shown.items.map((p) => (
             <li key={p.id}>
-              <Link href={`/purchases/${p.id}`} style={{ alignItems: "flex-start", flexDirection: "column", gap: 4 }}>
-                <span className="row row-between" style={{ width: "100%", gap: 8 }}>
+              <Link href={`/purchases/${p.id}`} className="item-stack">
+                <span className="row row-between w-full gap-2" >
                   <span>{p.document_no}</span>
                   <strong>{formatCurrency(p.total_amount)}</strong>
                 </span>
-                <span style={{ fontWeight: 500, color: "var(--text-secondary)" }}>
+                <span className="meta-strong">
                   {[data.suppliers.get(p.supplier_id ?? ""), formatDate(p.purchase_date), p.supplier_ref].filter(Boolean).join(" · ")}
                 </span>
               </Link>

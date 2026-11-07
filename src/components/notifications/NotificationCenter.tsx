@@ -104,8 +104,8 @@ export function NotificationCenter() {
         </div>
       </div>
       <div className="row row-gap-md">
-        <Link href="/settings/backup" className="btn btn-secondary" style={{ flex: 1 }}>Yedekleme / geri yükleme</Link>
-        <Link href="/reports/export" className="btn btn-secondary" style={{ flex: 1 }}>Dışa aktar</Link>
+        <Link href="/settings/backup" className="btn btn-secondary grow" >Yedekleme / geri yükleme</Link>
+        <Link href="/reports/export" className="btn btn-secondary grow" >Dışa aktar</Link>
       </div>
       {!isOnline ? <div className="alert alert-warning" role="status">Çevrimdışısınız: çakışma çözümü internet gerektirir.</div> : null}
       {error ? <div className="alert alert-error" role="alert">{error}</div> : null}
@@ -116,13 +116,13 @@ export function NotificationCenter() {
           <p>Bu kayıtlar sunucuya gönderilemedi. Hiçbiri silinmedi; nasıl devam edeceğinizi seçin.</p>
           <ul className="menu-list" aria-label="Çakışmalar">
             {issues.map((i: SyncQueueItem) => (
-              <li key={i.id} style={{ display: "flex", flexDirection: "column", gap: 4, padding: "8px 0" }}>
+              <li key={i.id} className="line-item">
                 <span className="row row-between">
                   <strong>{TABLE_LABEL[i.table_name] ?? i.table_name} · {i.operation === "UPDATE" ? "güncelleme" : i.operation === "INSERT" ? "ekleme" : "silme"}</strong>
                   <span className={`badge ${i.status === "CONFLICT" ? "badge-yellow" : "badge-red"}`}>{i.status === "CONFLICT" ? "Çakışma" : "Hata"}</span>
                 </span>
-                <small style={{ color: "var(--text-muted)" }}>{i.error_message ?? ""} · {formatDateTime(i.created_at)}</small>
-                <span className="row row-gap-sm" style={{ flexWrap: "wrap" }}>
+                <small className="muted">{i.error_message ?? ""} · {formatDateTime(i.created_at)}</small>
+                <span className="row row-gap-sm row-wrap" >
                   {i.status === "ERROR" ? (
                     <button type="button" className="btn btn-secondary btn-sm" disabled={busy === i.id} onClick={() => void run(i.id, () => retryItem(i.id))}>Yeniden dene</button>
                   ) : null}
@@ -159,7 +159,7 @@ export function NotificationCenter() {
                   {!n.read_at ? <span className="badge badge-yellow">Yeni</span> : null}
                 </span>
                 <span>{n.message}</span>
-                <small style={{ color: "var(--text-muted)" }}>{formatDateTime(n.created_at)}</small>
+                <small className="muted">{formatDateTime(n.created_at)}</small>
                 {ctx ? (
                   <span className="row row-gap-sm">
                     {!n.read_at ? <button type="button" className="btn btn-secondary btn-sm" onClick={() => void markRead(ctx.deviceCode, n.id)}>Okundu</button> : null}
@@ -172,7 +172,7 @@ export function NotificationCenter() {
         )}
         {resolved.length > 0 ? (
           <>
-            <button type="button" className="btn btn-ghost btn-sm" style={{ alignSelf: "flex-start" }} onClick={() => setShowResolved(!showResolved)}>
+            <button type="button" className="btn btn-ghost btn-sm self-start" onClick={() => setShowResolved(!showResolved)}>
               {showResolved ? "Çözülenleri gizle" : `Çözülenleri göster (${resolved.length})`}
             </button>
             {showResolved ? (
@@ -180,7 +180,7 @@ export function NotificationCenter() {
                 {resolved.slice(0, 50).map((n) => (
                   <li key={n.id} style={{ display: "flex", flexDirection: "column", gap: 2, padding: "6px 0", opacity: 0.6 }}>
                     <span>{n.message}</span>
-                    <small style={{ color: "var(--text-muted)" }}>Çözüldü: {n.resolved_at ? formatDateTime(n.resolved_at) : ""}</small>
+                    <small className="muted">Çözüldü: {n.resolved_at ? formatDateTime(n.resolved_at) : ""}</small>
                   </li>
                 ))}
               </ul>

@@ -40,7 +40,7 @@ export function ResetPasswordForm() {
       <div className="form-group">
         <label className="form-label" htmlFor="rp-password">Yeni şifre</label>
         <PasswordInput id="rp-password" autoComplete="new-password" value={password} onChange={(e) => setPassword(e.target.value)} autoFocus />
-        <small style={{ color: "var(--text-muted)" }}>En az 10 karakter, harf ve rakam içermeli.</small>
+        <small className="muted">En az 10 karakter, harf ve rakam içermeli.</small>
       </div>
       <div className="form-group">
         <label className="form-label" htmlFor="rp-confirm">Yeni şifre (tekrar)</label>

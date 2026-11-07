@@ -79,13 +79,13 @@ function CancelledRefund({ service }: { service: Service }) {
             <input id="cr-amount" className="form-input" inputMode="decimal" value={amount} onChange={(e) => setAmount(e.target.value)} autoFocus />
           </div>
           <PaymentMethodPicker value={method} onChange={setMethod} />
-          <button type="button" className="btn btn-ghost btn-sm" style={{ alignSelf: "flex-start" }} onClick={() => setAmount(moneyInputFromKurus(refundable))}>
+          <button type="button" className="btn btn-ghost btn-sm self-start" onClick={() => setAmount(moneyInputFromKurus(refundable))}>
             Tamamı: {formatCurrency(refundable / 100)}
           </button>
           {error ? <div className="alert alert-error" role="alert">{error}</div> : null}
           <div className="row row-gap-md">
-            <button type="button" className="btn btn-secondary" style={{ flex: 1 }} onClick={() => setOpen(false)} disabled={busy}>Vazgeç</button>
-            <button type="submit" className="btn btn-primary" style={{ flex: 1 }} disabled={busy}>{busy ? "Kaydediliyor…" : "İade et"}</button>
+            <button type="button" className="btn btn-secondary grow" onClick={() => setOpen(false)} disabled={busy}>Vazgeç</button>
+            <button type="submit" className="btn btn-primary grow" disabled={busy}>{busy ? "Kaydediliyor…" : "İade et"}</button>
           </div>
         </form>
       ) : (
@@ -172,11 +172,11 @@ function DeliveredReturn({ service }: { service: Service }) {
           {(parts ?? []).map(({ part, remaining }) => (
             <div key={part.id} className="stack stack-sm">
               <strong>{part.description_snapshot}</strong>
-              <small style={{ color: "var(--text-muted)" }}>İade edilebilir {formatQuantity(remaining)} {part.unit}</small>
+              <small className="muted">İade edilebilir {formatQuantity(remaining)} {part.unit}</small>
               <div className="row row-gap-md">
                 <input
-                  className="form-input"
-                  style={{ flex: 1 }}
+                  className="form-input grow"
+                  
                   inputMode="decimal"
                   placeholder="Miktar"
                   aria-label={`${part.description_snapshot} iade miktarı`}
@@ -185,8 +185,8 @@ function DeliveredReturn({ service }: { service: Service }) {
                 />
                 {part.source_type === "STOCK_PRODUCT" ? (
                   <select
-                    className="form-input"
-                    style={{ flex: 2 }}
+                    className="form-input grow-2"
+                    
                     aria-label={`${part.description_snapshot} ürün durumu`}
                     value={disp[part.id] ?? "SELLABLE"}
                     onChange={(e) => setDisp({ ...disp, [part.id]: e.target.value as StockDisposition })}
@@ -206,7 +206,7 @@ function DeliveredReturn({ service }: { service: Service }) {
           </OptionalGroup>
           <div className="form-group">
             <PaymentMethodPicker value={method} onChange={setMethod} label="Para iadesi" extra={[{ value: "CUSTOMER_CREDIT", label: "Müşteri alacağına yaz / borcundan düş" }]} />
-            <small style={{ color: "var(--text-muted)" }}>
+            <small className="muted">
               Servis tamamen ödenmediyse tutar önce müşterinin borcunu düşürür; yalnızca fazla ödenen kısım iade edilir.
             </small>
           </div>
@@ -216,8 +216,8 @@ function DeliveredReturn({ service }: { service: Service }) {
           </div>
           {error ? <div className="alert alert-error" role="alert">{error}</div> : null}
           <div className="row row-gap-md">
-            <button type="button" className="btn btn-secondary" style={{ flex: 1 }} onClick={() => setOpen(false)} disabled={busy}>Vazgeç</button>
-            <button type="submit" className="btn btn-primary" style={{ flex: 1 }} disabled={busy}>{busy ? "Kaydediliyor…" : "Kaydet"}</button>
+            <button type="button" className="btn btn-secondary grow" onClick={() => setOpen(false)} disabled={busy}>Vazgeç</button>
+            <button type="submit" className="btn btn-primary grow" disabled={busy}>{busy ? "Kaydediliyor…" : "Kaydet"}</button>
           </div>
         </form>
       ) : (
@@ -227,7 +227,7 @@ function DeliveredReturn({ service }: { service: Service }) {
       {returns && returns.length > 0 ? (
         <ul className="menu-list" aria-label="Servis iadeleri">
           {returns.map((r) => (
-            <li key={r.id} style={{ display: "flex", flexDirection: "column", gap: 4, padding: "8px 0", opacity: r.status === "REVERSED" ? 0.55 : 1 }}>
+            <li key={r.id} className="line-item" data-faded={r.status === "REVERSED" || undefined}>
               <span className="row row-between">
                 <strong>{r.document_no}</strong>
                 <span className="row row-gap-sm">
@@ -235,7 +235,7 @@ function DeliveredReturn({ service }: { service: Service }) {
                   <strong>{formatCurrency(r.total_amount)}</strong>
                 </span>
               </span>
-              <small style={{ color: "var(--text-muted)" }}>
+              <small className="muted">
                 {formatDateTime(r.return_date)} · {r.refund_method === "CUSTOMER_CREDIT" ? "Müşteri alacağı / borçtan düşüldü" : PAYMENT_METHOD_LABELS[r.refund_method as PaymentMethod] ?? r.refund_method}
                 {r.reason ? ` · ${r.reason}` : ""}
               </small>
@@ -250,7 +250,7 @@ function DeliveredReturn({ service }: { service: Service }) {
                     </div>
                   </div>
                 ) : (
-                  <button type="button" className="btn btn-ghost btn-sm" style={{ alignSelf: "flex-start" }} onClick={() => { setError(null); setReversing(r.id); }}>
+                  <button type="button" className="btn btn-ghost btn-sm self-start" onClick={() => { setError(null); setReversing(r.id); }}>
                     Hatalı kayıt: geri al
                   </button>
                 )

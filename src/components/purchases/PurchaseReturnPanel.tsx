@@ -108,7 +108,7 @@ export function PurchaseReturnPanel({ purchase }: { purchase: Purchase }) {
           {returnable.map(({ item, remaining, serial, units }) => (
             <div key={item.id} className="stack stack-sm">
               <strong>{item.description_snapshot}</strong>
-              <small style={{ color: "var(--text-muted)" }}>
+              <small className="muted">
                 Alınan {formatQuantity(item.quantity)} {item.unit} · iade edilebilir {formatQuantity(remaining)}
               </small>
               {serial ? (
@@ -117,7 +117,7 @@ export function PurchaseReturnPanel({ purchase }: { purchase: Purchase }) {
                     .filter((u) => u.status === "IN_STOCK" || u.status === "DAMAGED")
                     .map((u) => (
                       <li key={u.id} style={{ padding: "6px 0" }}>
-                        <label className="row row-gap-md" style={{ alignItems: "center" }}>
+                        <label className="row row-gap-md items-center" >
                           <input type="checkbox" checked={!!picked[u.id]} onChange={(e) => setPicked({ ...picked, [u.id]: e.target.checked })} />
                           <span>{unitLabel(u)}{u.status === "DAMAGED" ? " (hasarlı)" : ""}</span>
                         </label>
@@ -147,7 +147,7 @@ export function PurchaseReturnPanel({ purchase }: { purchase: Purchase }) {
           ))}
           <div className="form-group">
             <PaymentMethodPicker value={method} onChange={setMethod} label="Tedarikçiden para" extra={[{ value: "SUPPLIER_CREDIT", label: "Para almadım, borcumdan düş" }]} />
-            <small style={{ color: "var(--text-muted)" }}>
+            <small className="muted">
               İade önce tedarikçiye olan borcunuzu düşürür; yalnızca alıma fazladan ödediğiniz kısım geri alınmış sayılır.
             </small>
           </div>
@@ -157,8 +157,8 @@ export function PurchaseReturnPanel({ purchase }: { purchase: Purchase }) {
           </div>
           {error ? <div className="alert alert-error" role="alert">{error}</div> : null}
           <div className="row row-gap-md">
-            <button type="button" className="btn btn-secondary" style={{ flex: 1 }} onClick={() => setOpen(false)} disabled={busy}>Vazgeç</button>
-            <button type="submit" className="btn btn-primary" style={{ flex: 1 }} disabled={busy}>{busy ? "Kaydediliyor…" : "İadeyi kaydet"}</button>
+            <button type="button" className="btn btn-secondary grow" onClick={() => setOpen(false)} disabled={busy}>Vazgeç</button>
+            <button type="submit" className="btn btn-primary grow" disabled={busy}>{busy ? "Kaydediliyor…" : "İadeyi kaydet"}</button>
           </div>
         </form>
       ) : returnable.length > 0 ? (
@@ -170,7 +170,7 @@ export function PurchaseReturnPanel({ purchase }: { purchase: Purchase }) {
       {returns && returns.length > 0 ? (
         <ul className="menu-list" aria-label="İadeler">
           {returns.map((r) => (
-            <li key={r.id} style={{ display: "flex", flexDirection: "column", gap: 4, padding: "8px 0", opacity: r.status === "REVERSED" ? 0.55 : 1 }}>
+            <li key={r.id} className="line-item" data-faded={r.status === "REVERSED" || undefined}>
               <span className="row row-between">
                 <strong>{r.document_no}</strong>
                 <span className="row row-gap-sm">
@@ -178,7 +178,7 @@ export function PurchaseReturnPanel({ purchase }: { purchase: Purchase }) {
                   <strong>{formatCurrency(r.total_amount)}</strong>
                 </span>
               </span>
-              <small style={{ color: "var(--text-muted)" }}>
+              <small className="muted">
                 {formatDateTime(r.return_date)} · {r.refund_method === "SUPPLIER_CREDIT" ? "Borçtan düşüldü" : PAYMENT_METHOD_LABELS[r.refund_method as PaymentMethod] ?? r.refund_method}
                 {r.reason ? ` · ${r.reason}` : ""}
               </small>
@@ -193,7 +193,7 @@ export function PurchaseReturnPanel({ purchase }: { purchase: Purchase }) {
                     </div>
                   </div>
                 ) : (
-                  <button type="button" className="btn btn-ghost btn-sm" style={{ alignSelf: "flex-start" }} onClick={() => { setError(null); setReversing(r.id); }}>
+                  <button type="button" className="btn btn-ghost btn-sm self-start" onClick={() => { setError(null); setReversing(r.id); }}>
                     Hatalı iade: geri al
                   </button>
                 )

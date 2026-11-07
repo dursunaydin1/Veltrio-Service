@@ -26,8 +26,8 @@ export function CustomerHistory({ customer }: { customer: Customer }) {
     <>
       {!archived ? (
         <div className="row row-gap-md" aria-label="Hızlı işlemler">
-          <Link href={`/services/new?customer=${customer.id}`} className="btn btn-primary" style={{ flex: 1 }}>Servis aç</Link>
-          <Link href={`/sales/new?customer=${customer.id}`} className="btn btn-secondary" style={{ flex: 1 }}>Satış yap</Link>
+          <Link href={`/services/new?customer=${customer.id}`} className="btn btn-primary grow" >Servis aç</Link>
+          <Link href={`/sales/new?customer=${customer.id}`} className="btn btn-secondary grow" >Satış yap</Link>
         </div>
       ) : null}
 
@@ -39,12 +39,12 @@ export function CustomerHistory({ customer }: { customer: Customer }) {
           <ul className="menu-list" aria-label="Servisler">
             {services.slice(0, LIMIT).map((s) => (
               <li key={s.id}>
-                <Link href={`/services/${s.id}`} style={{ flexDirection: "column", alignItems: "flex-start", gap: 2 }}>
-                  <span className="row row-between" style={{ width: "100%" }}>
+                <Link href={`/services/${s.id}`} className="item-stack">
+                  <span className="row row-between w-full" >
                     <span>{s.document_no}</span>
                     <StatusBadge status={s.status} />
                   </span>
-                  <small style={{ color: "var(--text-muted)", fontWeight: 500 }}>
+                  <small className="meta">
                     {formatDate(s.received_date)} · {s.customer_complaint ?? ""}
                   </small>
                 </Link>
@@ -52,7 +52,7 @@ export function CustomerHistory({ customer }: { customer: Customer }) {
             ))}
           </ul>
         )}
-        {services && services.length > LIMIT ? <small style={{ color: "var(--text-muted)" }}>Son {LIMIT} servis gösteriliyor.</small> : null}
+        {services && services.length > LIMIT ? <small className="muted">Son {LIMIT} servis gösteriliyor.</small> : null}
       </section>
 
       <section className="card stack stack-md" aria-labelledby="ch-sales">
@@ -63,12 +63,12 @@ export function CustomerHistory({ customer }: { customer: Customer }) {
           <ul className="menu-list" aria-label="Satışlar">
             {sales.slice(0, LIMIT).map((s) => (
               <li key={s.id}>
-                <Link href={`/sales/${s.id}`} style={{ flexDirection: "column", alignItems: "flex-start", gap: 2 }}>
-                  <span className="row row-between" style={{ width: "100%" }}>
+                <Link href={`/sales/${s.id}`} className="item-stack">
+                  <span className="row row-between w-full" >
                     <span>{s.document_no}</span>
                     <strong>{formatCurrency(s.total_amount)}</strong>
                   </span>
-                  <small style={{ color: "var(--text-muted)", fontWeight: 500 }}>
+                  <small className="meta">
                     {formatDate(s.sale_date)} · <span className={`badge ${SALE_STATUS_BADGE[s.status]}`}>{SALE_STATUS_LABEL[s.status]}</span>
                   </small>
                 </Link>
@@ -76,7 +76,7 @@ export function CustomerHistory({ customer }: { customer: Customer }) {
             ))}
           </ul>
         )}
-        {sales && sales.length > LIMIT ? <small style={{ color: "var(--text-muted)" }}>Son {LIMIT} satış gösteriliyor.</small> : null}
+        {sales && sales.length > LIMIT ? <small className="muted">Son {LIMIT} satış gösteriliyor.</small> : null}
       </section>
     </>
   );

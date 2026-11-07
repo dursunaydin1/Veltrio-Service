@@ -159,7 +159,7 @@ export function ImportWizard() {
             <select id="im-kind" className="form-input" value={kind} onChange={(e) => setKind(e.target.value as ImportKind)}>
               {(Object.keys(IMPORT_DEFS) as ImportKind[]).map((k) => <option key={k} value={k}>{IMPORT_DEFS[k].label}</option>)}
             </select>
-            <small style={{ color: "var(--text-muted)" }}>{def.description}</small>
+            <small className="muted">{def.description}</small>
           </div>
           <button type="button" className="btn btn-secondary" onClick={() => download(`sablon-${kind}.xlsx`, templateXlsx(kind) as BlobPart, "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet")}>
             Şablonu indir (.xlsx)
@@ -186,8 +186,8 @@ export function ImportWizard() {
           ))}
           {missing.length > 0 ? <div className="alert alert-warning" role="alert">Zorunlu alan eşleşmedi: {missing.map((f) => f.label).join(", ")}</div> : null}
           <div className="row row-gap-md">
-            <button type="button" className="btn btn-secondary" style={{ flex: 1 }} onClick={reset} disabled={busy}>Vazgeç</button>
-            <button type="button" className="btn btn-primary" style={{ flex: 1 }} onClick={() => void validate()} disabled={busy || missing.length > 0}>Önizle ve doğrula</button>
+            <button type="button" className="btn btn-secondary grow" onClick={reset} disabled={busy}>Vazgeç</button>
+            <button type="button" className="btn btn-primary grow" onClick={() => void validate()} disabled={busy || missing.length > 0}>Önizle ve doğrula</button>
           </div>
         </div>
       ) : null}
@@ -207,7 +207,7 @@ export function ImportWizard() {
                 {errorRows.slice(0, 100).map((r) => (
                   <li key={r.rowNumber} style={{ display: "flex", flexDirection: "column", padding: "6px 0" }}>
                     <strong>{r.rowNumber}. satır</strong>
-                    <small style={{ color: "var(--accent-danger)" }}>{r.errors.join(" · ")}</small>
+                    <small className="text-danger">{r.errors.join(" · ")}</small>
                   </li>
                 ))}
               </ul>
@@ -220,9 +220,9 @@ export function ImportWizard() {
               <h2 id="im-warn">Uyarılar ve mükerrer kayıtlar</h2>
               <ul className="menu-list" aria-label="Uyarılar">
                 {warnRows.slice(0, 100).map((r) => (
-                  <li key={r.rowNumber} style={{ display: "flex", flexDirection: "column", gap: 4, padding: "8px 0" }}>
+                  <li key={r.rowNumber} className="line-item">
                     <strong>{r.rowNumber}. satır{r.duplicate ? ` · ${r.duplicate.label}` : ""}</strong>
-                    <small style={{ color: "var(--text-muted)" }}>{r.warnings.join(" · ")}</small>
+                    <small className="muted">{r.warnings.join(" · ")}</small>
                     {r.decisions.length > 1 ? (
                       <select
                         className="form-input"
@@ -243,8 +243,8 @@ export function ImportWizard() {
             Onayladığınızda {okRows.length} satır uygulanır; hatalı {errorRows.length} satır atlanır. İşlem tek adımdır: bir sorun çıkarsa hiçbir kayıt yazılmaz.
           </div>
           <div className="row row-gap-md">
-            <button type="button" className="btn btn-secondary" style={{ flex: 1 }} onClick={() => setStep("map")} disabled={busy}>Geri</button>
-            <button type="button" className="btn btn-primary" style={{ flex: 1 }} onClick={() => void confirm()} disabled={busy || okRows.length === 0 || !isOnline}>
+            <button type="button" className="btn btn-secondary grow" onClick={() => setStep("map")} disabled={busy}>Geri</button>
+            <button type="button" className="btn btn-primary grow" onClick={() => void confirm()} disabled={busy || okRows.length === 0 || !isOnline}>
               {busy ? "Uygulanıyor…" : "Onayla ve uygula"}
             </button>
           </div>

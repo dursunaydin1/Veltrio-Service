@@ -35,11 +35,11 @@ export function SupplierPicker({
     return (
       <div className="form-group">
         <span className="form-label">Tedarikçi *</span>
-        <div className="row row-between card" style={{ padding: 12 }}>
+        <div className="row row-between card pad-3" >
           <span>
             <strong>{selected.name}</strong>
             <br />
-            <small style={{ color: "var(--text-muted)" }}>{selected.phone ? formatPhone(selected.phone) : "Telefon yok"}</small>
+            <small className="muted">{selected.phone ? formatPhone(selected.phone) : "Telefon yok"}</small>
           </span>
           <button type="button" className="btn btn-secondary btn-sm" onClick={() => setChanging(true)}>
             Değiştir
@@ -71,7 +71,7 @@ export function SupplierPicker({
         autoComplete="off"
       />
       {error ? <p className="form-error" role="alert">{error}</p> : null}
-      <ul className="menu-list picker-list" aria-label="Tedarikçi sonuçları" style={{ marginTop: 8 }}>
+      <ul className="menu-list picker-list mt-2" aria-label="Tedarikçi sonuçları" >
         {matches.map((s) => (
           <li key={s.id}>
             <button
@@ -81,10 +81,10 @@ export function SupplierPicker({
                 setChanging(false);
                 setQuery("");
               }}
-              style={{ flexDirection: "column", alignItems: "flex-start", gap: 2 }}
+              className="item-stack"
             >
               <span>{s.name}</span>
-              <small style={{ color: "var(--text-muted)", fontWeight: 500 }}>{s.phone ? formatPhone(s.phone) : "Telefon yok"}</small>
+              <small className="meta">{s.phone ? formatPhone(s.phone) : "Telefon yok"}</small>
             </button>
           </li>
         ))}

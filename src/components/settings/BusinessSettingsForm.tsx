@@ -34,7 +34,7 @@ export function BusinessSettingsForm() {
 
   if (!business) return null;
   const set = <K extends keyof SettingsFormInput>(key: K, value: SettingsFormInput[K]) => setForm({ ...form, [key]: value });
-  const err = (key: keyof Errors) => (errors[key] ? <small role="alert" style={{ color: "var(--accent-danger)" }}>{errors[key]}</small> : null);
+  const err = (key: keyof Errors) => (errors[key] ? <small role="alert" className="text-danger">{errors[key]}</small> : null);
 
   async function submit(event: React.FormEvent) {
     event.preventDefault();
@@ -123,13 +123,13 @@ export function BusinessSettingsForm() {
         <div className="form-group">
           <label className="form-label" htmlFor="bs-threshold">Müşteri onayı eşiği (₺)</label>
           <input id="bs-threshold" className="form-input" inputMode="decimal" value={form.approvalThreshold} onChange={(e) => set("approvalThreshold", e.target.value)} />
-          <small style={{ color: "var(--text-muted)" }}>Teklif bu tutarı aşarsa işe başlamadan müşteri kararı kaydedilir. 0 = ücretli her işte onay.</small>
+          <small className="muted">Teklif bu tutarı aşarsa işe başlamadan müşteri kararı kaydedilir. 0 = ücretli her işte onay.</small>
           {err("approvalThreshold")}
         </div>
         <div className="form-group">
           <label className="form-label" htmlFor="bs-tolerance">Onay toleransı (₺)</label>
           <input id="bs-tolerance" className="form-input" inputMode="decimal" value={form.approvalTolerance} onChange={(e) => set("approvalTolerance", e.target.value)} />
-          <small style={{ color: "var(--text-muted)" }}>Onaylı bir kalemde bu tutara kadar artış yeniden onay istemez. Varsayılan 0.</small>
+          <small className="muted">Onaylı bir kalemde bu tutara kadar artış yeniden onay istemez. Varsayılan 0.</small>
           {err("approvalTolerance")}
         </div>
         <div className="form-group">
@@ -146,12 +146,12 @@ export function BusinessSettingsForm() {
 
       <section className="card stack stack-md" aria-labelledby="bs-general">
         <h2 id="bs-general">Stok, vergi ve çevrimdışı çalışma</h2>
-        <label className="row row-gap-sm" style={{ minHeight: 44 }}>
+        <label className="row row-gap-sm touch-row" >
           <input type="checkbox" checked={form.allowNegativeStock} onChange={(e) => set("allowNegativeStock", e.target.checked)} />
           Eksi stoğa izin ver (neden yazılarak, kritik uyarıyla)
         </label>
         <div className="row row-gap-md">
-          <div className="form-group" style={{ flex: 2 }}>
+          <div className="form-group grow-2" >
             <label className="form-label" htmlFor="bs-taxmode">KDV varsayılanı</label>
             <select id="bs-taxmode" className="form-input" value={form.defaultTaxMode} onChange={(e) => set("defaultTaxMode", e.target.value as SettingsFormInput["defaultTaxMode"])}>
               <option value="INCLUSIVE">KDV dahil</option>
@@ -159,7 +159,7 @@ export function BusinessSettingsForm() {
               <option value="NONE">KDV yok</option>
             </select>
           </div>
-          <div className="form-group" style={{ flex: 1 }}>
+          <div className="form-group grow" >
             <label className="form-label" htmlFor="bs-taxrate">Oran (%)</label>
             <input id="bs-taxrate" className="form-input" inputMode="decimal" value={form.defaultTaxRate} onChange={(e) => set("defaultTaxRate", e.target.value)} />
             {err("defaultTaxRate")}
@@ -168,7 +168,7 @@ export function BusinessSettingsForm() {
         <div className="form-group">
           <label className="form-label" htmlFor="bs-offline">Çevrimdışı azami süre (gün)</label>
           <input id="bs-offline" className="form-input" inputMode="numeric" value={form.maxOfflineDays} onChange={(e) => set("maxOfflineDays", e.target.value)} />
-          <small style={{ color: "var(--text-muted)" }}>Bu süreyi aşan cihazda, eşitlenene kadar yeni kayıt yapılamaz.</small>
+          <small className="muted">Bu süreyi aşan cihazda, eşitlenene kadar yeni kayıt yapılamaz.</small>
           {err("maxOfflineDays")}
         </div>
       </section>

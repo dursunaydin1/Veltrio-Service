@@ -144,7 +144,7 @@ export function CustomerForm({ customer, initial }: { customer?: Customer; initi
         {err("phone")}
       </div>
 
-      <label className="row row-gap-sm" style={{ minHeight: 44 }}>
+      <label className="row row-gap-sm touch-row" >
         <input
           type="checkbox"
           checked={values.noPhone}
@@ -165,7 +165,7 @@ export function CustomerForm({ customer, initial }: { customer?: Customer; initi
               </li>
             ))}
           </ul>
-          <label className="row row-gap-sm" style={{ minHeight: 44 }}>
+          <label className="row row-gap-sm touch-row" >
             <input
               type="checkbox"
               checked={allowDuplicate}

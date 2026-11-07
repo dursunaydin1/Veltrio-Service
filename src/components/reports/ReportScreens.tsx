@@ -170,15 +170,15 @@ export function ActiveServicesScreen() {
   return (
     <section className="stack stack-md">
       <Title>Aktif servisler</Title>
-      <div className="row row-gap-md no-print" style={{ flexWrap: "wrap" }}>
+      <div className="row row-gap-md no-print row-wrap" >
         <select className="form-input" style={{ flex: 1, minWidth: 160 }} aria-label="Duruma göre" value={status} onChange={(e) => setStatus(e.target.value)}>
           <option value="">Tüm durumlar</option>
           {["RECEIVED", "DIAGNOSED", "WAITING_CUSTOMER_APPROVAL", "IN_PROGRESS", "WAITING_PARTS", "COMPLETED"].map((s) => (
             <option key={s} value={s}>{statusLabel(s as never)}</option>
           ))}
         </select>
-        <input className="form-input" style={{ flex: 1, minWidth: 140 }} type="date" aria-label="Teslim sözü başlangıç" value={dueFrom} onChange={(e) => setDueFrom(e.target.value)} />
-        <input className="form-input" style={{ flex: 1, minWidth: 140 }} type="date" aria-label="Teslim sözü bitiş" value={dueTo} onChange={(e) => setDueTo(e.target.value)} />
+        <input className="form-input field-grow" type="date" aria-label="Teslim sözü başlangıç" value={dueFrom} onChange={(e) => setDueFrom(e.target.value)} />
+        <input className="form-input field-grow" type="date" aria-label="Teslim sözü bitiş" value={dueTo} onChange={(e) => setDueTo(e.target.value)} />
       </div>
       <p>Geciken teslimler en üstte, sonra yaklaşanlar, en altta teslim sözü olmayanlar.</p>
       {rows ? (
@@ -243,12 +243,12 @@ export function StockReportScreen() {
             ) : (
               <ul className="menu-list" aria-label="Stok hareketleri">
                 {movements.map((m) => (
-                  <li key={m.id} style={{ display: "flex", flexDirection: "column", gap: 2, padding: "6px 0" }}>
+                  <li key={m.id} className="line-item">
                     <span className="row row-between">
                       <strong>{MOVEMENT_LABEL[m.movement_type] ?? m.movement_type}{m.bucket === "DAMAGED" ? " (hasarlı)" : ""}</strong>
                       <strong style={{ color: m.quantity < 0 ? "var(--accent-warning)" : "var(--accent-success)" }}>{m.quantity > 0 ? "+" : ""}{formatQuantity(m.quantity)}</strong>
                     </span>
-                    <small style={{ color: "var(--text-muted)" }}>{formatDateTime(m.created_at)}{m.note ? ` · ${m.note}` : ""}</small>
+                    <small className="muted">{formatDateTime(m.created_at)}{m.note ? ` · ${m.note}` : ""}</small>
                   </li>
                 ))}
               </ul>
@@ -284,14 +284,14 @@ export function MachineHistoryScreen() {
           <ReportTable columns={MACHINE_COLUMNS} rows={display} rowKey={(r) => r.title + r.serial} empty="Henüz tamamlanmış servisi olan makine yok." />
           <ExportPanel title="Makine geçmişi" base="makine-gecmisi" columns={MACHINE_COLUMNS} rows={display} />
           {rows.map((m) => (
-            <details key={m.machineId} className="card" style={{ padding: 12 }}>
+            <details key={m.machineId} className="card pad-3" >
               <summary style={{ cursor: "pointer", fontWeight: 600 }}>{m.title} · {m.completedCount} servis</summary>
-              <ul className="menu-list" aria-label={`${m.title} servisleri`} style={{ marginTop: 8 }}>
+              <ul className="menu-list mt-2" aria-label={`${m.title} servisleri`} >
                 {m.services.map((s) => (
                   <li key={s.id}>
-                    <Link href={`/services/${s.id}`} style={{ flexDirection: "column", alignItems: "flex-start", gap: 2 }}>
+                    <Link href={`/services/${s.id}`} className="item-stack">
                       <span>{s.documentNo} · {s.date}</span>
-                      <small style={{ color: "var(--text-muted)", fontWeight: 500 }}>{s.summary}</small>
+                      <small className="meta">{s.summary}</small>
                     </Link>
                   </li>
                 ))}

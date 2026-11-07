@@ -87,12 +87,12 @@ export function SaleList() {
         <ul className="menu-list" aria-label="Satışlar">
           {shown.items.map((s) => (
             <li key={s.id}>
-              <Link href={`/sales/${s.id}`} style={{ alignItems: "flex-start", flexDirection: "column", gap: 4 }}>
-                <span className="row row-between" style={{ width: "100%", gap: 8 }}>
+              <Link href={`/sales/${s.id}`} className="item-stack">
+                <span className="row row-between w-full gap-2" >
                   <span>{s.document_no}</span>
                   <strong>{formatCurrency(s.total_amount)}</strong>
                 </span>
-                <span style={{ fontWeight: 500, color: "var(--text-secondary)" }}>
+                <span className="meta-strong">
                   {[data.customers.get(s.customer_id ?? "") ?? "Müşterisiz", formatDate(s.sale_date)].join(" · ")}
                 </span>
               </Link>

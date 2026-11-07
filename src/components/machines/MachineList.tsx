@@ -57,7 +57,7 @@ export function MachineList() {
         />
       </div>
 
-      <label className="row row-gap-sm" style={{ minHeight: 44 }}>
+      <label className="row row-gap-sm touch-row" >
         <input type="checkbox" checked={showArchived} onChange={(e) => setShowArchived(e.target.checked)} />
         Arşivlenmiş makineleri de göster
       </label>
@@ -73,15 +73,15 @@ export function MachineList() {
         <ul className="menu-list" aria-label="Makineler">
           {shown.items.map((m) => (
             <li key={m.id}>
-              <Link href={`/machines/${m.id}`} style={{ alignItems: "flex-start", flexDirection: "column", gap: 4 }}>
-                <span className="row row-between" style={{ width: "100%", gap: 8 }}>
+              <Link href={`/machines/${m.id}`} className="item-stack">
+                <span className="row row-between w-full gap-2" >
                   <span>{machineTitleOf(m)}</span>
                   <span className="row row-gap-sm">
                     {m.is_temporary ? <span className="badge badge-yellow">Geçici</span> : null}
                     {m.archived_at ? <span className="badge badge-gray">Arşivde</span> : null}
                   </span>
                 </span>
-                <span style={{ fontWeight: 500, color: "var(--text-secondary)" }}>
+                <span className="meta-strong">
                   {[m.type, m.serial_number ?? m.internal_number, data.owners.get(m.customer_id ?? "")]
                     .filter(Boolean)
                     .join(" · ")}

@@ -55,12 +55,12 @@ export function History({ serviceId }: { serviceId: string }) {
       {rows === undefined ? null : (
         <ul className="menu-list" aria-label="Durum geçmişi">
           {rows.map((h) => (
-            <li key={h.id} style={{ display: "flex", flexDirection: "column", gap: 2, padding: "8px 0" }}>
+            <li key={h.id} className="line-item">
               <strong>
                 {h.from_status ? `${statusLabel(h.from_status)} → ` : ""}
                 {statusLabel(h.to_status)}
               </strong>
-              <small style={{ color: "var(--text-muted)" }}>
+              <small className="muted">
                 {formatDateTime(h.changed_at)}
                 {h.note ? ` · ${h.note}` : ""}
               </small>

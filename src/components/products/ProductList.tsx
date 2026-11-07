@@ -58,7 +58,7 @@ export function ProductList() {
         />
       </div>
 
-      <label className="row row-gap-sm" style={{ minHeight: 44 }}>
+      <label className="row row-gap-sm touch-row" >
         <input
           type="checkbox"
           checked={showArchived}
@@ -82,10 +82,10 @@ export function ProductList() {
             const balance = balances?.get(p.id) ?? EMPTY_BALANCE;
             return (
             <li key={p.id}>
-              <Link href={`/products/${p.id}`} style={{ alignItems: "flex-start", gap: 12 }}>
+              <Link href={`/products/${p.id}`} className="items-start gap-3">
                 <ProductThumb product={p} />
                 <span className="stack" style={{ flex: 1, minWidth: 0, gap: 4 }}>
-                <span className="row row-between" style={{ width: "100%", gap: 8 }}>
+                <span className="row row-between w-full gap-2" >
                   <span>{p.name}</span>
                   <span>{formatCurrency(p.default_sale_price)}</span>
                 </span>
@@ -94,7 +94,7 @@ export function ProductList() {
                     .filter(Boolean)
                     .join(" · ")}
                 </span>
-                <span className="row row-gap-sm" style={{ flexWrap: "wrap" }}>
+                <span className="row row-gap-sm row-wrap" >
                   <span className="badge badge-gray">
                     Stok: {formatQuantity(balance.available)} {unitLabel(p.unit)}
                   </span>

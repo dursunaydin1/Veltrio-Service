@@ -209,7 +209,7 @@ export function PurchaseForm({
         </OptionalField>
       </OptionalGroup>
 
-      <label className="row row-gap-sm" style={{ minHeight: 44 }}>
+      <label className="row row-gap-sm touch-row" >
         <input type="checkbox" checked={quick} onChange={(e) => setQuick(e.target.checked)} />
         Hızlı alım: yalnızca toplam tutar (ürün satırı yok)
       </label>
@@ -238,21 +238,21 @@ export function PurchaseForm({
                   </span>
                   <span className="row row-gap-sm">
                     {/* label değil: içindeki − düğmesine dokunuşu aktarmasın */}
-                    <div className="form-group" style={{ flex: "0 0 auto" }}>
+                    <div className="form-group shrink-0" >
                       <span className="form-label">Miktar ({l.unit})</span>
                       <QuantityStepper label={`${l.name}: miktar`} value={l.quantity} onChange={(quantity) => update(l.key, { quantity })} />
                     </div>
-                    <label className="form-group" style={{ flex: 1 }}>
+                    <label className="form-group grow" >
                       <span className="form-label">Birim fiyat (₺)</span>
                       <input className="form-input" inputMode="decimal" value={l.price} onChange={(e) => update(l.key, { price: e.target.value })} />
                     </label>
                   </span>
                   <span className="row row-gap-sm">
-                    <label className="form-group" style={{ flex: 1 }}>
+                    <label className="form-group grow" >
                       <span className="form-label">İndirim (₺)</span>
                       <input className="form-input" inputMode="decimal" value={l.discount} onChange={(e) => update(l.key, { discount: e.target.value })} />
                     </label>
-                    <label className="form-group" style={{ flex: 1 }}>
+                    <label className="form-group grow" >
                       <span className="form-label">KDV</span>
                       <select className="form-input" value={l.taxMode} onChange={(e) => update(l.key, { taxMode: e.target.value as TaxMode })}>
                         <option value="INCLUSIVE">KDV dahil</option>
@@ -261,7 +261,7 @@ export function PurchaseForm({
                       </select>
                     </label>
                     {l.taxMode !== "NONE" ? (
-                      <label className="form-group" style={{ flex: 1 }}>
+                      <label className="form-group grow" >
                         <span className="form-label">Oran (%)</span>
                         <input className="form-input" inputMode="decimal" value={l.taxRate} onChange={(e) => update(l.key, { taxRate: e.target.value })} />
                       </label>
@@ -273,7 +273,7 @@ export function PurchaseForm({
                       <textarea className="form-input" rows={Math.min(Math.max(Number(l.quantity) || 1, 2), 6)} value={l.serial} onChange={(e) => update(l.key, { serial: e.target.value })} />
                     </label>
                   ) : null}
-                  <button type="button" className="btn btn-ghost btn-sm" style={{ alignSelf: "flex-start" }} onClick={() => setLines((c) => c.filter((x) => x.key !== l.key))}>
+                  <button type="button" className="btn btn-ghost btn-sm self-start" onClick={() => setLines((c) => c.filter((x) => x.key !== l.key))}>
                     Satırı kaldır
                   </button>
                 </li>
@@ -300,7 +300,7 @@ export function PurchaseForm({
       </OptionalGroup>
 
       {quick || lines.length > 0 ? (
-        <fieldset className="stack stack-sm" style={{ border: 0, padding: 0 }}>
+        <fieldset className="stack stack-sm bare" >
           <legend className="form-label">Teslim alırken yapılan ödeme (isteğe bağlı)</legend>
           <div className="form-group">
             <input className="form-input" inputMode="decimal" placeholder="Ödenen tutar (₺)" aria-label="Ödenen tutar" value={paid} onChange={(e) => setPaid(e.target.value)} />

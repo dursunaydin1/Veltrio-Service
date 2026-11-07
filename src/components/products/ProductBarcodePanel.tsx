@@ -67,8 +67,8 @@ export function ProductBarcodePanel({ product }: { product: Product }) {
         >
           <input className="form-input" inputMode="numeric" placeholder="Barkod numarası (ör. 8690…)" aria-label="Barkod numarası" value={typed} onChange={(e) => setTyped(e.target.value)} autoFocus />
           <div className="row row-gap-md">
-            <button type="button" className="btn btn-secondary" style={{ flex: 1 }} onClick={() => setMode(null)}>Vazgeç</button>
-            <button type="submit" className="btn btn-primary" style={{ flex: 1 }} disabled={!normalizeBarcode(typed)}>Kaydet</button>
+            <button type="button" className="btn btn-secondary grow" onClick={() => setMode(null)}>Vazgeç</button>
+            <button type="submit" className="btn btn-primary grow" disabled={!normalizeBarcode(typed)}>Kaydet</button>
           </div>
         </form>
       ) : product.barcode ? (
@@ -76,13 +76,13 @@ export function ProductBarcodePanel({ product }: { product: Product }) {
           <p className="mono" style={{ fontSize: "1.0625rem", fontWeight: 650 }}>{product.barcode}</p>
           {saved ? <div className="alert alert-success" role="status">Barkod kaydedildi. Artık okutunca bu ürün açılır.</div> : null}
           <div className="row row-gap-md">
-            <button type="button" className="btn btn-secondary" style={{ flex: 1 }} onClick={() => setMode("scan")}>Değiştir</button>
-            <button type="button" className="btn btn-danger-soft" style={{ flex: 1 }} onClick={() => void remove()}>Kaldır</button>
+            <button type="button" className="btn btn-secondary grow" onClick={() => setMode("scan")}>Değiştir</button>
+            <button type="button" className="btn btn-danger-soft grow" onClick={() => void remove()}>Kaldır</button>
           </div>
         </>
       ) : (
         <>
-          <small style={{ color: "var(--text-muted)" }}>Kutusunda barkod varsa bir kez okutun; sonra okutunca ürün doğrudan açılır, satışta okutunca satışa eklenir. Etiket basmanız gerekmez.</small>
+          <small className="muted">Kutusunda barkod varsa bir kez okutun; sonra okutunca ürün doğrudan açılır, satışta okutunca satışa eklenir. Etiket basmanız gerekmez.</small>
           <button type="button" className="btn btn-primary btn-full" onClick={() => setMode("scan")}>
             <ScanBarcode size={18} aria-hidden="true" /> Barkodu tanıt
           </button>

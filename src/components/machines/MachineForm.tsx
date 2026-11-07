@@ -149,7 +149,7 @@ export function MachineForm({
         {err("type")}
       </div>
 
-      <label className="row row-gap-sm" style={{ minHeight: 44 }}>
+      <label className="row row-gap-sm touch-row" >
         <input type="checkbox" checked={values.isTemporary} onChange={(e) => set("isTemporary", e.target.checked)} />
         Geçici kayıt (marka / model henüz bilinmiyor)
       </label>
@@ -194,14 +194,14 @@ export function MachineForm({
               </li>
             ))}
           </ul>
-          <label className="row row-gap-sm" style={{ minHeight: 44 }}>
+          <label className="row row-gap-sm touch-row" >
             <input type="checkbox" checked={allowDuplicate} onChange={(e) => setAllowDuplicate(e.target.checked)} />
             Yine de ayrı bir makine olarak kaydet
           </label>
         </div>
       ) : null}
 
-      {!serial ? <small style={{ color: "var(--text-muted)" }}>Seri numarası girilmezse makine sistemin verdiği iç numarayla (MK-…) tanınır.</small> : null}
+      {!serial ? <small className="muted">Seri numarası girilmezse makine sistemin verdiği iç numarayla (MK-…) tanınır.</small> : null}
       <OptionalGroup title="Eklemek isterseniz">
         <OptionalField label="Seri numarası" chip="Seri no" htmlFor="m-serialNumber" filled={!!values.serialNumber} onClear={() => set("serialNumber", "")}>
           <input {...field("serialNumber")} className="form-input upper" autoCapitalize="characters" value={values.serialNumber} onChange={(e) => set("serialNumber", upper(e.target.value))} autoComplete="off" />
@@ -213,7 +213,7 @@ export function MachineForm({
         </OptionalField>
         <OptionalField label="Garanti bitiş tarihi" chip="Garanti" htmlFor="m-warrantyUntil" filled={!!values.warrantyUntil} onClear={() => set("warrantyUntil", "")}>
           <input {...field("warrantyUntil")} className="form-input" type="date" value={values.warrantyUntil ?? ""} onChange={(e) => set("warrantyUntil", e.target.value)} />
-          <small style={{ color: "var(--text-muted)" }}>Bilgi amaçlıdır; garanti kapsamını serviste siz doğrularsınız.</small>
+          <small className="muted">Bilgi amaçlıdır; garanti kapsamını serviste siz doğrularsınız.</small>
           {err("warrantyUntil")}
         </OptionalField>
         <OptionalField label="Not" htmlFor="m-notes" filled={!!values.notes} onClear={() => set("notes", "")}>

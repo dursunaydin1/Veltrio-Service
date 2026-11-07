@@ -91,7 +91,7 @@ export function DeviceManager() {
                     {revoked ? <span className="badge badge-red">İptal edildi</span> : <span className="badge badge-gray">Etkin</span>}
                   </span>
                 </span>
-                <small style={{ color: "var(--text-muted)" }}>
+                <small className="muted">
                   {d.device_code} · Son eşitleme: {d.last_synced_at ? formatDateTime(d.last_synced_at) : "—"}
                   {revoked ? ` · ${d.wipe_confirmed_at ? "Yerel veri silindi" : "Cihaz bağlanınca yerel veri silinecek"}` : ""}
                 </small>
@@ -108,7 +108,7 @@ export function DeviceManager() {
                       </div>
                     </div>
                   ) : (
-                    <button type="button" className="btn btn-ghost btn-sm" style={{ alignSelf: "flex-start" }} onClick={() => setConfirming(d.id)} disabled={!isOnline}>
+                    <button type="button" className="btn btn-ghost btn-sm self-start" onClick={() => setConfirming(d.id)} disabled={!isOnline}>
                       İptal et…
                     </button>
                   )

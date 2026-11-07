@@ -74,7 +74,7 @@ export function DetailsForm({ service, onSaved }: { service: Service; onSaved: (
         <div className="form-group">
           <label className="form-label" htmlFor="dt-resolution">Yapılan iş</label>
           <textarea id="dt-resolution" className="form-input" rows={3} placeholder="Ör. karbüratör temizlendi, zincir değişti" value={resolution} onChange={(e) => setResolution(e.target.value)} disabled={locked} />
-          <small style={{ color: "var(--text-muted)" }}>İş bitince yazın; müşteriye verilen sonuç özetinde görünür.</small>
+          <small className="muted">İş bitince yazın; müşteriye verilen sonuç özetinde görünür.</small>
         </div>
       ) : null}
       <div className="toggle-card">

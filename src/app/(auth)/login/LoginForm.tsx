@@ -109,7 +109,7 @@ export function LoginForm({ notice }: { notice?: string }) {
         {isPending ? "Giriş yapılıyor…" : "Giriş Yap"}
       </button>
 
-      <div className="stack stack-sm" style={{ alignItems: "center" }}>
+      <div className="stack stack-sm items-center" >
         <Link href="/forgot-password">Şifremi unuttum</Link>
         <Link href="/register">Hesap oluştur</Link>
       </div>

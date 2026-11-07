@@ -55,7 +55,7 @@ export function ApprovalForm({
       <p>Her kalem için müşterinin kararını seçin. Reddedilen ve ertelenen kalemler toplama girmez.</p>
       <ul className="menu-list" aria-label="Karar bekleyen kalemler">
         {pending.map((p) => (
-          <li key={p.id} style={{ display: "flex", flexDirection: "column", gap: 4, padding: "8px 0" }}>
+          <li key={p.id} className="line-item">
             <span className="row row-between">
               <strong>{p.title}</strong>
               <strong>{formatCurrency(p.total)}</strong>
@@ -88,8 +88,8 @@ export function ApprovalForm({
       </OptionalGroup>
       {error ? <div className="alert alert-error" role="alert">{error}</div> : null}
       <div className="row row-gap-md">
-        <button type="button" className="btn btn-secondary" style={{ flex: 1 }} onClick={onDone} disabled={busy}>Vazgeç</button>
-        <button type="submit" className="btn btn-primary" style={{ flex: 1 }} disabled={busy}>{busy ? "Kaydediliyor…" : "Kararı kaydet"}</button>
+        <button type="button" className="btn btn-secondary grow" onClick={onDone} disabled={busy}>Vazgeç</button>
+        <button type="submit" className="btn btn-primary grow" disabled={busy}>{busy ? "Kaydediliyor…" : "Kararı kaydet"}</button>
       </div>
     </form>
   );

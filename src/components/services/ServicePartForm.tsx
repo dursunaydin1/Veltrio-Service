@@ -87,11 +87,11 @@ export function PartForm({
       )}
 
       <div className="row row-gap-md">
-        <div className="form-group" style={{ flex: "0 0 auto" }}>
+        <div className="form-group shrink-0" >
           <label className="form-label" htmlFor="pt-qty">Miktar</label>
           <QuantityStepper id="pt-qty" value={quantity} onChange={setQuantity} />
         </div>
-        <div className="form-group" style={{ flex: 2 }}>
+        <div className="form-group grow-2" >
           <label className="form-label" htmlFor="pt-price">Birim fiyat (₺)</label>
           <input
             id="pt-price"
@@ -107,8 +107,8 @@ export function PartForm({
 
       {error ? <div className="alert alert-error" role="alert">{error}</div> : null}
       <div className="row row-gap-md">
-        <button type="button" className="btn btn-secondary" style={{ flex: 1 }} onClick={onDone} disabled={busy}>Vazgeç</button>
-        <button type="submit" className="btn btn-primary" style={{ flex: 1 }} disabled={busy}>{busy ? "Kaydediliyor…" : "Ekle"}</button>
+        <button type="button" className="btn btn-secondary grow" onClick={onDone} disabled={busy}>Vazgeç</button>
+        <button type="submit" className="btn btn-primary grow" disabled={busy}>{busy ? "Kaydediliyor…" : "Ekle"}</button>
       </div>
     </form>
   );

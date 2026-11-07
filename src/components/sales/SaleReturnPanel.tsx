@@ -101,13 +101,13 @@ export function SaleReturnPanel({ sale }: { sale: Sale }) {
           {returnable.map(({ item, remaining }) => (
             <div key={item.id} className="stack stack-sm">
               <strong>{item.description_snapshot}</strong>
-              <small style={{ color: "var(--text-muted)" }}>
+              <small className="muted">
                 Satılan {formatQuantity(item.quantity)} {item.unit} · iade edilebilir {formatQuantity(remaining)}
               </small>
               <div className="row row-gap-md">
                 <input
-                  className="form-input"
-                  style={{ flex: 1 }}
+                  className="form-input grow"
+                  
                   inputMode="decimal"
                   placeholder="İade miktarı"
                   aria-label={`${item.description_snapshot} iade miktarı`}
@@ -115,8 +115,8 @@ export function SaleReturnPanel({ sale }: { sale: Sale }) {
                   onChange={(e) => setQty({ ...qty, [item.id]: e.target.value })}
                 />
                 <select
-                  className="form-input"
-                  style={{ flex: 2 }}
+                  className="form-input grow-2"
+                  
                   aria-label={`${item.description_snapshot} ürün durumu`}
                   value={disp[item.id] ?? "SELLABLE"}
                   onChange={(e) => setDisp({ ...disp, [item.id]: e.target.value as StockDisposition })}
@@ -130,7 +130,7 @@ export function SaleReturnPanel({ sale }: { sale: Sale }) {
           ))}
           <div className="form-group">
             <PaymentMethodPicker value={method} onChange={setMethod} label="Para iadesi" extra={[...(sale.customer_id ? [{ value: "CUSTOMER_CREDIT", label: "Müşteri alacağına yaz (nakit çıkmaz)" }] as const : [])]} />
-            <small style={{ color: "var(--text-muted)" }}>
+            <small className="muted">
               Satış tamamen ödenmediyse iade önce müşterinin borcunu düşürür; yalnızca fazla ödenen kısım iade edilir.
             </small>
           </div>
@@ -140,8 +140,8 @@ export function SaleReturnPanel({ sale }: { sale: Sale }) {
           </div>
           {error ? <div className="alert alert-error" role="alert">{error}</div> : null}
           <div className="row row-gap-md">
-            <button type="button" className="btn btn-secondary" style={{ flex: 1 }} onClick={() => setOpen(false)} disabled={busy}>Vazgeç</button>
-            <button type="submit" className="btn btn-primary" style={{ flex: 1 }} disabled={busy}>{busy ? "Kaydediliyor…" : "İadeyi kaydet"}</button>
+            <button type="button" className="btn btn-secondary grow" onClick={() => setOpen(false)} disabled={busy}>Vazgeç</button>
+            <button type="submit" className="btn btn-primary grow" disabled={busy}>{busy ? "Kaydediliyor…" : "İadeyi kaydet"}</button>
           </div>
         </form>
       ) : returnable.length > 0 ? (
@@ -153,7 +153,7 @@ export function SaleReturnPanel({ sale }: { sale: Sale }) {
       {returns && returns.length > 0 ? (
         <ul className="menu-list" aria-label="İadeler">
           {returns.map((r) => (
-            <li key={r.id} style={{ display: "flex", flexDirection: "column", gap: 4, padding: "8px 0", opacity: r.status === "REVERSED" ? 0.55 : 1 }}>
+            <li key={r.id} className="line-item" data-faded={r.status === "REVERSED" || undefined}>
               <span className="row row-between">
                 <strong>{r.document_no}</strong>
                 <span className="row row-gap-sm">
@@ -161,7 +161,7 @@ export function SaleReturnPanel({ sale }: { sale: Sale }) {
                   <strong>{formatCurrency(r.total_amount)}</strong>
                 </span>
               </span>
-              <small style={{ color: "var(--text-muted)" }}>
+              <small className="muted">
                 {formatDateTime(r.return_date)} · {r.refund_method === "CUSTOMER_CREDIT" ? "Müşteri alacağı" : PAYMENT_METHOD_LABELS[r.refund_method as PaymentMethod] ?? r.refund_method}
                 {r.reason ? ` · ${r.reason}` : ""}
               </small>
@@ -176,7 +176,7 @@ export function SaleReturnPanel({ sale }: { sale: Sale }) {
                     </div>
                   </div>
                 ) : (
-                  <button type="button" className="btn btn-ghost btn-sm" style={{ alignSelf: "flex-start" }} onClick={() => { setError(null); setReversing(r.id); }}>
+                  <button type="button" className="btn btn-ghost btn-sm self-start" onClick={() => { setError(null); setReversing(r.id); }}>
                     Hatalı iade: geri al
                   </button>
                 )

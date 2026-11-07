@@ -86,7 +86,7 @@ export function QrLabel({
             ))}
           </select>
         </div>
-        <label className="row row-gap-sm" style={{ minHeight: 44 }}>
+        <label className="row row-gap-sm touch-row" >
           <input
             type="checkbox"
             checked={showBusiness}
@@ -100,7 +100,7 @@ export function QrLabel({
         <button type="button" className="btn btn-primary btn-full" onClick={() => window.print()} disabled={!dataUrl}>
           Yazdır
         </button>
-        <small style={{ color: "var(--text-muted)" }}>
+        <small className="muted">
           QR yalnızca kayıt adresini içerir; fiyat ve stok değişse de etiketi yeniden basmanız gerekmez.
         </small>
       </div>
@@ -133,8 +133,8 @@ export function QrLabel({
         ) : (
           <div style={{ width: `${dims.qr}mm`, height: `${dims.qr}mm` }} />
         )}
-        <strong style={{ wordBreak: "break-word" }}>{title}</strong>
-        {subtitle ? <span style={{ wordBreak: "break-word" }}>{subtitle}</span> : null}
+        <strong className="break-word">{title}</strong>
+        {subtitle ? <span className="break-word">{subtitle}</span> : null}
         {showBusiness && businessName ? <span style={{ fontSize: "2.4mm" }}>{businessName}</span> : null}
       </div>
     </div>

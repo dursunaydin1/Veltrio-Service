@@ -132,7 +132,7 @@ export function ProductForm({ product, initial }: { product?: Product; initial?:
       </div>
 
       <div className="row row-gap-md">
-        <div className="form-group" style={{ flex: 1 }}>
+        <div className="form-group grow" >
           <label className="form-label" htmlFor="f-salePrice">Satış fiyatı (₺) *</label>
           <input
             {...field("salePrice")}
@@ -144,7 +144,7 @@ export function ProductForm({ product, initial }: { product?: Product; initial?:
           />
           {err("salePrice")}
         </div>
-        <div className="form-group" style={{ flex: 1 }}>
+        <div className="form-group grow" >
           <label className="form-label" htmlFor="f-unit">Birim</label>
           <select {...field("unit")} className="form-input" value={values.unit} onChange={(e) => set("unit", e.target.value)}>
             {PRODUCT_UNITS.map((u) => (
@@ -179,8 +179,8 @@ export function ProductForm({ product, initial }: { product?: Product; initial?:
           }}
         >
           <div className="row row-gap-md">
-            <input {...field("brand")} className="form-input" style={{ flex: 1 }} placeholder="Marka" value={values.brand} onChange={(e) => set("brand", e.target.value.toLocaleUpperCase("tr"))} autoCapitalize="characters" />
-            <input {...field("model")} className="form-input" style={{ flex: 1 }} placeholder="Model" aria-label="Model" value={values.model} onChange={(e) => set("model", e.target.value.toLocaleUpperCase("tr"))} autoCapitalize="characters" />
+            <input {...field("brand")} className="form-input grow" placeholder="Marka" value={values.brand} onChange={(e) => set("brand", e.target.value.toLocaleUpperCase("tr"))} autoCapitalize="characters" />
+            <input {...field("model")} className="form-input grow" placeholder="Model" aria-label="Model" value={values.model} onChange={(e) => set("model", e.target.value.toLocaleUpperCase("tr"))} autoCapitalize="characters" />
           </div>
         </OptionalField>
         <OptionalField label="Son alış fiyatı (₺)" chip="Alış fiyatı" htmlFor="f-lastPurchasePrice" filled={!!values.lastPurchasePrice} onClear={() => set("lastPurchasePrice", "")}>
@@ -189,7 +189,7 @@ export function ProductForm({ product, initial }: { product?: Product; initial?:
         </OptionalField>
         <OptionalField label="Kritik stok seviyesi" chip="Kritik stok" htmlFor="f-criticalStockLevel" filled={!!values.criticalStockLevel} onClear={() => set("criticalStockLevel", "")}>
           <input {...field("criticalStockLevel")} className="form-input" inputMode="decimal" value={values.criticalStockLevel} onChange={(e) => set("criticalStockLevel", e.target.value)} />
-          <small style={{ color: "var(--text-muted)" }}>Stok bu miktara inince uyarılırsınız.</small>
+          <small className="muted">Stok bu miktara inince uyarılırsınız.</small>
           {err("criticalStockLevel")}
         </OptionalField>
         <OptionalField
@@ -203,12 +203,12 @@ export function ProductForm({ product, initial }: { product?: Product; initial?:
           }}
         >
           <div className="row row-gap-md">
-            <select {...field("taxMode")} className="form-input" style={{ flex: 1 }} value={values.taxMode} onChange={(e) => set("taxMode", e.target.value as TaxMode)}>
+            <select {...field("taxMode")} className="form-input grow" value={values.taxMode} onChange={(e) => set("taxMode", e.target.value as TaxMode)}>
               {(Object.keys(TAX_MODE_LABELS) as TaxMode[]).map((m) => (
                 <option key={m} value={m}>{TAX_MODE_LABELS[m]}</option>
               ))}
             </select>
-            <input {...field("taxRate")} className="form-input" style={{ flex: 1 }} inputMode="decimal" aria-label="KDV oranı (%)" value={values.taxRate} onChange={(e) => set("taxRate", e.target.value)} />
+            <input {...field("taxRate")} className="form-input grow" inputMode="decimal" aria-label="KDV oranı (%)" value={values.taxRate} onChange={(e) => set("taxRate", e.target.value)} />
           </div>
           {err("taxRate")}
         </OptionalField>
@@ -223,7 +223,7 @@ export function ProductForm({ product, initial }: { product?: Product; initial?:
         </OptionalField>
       </OptionalGroup>
 
-      <label className="row row-gap-sm" style={{ minHeight: 44 }}>
+      <label className="row row-gap-sm touch-row" >
         <input
           type="checkbox"
           checked={values.isSerialTracked}

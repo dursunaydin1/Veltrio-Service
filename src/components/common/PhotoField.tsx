@@ -46,7 +46,7 @@ export function PhotoField({
         // eslint-disable-next-line @next/next/no-img-element
         <img src={value} alt={label} style={{ maxWidth: 220, maxHeight: 220, borderRadius: 8, objectFit: "cover" }} />
       ) : null}
-      <div className="row row-gap-sm" style={{ flexWrap: "wrap" }}>
+      <div className="row row-gap-sm row-wrap" >
         <button type="button" className="btn btn-secondary btn-sm" disabled={disabled || busy} onClick={() => input.current?.click()}>
           <ImagePlus size={18} aria-hidden="true" /> {value ? "Fotoğrafı değiştir" : "Fotoğraf ekle"}
         </button>

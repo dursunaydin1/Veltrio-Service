@@ -31,11 +31,11 @@ export function RangePicker({
 }) {
   return (
     <div className="row row-gap-md no-print" style={{ flexWrap: "wrap", alignItems: "flex-end" }}>
-      <div className="form-group" style={{ flex: 1, minWidth: 140 }}>
+      <div className="form-group field-grow" >
         <label className="form-label" htmlFor="rp-from">Başlangıç</label>
         <input id="rp-from" className="form-input" type="date" value={range.from} max={range.to} onChange={(e) => e.target.value && onChange({ ...range, from: e.target.value })} />
       </div>
-      <div className="form-group" style={{ flex: 1, minWidth: 140 }}>
+      <div className="form-group field-grow" >
         <label className="form-label" htmlFor="rp-to">Bitiş</label>
         <input id="rp-to" className="form-input" type="date" value={range.to} min={range.from} onChange={(e) => e.target.value && onChange({ ...range, to: e.target.value })} />
       </div>
@@ -196,15 +196,15 @@ export function ExportPanel<T extends Record<string, unknown>>({
     <div className="no-print stack stack-sm">
       {format === null ? (
         <div className="row row-gap-md">
-          <button type="button" className="btn btn-secondary" style={{ flex: 1 }} disabled={rows.length === 0} onClick={() => setFormat("csv")}>CSV indir</button>
-          <button type="button" className="btn btn-secondary" style={{ flex: 1 }} disabled={rows.length === 0} onClick={() => setFormat("xlsx")}>Excel indir</button>
+          <button type="button" className="btn btn-secondary grow" disabled={rows.length === 0} onClick={() => setFormat("csv")}>CSV indir</button>
+          <button type="button" className="btn btn-secondary grow" disabled={rows.length === 0} onClick={() => setFormat("xlsx")}>Excel indir</button>
         </div>
       ) : (
         <div className="card stack stack-sm">
           <div className="alert alert-warning" role="note">
             <strong>Hassas veri:</strong> Bu dosya müşteri ve mali bilgiler içerir. Güvenli saklayın, yetkisiz kişilerle paylaşmayın.
           </div>
-          <label className="row row-gap-sm" style={{ minHeight: 44 }}>
+          <label className="row row-gap-sm touch-row" >
             <input type="checkbox" checked={ack} onChange={(e) => setAck(e.target.checked)} />
             Uyarıyı okudum, dosyayı güvenle saklayacağım
           </label>
@@ -216,8 +216,8 @@ export function ExportPanel<T extends Record<string, unknown>>({
           ) : null}
           {error ? <div className="alert alert-error" role="alert">{error}</div> : null}
           <div className="row row-gap-md">
-            <button type="button" className="btn btn-secondary" style={{ flex: 1 }} onClick={() => { setFormat(null); setError(null); }} disabled={busy}>Vazgeç</button>
-            <button type="button" className="btn btn-primary" style={{ flex: 1 }} onClick={() => void confirm()} disabled={busy || (needsSecret && secret.length === 0)}>
+            <button type="button" className="btn btn-secondary grow" onClick={() => { setFormat(null); setError(null); }} disabled={busy}>Vazgeç</button>
+            <button type="button" className="btn btn-primary grow" onClick={() => void confirm()} disabled={busy || (needsSecret && secret.length === 0)}>
               {format === "csv" ? "CSV indir" : "Excel indir"}
             </button>
           </div>

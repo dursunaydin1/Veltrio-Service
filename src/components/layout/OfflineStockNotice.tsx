@@ -14,7 +14,7 @@ export function OfflineStockNotice({ always = false }: { always?: boolean }) {
   return (
     <details className={`alert ${isOnline ? "alert-warning" : "alert-error"}`} open={!isOnline}>
       <summary>{isOnline ? "Çevrimdışıyken stok nasıl çalışır?" : "Çevrimdışısınız: stok bilgisi bu cihaza göredir"}</summary>
-      <p style={{ marginTop: 8 }}>
+      <p className="mt-2">
         Gösterilen stok, bu cihazın bildiği son stok ile eşitlenmemiş yerel hareketlerin toplamıdır. Başka bir cihazda aynı
         ürün satıldı veya kullanıldıysa, eşitlenince stok <strong>eksiye düşebilir</strong>. Hareketler silinmez; ürün
         “Eksi stok” olarak işaretlenir ve bildirim gelir. Telafi için stok düzeltmesi yapabilir ya da ilgili satış / servis

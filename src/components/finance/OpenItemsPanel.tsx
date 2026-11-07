@@ -76,12 +76,12 @@ export function OpenItemsPanel({ party }: { party: { id: string; business_id: st
             {data.items.map((item) => {
               const href = itemHref(item);
               return (
-                <li key={item.key} style={{ display: "flex", flexDirection: "column", gap: 2, padding: "8px 0" }}>
+                <li key={item.key} className="line-item">
                   <span className="row row-between">
                     {href ? <Link href={href}><strong>{item.label}</strong></Link> : <strong>{item.label}</strong>}
                     <strong>{formatKurus(item.remainingKurus)}</strong>
                   </span>
-                  <small style={{ color: "var(--text-muted)" }}>
+                  <small className="muted">
                     {formatDate(item.docDate)}
                     {item.dueDate ? ` · vade ${formatDate(item.dueDate)}` : ""}
                     {item.paidKurus > 0 ? ` · ${formatKurus(item.paidKurus)} ödendi` : ""}
@@ -156,8 +156,8 @@ function OffsetForm({
       <AllocationFields items={items} values={values} onChange={setValues} />
       {error ? <div className="alert alert-error" role="alert">{error}</div> : null}
       <div className="row row-gap-md">
-        <button type="button" className="btn btn-secondary" style={{ flex: 1 }} onClick={onDone} disabled={busy}>Vazgeç</button>
-        <button type="submit" className="btn btn-primary" style={{ flex: 1 }} disabled={busy}>{busy ? "Kaydediliyor…" : "Mahsup et"}</button>
+        <button type="button" className="btn btn-secondary grow" onClick={onDone} disabled={busy}>Vazgeç</button>
+        <button type="submit" className="btn btn-primary grow" disabled={busy}>{busy ? "Kaydediliyor…" : "Mahsup et"}</button>
       </div>
     </form>
   );
@@ -175,10 +175,10 @@ function AllocationFields({
   return (
     <ul className="menu-list" aria-label="Tahsis edilecek kalemler">
       {items.map((item) => (
-        <li key={item.key} style={{ display: "flex", flexDirection: "column", gap: 4, padding: "8px 0" }}>
+        <li key={item.key} className="line-item">
           <span className="row row-between">
             <span>{item.label}</span>
-            <small style={{ color: "var(--text-muted)" }}>kalan {formatKurus(item.remainingKurus)}</small>
+            <small className="muted">kalan {formatKurus(item.remainingKurus)}</small>
           </span>
           <input
             className="form-input"
@@ -262,7 +262,7 @@ export function CollectionForm({ party, onDone }: { party: { id: string; busines
       {items.length > 0 ? (
         <div className="stack stack-sm">
           <strong>Hangi borca sayılsın?</strong>
-          <small style={{ color: "var(--text-muted)" }}>En eski borçtan başlayarak önerildi; tutarları değiştirebilirsiniz.</small>
+          <small className="muted">En eski borçtan başlayarak önerildi; tutarları değiştirebilirsiniz.</small>
           <AllocationFields items={items} values={values} onChange={setManual} />
           {amountKurus && amountKurus > 0 ? (
             <div className={`alert ${advance < 0 ? "alert-error" : "alert-warning"}`} role="status">
@@ -275,7 +275,7 @@ export function CollectionForm({ party, onDone }: { party: { id: string; busines
           ) : null}
         </div>
       ) : (
-        <small style={{ color: "var(--text-muted)" }}>Açık borç kalemi yok; tutar müşteri avansı olarak yazılır.</small>
+        <small className="muted">Açık borç kalemi yok; tutar müşteri avansı olarak yazılır.</small>
       )}
 
       <OptionalGroup>
@@ -285,8 +285,8 @@ export function CollectionForm({ party, onDone }: { party: { id: string; busines
       </OptionalGroup>
       {error ? <div className="alert alert-error" role="alert">{error}</div> : null}
       <div className="row row-gap-md">
-        <button type="button" className="btn btn-secondary" style={{ flex: 1 }} onClick={onDone} disabled={busy}>Vazgeç</button>
-        <button type="submit" className="btn btn-primary" style={{ flex: 1 }} disabled={busy}>{busy ? "Kaydediliyor…" : "Kaydet"}</button>
+        <button type="button" className="btn btn-secondary grow" onClick={onDone} disabled={busy}>Vazgeç</button>
+        <button type="submit" className="btn btn-primary grow" disabled={busy}>{busy ? "Kaydediliyor…" : "Kaydet"}</button>
       </div>
     </form>
   );

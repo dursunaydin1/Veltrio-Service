@@ -44,11 +44,11 @@ export function AuditHistory() {
       <PageHead title="Geçmiş" />
       <p>Kritik işlemler (iade, iptal, stok düzeltme, arşivleme, cihaz iptali, ayar değişikliği…) burada değiştirilemez kayıt olarak tutulur.</p>
       <div className="row row-gap-md">
-        <select className="form-input" style={{ flex: 1 }} aria-label="Kayıt türü" value={entity} onChange={(e) => { setEntity(e.target.value); setLimit(PAGE); }}>
+        <select className="form-input grow" aria-label="Kayıt türü" value={entity} onChange={(e) => { setEntity(e.target.value); setLimit(PAGE); }}>
           <option value="">Tüm kayıtlar</option>
           {entityTypes.map((t) => <option key={t} value={t}>{ENTITY_LABEL[t] ?? t}</option>)}
         </select>
-        <input className="form-input" style={{ flex: 2 }} type="search" placeholder="Gerekçe veya içerik ara" aria-label="Geçmişte ara" value={query} onChange={(e) => { setQuery(e.target.value); setLimit(PAGE); }} />
+        <input className="form-input grow-2" type="search" placeholder="Gerekçe veya içerik ara" aria-label="Geçmişte ara" value={query} onChange={(e) => { setQuery(e.target.value); setLimit(PAGE); }} />
       </div>
 
       {logs === undefined ? null : filtered.length === 0 ? (
@@ -67,7 +67,7 @@ export function AuditHistory() {
                   </span>
                   {l.reason ? <span>{l.reason}</span> : null}
                   {changes.map((c) => <small key={c} style={{ color: "var(--text-secondary)" }}>{c}</small>)}
-                  <small style={{ color: "var(--text-muted)" }}>{formatDateTime(l.changed_at)} · {l.changed_by_device}</small>
+                  <small className="muted">{formatDateTime(l.changed_at)} · {l.changed_by_device}</small>
                 </li>
               );
             })}

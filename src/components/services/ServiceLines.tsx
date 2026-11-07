@@ -83,13 +83,13 @@ export function ServiceLines({ service, onApproved, onNext }: { service: Service
           ) : (
             <ul className="menu-list" aria-label="Kalemler">
               {lines.operations.map((op) => (
-                <li key={op.id} style={{ display: "flex", flexDirection: "column", gap: 4, padding: "8px 0" }}>
-                  <span className="row row-between" style={{ gap: 8 }}>
+                <li key={op.id} className="line-item">
+                  <span className="row row-between gap-2" >
                     <strong>{op.description}</strong>
                     <strong>{op.price_pending ? "Fiyat bekleniyor" : formatCurrency(op.line_total)}</strong>
                   </span>
                   <span className="row row-between">
-                    <small style={{ color: "var(--text-muted)" }}>
+                    <small className="muted">
                       İşlem · {formatQuantity(op.quantity)} × {formatCurrency(op.unit_price)}
                     </small>
                     <span className={`badge ${STATUS_BADGE[op.status]}`}>{STATUS_LABEL[op.status]}</span>
@@ -117,10 +117,10 @@ export function ServiceLines({ service, onApproved, onNext }: { service: Service
 
           {editable ? (
             <div className="row row-gap-md">
-              <button type="button" className="btn btn-secondary" style={{ flex: 1 }} onClick={() => setMode({ type: "op" })}>
+              <button type="button" className="btn btn-secondary grow" onClick={() => setMode({ type: "op" })}>
                 + İşlem ekle
               </button>
-              <button type="button" className="btn btn-secondary" style={{ flex: 1 }} onClick={() => setMode({ type: "part" })}>
+              <button type="button" className="btn btn-secondary grow" onClick={() => setMode({ type: "part" })}>
                 + Parça ekle
               </button>
             </div>
@@ -161,12 +161,12 @@ export function ServiceLines({ service, onApproved, onNext }: { service: Service
           <h3>Onay geçmişi</h3>
           <ul className="menu-list" aria-label="Onay geçmişi">
             {approvals.map((a) => (
-              <li key={a.id} style={{ display: "flex", flexDirection: "column", gap: 2, padding: "8px 0" }}>
+              <li key={a.id} className="line-item">
                 <strong>
                   {a.decision === "APPROVED" ? "Onaylandı" : a.decision === "REJECTED" ? "Reddedildi" : a.decision === "DEFERRED" ? "Ertelendi" : "Kısmen onaylandı"}{" "}
                   · Onaylı tutar: {formatCurrency(a.approved_amount)}
                 </strong>
-                <small style={{ color: "var(--text-muted)" }}>
+                <small className="muted">
                   {formatDateTime(a.decided_at)} · {a.method === "IN_PERSON" ? "Yüz yüze" : a.method === "PHONE" ? "Telefon" : "Diğer"}
                   {a.explanation ? ` · ${a.explanation}` : ""}
                 </small>

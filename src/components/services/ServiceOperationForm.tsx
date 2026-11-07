@@ -99,7 +99,7 @@ export function OperationForm({
                   onClick={() => pickFromCatalog(o.id)}
                 >
                   {o.name}
-                  {o.suggested_price !== undefined ? <small style={{ color: "var(--text-muted)", fontWeight: 500 }}>{moneyInput(o.suggested_price)} ₺</small> : null}
+                  {o.suggested_price !== undefined ? <small className="meta">{moneyInput(o.suggested_price)} ₺</small> : null}
                 </button>
               ))}
               {!showAllCatalog && catalog.length > QUICK ? (
@@ -114,11 +114,11 @@ export function OperationForm({
         <input id="op-desc" className="form-input" placeholder="Ör. karbüratör ayarı" value={description} onChange={(e) => setDescription(e.target.value)} autoFocus />
       </div>
       <div className="row row-gap-md">
-        <div className="form-group" style={{ flex: "0 0 auto" }}>
+        <div className="form-group shrink-0" >
           <label className="form-label" htmlFor="op-qty">Miktar</label>
           <QuantityStepper id="op-qty" value={quantity} onChange={setQuantity} />
         </div>
-        <div className="form-group" style={{ flex: 2 }}>
+        <div className="form-group grow-2" >
           <label className="form-label" htmlFor="op-price">Birim fiyat (₺)</label>
           <input id="op-price" className="form-input" inputMode="decimal" placeholder="Boş: fiyat sonra" value={price} onChange={(e) => setPrice(e.target.value)} />
         </div>
@@ -139,19 +139,19 @@ export function OperationForm({
           }}
         >
           <div className="row row-gap-md">
-            <select id="op-tax" className="form-input" style={{ flex: 1 }} value={taxMode} onChange={(e) => setTaxMode(e.target.value as TaxMode)}>
+            <select id="op-tax" className="form-input grow" value={taxMode} onChange={(e) => setTaxMode(e.target.value as TaxMode)}>
               <option value="INCLUSIVE">KDV dahil</option>
               <option value="EXCLUSIVE">KDV hariç</option>
               <option value="NONE">KDV yok</option>
             </select>
-            <input id="op-rate" className="form-input" style={{ flex: 1 }} inputMode="decimal" aria-label="KDV oranı (%)" value={taxRate} onChange={(e) => setTaxRate(e.target.value)} />
+            <input id="op-rate" className="form-input grow" inputMode="decimal" aria-label="KDV oranı (%)" value={taxRate} onChange={(e) => setTaxRate(e.target.value)} />
           </div>
         </OptionalField>
       </OptionalGroup>
       {error ? <div className="alert alert-error" role="alert">{error}</div> : null}
       <div className="row row-gap-md">
-        <button type="button" className="btn btn-secondary" style={{ flex: 1 }} onClick={onDone} disabled={busy}>Vazgeç</button>
-        <button type="submit" className="btn btn-primary" style={{ flex: 1 }} disabled={busy}>{busy ? "Kaydediliyor…" : "Kaydet"}</button>
+        <button type="button" className="btn btn-secondary grow" onClick={onDone} disabled={busy}>Vazgeç</button>
+        <button type="submit" className="btn btn-primary grow" disabled={busy}>{busy ? "Kaydediliyor…" : "Kaydet"}</button>
       </div>
     </form>
   );

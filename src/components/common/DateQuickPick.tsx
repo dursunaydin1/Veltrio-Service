@@ -55,7 +55,7 @@ export function DateQuickPick({ id, value, onChange }: { id: string; value: stri
         value={value}
         onChange={(e) => onChange(e.target.value)}
       />
-      {value ? <small style={{ color: "var(--text-muted)" }}>Seçilen: {formatDate(value)}</small> : null}
+      {value ? <small className="muted">Seçilen: {formatDate(value)}</small> : null}
     </div>
   );
 }

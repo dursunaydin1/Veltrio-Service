@@ -89,11 +89,11 @@ export function CustomerPicker({
     return (
       <div className="form-group">
         <span className="form-label">{label}{required ? " *" : ""}</span>
-        <div className="row row-between card" style={{ padding: 12 }}>
+        <div className="row row-between card pad-3" >
           <span>
             <strong>{selected.name}</strong>
             <br />
-            <small style={{ color: "var(--text-muted)" }}>
+            <small className="muted">
               {[selected.village, selected.phone ? formatPhone(selected.phone) : null].filter(Boolean).join(" · ")}
             </small>
           </span>
@@ -135,7 +135,7 @@ export function CustomerPicker({
       />
       {error ? <p className="form-error" role="alert">{error}</p> : null}
       {matches.length > 0 ? (
-        <ul className="menu-list picker-list" aria-label="Müşteri sonuçları" style={{ marginTop: 8 }}>
+        <ul className="menu-list picker-list mt-2" aria-label="Müşteri sonuçları" >
           {matches.map((c) => (
             <li key={c.id}>
               <button
@@ -145,10 +145,10 @@ export function CustomerPicker({
                   setChanging(false);
                   setQuery("");
                 }}
-                style={{ flexDirection: "column", alignItems: "flex-start", gap: 2 }}
+                className="item-stack"
               >
                 <span>{c.name}</span>
-                <small style={{ color: "var(--text-muted)", fontWeight: 500 }}>
+                <small className="meta">
                   {[c.village, c.phone ? formatPhone(c.phone) : "Telefon yok"].filter(Boolean).join(" · ")}
                 </small>
               </button>
@@ -160,8 +160,8 @@ export function CustomerPicker({
       {!allowAdd ? null : !adding ? (
         <button
           type="button"
-          className="btn btn-secondary"
-          style={{ marginTop: 8 }}
+          className="btn btn-secondary mt-2"
+          
           onClick={() => {
             setDraft((d) => ({ ...d, name: query.trim() }));
             setAdding(true);

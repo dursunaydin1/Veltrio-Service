@@ -218,7 +218,7 @@ export function SaleForm({
             const short = !l.isSerial && p.ok && p.quantity > available;
             return (
               <li key={l.key} className="sale-line">
-                <span className="row row-between" style={{ alignItems: "flex-start", gap: 12 }}>
+                <span className="row row-between items-start gap-3" >
                   <ProductThumb product={l} size={40} />
                   <span className="stack" style={{ gap: 4, minWidth: 0, flex: 1 }}>
                     <strong>{l.name}</strong>
@@ -242,7 +242,7 @@ export function SaleForm({
                     <QuantityStepper label={`${l.name}: miktar`} value={l.quantity} onChange={(quantity) => update(l.key, { quantity })} />
                   )}
                   <label className="row row-gap-sm" style={{ flex: "1 1 140px" }}>
-                    <span className="form-label" style={{ whiteSpace: "nowrap" }}>Fiyat ₺</span>
+                    <span className="form-label nowrap" >Fiyat ₺</span>
                     <input className="form-input" inputMode="decimal" aria-label={`${l.name}: birim fiyat`} value={l.price} onChange={(e) => update(l.key, { price: e.target.value })} />
                   </label>
                 </span>
@@ -285,11 +285,11 @@ export function SaleForm({
       />
 
       {lines.length > 0 ? (
-        <fieldset className="stack stack-sm" style={{ border: 0, padding: 0 }}>
+        <fieldset className="stack stack-sm bare" >
           <legend className="form-label">Ödeme</legend>
           <PaymentMethodPicker value={method} onChange={setMethod} />
           <div className="row row-gap-sm">
-            <input className="form-input" style={{ flex: 1 }} inputMode="decimal" placeholder="Alınan tutar (₺)" aria-label="Alınan tutar" value={received} onChange={(e) => setReceived(e.target.value)} />
+            <input className="form-input grow" inputMode="decimal" placeholder="Alınan tutar (₺)" aria-label="Alınan tutar" value={received} onChange={(e) => setReceived(e.target.value)} />
             <button type="button" className="btn btn-secondary" onClick={() => setReceived(moneyInput(totalKurus / 100))} disabled={totalKurus === 0}>
               Tamamı
             </button>
@@ -305,7 +305,7 @@ export function SaleForm({
             <OptionalGroup>
               <OptionalField label="Vade tarihi" chip="Vade tarihi" htmlFor="sl-due" filled={!!dueDate} onClear={() => setDueDate("")}>
                 <DateQuickPick id="sl-due" value={dueDate} onChange={setDueDate} />
-                <small style={{ color: "var(--text-muted)" }}>Girilirse vade gününde ve 7 gün gecikince hatırlatılır.</small>
+                <small className="muted">Girilirse vade gününde ve 7 gün gecikince hatırlatılır.</small>
               </OptionalField>
             </OptionalGroup>
           ) : null}
@@ -315,7 +315,7 @@ export function SaleForm({
       <OptionalGroup>
         <OptionalField label="Satış tarihi" chip="Farklı tarih" htmlFor="sl-date" filled={date !== todayLocalDate()} onClear={() => setDate(todayLocalDate())}>
           <input id="sl-date" className="form-input" type="date" value={date} onChange={(e) => setDate(e.target.value)} />
-          <small style={{ color: "var(--text-muted)" }}>Geçmiş tarihli satış içindir. X ile kapatırsanız satış bugünün tarihiyle kaydedilir.</small>
+          <small className="muted">Geçmiş tarihli satış içindir. X ile kapatırsanız satış bugünün tarihiyle kaydedilir.</small>
         </OptionalField>
         <OptionalField label="Not" htmlFor="sl-notes" filled={!!notes} onClear={() => setNotes("")}>
           <input id="sl-notes" className="form-input" value={notes} onChange={(e) => setNotes(e.target.value)} />

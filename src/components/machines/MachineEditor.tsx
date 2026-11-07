@@ -183,8 +183,8 @@ function MergeSection({ machine }: { machine: Machine }) {
           <input className="form-input" placeholder="Birleştirme nedeni *" aria-label="Birleştirme nedeni" value={reason} onChange={(e) => setReason(e.target.value)} />
           {error ? <div className="alert alert-error" role="alert">{error}</div> : null}
           <div className="row row-gap-md">
-            <button type="button" className="btn btn-secondary" style={{ flex: 1 }} onClick={() => setOpen(false)} disabled={busy}>Vazgeç</button>
-            <button type="submit" className="btn btn-primary" style={{ flex: 1 }} disabled={busy}>Birleştir</button>
+            <button type="button" className="btn btn-secondary grow" onClick={() => setOpen(false)} disabled={busy}>Vazgeç</button>
+            <button type="submit" className="btn btn-primary grow" disabled={busy}>Birleştir</button>
           </div>
         </form>
       ) : (
@@ -247,8 +247,8 @@ function OwnerSection({ machine }: { machine: Machine }) {
           </div>
           {error ? <div className="alert alert-error" role="alert">{error}</div> : null}
           <div className="row row-gap-md">
-            <button type="button" className="btn btn-secondary" style={{ flex: 1 }} onClick={() => setOpen(false)} disabled={busy}>Vazgeç</button>
-            <button type="submit" className="btn btn-primary" style={{ flex: 1 }} disabled={busy}>
+            <button type="button" className="btn btn-secondary grow" onClick={() => setOpen(false)} disabled={busy}>Vazgeç</button>
+            <button type="submit" className="btn btn-primary grow" disabled={busy}>
               {busy ? "Kaydediliyor…" : "Sahibi değiştir"}
             </button>
           </div>
@@ -265,9 +265,9 @@ function OwnerSection({ machine }: { machine: Machine }) {
       ) : (
         <ul className="menu-list" aria-label="Sahiplik geçmişi">
           {history.map((h) => (
-            <li key={h.id} style={{ display: "flex", flexDirection: "column", gap: 2, padding: "8px 0" }}>
+            <li key={h.id} className="line-item">
               <strong>{h.from} → {h.to}</strong>
-              <small style={{ color: "var(--text-muted)" }}>
+              <small className="muted">
                 {formatDateTime(h.changed_at)} · {h.reason}
               </small>
             </li>
@@ -293,12 +293,12 @@ function MachineServices({ machineId }: { machineId: string }) {
         <ul className="menu-list" aria-label="Servisler">
           {services.map((s) => (
             <li key={s.id}>
-              <Link href={`/services/${s.id}`} style={{ flexDirection: "column", alignItems: "flex-start", gap: 2 }}>
-                <span className="row row-between" style={{ width: "100%" }}>
+              <Link href={`/services/${s.id}`} className="item-stack">
+                <span className="row row-between w-full" >
                   <span>{s.document_no}</span>
                   <StatusBadge status={s.status} />
                 </span>
-                <small style={{ color: "var(--text-muted)", fontWeight: 500 }}>
+                <small className="meta">
                   {formatDate(s.received_date)} · {s.customer_complaint ?? ""}
                 </small>
               </Link>

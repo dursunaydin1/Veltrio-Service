@@ -38,10 +38,10 @@ export function DataCheck() {
         alınır; hareketler hiçbir zaman değiştirilmez.
       </p>
       <div className="row row-gap-md">
-        <button type="button" className="btn btn-secondary" style={{ flex: 1 }} onClick={() => void run(false)} disabled={busy}>
+        <button type="button" className="btn btn-secondary grow" onClick={() => void run(false)} disabled={busy}>
           Denetle
         </button>
-        <button type="button" className="btn btn-primary" style={{ flex: 1 }} onClick={() => void run(true)} disabled={busy}>
+        <button type="button" className="btn btn-primary grow" onClick={() => void run(true)} disabled={busy}>
           Denetle ve düzelt
         </button>
       </div>
@@ -56,9 +56,9 @@ export function DataCheck() {
             </div>
             <ul className="menu-list" aria-label="Farklar">
               {result.found.map((m) => (
-                <li key={m.productId} style={{ display: "flex", flexDirection: "column", gap: 2, padding: "8px 0" }}>
+                <li key={m.productId} className="line-item">
                   <strong>{m.name}</strong>
-                  <small style={{ color: "var(--text-muted)" }}>
+                  <small className="muted">
                     Özet: {formatQuantity(m.cachedAvailable)} / hasarlı {formatQuantity(m.cachedDamaged)} · Defter:{" "}
                     {formatQuantity(m.ledgerAvailable)} / hasarlı {formatQuantity(m.ledgerDamaged)}
                   </small>

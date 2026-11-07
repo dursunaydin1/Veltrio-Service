@@ -282,7 +282,7 @@ export function ServiceForm({
                 />
               </div>
             ) : null}
-            <Link href={`/machines/new?customer=${customerId}`} className="btn btn-ghost btn-sm" style={{ alignSelf: "flex-start" }}>
+            <Link href={`/machines/new?customer=${customerId}`} className="btn btn-ghost btn-sm self-start" >
               <Plus size={16} aria-hidden="true" />
               Makineyi kalıcı olarak kaydet
             </Link>
@@ -429,7 +429,7 @@ export function ServiceForm({
                     <label className="form-label" htmlFor="sv-wcoverage">Kapsam açıklaması</label>
                     <input id="sv-wcoverage" className="form-input" value={warrantyCoverage} onChange={(e) => setWarrantyCoverage(e.target.value)} />
                   </div>
-                  <small style={{ color: "var(--text-muted)" }}>Garanti kapsamındaki kalemlerin fiyatını 0 girebilirsiniz; kullanılan parça yine stoktan düşer ve maliyeti kaydedilir.</small>
+                  <small className="muted">Garanti kapsamındaki kalemlerin fiyatını 0 girebilirsiniz; kullanılan parça yine stoktan düşer ve maliyeti kaydedilir.</small>
                 </div>
               ) : null}
             </div>

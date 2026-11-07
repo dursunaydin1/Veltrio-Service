@@ -76,10 +76,10 @@ export function StockPanel({ product }: { product: Product }) {
             Stok girişi
           </button>
           <div className="row row-gap-md">
-            <button type="button" className="btn btn-secondary" style={{ flex: 1 }} onClick={() => setMode("adjust")}>
+            <button type="button" className="btn btn-secondary grow" onClick={() => setMode("adjust")}>
               Stok düzelt
             </button>
-            <button type="button" className="btn btn-secondary" style={{ flex: 1 }} onClick={() => setMode("damage")}>
+            <button type="button" className="btn btn-secondary grow" onClick={() => setMode("damage")}>
               Hasarlı stok
             </button>
           </div>
@@ -104,7 +104,7 @@ export function StockPanel({ product }: { product: Product }) {
       ) : (
         <ul className="menu-list" aria-label="Stok hareketleri">
           {movements.map((m) => (
-            <li key={m.id} style={{ display: "flex", flexDirection: "column", gap: 2, padding: "8px 0" }}>
+            <li key={m.id} className="line-item">
               <span className="row row-between">
                 <strong>{MOVEMENT_LABELS[m.movement_type] ?? m.movement_type}</strong>
                 <strong style={{ color: m.quantity < 0 ? "var(--accent-danger)" : "var(--accent-success)" }}>
@@ -113,7 +113,7 @@ export function StockPanel({ product }: { product: Product }) {
                   {m.bucket === "DAMAGED" ? " (hasarlı)" : ""}
                 </strong>
               </span>
-              <small style={{ color: "var(--text-muted)" }}>
+              <small className="muted">
                 {formatDateTime(m.created_at)}
                 {m.note ? ` · ${m.note}` : ""}
               </small>
@@ -180,8 +180,8 @@ function EntryForm({ product, ctx, onDone }: FormProps) {
       </OptionalGroup>
       {error ? <div className="alert alert-error" role="alert">{error}</div> : null}
       <div className="row row-gap-md">
-        <button type="button" className="btn btn-secondary" style={{ flex: 1 }} onClick={onDone} disabled={busy}>Vazgeç</button>
-        <button type="submit" className="btn btn-primary" style={{ flex: 1 }} disabled={busy}>
+        <button type="button" className="btn btn-secondary grow" onClick={onDone} disabled={busy}>Vazgeç</button>
+        <button type="submit" className="btn btn-primary grow" disabled={busy}>
           {busy ? "Kaydediliyor…" : "Girişi kaydet"}
         </button>
       </div>
@@ -236,8 +236,8 @@ function AdjustForm({ product, current, ctx, onDone }: FormProps & { current: nu
         </div>
         {error ? <div className="alert alert-error" role="alert">{error}</div> : null}
         <div className="row row-gap-md">
-          <button type="button" className="btn btn-secondary" style={{ flex: 1 }} onClick={() => setConfirming(false)} disabled={busy}>Geri dön</button>
-          <button type="button" className="btn btn-primary" style={{ flex: 1 }} onClick={confirm} disabled={busy}>
+          <button type="button" className="btn btn-secondary grow" onClick={() => setConfirming(false)} disabled={busy}>Geri dön</button>
+          <button type="button" className="btn btn-primary grow" onClick={confirm} disabled={busy}>
             {busy ? "Kaydediliyor…" : "Onayla"}
           </button>
         </div>
@@ -264,8 +264,8 @@ function AdjustForm({ product, current, ctx, onDone }: FormProps & { current: nu
       </div>
       {error ? <div className="alert alert-error" role="alert">{error}</div> : null}
       <div className="row row-gap-md">
-        <button type="button" className="btn btn-secondary" style={{ flex: 1 }} onClick={onDone}>Vazgeç</button>
-        <button type="submit" className="btn btn-primary" style={{ flex: 1 }}>Devam</button>
+        <button type="button" className="btn btn-secondary grow" onClick={onDone}>Vazgeç</button>
+        <button type="submit" className="btn btn-primary grow" >Devam</button>
       </div>
     </form>
   );
@@ -340,8 +340,8 @@ function DamageForm({
       </div>
       {error ? <div className="alert alert-error" role="alert">{error}</div> : null}
       <div className="row row-gap-md">
-        <button type="button" className="btn btn-secondary" style={{ flex: 1 }} onClick={onDone} disabled={busy}>Vazgeç</button>
-        <button type="submit" className="btn btn-primary" style={{ flex: 1 }} disabled={busy}>
+        <button type="button" className="btn btn-secondary grow" onClick={onDone} disabled={busy}>Vazgeç</button>
+        <button type="submit" className="btn btn-primary grow" disabled={busy}>
           {busy ? "Kaydediliyor…" : "Kaydet"}
         </button>
       </div>

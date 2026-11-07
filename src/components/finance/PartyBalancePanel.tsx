@@ -98,7 +98,7 @@ export function PartyBalancePanel({
       {/* Borç varken kart turuncu çerçeveyle öne çıkar, tahsilat / ödeme düğmesi kartın içinde (K-097) */}
       {state === "DEBT" ? (
         <div className="debt-callout">
-          <div className="stack" style={{ gap: 4 }}>
+          <div className="stack gap-1" >
             <div className="tile-label">{cfg.debtLabel}</div>
             <div className="tile-value">{formatCurrency(Math.abs(balance?.balance ?? 0) / 100)}</div>
           </div>
@@ -193,7 +193,7 @@ function PaymentRow({ kind, payment, cancelled }: { kind: PartyType; payment: Pa
   }
 
   return (
-    <li style={{ display: "flex", flexDirection: "column", gap: 4, padding: "8px 0" }}>
+    <li className="line-item">
       <span className="row row-between" style={{ opacity: cancelled ? 0.55 : 1 }}>
         <strong style={cancelled ? { textDecoration: "line-through" } : undefined}>
           {sign} {formatCurrency(payment.amount)}
@@ -204,7 +204,7 @@ function PaymentRow({ kind, payment, cancelled }: { kind: PartyType; payment: Pa
           <span className="badge badge-gray">{PAYMENT_METHOD_LABELS[payment.method]}</span>
         </span>
       </span>
-      <small style={{ color: "var(--text-muted)" }}>
+      <small className="muted">
         {CONFIG[kind].rowLabel[payment.direction]} · {formatDateTime(payment.payment_date)}
         {payment.note ? ` · ${payment.note}` : ""}
       </small>
@@ -221,14 +221,14 @@ function PaymentRow({ kind, payment, cancelled }: { kind: PartyType; payment: Pa
             />
             {error ? <div className="alert alert-error" role="alert">{error}</div> : null}
             <div className="row row-gap-md">
-              <button type="button" className="btn btn-secondary btn-sm" style={{ flex: 1 }} onClick={() => setOpen(false)} disabled={busy}>Vazgeç</button>
-              <button type="button" className="btn btn-danger btn-sm" style={{ flex: 1 }} onClick={confirm} disabled={busy}>
+              <button type="button" className="btn btn-secondary btn-sm grow" onClick={() => setOpen(false)} disabled={busy}>Vazgeç</button>
+              <button type="button" className="btn btn-danger btn-sm grow" onClick={confirm} disabled={busy}>
                 Ters kaydı onayla
               </button>
             </div>
           </div>
         ) : (
-          <button type="button" className="btn btn-ghost btn-sm" style={{ alignSelf: "flex-start" }} onClick={() => setOpen(true)}>
+          <button type="button" className="btn btn-ghost btn-sm self-start" onClick={() => setOpen(true)}>
             Hatalı — ters kaydet
           </button>
         )
@@ -289,8 +289,8 @@ function PaymentForm({
       </OptionalGroup>
       {error ? <div className="alert alert-error" role="alert">{error}</div> : null}
       <div className="row row-gap-md">
-        <button type="button" className="btn btn-secondary" style={{ flex: 1 }} onClick={onDone} disabled={busy}>Vazgeç</button>
-        <button type="submit" className="btn btn-primary" style={{ flex: 1 }} disabled={busy}>
+        <button type="button" className="btn btn-secondary grow" onClick={onDone} disabled={busy}>Vazgeç</button>
+        <button type="submit" className="btn btn-primary grow" disabled={busy}>
           {busy ? "Kaydediliyor…" : "Kaydet"}
         </button>
       </div>
@@ -396,8 +396,8 @@ function OpeningForm({
       ) : null}
       {error ? <div className="alert alert-error" role="alert">{error}</div> : null}
       <div className="row row-gap-md">
-        <button type="button" className="btn btn-secondary" style={{ flex: 1 }} onClick={onDone} disabled={busy}>Vazgeç</button>
-        <button type="submit" className="btn btn-primary" style={{ flex: 1 }} disabled={busy}>
+        <button type="button" className="btn btn-secondary grow" onClick={onDone} disabled={busy}>Vazgeç</button>
+        <button type="submit" className="btn btn-primary grow" disabled={busy}>
           {busy ? "Kaydediliyor…" : "Kaydet"}
         </button>
       </div>

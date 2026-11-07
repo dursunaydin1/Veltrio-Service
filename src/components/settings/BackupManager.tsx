@@ -132,7 +132,7 @@ export function BackupManager() {
         <span>
           {last ? `${formatDateTime(last.at)} · ${last.total} kayıt · ${KIND_LABEL[last.kind] ?? last.kind}` : "Bu cihazda henüz yedek alınmadı."}
         </span>
-        <small style={{ color: "var(--text-muted)" }}>
+        <small className="muted">
           Sunucu her gün otomatik yedek alır; aşağıdaki listede son durumunu görürsünüz. Elle yedek, verinizi kendi cihazınıza da kaydeder.
         </small>
         <button type="button" className="btn btn-primary btn-full" onClick={() => void manual()} disabled={busy}>Yedek al ve indir</button>
@@ -151,8 +151,8 @@ export function BackupManager() {
               {formatDateTime(pending.created_at)} tarihli yedek ({pending.device_code}) · {backupTotal(pending)} kayıt. Devam edilsin mi?
             </div>
             <div className="row row-gap-md">
-              <button type="button" className="btn btn-secondary" style={{ flex: 1 }} onClick={() => setPending(null)} disabled={busy}>Vazgeç</button>
-              <button type="button" className="btn btn-danger" style={{ flex: 1 }} onClick={() => void restore()} disabled={busy}>Geri yükle</button>
+              <button type="button" className="btn btn-secondary grow" onClick={() => setPending(null)} disabled={busy}>Vazgeç</button>
+              <button type="button" className="btn btn-danger grow" onClick={() => void restore()} disabled={busy}>Geri yükle</button>
             </div>
           </div>
         ) : null}
@@ -173,12 +173,12 @@ export function BackupManager() {
         ) : (
           <ul className="menu-list" aria-label="Sunucu yedekleri">
             {serverList.map((b) => (
-              <li key={b.id} style={{ display: "flex", flexDirection: "column", gap: 2, padding: "8px 0" }}>
+              <li key={b.id} className="line-item">
                 <span className="row row-between">
                   <strong>{KIND_LABEL[b.kind] ?? b.kind}</strong>
                   <span className={`badge ${b.status === "OK" ? "badge-green" : "badge-red"}`}>{b.status === "OK" ? "Başarılı" : "Başarısız"}</span>
                 </span>
-                <small style={{ color: "var(--text-muted)" }}>
+                <small className="muted">
                   {formatDateTime(b.created_at)}
                   {b.size_bytes ? ` · ${(b.size_bytes / 1024).toFixed(0)} KB` : ""}
                   {b.error ? ` · ${b.error}` : ""}

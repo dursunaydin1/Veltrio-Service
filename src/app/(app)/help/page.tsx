@@ -46,9 +46,9 @@ export default function HelpPage() {
       <ul className="menu-list" aria-label="Sık sorulanlar">
         {TOPICS.map((t) => (
           <li key={t.title} style={{ display: "block", padding: 0 }}>
-            <details className="card" style={{ padding: 12 }}>
+            <details className="card pad-3" >
               <summary style={{ cursor: "pointer", fontWeight: 600 }}>{t.title}</summary>
-              <p style={{ marginTop: 8 }}>{t.body}</p>
+              <p className="mt-2">{t.body}</p>
             </details>
           </li>
         ))}

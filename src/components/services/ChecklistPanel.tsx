@@ -52,8 +52,8 @@ export function ChecklistPanel({ service }: { service: Service }) {
       {items && items.length > 0 ? (
         <ul className="menu-list" aria-label="Kontrol listesi maddeleri">
           {items.map((item) => (
-            <li key={item.id} style={{ display: "flex", flexDirection: "column", gap: 2, padding: "6px 0" }}>
-              <span className="row row-between" style={{ alignItems: "center" }}>
+            <li key={item.id} className="line-item">
+              <span className="row row-between items-center" >
                 <label className="row row-gap-md" style={{ alignItems: "center", minHeight: 44 }}>
                   <input
                     type="checkbox"
@@ -75,7 +75,7 @@ export function ChecklistPanel({ service }: { service: Service }) {
                 </span>
               </span>
               {item.is_completed && item.completed_at ? (
-                <small style={{ color: "var(--text-muted)" }}>
+                <small className="muted">
                   {formatDateTime(item.completed_at)}
                   {item.completed_by_device ? ` · ${item.completed_by_device}` : ""}
                 </small>
@@ -112,8 +112,8 @@ export function ChecklistPanel({ service }: { service: Service }) {
               if (ctx) void run(async () => { await addChecklistItem(ctx, service.id, { title, required }); setTitle(""); setRequired(false); });
             }}
           >
-            <input className="form-input" style={{ flex: 1 }} placeholder="Yeni madde" aria-label="Yeni madde" value={title} onChange={(e) => setTitle(e.target.value)} />
-            <label className="row row-gap-sm" style={{ alignItems: "center", whiteSpace: "nowrap" }}>
+            <input className="form-input grow" placeholder="Yeni madde" aria-label="Yeni madde" value={title} onChange={(e) => setTitle(e.target.value)} />
+            <label className="row row-gap-sm items-center nowrap" >
               <input type="checkbox" checked={required} onChange={(e) => setRequired(e.target.checked)} />
               Zorunlu
             </label>

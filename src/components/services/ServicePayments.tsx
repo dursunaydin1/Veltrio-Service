@@ -92,7 +92,7 @@ export function ServicePayments({ service, onCollected }: { service: Service; on
       ) : (
         <ul className="menu-list" aria-label="Servis ödemeleri">
           {payments.map((p) => (
-            <li key={p.id} style={{ display: "flex", flexDirection: "column", gap: 2, padding: "8px 0", opacity: reversed.has(p.id) ? 0.55 : 1 }}>
+            <li key={p.id} className="line-item" data-faded={reversed.has(p.id) || undefined}>
               <span className="row row-between">
                 <strong style={reversed.has(p.id) ? { textDecoration: "line-through" } : undefined}>
                   {p.direction === "IN" ? "+" : "−"} {formatCurrency(p.amount)}
@@ -103,7 +103,7 @@ export function ServicePayments({ service, onCollected }: { service: Service; on
                   <span className="badge badge-gray">{PAYMENT_METHOD_LABELS[p.method]}</span>
                 </span>
               </span>
-              <small style={{ color: "var(--text-muted)" }}>
+              <small className="muted">
                 {formatDateTime(p.payment_date)}
                 {p.note ? ` · ${p.note}` : ""}
               </small>
@@ -111,7 +111,7 @@ export function ServicePayments({ service, onCollected }: { service: Service; on
           ))}
         </ul>
       )}
-      <small style={{ color: "var(--text-muted)" }}>
+      <small className="muted">
         Hatalı ödeme, müşteri sayfasındaki ödeme geçmişinden “ters kaydet” ile düzeltilir.
       </small>
     </section>
@@ -164,8 +164,8 @@ function CollectForm({ service, onDone, onSaved }: { service: Service; onDone: (
       </OptionalGroup>
       {error ? <div className="alert alert-error" role="alert">{error}</div> : null}
       <div className="row row-gap-md">
-        <button type="button" className="btn btn-secondary" style={{ flex: 1 }} onClick={onDone} disabled={busy}>Vazgeç</button>
-        <button type="submit" className="btn btn-primary" style={{ flex: 1 }} disabled={busy}>{busy ? "Kaydediliyor…" : "Kaydet"}</button>
+        <button type="button" className="btn btn-secondary grow" onClick={onDone} disabled={busy}>Vazgeç</button>
+        <button type="submit" className="btn btn-primary grow" disabled={busy}>{busy ? "Kaydediliyor…" : "Kaydet"}</button>
       </div>
     </form>
   );
@@ -223,7 +223,7 @@ export function DeliveryPanel({ service }: { service: Service }) {
       </div>
       <PaymentMethodPicker value={method} onChange={setMethod} />
       {balance && balance.remaining > 0 ? (
-        <button type="button" className="btn btn-ghost btn-sm" style={{ alignSelf: "flex-start" }} onClick={() => setAmount(moneyInputFromKurus(balance.remaining))}>
+        <button type="button" className="btn btn-ghost btn-sm self-start" onClick={() => setAmount(moneyInputFromKurus(balance.remaining))}>
           Kalanın tamamını tahsil et
         </button>
       ) : null}

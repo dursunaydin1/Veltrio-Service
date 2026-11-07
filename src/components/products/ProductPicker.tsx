@@ -54,7 +54,7 @@ export function ProductPicker({
           <span style={{ flex: 1, minWidth: 0 }}>
             <strong>{selected.name}</strong>
             <br />
-            <small style={{ color: "var(--text-muted)" }}>
+            <small className="muted">
               Stok: {formatQuantity(balances?.get(selected.id)?.available ?? 0)} {unitLabel(selected.unit)} ·{" "}
               {formatCurrency(selected.default_sale_price)}
             </small>
@@ -87,7 +87,7 @@ export function ProductPicker({
         onChange={(e) => setQuery(e.target.value)}
         autoComplete="off"
       />
-      <ul className="menu-list picker-list" aria-label="Ürün sonuçları" style={{ marginTop: 8 }}>
+      <ul className="menu-list picker-list mt-2" aria-label="Ürün sonuçları" >
         {matches.map((p) => (
           <li key={p.id}>
             <button
@@ -102,7 +102,7 @@ export function ProductPicker({
               <ProductThumb product={p} size={40} />
               <span className="stack" style={{ gap: 2, minWidth: 0, alignItems: "flex-start" }}>
                 <span>{p.name}</span>
-                <small style={{ color: "var(--text-muted)", fontWeight: 500 }}>
+                <small className="meta">
                   Stok: {formatQuantity(balances?.get(p.id)?.available ?? 0)} {unitLabel(p.unit)} ·{" "}
                   {formatCurrency(p.default_sale_price)}
                 </small>

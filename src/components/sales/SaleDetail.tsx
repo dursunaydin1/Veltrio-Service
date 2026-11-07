@@ -72,7 +72,7 @@ export function SaleDetail({ id }: { id: string }) {
           {" · "}
           {formatDate(sale.sale_date)}
         </p>
-        {sale.notes ? <small style={{ color: "var(--text-muted)" }}>{sale.notes}</small> : null}
+        {sale.notes ? <small className="muted">{sale.notes}</small> : null}
         {sale.status === "CANCELLED" && sale.cancel_reason ? (
           <div className="alert alert-error" role="note">İptal nedeni: {sale.cancel_reason}</div>
         ) : null}
@@ -82,12 +82,12 @@ export function SaleDetail({ id }: { id: string }) {
         <h2 id="si-title">Satış kalemleri</h2>
         <ul className="menu-list" aria-label="Satış kalemleri">
           {(items ?? []).map((i) => (
-            <li key={i.id} style={{ display: "flex", flexDirection: "column", gap: 2, padding: "8px 0" }}>
+            <li key={i.id} className="line-item">
               <span className="row row-between">
                 <strong>{i.description_snapshot}</strong>
                 <strong>{formatCurrency(i.line_total)}</strong>
               </span>
-              <small style={{ color: "var(--text-muted)" }}>
+              <small className="muted">
                 {formatQuantity(i.quantity)} {i.unit} × {formatCurrency(i.unit_price_snapshot)}
                 {i.discount_amount > 0 ? ` − ${formatCurrency(i.discount_amount)} indirim` : ""}
               </small>
@@ -167,8 +167,8 @@ function DraftActions({ sale, onEdit }: { sale: Sale; onEdit: () => void }) {
           </div>
           {error ? <div className="alert alert-error" role="alert">{error}</div> : null}
           <div className="row row-gap-md">
-            <button type="button" className="btn btn-secondary" style={{ flex: 1 }} onClick={() => setCancelling(false)} disabled={busy}>Vazgeç</button>
-            <button type="button" className="btn btn-danger" style={{ flex: 1 }} onClick={cancel} disabled={busy}>İptal et</button>
+            <button type="button" className="btn btn-secondary grow" onClick={() => setCancelling(false)} disabled={busy}>Vazgeç</button>
+            <button type="button" className="btn btn-danger grow" onClick={cancel} disabled={busy}>İptal et</button>
           </div>
         </div>
       ) : (
@@ -178,7 +178,7 @@ function DraftActions({ sale, onEdit }: { sale: Sale; onEdit: () => void }) {
             <input id="sf-received" className="form-input" inputMode="decimal" placeholder="0,00" value={received} onChange={(e) => setReceived(e.target.value)} />
           </div>
           <PaymentMethodPicker value={method} onChange={setMethod} />
-          <button type="button" className="btn btn-ghost btn-sm" style={{ alignSelf: "flex-start" }} onClick={() => setReceived(moneyInput(sale.total_amount))}>
+          <button type="button" className="btn btn-ghost btn-sm self-start" onClick={() => setReceived(moneyInput(sale.total_amount))}>
             Tamamı peşin: {formatCurrency(sale.total_amount)}
           </button>
           {needsNeg ? (
@@ -192,8 +192,8 @@ function DraftActions({ sale, onEdit }: { sale: Sale; onEdit: () => void }) {
             {busy ? "İşleniyor…" : "Satışı tamamla"}
           </button>
           <div className="row row-gap-md">
-            <button type="button" className="btn btn-secondary" style={{ flex: 1 }} onClick={onEdit} disabled={busy}>Düzenle</button>
-            <button type="button" className="btn btn-danger-soft" style={{ flex: 1 }} onClick={() => setCancelling(true)} disabled={busy}>İptal et</button>
+            <button type="button" className="btn btn-secondary grow" onClick={onEdit} disabled={busy}>Düzenle</button>
+            <button type="button" className="btn btn-danger-soft grow" onClick={() => setCancelling(true)} disabled={busy}>İptal et</button>
           </div>
         </>
       )}
@@ -268,8 +268,8 @@ function SalePayments({ sale }: { sale: Sale }) {
           <PaymentMethodPicker value={method} onChange={setMethod} />
           {error ? <div className="alert alert-error" role="alert">{error}</div> : null}
           <div className="row row-gap-md">
-            <button type="button" className="btn btn-secondary" style={{ flex: 1 }} onClick={() => setOpen(false)} disabled={busy}>Vazgeç</button>
-            <button type="submit" className="btn btn-primary" style={{ flex: 1 }} disabled={busy}>{busy ? "Kaydediliyor…" : "Kaydet"}</button>
+            <button type="button" className="btn btn-secondary grow" onClick={() => setOpen(false)} disabled={busy}>Vazgeç</button>
+            <button type="submit" className="btn btn-primary grow" disabled={busy}>{busy ? "Kaydediliyor…" : "Kaydet"}</button>
           </div>
         </form>
       ) : remaining > 0 ? (
@@ -286,7 +286,7 @@ function SalePayments({ sale }: { sale: Sale }) {
       ) : (
         <ul className="menu-list" aria-label="Satış tahsilatları">
           {payments.map((p) => (
-            <li key={p.id} style={{ display: "flex", flexDirection: "column", gap: 2, padding: "8px 0", opacity: reversed.has(p.id) ? 0.55 : 1 }}>
+            <li key={p.id} className="line-item" data-faded={reversed.has(p.id) || undefined}>
               <span className="row row-between">
                 <strong style={reversed.has(p.id) ? { textDecoration: "line-through" } : undefined}>
                   {p.direction === "IN" ? "+" : "−"} {formatCurrency(p.amount)}
@@ -297,7 +297,7 @@ function SalePayments({ sale }: { sale: Sale }) {
                   <span className="badge badge-gray">{PAYMENT_METHOD_LABELS[p.method]}</span>
                 </span>
               </span>
-              <small style={{ color: "var(--text-muted)" }}>
+              <small className="muted">
                 {formatDateTime(p.payment_date)}
                 {p.note ? ` · ${p.note}` : ""}
               </small>
@@ -305,7 +305,7 @@ function SalePayments({ sale }: { sale: Sale }) {
           ))}
         </ul>
       )}
-      <small style={{ color: "var(--text-muted)" }}>
+      <small className="muted">
         Hatalı satış aşağıdan iptal edilir; fiziksel ürün geri geliyorsa bu iade (Faz 5) olur. Hatalı tahsilat, müşteri sayfasındaki geçmişten ters kaydedilir.
       </small>
     </section>
@@ -354,8 +354,8 @@ function FinalCancel({ sale }: { sale: Sale }) {
       </div>
       {error ? <div className="alert alert-error" role="alert">{error}</div> : null}
       <div className="row row-gap-md">
-        <button type="button" className="btn btn-secondary" style={{ flex: 1 }} onClick={() => setOpen(false)} disabled={busy}>Vazgeç</button>
-        <button type="button" className="btn btn-danger" style={{ flex: 1 }} onClick={cancel} disabled={busy}>
+        <button type="button" className="btn btn-secondary grow" onClick={() => setOpen(false)} disabled={busy}>Vazgeç</button>
+        <button type="button" className="btn btn-danger grow" onClick={cancel} disabled={busy}>
           {busy ? "İptal ediliyor…" : "Satışı iptal et"}
         </button>
       </div>
