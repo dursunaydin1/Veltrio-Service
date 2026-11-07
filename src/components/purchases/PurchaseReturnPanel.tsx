@@ -117,7 +117,7 @@ export function PurchaseReturnPanel({ purchase }: { purchase: Purchase }) {
                     .filter((u) => u.status === "IN_STOCK" || u.status === "DAMAGED")
                     .map((u) => (
                       <li key={u.id} style={{ padding: "6px 0" }}>
-                        <label className="row row-gap-md items-center" >
+                        <label className="row row-gap-md items-center">
                           <input type="checkbox" checked={!!picked[u.id]} onChange={(e) => setPicked({ ...picked, [u.id]: e.target.checked })} />
                           <span>{unitLabel(u)}{u.status === "DAMAGED" ? " (hasarlı)" : ""}</span>
                         </label>

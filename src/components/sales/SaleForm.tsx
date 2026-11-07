@@ -218,7 +218,7 @@ export function SaleForm({
             const short = !l.isSerial && p.ok && p.quantity > available;
             return (
               <li key={l.key} className="sale-line">
-                <span className="row row-between items-start gap-3" >
+                <span className="row row-between items-start gap-3">
                   <ProductThumb product={l} size={40} />
                   <span className="stack" style={{ gap: 4, minWidth: 0, flex: 1 }}>
                     <strong>{l.name}</strong>
@@ -242,7 +242,7 @@ export function SaleForm({
                     <QuantityStepper label={`${l.name}: miktar`} value={l.quantity} onChange={(quantity) => update(l.key, { quantity })} />
                   )}
                   <label className="row row-gap-sm" style={{ flex: "1 1 140px" }}>
-                    <span className="form-label nowrap" >Fiyat ₺</span>
+                    <span className="form-label nowrap">Fiyat ₺</span>
                     <input className="form-input" inputMode="decimal" aria-label={`${l.name}: birim fiyat`} value={l.price} onChange={(e) => update(l.key, { price: e.target.value })} />
                   </label>
                 </span>
@@ -285,7 +285,7 @@ export function SaleForm({
       />
 
       {lines.length > 0 ? (
-        <fieldset className="stack stack-sm bare" >
+        <fieldset className="stack stack-sm bare">
           <legend className="form-label">Ödeme</legend>
           <PaymentMethodPicker value={method} onChange={setMethod} />
           <div className="row row-gap-sm">

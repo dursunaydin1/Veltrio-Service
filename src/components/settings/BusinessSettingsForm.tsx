@@ -146,12 +146,12 @@ export function BusinessSettingsForm() {
 
       <section className="card stack stack-md" aria-labelledby="bs-general">
         <h2 id="bs-general">Stok, vergi ve çevrimdışı çalışma</h2>
-        <label className="row row-gap-sm touch-row" >
-          <input type="checkbox" checked={form.allowNegativeStock} onChange={(e) => set("allowNegativeStock", e.target.checked)} />
-          Eksi stoğa izin ver (neden yazılarak, kritik uyarıyla)
+        <label className="toggle-row">
+          <span>Eksi stoğa izin ver (neden yazılarak, kritik uyarıyla)</span>
+          <input type="checkbox" className="switch" checked={form.allowNegativeStock} onChange={(e) => set("allowNegativeStock", e.target.checked)} />
         </label>
         <div className="row row-gap-md">
-          <div className="form-group grow-2" >
+          <div className="form-group grow-2">
             <label className="form-label" htmlFor="bs-taxmode">KDV varsayılanı</label>
             <select id="bs-taxmode" className="form-input" value={form.defaultTaxMode} onChange={(e) => set("defaultTaxMode", e.target.value as SettingsFormInput["defaultTaxMode"])}>
               <option value="INCLUSIVE">KDV dahil</option>
@@ -159,7 +159,7 @@ export function BusinessSettingsForm() {
               <option value="NONE">KDV yok</option>
             </select>
           </div>
-          <div className="form-group grow" >
+          <div className="form-group grow">
             <label className="form-label" htmlFor="bs-taxrate">Oran (%)</label>
             <input id="bs-taxrate" className="form-input" inputMode="decimal" value={form.defaultTaxRate} onChange={(e) => set("defaultTaxRate", e.target.value)} />
             {err("defaultTaxRate")}

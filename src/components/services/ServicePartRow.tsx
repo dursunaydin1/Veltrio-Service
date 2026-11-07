@@ -105,7 +105,7 @@ export function PartRow({
 
   return (
     <li className="line-item">
-      <span className="row row-between gap-2" >
+      <span className="row row-between gap-2">
         <strong>{part.description_snapshot}</strong>
         <strong>{formatCurrency(part.line_total)}</strong>
       </span>
@@ -115,7 +115,7 @@ export function PartRow({
         </small>
         <span className={`badge ${STATUS_BADGE[part.status]}`}>{STATUS_LABEL[part.status]}</span>
       </span>
-      <span className="row row-gap-sm row-wrap" >
+      <span className="row row-gap-sm row-wrap">
         {part.source_type === "STOCK_PRODUCT" ? (
           <span className={`badge ${part.supply_status === "IN_STOCK" || part.supply_status === "ARRIVED" ? "badge-green" : "badge-yellow"}`}>
             {SUPPLY_LABEL[part.supply_status]}
@@ -132,7 +132,7 @@ export function PartRow({
       ) : null}
 
       {editing ? (
-        <span className="row row-gap-sm row-wrap" >
+        <span className="row row-gap-sm row-wrap">
           <QuantityStepper value={qtyText} onChange={setQtyText} />
           <input className="form-input" style={{ maxWidth: 130 }} inputMode="decimal" aria-label="Birim fiyat (₺)" value={priceText2} onChange={(e) => setPriceText2(e.target.value)} />
           <button type="button" className="btn btn-primary btn-sm" onClick={() => void saveEdit()}>Kaydet</button>

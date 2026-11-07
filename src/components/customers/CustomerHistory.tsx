@@ -26,8 +26,8 @@ export function CustomerHistory({ customer }: { customer: Customer }) {
     <>
       {!archived ? (
         <div className="row row-gap-md" aria-label="Hızlı işlemler">
-          <Link href={`/services/new?customer=${customer.id}`} className="btn btn-primary grow" >Servis aç</Link>
-          <Link href={`/sales/new?customer=${customer.id}`} className="btn btn-secondary grow" >Satış yap</Link>
+          <Link href={`/services/new?customer=${customer.id}`} className="btn btn-primary grow">Servis aç</Link>
+          <Link href={`/sales/new?customer=${customer.id}`} className="btn btn-secondary grow">Satış yap</Link>
         </div>
       ) : null}
 
@@ -40,7 +40,7 @@ export function CustomerHistory({ customer }: { customer: Customer }) {
             {services.slice(0, LIMIT).map((s) => (
               <li key={s.id}>
                 <Link href={`/services/${s.id}`} className="item-stack">
-                  <span className="row row-between w-full" >
+                  <span className="row row-between w-full">
                     <span>{s.document_no}</span>
                     <StatusBadge status={s.status} />
                   </span>
@@ -64,7 +64,7 @@ export function CustomerHistory({ customer }: { customer: Customer }) {
             {sales.slice(0, LIMIT).map((s) => (
               <li key={s.id}>
                 <Link href={`/sales/${s.id}`} className="item-stack">
-                  <span className="row row-between w-full" >
+                  <span className="row row-between w-full">
                     <span>{s.document_no}</span>
                     <strong>{formatCurrency(s.total_amount)}</strong>
                   </span>

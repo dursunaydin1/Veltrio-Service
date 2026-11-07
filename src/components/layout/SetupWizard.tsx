@@ -89,7 +89,7 @@ export function SetupWizard() {
           <input id="su-tax" className="form-input" value={taxNumber} onChange={(e) => setTaxNumber(e.target.value)} />
         </div>
         <div className="row row-gap-md">
-          <div className="form-group grow-2" >
+          <div className="form-group grow-2">
             <label className="form-label" htmlFor="su-mode">KDV varsayılanı</label>
             <select id="su-mode" className="form-input" value={taxMode} onChange={(e) => setTaxMode(e.target.value as typeof taxMode)}>
               <option value="INCLUSIVE">KDV dahil</option>
@@ -97,7 +97,7 @@ export function SetupWizard() {
               <option value="NONE">KDV yok</option>
             </select>
           </div>
-          <div className="form-group grow" >
+          <div className="form-group grow">
             <label className="form-label" htmlFor="su-rate">Oran (%)</label>
             <input id="su-rate" className="form-input" inputMode="decimal" value={taxRate} onChange={(e) => setTaxRate(e.target.value)} />
           </div>

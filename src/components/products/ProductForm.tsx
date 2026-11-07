@@ -132,7 +132,7 @@ export function ProductForm({ product, initial }: { product?: Product; initial?:
       </div>
 
       <div className="row row-gap-md">
-        <div className="form-group grow" >
+        <div className="form-group grow">
           <label className="form-label" htmlFor="f-salePrice">Satış fiyatı (₺) *</label>
           <input
             {...field("salePrice")}
@@ -144,7 +144,7 @@ export function ProductForm({ product, initial }: { product?: Product; initial?:
           />
           {err("salePrice")}
         </div>
-        <div className="form-group grow" >
+        <div className="form-group grow">
           <label className="form-label" htmlFor="f-unit">Birim</label>
           <select {...field("unit")} className="form-input" value={values.unit} onChange={(e) => set("unit", e.target.value)}>
             {PRODUCT_UNITS.map((u) => (
@@ -223,14 +223,14 @@ export function ProductForm({ product, initial }: { product?: Product; initial?:
         </OptionalField>
       </OptionalGroup>
 
-      <label className="row row-gap-sm touch-row" >
+      <label className="toggle-row">
+        <span>Seri numarası ile takip edilir (makineler)</span>
         <input
-          type="checkbox"
+          type="checkbox" className="switch"
           checked={values.isSerialTracked}
           onChange={(e) => set("isSerialTracked", e.target.checked)}
           disabled={!!product}
         />
-        Seri numarası ile takip edilir (makineler)
       </label>
       {product ? (
         <p>Seri takibi, stok hareketi oluştuktan sonra değiştirilemez.</p>

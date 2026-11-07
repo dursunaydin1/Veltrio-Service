@@ -36,9 +36,9 @@ export function GlobalSearch() {
         onChange={(e) => setQuery(e.target.value)}
         autoFocus
       />
-      <label className="row row-gap-sm touch-row" >
-        <input type="checkbox" checked={includeArchived} onChange={(e) => setIncludeArchived(e.target.checked)} />
-        Arşivdeki kayıtlarda da ara
+      <label className="toggle-row toggle-inline">
+        <span>Arşivdeki kayıtlarda da ara</span>
+        <input type="checkbox" className="switch" checked={includeArchived} onChange={(e) => setIncludeArchived(e.target.checked)} />
       </label>
       {!isOnline ? (
         <div className="alert alert-warning" role="status">
@@ -58,7 +58,7 @@ export function GlobalSearch() {
               {g.items.map((hit: SearchHit) => (
                 <li key={`${hit.kind}:${hit.id}`}>
                   <Link href={hit.href} className="item-stack">
-                    <span className="row row-between w-full" >
+                    <span className="row row-between w-full">
                       <span>{hit.title}</span>
                       {hit.archived ? <span className="badge badge-gray">Arşivde</span> : null}
                     </span>

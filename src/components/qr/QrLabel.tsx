@@ -86,16 +86,16 @@ export function QrLabel({
             ))}
           </select>
         </div>
-        <label className="row row-gap-sm touch-row" >
+        <label className="toggle-row">
+          <span>Etikette işletme adı yazılsın</span>
           <input
-            type="checkbox"
+            type="checkbox" className="switch"
             checked={showBusiness}
             onChange={(e) => {
-              setShowBusiness(e.target.checked);
-              writePref(SHOW_BUSINESS_KEY, e.target.checked ? "1" : "0");
+            setShowBusiness(e.target.checked);
+            writePref(SHOW_BUSINESS_KEY, e.target.checked ? "1" : "0");
             }}
           />
-          Etikette işletme adı yazılsın
         </label>
         <button type="button" className="btn btn-primary btn-full" onClick={() => window.print()} disabled={!dataUrl}>
           Yazdır

@@ -144,13 +144,13 @@ export function CustomerForm({ customer, initial }: { customer?: Customer; initi
         {err("phone")}
       </div>
 
-      <label className="row row-gap-sm touch-row" >
+      <label className="toggle-row">
+        <span>Telefonu yok</span>
         <input
-          type="checkbox"
+          type="checkbox" className="switch"
           checked={values.noPhone}
           onChange={(e) => set("noPhone", e.target.checked)}
         />
-        Telefonu yok
       </label>
 
       {duplicates.length > 0 ? (
@@ -165,7 +165,7 @@ export function CustomerForm({ customer, initial }: { customer?: Customer; initi
               </li>
             ))}
           </ul>
-          <label className="row row-gap-sm touch-row" >
+          <label className="row row-gap-sm touch-row">
             <input
               type="checkbox"
               checked={allowDuplicate}

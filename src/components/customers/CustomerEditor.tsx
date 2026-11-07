@@ -67,13 +67,13 @@ export function CustomerEditor({ id }: { id: string }) {
       {tel || whatsapp ? (
         <div className="row row-gap-md">
           {tel ? (
-            <a href={tel} className="btn btn-secondary grow" >
+            <a href={tel} className="btn btn-secondary grow">
               <Phone size={18} aria-hidden="true" />
               Ara
             </a>
           ) : null}
           {whatsapp ? (
-            <a href={whatsapp} target="_blank" rel="noopener noreferrer" className="btn btn-secondary grow" >
+            <a href={whatsapp} target="_blank" rel="noopener noreferrer" className="btn btn-secondary grow">
               <MessageCircle size={18} aria-hidden="true" />
               WhatsApp&apos;ta aç
             </a>

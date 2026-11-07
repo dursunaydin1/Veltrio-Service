@@ -265,7 +265,7 @@ function AdjustForm({ product, current, ctx, onDone }: FormProps & { current: nu
       {error ? <div className="alert alert-error" role="alert">{error}</div> : null}
       <div className="row row-gap-md">
         <button type="button" className="btn btn-secondary grow" onClick={onDone}>Vazgeç</button>
-        <button type="submit" className="btn btn-primary grow" >Devam</button>
+        <button type="submit" className="btn btn-primary grow">Devam</button>
       </div>
     </form>
   );

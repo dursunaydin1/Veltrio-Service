@@ -111,7 +111,7 @@ export function BalanceReport() {
               {customers.map((r) => (
                 <li key={r.id}>
                   <Link href={`/customers/${r.id}`} className="item-stack">
-                    <span className="row row-between w-full gap-2" >
+                    <span className="row row-between w-full gap-2">
                       <span>{r.name}</span>
                       <strong style={{ color: r.balanceKurus > 0 ? "var(--accent-warning)" : "var(--accent-success)" }}>
                         {r.balanceKurus > 0 ? formatKurus(r.balanceKurus) : `${formatKurus(-r.balanceKurus)} alacaklı`}
@@ -145,7 +145,7 @@ export function BalanceReport() {
               {suppliers.map((r) => (
                 <li key={r.id}>
                   <Link href={`/suppliers/${r.id}`}>
-                    <span className="row row-between w-full gap-2" >
+                    <span className="row row-between w-full gap-2">
                       <span>{r.name}</span>
                       <strong style={{ color: r.balanceKurus > 0 ? "var(--accent-warning)" : "var(--accent-success)" }}>
                         {r.balanceKurus > 0 ? `${formatKurus(r.balanceKurus)} borç` : `${formatKurus(-r.balanceKurus)} alacak`}

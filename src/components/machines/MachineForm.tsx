@@ -149,9 +149,9 @@ export function MachineForm({
         {err("type")}
       </div>
 
-      <label className="row row-gap-sm touch-row" >
-        <input type="checkbox" checked={values.isTemporary} onChange={(e) => set("isTemporary", e.target.checked)} />
-        Geçici kayıt (marka / model henüz bilinmiyor)
+      <label className="toggle-row">
+        <span>Geçici kayıt (marka / model henüz bilinmiyor)</span>
+        <input type="checkbox" className="switch" checked={values.isTemporary} onChange={(e) => set("isTemporary", e.target.checked)} />
       </label>
 
       {/* Marka / model büyük harfle tutulur (STIHL, MS 250); öneriler çip (K-094) */}
@@ -194,7 +194,7 @@ export function MachineForm({
               </li>
             ))}
           </ul>
-          <label className="row row-gap-sm touch-row" >
+          <label className="row row-gap-sm touch-row">
             <input type="checkbox" checked={allowDuplicate} onChange={(e) => setAllowDuplicate(e.target.checked)} />
             Yine de ayrı bir makine olarak kaydet
           </label>

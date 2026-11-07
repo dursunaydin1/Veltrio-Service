@@ -38,7 +38,7 @@ export function ReceiptView({ serviceId, type }: { serviceId: string; type: Rece
     <div className="stack stack-md">
       <div className="no-print stack stack-sm">
         <Link href={`/services/${serviceId}`}>← Servise dön</Link>
-        <div className="row row-gap-sm row-wrap" >
+        <div className="row row-gap-sm row-wrap">
           <Link href={`/services/${serviceId}/receipt?type=intake`} className={`btn btn-sm ${type === "intake" ? "btn-primary" : "btn-secondary"}`}>
             Kabul fişi
           </Link>

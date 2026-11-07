@@ -98,7 +98,7 @@ export function PartyBalancePanel({
       {/* Borç varken kart turuncu çerçeveyle öne çıkar, tahsilat / ödeme düğmesi kartın içinde (K-097) */}
       {state === "DEBT" ? (
         <div className="debt-callout">
-          <div className="stack gap-1" >
+          <div className="stack gap-1">
             <div className="tile-label">{cfg.debtLabel}</div>
             <div className="tile-value">{formatCurrency(Math.abs(balance?.balance ?? 0) / 100)}</div>
           </div>

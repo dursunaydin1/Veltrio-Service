@@ -31,11 +31,11 @@ export function RangePicker({
 }) {
   return (
     <div className="row row-gap-md no-print" style={{ flexWrap: "wrap", alignItems: "flex-end" }}>
-      <div className="form-group field-grow" >
+      <div className="form-group field-grow">
         <label className="form-label" htmlFor="rp-from">Başlangıç</label>
         <input id="rp-from" className="form-input" type="date" value={range.from} max={range.to} onChange={(e) => e.target.value && onChange({ ...range, from: e.target.value })} />
       </div>
-      <div className="form-group field-grow" >
+      <div className="form-group field-grow">
         <label className="form-label" htmlFor="rp-to">Bitiş</label>
         <input id="rp-to" className="form-input" type="date" value={range.to} min={range.from} onChange={(e) => e.target.value && onChange({ ...range, to: e.target.value })} />
       </div>
@@ -204,7 +204,7 @@ export function ExportPanel<T extends Record<string, unknown>>({
           <div className="alert alert-warning" role="note">
             <strong>Hassas veri:</strong> Bu dosya müşteri ve mali bilgiler içerir. Güvenli saklayın, yetkisiz kişilerle paylaşmayın.
           </div>
-          <label className="row row-gap-sm touch-row" >
+          <label className="row row-gap-sm touch-row">
             <input type="checkbox" checked={ack} onChange={(e) => setAck(e.target.checked)} />
             Uyarıyı okudum, dosyayı güvenle saklayacağım
           </label>

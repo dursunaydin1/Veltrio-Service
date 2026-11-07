@@ -90,7 +90,7 @@ export function PurchaseList() {
           {shown.items.map((p) => (
             <li key={p.id}>
               <Link href={`/purchases/${p.id}`} className="item-stack">
-                <span className="row row-between w-full gap-2" >
+                <span className="row row-between w-full gap-2">
                   <span>{p.document_no}</span>
                   <strong>{formatCurrency(p.total_amount)}</strong>
                 </span>

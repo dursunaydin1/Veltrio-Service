@@ -84,7 +84,7 @@ export function ServiceLines({ service, onApproved, onNext }: { service: Service
             <ul className="menu-list" aria-label="Kalemler">
               {lines.operations.map((op) => (
                 <li key={op.id} className="line-item">
-                  <span className="row row-between gap-2" >
+                  <span className="row row-between gap-2">
                     <strong>{op.description}</strong>
                     <strong>{op.price_pending ? "Fiyat bekleniyor" : formatCurrency(op.line_total)}</strong>
                   </span>

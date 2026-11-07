@@ -89,7 +89,7 @@ export function CustomerPicker({
     return (
       <div className="form-group">
         <span className="form-label">{label}{required ? " *" : ""}</span>
-        <div className="row row-between card pad-3" >
+        <div className="row row-between card pad-3">
           <span>
             <strong>{selected.name}</strong>
             <br />
@@ -189,13 +189,13 @@ export function CustomerPicker({
             value={draft.phone}
             onChange={(e) => setDraft({ ...draft, phone: e.target.value })}
           />
-          <label className="row row-gap-sm">
+          <label className="toggle-row">
+            <span>Telefonu yok</span>
             <input
-              type="checkbox"
+              type="checkbox" className="switch"
               checked={draft.noPhone}
               onChange={(e) => setDraft({ ...draft, noPhone: e.target.checked, phone: "" })}
             />
-            Telefonu yok
           </label>
           <input
             className="form-input"

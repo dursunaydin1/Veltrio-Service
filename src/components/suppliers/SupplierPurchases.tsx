@@ -31,7 +31,7 @@ export function SupplierPurchases({ supplier }: { supplier: Supplier }) {
           {purchases.slice(0, 20).map((p) => (
             <li key={p.id}>
               <Link href={`/purchases/${p.id}`} className="item-stack">
-                <span className="row row-between w-full" >
+                <span className="row row-between w-full">
                   <span>{p.document_no}</span>
                   <strong>{formatCurrency(p.total_amount)}</strong>
                 </span>

@@ -58,13 +58,13 @@ export function ProductList() {
         />
       </div>
 
-      <label className="row row-gap-sm touch-row" >
+      <label className="toggle-row toggle-inline">
+        <span>Pasif ürünleri de göster</span>
         <input
-          type="checkbox"
+          type="checkbox" className="switch"
           checked={showArchived}
           onChange={(e) => setShowArchived(e.target.checked)}
         />
-        Pasif ürünleri de göster
       </label>
 
       {products === undefined || (pullingAll && visible.length === 0) ? <ListSkeleton /> : visible.length === 0 ? (
@@ -85,7 +85,7 @@ export function ProductList() {
               <Link href={`/products/${p.id}`} className="items-start gap-3">
                 <ProductThumb product={p} />
                 <span className="stack" style={{ flex: 1, minWidth: 0, gap: 4 }}>
-                <span className="row row-between w-full gap-2" >
+                <span className="row row-between w-full gap-2">
                   <span>{p.name}</span>
                   <span>{formatCurrency(p.default_sale_price)}</span>
                 </span>
@@ -94,7 +94,7 @@ export function ProductList() {
                     .filter(Boolean)
                     .join(" · ")}
                 </span>
-                <span className="row row-gap-sm row-wrap" >
+                <span className="row row-gap-sm row-wrap">
                   <span className="badge badge-gray">
                     Stok: {formatQuantity(balance.available)} {unitLabel(p.unit)}
                   </span>

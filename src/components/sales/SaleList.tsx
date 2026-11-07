@@ -88,7 +88,7 @@ export function SaleList() {
           {shown.items.map((s) => (
             <li key={s.id}>
               <Link href={`/sales/${s.id}`} className="item-stack">
-                <span className="row row-between w-full gap-2" >
+                <span className="row row-between w-full gap-2">
                   <span>{s.document_no}</span>
                   <strong>{formatCurrency(s.total_amount)}</strong>
                 </span>

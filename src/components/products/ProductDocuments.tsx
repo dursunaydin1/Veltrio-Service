@@ -31,7 +31,7 @@ export function ProductPurchases({ productId }: { productId: string }) {
           {rows.slice(0, LIMIT).map(({ item, purchase }) => (
             <li key={item.id}>
               <Link href={`/purchases/${purchase.id}`} className="item-stack">
-                <span className="row row-between w-full" >
+                <span className="row row-between w-full">
                   <span>{purchase.document_no}</span>
                   <strong>{formatCurrency(item.line_total)}</strong>
                 </span>
@@ -70,7 +70,7 @@ export function ProductSales({ productId }: { productId: string }) {
           {rows.slice(0, LIMIT).map(({ item, sale }) => (
             <li key={item.id}>
               <Link href={`/sales/${sale.id}`} className="item-stack">
-                <span className="row row-between w-full" >
+                <span className="row row-between w-full">
                   <span>{sale.document_no}</span>
                   <strong>{formatCurrency(item.line_total)}</strong>
                 </span>

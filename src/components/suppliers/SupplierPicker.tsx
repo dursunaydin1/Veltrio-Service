@@ -35,7 +35,7 @@ export function SupplierPicker({
     return (
       <div className="form-group">
         <span className="form-label">Tedarikçi *</span>
-        <div className="row row-between card pad-3" >
+        <div className="row row-between card pad-3">
           <span>
             <strong>{selected.name}</strong>
             <br />

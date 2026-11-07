@@ -53,7 +53,7 @@ export function ChecklistPanel({ service }: { service: Service }) {
         <ul className="menu-list" aria-label="Kontrol listesi maddeleri">
           {items.map((item) => (
             <li key={item.id} className="line-item">
-              <span className="row row-between items-center" >
+              <span className="row row-between items-center">
                 <label className="row row-gap-md" style={{ alignItems: "center", minHeight: 44 }}>
                   <input
                     type="checkbox"
@@ -113,7 +113,7 @@ export function ChecklistPanel({ service }: { service: Service }) {
             }}
           >
             <input className="form-input grow" placeholder="Yeni madde" aria-label="Yeni madde" value={title} onChange={(e) => setTitle(e.target.value)} />
-            <label className="row row-gap-sm items-center nowrap" >
+            <label className="row row-gap-sm items-center nowrap">
               <input type="checkbox" checked={required} onChange={(e) => setRequired(e.target.checked)} />
               Zorunlu
             </label>

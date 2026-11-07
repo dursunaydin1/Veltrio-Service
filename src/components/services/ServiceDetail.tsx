@@ -58,8 +58,8 @@ export function ServiceDetail({ id }: { id: string }) {
   return (
     <div className="stack stack-lg">
       <div className="card stack stack-md">
-        <div className="stack gap-1" >
-          <div className="row row-between gap-2" >
+        <div className="stack gap-1">
+          <div className="row row-between gap-2">
             <small style={{ color: "var(--text-muted)", fontWeight: 600, letterSpacing: "0.02em" }}>{service.document_no}</small>
             <span className="row row-gap-sm">
               {service.is_warranty_claim ? <span className="badge badge-yellow">Garanti</span> : null}
@@ -95,7 +95,7 @@ export function ServiceDetail({ id }: { id: string }) {
         {service.status === "CANCELLED" && service.cancel_reason ? (
           <div className="alert alert-error" role="note">İptal nedeni: {service.cancel_reason}</div>
         ) : null}
-        <div className="row row-gap-sm row-wrap" >
+        <div className="row row-gap-sm row-wrap">
           <Link href={`/services/${service.id}/receipt?type=intake`} className="btn btn-secondary btn-sm">
             <Printer size={16} aria-hidden="true" />
             Kabul fişi

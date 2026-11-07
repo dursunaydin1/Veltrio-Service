@@ -171,11 +171,11 @@ function EntryForm({ kind, entry, onDone }: { kind: Kind; entry?: Entry; onDone:
       </div>
       {kind === "OPERATION" ? (
         <div className="row row-gap-md">
-          <div className="form-group grow" >
+          <div className="form-group grow">
             <label className="form-label" htmlFor="cat-price">Önerilen fiyat (₺)</label>
             <input id="cat-price" className="form-input" inputMode="decimal" value={price} onChange={(e) => setPrice(e.target.value)} />
           </div>
-          <div className="form-group grow" >
+          <div className="form-group grow">
             <label className="form-label" htmlFor="cat-duration">Süre (dk)</label>
             <input id="cat-duration" className="form-input" inputMode="numeric" value={duration} onChange={(e) => setDuration(e.target.value)} />
           </div>

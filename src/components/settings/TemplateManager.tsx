@@ -124,7 +124,7 @@ function TemplateForm({ template, initial, onDone }: { template?: ServiceTemplat
       <div className="stack stack-sm">
         <strong>Maddeler</strong>
         {items.map((row, index) => (
-          <div key={index} className="row row-gap-sm items-center" >
+          <div key={index} className="row row-gap-sm items-center">
             <input
               className="form-input grow"
               
@@ -132,7 +132,7 @@ function TemplateForm({ template, initial, onDone }: { template?: ServiceTemplat
               value={row.title}
               onChange={(e) => patch(index, { title: e.target.value })}
             />
-            <label className="row row-gap-sm items-center nowrap" >
+            <label className="row row-gap-sm items-center nowrap">
               <input type="checkbox" checked={row.required} onChange={(e) => patch(index, { required: e.target.checked })} />
               Zorunlu
             </label>

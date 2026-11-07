@@ -294,7 +294,7 @@ function MachineServices({ machineId }: { machineId: string }) {
           {services.map((s) => (
             <li key={s.id}>
               <Link href={`/services/${s.id}`} className="item-stack">
-                <span className="row row-between w-full" >
+                <span className="row row-between w-full">
                   <span>{s.document_no}</span>
                   <StatusBadge status={s.status} />
                 </span>

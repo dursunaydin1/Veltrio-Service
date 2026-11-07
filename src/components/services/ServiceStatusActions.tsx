@@ -142,7 +142,7 @@ export function StatusActions({ service, onGoTab }: { service: Service; onGoTab:
     return (
       <details className="more-actions">
         <summary>Diğer işlemler</summary>
-        <div className="row row-gap-sm row-wrap" >
+        <div className="row row-gap-sm row-wrap">
           {others.map((to) => (
             <button
               key={to}
@@ -167,7 +167,7 @@ export function StatusActions({ service, onGoTab }: { service: Service; onGoTab:
       {checklistWarning ? (
         <div className="alert alert-warning" role="alert">
           <p>Tamamlanmamış zorunlu kontrol maddesi var: <strong>{checklistWarning.titles.join(", ")}</strong></p>
-          <div className="row row-gap-md mt-2" >
+          <div className="row row-gap-md mt-2">
             <button type="button" className="btn btn-secondary btn-sm" onClick={() => setChecklistWarning(null)}>Geri dön</button>
             <button type="button" className="btn btn-primary btn-sm" disabled={busy} onClick={() => void go(checklistWarning.to, undefined, true)}>
               Yine de tamamla
@@ -273,7 +273,7 @@ export function StatusActions({ service, onGoTab }: { service: Service; onGoTab:
             </button>
           ) : null}
           {others.length > 0 ? (
-            <div className="row row-gap-sm row-wrap" >
+            <div className="row row-gap-sm row-wrap">
               {others.map((to) => (
                 <button
                   key={to}

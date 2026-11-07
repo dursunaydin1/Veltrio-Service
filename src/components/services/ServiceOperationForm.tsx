@@ -114,11 +114,11 @@ export function OperationForm({
         <input id="op-desc" className="form-input" placeholder="Ör. karbüratör ayarı" value={description} onChange={(e) => setDescription(e.target.value)} autoFocus />
       </div>
       <div className="row row-gap-md">
-        <div className="form-group shrink-0" >
+        <div className="form-group shrink-0">
           <label className="form-label" htmlFor="op-qty">Miktar</label>
           <QuantityStepper id="op-qty" value={quantity} onChange={setQuantity} />
         </div>
-        <div className="form-group grow-2" >
+        <div className="form-group grow-2">
           <label className="form-label" htmlFor="op-price">Birim fiyat (₺)</label>
           <input id="op-price" className="form-input" inputMode="decimal" placeholder="Boş: fiyat sonra" value={price} onChange={(e) => setPrice(e.target.value)} />
         </div>

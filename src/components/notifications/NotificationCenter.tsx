@@ -104,8 +104,8 @@ export function NotificationCenter() {
         </div>
       </div>
       <div className="row row-gap-md">
-        <Link href="/settings/backup" className="btn btn-secondary grow" >Yedekleme / geri yükleme</Link>
-        <Link href="/reports/export" className="btn btn-secondary grow" >Dışa aktar</Link>
+        <Link href="/settings/backup" className="btn btn-secondary grow">Yedekleme / geri yükleme</Link>
+        <Link href="/reports/export" className="btn btn-secondary grow">Dışa aktar</Link>
       </div>
       {!isOnline ? <div className="alert alert-warning" role="status">Çevrimdışısınız: çakışma çözümü internet gerektirir.</div> : null}
       {error ? <div className="alert alert-error" role="alert">{error}</div> : null}
@@ -122,7 +122,7 @@ export function NotificationCenter() {
                   <span className={`badge ${i.status === "CONFLICT" ? "badge-yellow" : "badge-red"}`}>{i.status === "CONFLICT" ? "Çakışma" : "Hata"}</span>
                 </span>
                 <small className="muted">{i.error_message ?? ""} · {formatDateTime(i.created_at)}</small>
-                <span className="row row-gap-sm row-wrap" >
+                <span className="row row-gap-sm row-wrap">
                   {i.status === "ERROR" ? (
                     <button type="button" className="btn btn-secondary btn-sm" disabled={busy === i.id} onClick={() => void run(i.id, () => retryItem(i.id))}>Yeniden dene</button>
                   ) : null}

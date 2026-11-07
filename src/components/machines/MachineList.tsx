@@ -57,9 +57,9 @@ export function MachineList() {
         />
       </div>
 
-      <label className="row row-gap-sm touch-row" >
-        <input type="checkbox" checked={showArchived} onChange={(e) => setShowArchived(e.target.checked)} />
-        Arşivlenmiş makineleri de göster
+      <label className="toggle-row toggle-inline">
+        <span>Arşivlenmiş makineleri de göster</span>
+        <input type="checkbox" className="switch" checked={showArchived} onChange={(e) => setShowArchived(e.target.checked)} />
       </label>
 
       {data === undefined || (pullingAll && visible.length === 0) ? <ListSkeleton /> : visible.length === 0 ? (
@@ -74,7 +74,7 @@ export function MachineList() {
           {shown.items.map((m) => (
             <li key={m.id}>
               <Link href={`/machines/${m.id}`} className="item-stack">
-                <span className="row row-between w-full gap-2" >
+                <span className="row row-between w-full gap-2">
                   <span>{machineTitleOf(m)}</span>
                   <span className="row row-gap-sm">
                     {m.is_temporary ? <span className="badge badge-yellow">Geçici</span> : null}

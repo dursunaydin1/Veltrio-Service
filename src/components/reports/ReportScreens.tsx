@@ -170,7 +170,7 @@ export function ActiveServicesScreen() {
   return (
     <section className="stack stack-md">
       <Title>Aktif servisler</Title>
-      <div className="row row-gap-md no-print row-wrap" >
+      <div className="row row-gap-md no-print row-wrap">
         <select className="form-input" style={{ flex: 1, minWidth: 160 }} aria-label="Duruma göre" value={status} onChange={(e) => setStatus(e.target.value)}>
           <option value="">Tüm durumlar</option>
           {["RECEIVED", "DIAGNOSED", "WAITING_CUSTOMER_APPROVAL", "IN_PROGRESS", "WAITING_PARTS", "COMPLETED"].map((s) => (
@@ -284,7 +284,7 @@ export function MachineHistoryScreen() {
           <ReportTable columns={MACHINE_COLUMNS} rows={display} rowKey={(r) => r.title + r.serial} empty="Henüz tamamlanmış servisi olan makine yok." />
           <ExportPanel title="Makine geçmişi" base="makine-gecmisi" columns={MACHINE_COLUMNS} rows={display} />
           {rows.map((m) => (
-            <details key={m.machineId} className="card pad-3" >
+            <details key={m.machineId} className="card pad-3">
               <summary style={{ cursor: "pointer", fontWeight: 600 }}>{m.title} · {m.completedCount} servis</summary>
               <ul className="menu-list mt-2" aria-label={`${m.title} servisleri`} >
                 {m.services.map((s) => (

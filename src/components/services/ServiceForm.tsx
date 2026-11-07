@@ -282,7 +282,7 @@ export function ServiceForm({
                 />
               </div>
             ) : null}
-            <Link href={`/machines/new?customer=${customerId}`} className="btn btn-ghost btn-sm self-start" >
+            <Link href={`/machines/new?customer=${customerId}`} className="btn btn-ghost btn-sm self-start">
               <Plus size={16} aria-hidden="true" />
               Makineyi kalıcı olarak kaydet
             </Link>
