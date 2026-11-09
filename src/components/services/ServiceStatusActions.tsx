@@ -24,6 +24,7 @@ import { formatCurrency } from "@/lib/utils";
 import { OptionalField, OptionalGroup } from "@/components/common/OptionalField";
 import { NO_CONTEXT_MESSAGE, errorMessage } from "@/lib/errors/message";
 import { DetailTab, detailsOf } from "@/components/services/serviceDetailTabs";
+import { useCan } from "@/hooks/usePermission";
 
 /**
  * "Sonraki adım" kartı (K-084): üstte servisin adımları (teşhis, kalem, müşteri kararı, yapılan iş) tikli;
@@ -32,6 +33,8 @@ import { DetailTab, detailsOf } from "@/components/services/serviceDetailTabs";
  */
 export function StatusActions({ service, onGoTab }: { service: Service; onGoTab: (tab: DetailTab) => void }) {
   const ctx = useServiceContext();
+  // Servis iptali patronun ya da izinli çalışanın işi (K-119)
+  const canCancel = useCan("cancel");
   const lines = useLiveQuery(() => getServiceLines(service.id), [service.id]);
   const [diagnosisText, setDiagnosisText] = useState(service.diagnosis ?? "");
   const [completing, setCompleting] = useState(false);
@@ -93,7 +96,9 @@ export function StatusActions({ service, onGoTab }: { service: Service; onGoTab:
     await go("COMPLETED");
   }
   // "İş tamamlandı" → "Teslim edildi" geçişi teslim paneliyle (kalan bakiye, tahsilat) yapılır.
-  const options = SERVICE_TRANSITIONS[from].filter((to) => !(from === "COMPLETED" && to === "DELIVERED"));
+  const options = SERVICE_TRANSITIONS[from].filter(
+    (to) => !(from === "COMPLETED" && to === "DELIVERED") && (canCancel || to !== "CANCELLED")
+  );
   if (options.length === 0) return null;
   const suggested = SERVICE_MAIN_NEXT[from];
   const main = suggested && options.includes(suggested) ? suggested : undefined;

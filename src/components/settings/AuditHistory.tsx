@@ -9,6 +9,8 @@ import { useSessionStore } from "@/stores/session";
 import { foldText } from "@/lib/utils/search";
 import { formatDateTime } from "@/lib/utils";
 import { PageHead } from "@/components/layout/PageHead";
+import { useActorNames } from "@/hooks/useActorNames";
+import { actorLabel } from "@/lib/auth/actors";
 
 const PAGE = 50;
 
@@ -18,6 +20,8 @@ export function AuditHistory() {
   const [entity, setEntity] = useState("");
   const [query, setQuery] = useState("");
   const [limit, setLimit] = useState(PAGE);
+  // Cihaz kodunun yanında kişi adı: kim yaptı? (K-119)
+  const actors = useActorNames();
 
   const logs = useLiveQuery(
     async () => {
@@ -34,10 +38,10 @@ export function AuditHistory() {
     return (logs ?? []).filter((l) => {
       if (entity && l.entity_type !== entity) return false;
       if (words.length === 0) return true;
-      const haystack = foldText([l.reason, l.changed_by_device, ENTITY_LABEL[l.entity_type], ...describeChange(l)].filter(Boolean).join(" "));
+      const haystack = foldText([l.reason, actorLabel(actors, l.changed_by_device), ENTITY_LABEL[l.entity_type], ...describeChange(l)].filter(Boolean).join(" "));
       return words.every((w) => haystack.includes(w));
     });
-  }, [logs, entity, query]);
+  }, [logs, entity, query, actors]);
 
   return (
     <section className="stack stack-md">
@@ -67,7 +71,7 @@ export function AuditHistory() {
                   </span>
                   {l.reason ? <span>{l.reason}</span> : null}
                   {changes.map((c) => <small key={c} style={{ color: "var(--text-secondary)" }}>{c}</small>)}
-                  <small className="muted">{formatDateTime(l.changed_at)} · {l.changed_by_device}</small>
+                  <small className="muted">{formatDateTime(l.changed_at)} · {actorLabel(actors, l.changed_by_device)}</small>
                 </li>
               );
             })}

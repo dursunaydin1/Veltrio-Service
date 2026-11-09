@@ -19,6 +19,7 @@ import { confirmDialog } from "@/components/common/ConfirmDialog";
 import { errorMessage } from "@/lib/errors/message";
 import { PageHead } from "@/components/layout/PageHead";
 import { DetailSkeleton } from "@/components/common/ListSkeleton";
+import { useCan } from "@/hooks/usePermission";
 
 /** Ürün düzenleme sayfasının içeriği: form + pasifleştirme / yeniden etkinleştirme. */
 export function ProductEditor({ id }: { id: string }) {
@@ -31,6 +32,10 @@ export function ProductEditor({ id }: { id: string }) {
   const found = useLiveQuery(() => db.products.where("id").equals(id).toArray(), [id]);
   const balance = useLiveQuery(() => getProductBalance(id), [id]);
   const [tab, setTab] = useState<"stock" | "purchases" | "sales" | "general">("stock");
+  // Çalışan ürünü görür; düzenleme, barkod ve alış bilgisi izne bağlı (K-119)
+  const canEdit = useCan("products");
+  const canSeeCosts = useCan("view_costs");
+  const canSeePurchases = useCan("purchases") && canSeeCosts;
 
   if (found === undefined) return <DetailSkeleton />;
   if (found.length === 0) {
@@ -75,21 +80,23 @@ export function ProductEditor({ id }: { id: string }) {
           <div className="tile-label">Satış fiyatı</div>
           <div className="tile-value">{formatCurrency(product.default_sale_price)}</div>
         </div>
-        <div className="tile">
-          <div className="tile-label">Son alış fiyatı</div>
-          <div className="tile-value">{product.last_purchase_price != null ? formatCurrency(product.last_purchase_price) : "—"}</div>
-        </div>
+        {canSeeCosts ? (
+          <div className="tile">
+            <div className="tile-label">Son alış fiyatı</div>
+            <div className="tile-value">{product.last_purchase_price != null ? formatCurrency(product.last_purchase_price) : "—"}</div>
+          </div>
+        ) : null}
       </div>
       {/* Kutulu üründe fabrika barkodu, açık üründe raf için QR etiketi (K-102) */}
-      {product.is_serial_tracked ? null : <ProductBarcodePanel product={product} />}
+      {product.is_serial_tracked || !canEdit ? null : <ProductBarcodePanel product={product} />}
       <Link href={`/products/${product.id}/qr`} className="btn btn-secondary btn-full">QR etiketi göster / yazdır</Link>
 
       <div role="tablist" aria-label="Ürün bölümleri">
         {([
           ["stock", product.is_serial_tracked ? "Seri birimler" : "Stok ve hareketler"],
-          ["purchases", "Alışlar"],
+          ...(canSeePurchases ? [["purchases", "Alışlar"] as const] : []),
           ["sales", "Satışlar"],
-          ["general", "Ürün bilgileri"],
+          ...(canEdit ? [["general", "Ürün bilgileri"] as const] : []),
         ] as const).map(([id, label]) => (
           <button
             key={id}
@@ -104,9 +111,9 @@ export function ProductEditor({ id }: { id: string }) {
       </div>
 
       {tab === "stock" ? (product.is_serial_tracked ? <SerialUnitsPanel product={product} /> : <StockPanel product={product} />) : null}
-      {tab === "purchases" ? <ProductPurchases productId={product.id} /> : null}
+      {tab === "purchases" && canSeePurchases ? <ProductPurchases productId={product.id} /> : null}
       {tab === "sales" ? <ProductSales productId={product.id} /> : null}
-      {tab === "general" ? (
+      {tab === "general" && canEdit ? (
         <>
           <ProductForm key={`${product.id}:${product.version ?? 0}`} product={product} />
 

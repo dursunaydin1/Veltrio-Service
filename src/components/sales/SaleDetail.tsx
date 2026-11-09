@@ -9,6 +9,7 @@ import { useServiceContext } from "@/hooks/useServiceContext";
 import { SALE_STATUS_BADGE, SALE_STATUS_LABEL } from "@/lib/sales/status";
 import { SaleForm } from "@/components/sales/SaleForm";
 import { SaleReturnPanel } from "@/components/sales/SaleReturnPanel";
+import { useCan } from "@/hooks/usePermission";
 import { parseMoneyInput } from "@/lib/calc";
 import { PAYMENT_METHOD_LABELS, reversedPaymentIds } from "@/lib/finance/service";
 import {
@@ -28,6 +29,8 @@ import { NO_CONTEXT_MESSAGE, errorMessage } from "@/lib/errors/message";
 import { PaymentMethodPicker } from "@/components/common/PaymentMethodPicker";
 import { PageHead } from "@/components/layout/PageHead";
 import { DetailSkeleton } from "@/components/common/ListSkeleton";
+import { useActorNames } from "@/hooks/useActorNames";
+import { teamActorName } from "@/lib/auth/actors";
 
 
 /** Satış detayı: satırlar, toplamlar, taslak işlemleri, tahsilat (Adım 4.8). */
@@ -42,6 +45,8 @@ export function SaleDetail({ id }: { id: string }) {
   );
   const items = useLiveQuery(() => getSaleItems(id), [id]);
   const [editing, setEditing] = useState(false);
+  const canCancel = useCan("cancel");
+  const actors = useActorNames();
 
   if (found === undefined) return <DetailSkeleton />;
   if (found.length === 0) {
@@ -70,6 +75,7 @@ export function SaleDetail({ id }: { id: string }) {
           {customer ? <Link href={`/customers/${customer.id}`}>{customer.name}</Link> : "Müşterisiz satış"}
           {" · "}
           {formatDate(sale.sale_date)}
+          {teamActorName(actors, sale.created_by_device) ? ` · Satan: ${teamActorName(actors, sale.created_by_device)}` : ""}
         </p>
         {sale.notes ? <small className="muted">{sale.notes}</small> : null}
         {sale.status === "CANCELLED" && sale.cancel_reason ? (
@@ -105,8 +111,9 @@ export function SaleDetail({ id }: { id: string }) {
 
       {sale.status === "DRAFT" ? <DraftActions sale={sale} onEdit={() => setEditing(true)} /> : null}
       {sale.status === "FINAL" ? <SalePayments sale={sale} /> : null}
-      {sale.status === "FINAL" ? <SaleReturnPanel sale={sale} /> : null}
-      {sale.status === "FINAL" ? <FinalCancel sale={sale} /> : null}
+      {/* İade ve iptal patronun ya da izinli çalışanın işi (K-119) */}
+      {sale.status === "FINAL" && canCancel ? <SaleReturnPanel sale={sale} /> : null}
+      {sale.status === "FINAL" && canCancel ? <FinalCancel sale={sale} /> : null}
     </div>
   );
 }

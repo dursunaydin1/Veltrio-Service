@@ -18,6 +18,7 @@ import { OptionalField, OptionalGroup } from "@/components/common/OptionalField"
 import { DateQuickPick } from "@/components/common/DateQuickPick";
 import { NO_CONTEXT_MESSAGE, errorMessage } from "@/lib/errors/message";
 import { PaymentMethodPicker } from "@/components/common/PaymentMethodPicker";
+import { useCan } from "@/hooks/usePermission";
 
 
 function useBalance(serviceId: string) {
@@ -174,6 +175,8 @@ function CollectForm({ service, onDone, onSaved }: { service: Service; onDone: (
 /** "İş tamamlandı" durumundaki servisin teslim paneli: kalan bakiye, tahsilat, teslim alan, borç kabulü (§5.2, AC-025). */
 export function DeliveryPanel({ service }: { service: Service }) {
   const ctx = useServiceContext();
+  // Kalan borçla teslim (veresiye) izne bağlı (K-119)
+  const canCredit = useCan("credit_sale");
   const balance = useBalance(service.id);
   const [amount, setAmount] = useState("");
   const [method, setMethod] = useState<PaymentMethod>("CASH");
@@ -198,6 +201,7 @@ export function DeliveryPanel({ service }: { service: Service }) {
       payment = { amountKurus: kurus, method };
     }
     if (!ctx) return setError(NO_CONTEXT_MESSAGE);
+    if (after > 0 && !canCredit) return setError("Borçla teslim izniniz yok: kalan tutarın tamamını tahsil edin.");
 
     setBusy(true);
     try {
@@ -228,7 +232,9 @@ export function DeliveryPanel({ service }: { service: Service }) {
         </button>
       ) : null}
 
-      {after > 0 ? (
+      {after > 0 && !canCredit ? (
+        <div className="alert alert-error" role="status">Borçla teslim izniniz yok: kalan tutarın tamamını tahsil edin.</div>
+      ) : after > 0 ? (
         <div className="toggle-card">
           <label className="toggle-row">
             <span>

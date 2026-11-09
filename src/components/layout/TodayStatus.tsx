@@ -8,6 +8,7 @@ import { isLow, loadStockFacts } from "@/lib/notifications/stockAlerts";
 import { loadServiceFacts, summarizeServices } from "@/lib/notifications/serviceReminders";
 import { useSessionStore } from "@/stores/session";
 import { todayLocalDate } from "@/lib/utils";
+import { canOpenRoute } from "@/lib/auth/permissions";
 
 /**
  * "Bugün yapılacaklar" — işletmeyle ilgili canlı sayılar (yerel veritabanından) cümle olarak:
@@ -18,6 +19,8 @@ import { todayLocalDate } from "@/lib/utils";
 export function TodayStatus() {
   const businessId = useSessionStore((s) => s.business?.id);
   const reminderDays = useSessionStore((s) => s.business?.settings?.default_service_reminder_days);
+  // Raporlara giremeyen çalışan vadesi gelen alacakları bildirimlerden görür (K-119)
+  const dueHref = useSessionStore((s) => (canOpenRoute(s.user, "/reports/balances") ? "/reports/balances" : "/notifications"));
 
   const summary = useLiveQuery(
     async () => (businessId ? summarizeServices(await loadServiceFacts(businessId), todayLocalDate(), reminderDays) : undefined),
@@ -49,7 +52,7 @@ export function TodayStatus() {
     { count: summary.waitingApproval, title: "servis müşteri onayı bekliyor", hint: "Fiyatı müşteriye iletin", href: "/services", Icon: ClipboardCheck, tone: "warn" },
     { count: summary.waitingParts, title: "servis parça bekliyor", hint: "Siparişleri kontrol edin", href: "/services", Icon: PackageOpen, tone: "accent" },
     { count: criticalStock, title: "üründe stok azaldı", hint: "Sipariş vermeyi düşünün", href: "/products", Icon: PackageX, tone: "warn" },
-    { count: dueReminders, title: "alacağın vadesi geldi", hint: "Tahsilat için müşteriyi arayın", href: "/reports/balances", Icon: CircleDollarSign, tone: "danger" },
+    { count: dueReminders, title: "alacağın vadesi geldi", hint: "Tahsilat için müşteriyi arayın", href: dueHref, Icon: CircleDollarSign, tone: "danger" },
   ];
   const visible = tasks.filter((t) => t.count > 0);
 

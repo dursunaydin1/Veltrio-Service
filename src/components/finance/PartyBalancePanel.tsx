@@ -23,6 +23,9 @@ import type { Payment, PaymentDirection, PaymentMethod } from "@/types";
 import { OptionalField, OptionalGroup } from "@/components/common/OptionalField";
 import { NO_CONTEXT_MESSAGE, errorMessage } from "@/lib/errors/message";
 import { PaymentMethodPicker } from "@/components/common/PaymentMethodPicker";
+import { useCan, useIsOwner } from "@/hooks/usePermission";
+import { useActorNames } from "@/hooks/useActorNames";
+import { teamActorName } from "@/lib/auth/actors";
 
 type Mode = null | "primary" | "secondary" | "opening";
 type OpeningDirection = "OWED_BY_PARTY" | "OWED_TO_PARTY";
@@ -75,6 +78,10 @@ export function PartyBalancePanel({
 }) {
   const cfg = CONFIG[kind];
   const [mode, setMode] = useState<Mode>(null);
+  // Müşteriye para iadesi izinli çalışanın, açılış bakiyesi patronun işi (K-119)
+  const canCancel = useCan("cancel");
+  const owner = useIsOwner();
+  const canSecondary = kind === "SUPPLIER" || canCancel;
 
   const balance = useLiveQuery(
     () => loadBalance(kind, party.business_id, party.id),
@@ -129,12 +136,16 @@ export function PartyBalancePanel({
                   {kind === "CUSTOMER" ? "Ön ödeme / avans al" : "Avans ödemesi yap"}
                 </button>
               ) : null}
-              <button type="button" className="btn btn-secondary btn-full" onClick={() => setMode("secondary")}>
-                {cfg.secondary.button}
-              </button>
-              <button type="button" className="btn btn-secondary btn-full" onClick={() => setMode("opening")}>
-                Açılış bakiyesi
-              </button>
+              {canSecondary ? (
+                <button type="button" className="btn btn-secondary btn-full" onClick={() => setMode("secondary")}>
+                  {cfg.secondary.button}
+                </button>
+              ) : null}
+              {owner ? (
+                <button type="button" className="btn btn-secondary btn-full" onClick={() => setMode("opening")}>
+                  Açılış bakiyesi
+                </button>
+              ) : null}
             </div>
           </details>
         </div>
@@ -170,6 +181,8 @@ export function PartyBalancePanel({
 
 function PaymentRow({ kind, payment, cancelled }: { kind: PartyType; payment: Payment; cancelled: boolean }) {
   const ctx = useBusinessContext();
+  const canCancel = useCan("cancel");
+  const actor = teamActorName(useActorNames(), payment.created_by_device);
   const [open, setOpen] = useState(false);
   const [reason, setReason] = useState("");
   const [error, setError] = useState<string | null>(null);
@@ -207,9 +220,10 @@ function PaymentRow({ kind, payment, cancelled }: { kind: PartyType; payment: Pa
       <small className="muted">
         {CONFIG[kind].rowLabel[payment.direction]} · {formatDateTime(payment.payment_date)}
         {payment.note ? ` · ${payment.note}` : ""}
+        {actor ? ` · ${actor}` : ""}
       </small>
 
-      {!cancelled && !isReversal ? (
+      {!cancelled && !isReversal && canCancel ? (
         open ? (
           <div className="stack stack-sm">
             <input

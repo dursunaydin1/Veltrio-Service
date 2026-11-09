@@ -19,6 +19,7 @@ import {
 } from "@/lib/stock/service";
 import { formatDateTime, formatQuantity } from "@/lib/utils";
 import type { Product } from "@/types";
+import { useCan } from "@/hooks/usePermission";
 import { OptionalField, OptionalGroup } from "@/components/common/OptionalField";
 import { NO_CONTEXT_MESSAGE, errorMessage } from "@/lib/errors/message";
 
@@ -29,6 +30,8 @@ export function StockPanel({ product }: { product: Product }) {
   const ctx = useStockContext();
   const balance = useProductBalance(product.id);
   const [mode, setMode] = useState<Mode>(null);
+  // Stok girişi, sayım ve hasarlı stok: satın alma izni (K-119)
+  const canChangeStock = useCan("purchases");
 
   const movements = useLiveQuery(
     async () => {
@@ -70,7 +73,7 @@ export function StockPanel({ product }: { product: Product }) {
         <div className="alert alert-warning" role="note">
           Seri takipli ürünlerin stoğu birim kayıtlarıyla yönetilir (yakında).
         </div>
-      ) : mode === null ? (
+      ) : !canChangeStock ? null : mode === null ? (
         <div className="stack stack-sm">
           <button type="button" className="btn btn-primary btn-full" onClick={() => setMode("entry")}>
             Stok girişi

@@ -9,7 +9,7 @@
  *  - Oturum açıkken istemci PRECACHE mesajı yollar; yalnızca yönlendirilmeden gelen,
  *    HTML ve başarılı yanıtlar saklanır (giriş sayfası yanlışlıkla ana sayfa yerine geçmez).
  */
-const VERSION = "v5"; // kıdemli inceleme: tasarım ölçeği, açık tema (K-112 – K-117); eski önbellek silinsin
+const VERSION = "v6"; // patron ve çalışanlar (K-119); eski önbellek silinsin
 const STATIC_CACHE = `veltrio-static-${VERSION}`;
 const PAGE_CACHE = `veltrio-pages-${VERSION}`;
 const OFFLINE_URL = "/offline";

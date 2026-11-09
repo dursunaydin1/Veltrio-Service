@@ -17,10 +17,15 @@ import { StatusActions } from "@/components/services/ServiceStatusActions";
 import { DetailsForm } from "@/components/services/ServiceDetailsForm";
 import { DeliveredCard, History, ServiceProgress } from "@/components/services/ServiceDetailParts";
 import { DetailSkeleton } from "@/components/common/ListSkeleton";
+import { useCan } from "@/hooks/usePermission";
+import { useActorNames } from "@/hooks/useActorNames";
+import { teamActorName } from "@/lib/auth/actors";
 
 /** Servis detayı: özet, durum geçişleri, bilgiler (şikâyet / teşhis / yapılan iş) ve durum geçmişi (Adım 3.7, 3.17). */
 export function ServiceDetail({ id }: { id: string }) {
   const [tab, setTab] = useState<DetailTab>("summary");
+  const canCancel = useCan("cancel");
+  const actors = useActorNames();
   // Kaydedince sıradaki sekmeye geçilir ve kısa bir onay görünür (K-082)
   const [flash, setFlash] = useState<string | null>(null);
   const tabsRef = useRef<HTMLDivElement>(null);
@@ -81,6 +86,7 @@ export function ServiceDetail({ id }: { id: string }) {
             Kabul: {formatDateTime(service.received_date)}
             {service.promised_date ? ` · Teslim sözü: ${formatDate(service.promised_date)}` : ""}
             {service.deposit_amount > 0 ? ` · Kapora: ${formatCurrency(service.deposit_amount)}` : ""}
+            {teamActorName(actors, service.created_by_device) ? ` · Kabul eden: ${teamActorName(actors, service.created_by_device)}` : ""}
           </small>
         </div>
         <ServiceProgress status={service.status} />
@@ -145,7 +151,7 @@ export function ServiceDetail({ id }: { id: string }) {
       {tab === "payments" ? (
         <>
           <ServicePayments service={service} onCollected={() => moveOn("summary", "Tahsilat kaydedildi.")} />
-          <ServiceReturnPanel service={service} />
+          {canCancel ? <ServiceReturnPanel service={service} /> : null}
         </>
       ) : null}
       {tab === "history" ? <History serviceId={service.id} /> : null}

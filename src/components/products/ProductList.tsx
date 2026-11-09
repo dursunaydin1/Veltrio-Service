@@ -18,6 +18,7 @@ import { useIncremental } from "@/hooks/useIncremental";
 import { LoadMore } from "@/components/common/LoadMore";
 import { NoMatchAdd } from "@/components/common/NoMatchAdd";
 import { matchesProduct } from "@/lib/search/match";
+import { useCan } from "@/hooks/usePermission";
 
 
 /** Ürün listesi: arama, pasifleri gösterme, kritik stok rozeti (Adım 2.1, 2.9). */
@@ -28,6 +29,7 @@ export function ProductList() {
   const [query, setQuery] = useState("");
   const [showArchived, setShowArchived] = useState(false);
   const balances = useStockBalances();
+  const canAdd = useCan("products");
 
   const products = useLiveQuery(
     () => (businessId ? db.products.where("business_id").equals(businessId).toArray() : []),
@@ -44,7 +46,7 @@ export function ProductList() {
 
   return (
     <section className="stack stack-md">
-      <PageHead title="Stok" addHref="/products/new" addLabel="Ürün ekle" />
+      <PageHead title="Stok" addHref={canAdd ? "/products/new" : undefined} addLabel={canAdd ? "Ürün ekle" : undefined} />
 
       {/* Aşağı kaydırınca arama kutusu üstte kalır (K-097) */}
       <div className="list-toolbar">
@@ -68,11 +70,11 @@ export function ProductList() {
       </label>
 
       {products === undefined || (pullingAll && visible.length === 0) ? <ListSkeleton /> : visible.length === 0 ? (
-        query.trim() ? (
+        query.trim() && canAdd ? (
           <NoMatchAdd query={query} noun="ürün" href={`/products/new?name=${encodeURIComponent(query.trim())}`} />
         ) : (
           <div className="empty-state" role="note">
-            {products.length === 0 ? "Henüz ürün eklenmemiş. Üstteki “Ürün ekle” ile ilkini ekleyin." : "Bu filtrede ürün yok."}
+            {query.trim() ? "Aramaya uyan ürün yok." : products.length === 0 ? (canAdd ? "Henüz ürün eklenmemiş. Üstteki “Ürün ekle” ile ilkini ekleyin." : "Henüz ürün eklenmemiş.") : "Bu filtrede ürün yok."}
           </div>
         )
       ) : (
