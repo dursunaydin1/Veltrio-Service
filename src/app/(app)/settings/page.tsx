@@ -10,6 +10,7 @@ export default function Page() {
       <PageHead title="Ayarlar" />
       <ul className="menu-list" aria-label="Ayarlar">
         <li><Link href="/settings/business">İşletme bilgileri ve ayarlar (onay eşiği, hatırlatma, stok…)</Link></li>
+        <li><Link href="/settings/staff">Çalışanlar (davet ve izinler)</Link></li>
         <li><Link href="/settings/catalog">Arıza ve işlem katalogları</Link></li>
         <li><Link href="/settings/templates">Servis şablonları (kontrol listesi)</Link></li>
         <li><Link href="/settings/appearance">Görünüm (koyu / açık tema)</Link></li>

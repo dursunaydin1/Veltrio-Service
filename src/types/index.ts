@@ -49,7 +49,12 @@ export interface User {
   business_id: UUID;
   email: string;
   name: string;
-  role: "owner"; // MVP'de tek rol
+  /** Patron her şeyi yapar; çalışanın yetkisi `permissions` ile belirlenir (K-119) */
+  role: "owner" | "staff";
+  /** 028'den önceki kayıtlarda yok sayılır: etkin, izinsiz */
+  is_active?: boolean;
+  permissions?: string[];
+  deactivated_at?: ISODateTimeString | null;
   created_at: ISODateTimeString;
 }
 

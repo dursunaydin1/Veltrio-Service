@@ -19,6 +19,7 @@ import { SetupWizard } from "@/components/layout/SetupWizard";
 import { SyncStatus } from "@/components/layout/SyncStatus";
 import { useSessionStore } from "@/stores/session";
 import { useAppNav, useNavTracker } from "@/lib/nav/useAppNav";
+import { canOpenRoute } from "@/lib/auth/permissions";
 
 const SUPABASE_CONFIGURED = !!process.env.NEXT_PUBLIC_SUPABASE_URL && !!process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY;
 
@@ -54,6 +55,8 @@ export function AppShell({ children }: { children: React.ReactNode }) {
   const showSearch = !onHome && !OWN_SEARCH.has(pathname);
   // Liste ekranlarının başlık + ekle satırı bu kutuya taşınır (K-066)
   const [headSlot, setHeadSlot] = useState<HTMLElement | null>(null);
+  // Çalışan yalnızca izinli bölümleri açar; sunucu da ayrıca reddeder (K-119)
+  const allowed = useSessionStore((s) => canOpenRoute(s.user, pathname));
 
   // Supabase varken kullanıcı bilgisi gelmeden boş ana sayfa gösterilmez (K-092)
   if (!sessionLoaded || (SUPABASE_CONFIGURED && !hasUser && !needsSetup)) {
@@ -101,7 +104,15 @@ export function AppShell({ children }: { children: React.ReactNode }) {
       <main id="main" className="app-main">
         <UpdateNotice />
         <PwaBanner />
-        <PageHeadSlot.Provider value={onHome ? null : headSlot}>{children}</PageHeadSlot.Provider>
+        <PageHeadSlot.Provider value={onHome ? null : headSlot}>
+          {allowed ? children : (
+            <div className="card stack stack-md" role="alert">
+              <h1>Bu bölüm için yetkiniz yok</h1>
+              <p>Bu işi patron yapar. Gerekirse patronunuz Ayarlar → Çalışanlar&apos;dan size izin verebilir.</p>
+              <Link href="/dashboard" className="btn btn-primary btn-full">Ana sayfaya dön</Link>
+            </div>
+          )}
+        </PageHeadSlot.Provider>
       </main>
       {exitHint ? (
         <div className="exit-hint" role="status">Çıkmak için tekrar geri yapın</div>

@@ -1459,6 +1459,15 @@ a.item-card::after {
 .toggle-row > span { display: flex; flex-direction: column; gap: 2px; }
 .toggle-row small { color: var(--text-muted); }
 
+/* Çalışan davet kodu (K-119): telefonda okunup yazılacak, büyük ve aralıklı */
+.invite-code {
+  font-family: ui-monospace, "SFMono-Regular", Menlo, Consolas, monospace;
+  font-size: var(--text-2xl);
+  font-weight: 700;
+  letter-spacing: 0.12em;
+  color: var(--accent-primary);
+}
+
 input[type="checkbox"].switch {
   appearance: none;
   -webkit-appearance: none;
