@@ -10,6 +10,7 @@ import { formatDateTime } from "@/lib/utils";
 import type { Device } from "@/types";
 import { PageHead } from "@/components/layout/PageHead";
 import { errorMessage } from "@/lib/errors/message";
+import { useActorNames } from "@/hooks/useActorNames";
 
 type Row = Device & { wipe_confirmed_at?: string };
 
@@ -26,6 +27,8 @@ export function DeviceManager() {
   const [error, setError] = useState<string | null>(null);
   const [confirming, setConfirming] = useState<string | null>(null);
   const [busy, setBusy] = useState(false);
+  // Çalışanların telefonları da burada: kimin cihazı? (K-119)
+  const actors = useActorNames();
 
   const load = useCallback(async () => {
     try {
@@ -71,7 +74,7 @@ export function DeviceManager() {
     <section className="stack stack-md">
       <PageHead title="Cihazlar" />
       <p>
-        Bu hesaba kayıtlı cihazlar. Kayıp veya çalıntı bir cihazı iptal ederseniz internete bağlandığında yerel verisini
+        İşletmeye kayıtlı cihazlar (sizin ve çalışanlarınızın). Kayıp veya çalıntı bir cihazı iptal ederseniz internete bağlandığında yerel verisini
         siler ve bir daha eşitleme yapamaz.
       </p>
       {!isOnline ? <div className="alert alert-warning" role="status">Cihaz listesi ve iptal için internet bağlantısı gerekir.</div> : null}
@@ -92,7 +95,7 @@ export function DeviceManager() {
                   </span>
                 </span>
                 <small className="muted">
-                  {d.device_code} · Son eşitleme: {d.last_synced_at ? formatDateTime(d.last_synced_at) : "—"}
+                  {actors[d.device_code] ? `${actors[d.device_code]} · ` : ""}{d.device_code} · Son eşitleme: {d.last_synced_at ? formatDateTime(d.last_synced_at) : "—"}
                   {revoked ? ` · ${d.wipe_confirmed_at ? "Yerel veri silindi" : "Cihaz bağlanınca yerel veri silinecek"}` : ""}
                 </small>
                 {!revoked ? (

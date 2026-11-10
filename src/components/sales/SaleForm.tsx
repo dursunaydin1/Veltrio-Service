@@ -33,6 +33,7 @@ import { QuantityStepper } from "@/components/common/QuantityStepper";
 import { PaymentMethodPicker } from "@/components/common/PaymentMethodPicker";
 import { addProductLine, linesFromItems, parseLine, type DraftLine, type ParsedLine } from "@/lib/sales/draft";
 import { NO_CONTEXT_MESSAGE, errorMessage } from "@/lib/errors/message";
+import { useCan } from "@/hooks/usePermission";
 
 /**
  * Satış formu (Adım 4.1-4.2): ürünleri ekle, indirim uygula, müşteri (isteğe
@@ -69,6 +70,9 @@ export function SaleForm({
   const [busy, setBusy] = useState(false);
   const [scanning, setScanning] = useState(false);
   const [scanNote, setScanNote] = useState<{ ok: boolean; text: string } | null>(null);
+  // Çalışan liste fiyatından satar; indirim ve veresiye patronun verdiği izne bağlı (K-119)
+  const canDiscount = useCan("discount");
+  const canCredit = useCan("credit_sale");
 
   function addProduct(product: Product) {
     setLines((current) => addProductLine(current, product));
@@ -163,6 +167,9 @@ export function SaleForm({
       if (receivedKurus === null || receivedKurus <= 0) return setError("Alınan tutar sıfırdan büyük geçerli bir tutar olmalıdır.");
       payment = { amountKurus: receivedKurus, method };
     }
+    if (finalize && unpaidKurus > 0 && !canCredit) {
+      return setError("Veresiye satış izniniz yok: tutarın tamamını tahsil edin.");
+    }
     if (finalize && unpaidKurus > 0 && !customerId) {
       return setError("Tahsil edilmeyen tutar var: veresiye satış için müşteri seçin ya da tutarı tahsil edin.");
     }
@@ -243,14 +250,16 @@ export function SaleForm({
                   )}
                   <label className="row row-gap-sm" style={{ flex: "1 1 140px" }}>
                     <span className="form-label nowrap">Fiyat ₺</span>
-                    <input className="form-input" inputMode="decimal" aria-label={`${l.name}: birim fiyat`} value={l.price} onChange={(e) => update(l.key, { price: e.target.value })} />
+                    <input className="form-input" inputMode="decimal" aria-label={`${l.name}: birim fiyat`} value={l.price} onChange={(e) => update(l.key, { price: e.target.value })} readOnly={!canDiscount} />
                   </label>
                 </span>
-                <OptionalGroup>
-                  <OptionalField label="Satır indirimi (₺)" chip="İndirim" filled={!!l.discount} onClear={() => update(l.key, { discount: "" })}>
-                    <input className="form-input" inputMode="decimal" placeholder="0,00" aria-label={`${l.name}: indirim`} value={l.discount} onChange={(e) => update(l.key, { discount: e.target.value })} />
-                  </OptionalField>
-                </OptionalGroup>
+                {canDiscount ? (
+                  <OptionalGroup>
+                    <OptionalField label="Satır indirimi (₺)" chip="İndirim" filled={!!l.discount} onClear={() => update(l.key, { discount: "" })}>
+                      <input className="form-input" inputMode="decimal" placeholder="0,00" aria-label={`${l.name}: indirim`} value={l.discount} onChange={(e) => update(l.key, { discount: e.target.value })} />
+                    </OptionalField>
+                  </OptionalGroup>
+                ) : null}
               </li>
             );
           })}
@@ -262,11 +271,13 @@ export function SaleForm({
       {/* Ürün yokken toplam, indirim ve ödeme gösterilmez; ilk ürünle açılır (K-099) */}
       {lines.length > 0 ? (
         <>
-          <OptionalGroup>
-            <OptionalField label="Belge indirimi (₺, tüm satışa)" chip="Belge indirimi" htmlFor="sl-docdisc" filled={!!docDiscount} onClear={() => setDocDiscount("")}>
-              <input id="sl-docdisc" className="form-input" inputMode="decimal" placeholder="0,00" value={docDiscount} onChange={(e) => setDocDiscount(e.target.value)} />
-            </OptionalField>
-          </OptionalGroup>
+          {canDiscount ? (
+            <OptionalGroup>
+              <OptionalField label="Belge indirimi (₺, tüm satışa)" chip="Belge indirimi" htmlFor="sl-docdisc" filled={!!docDiscount} onClear={() => setDocDiscount("")}>
+                <input id="sl-docdisc" className="form-input" inputMode="decimal" placeholder="0,00" value={docDiscount} onChange={(e) => setDocDiscount(e.target.value)} />
+              </OptionalField>
+            </OptionalGroup>
+          ) : null}
 
           <div className="tile">
             <div className="tile-label">Satış toplamı</div>
@@ -295,13 +306,15 @@ export function SaleForm({
             </button>
           </div>
           {unpaidKurus > 0 && totalKurus > 0 ? (
-            <div className={`alert ${customerId ? "alert-warning" : "alert-error"}`} role="status">
-              {customerId
+            <div className={`alert ${customerId && canCredit ? "alert-warning" : "alert-error"}`} role="status">
+              {!canCredit
+                ? `Tahsil edilmeyen ${formatCurrency(unpaidKurus / 100)} var: veresiye satış izniniz yok, tutarın tamamını tahsil edin.`
+                : customerId
                 ? `Veresiye: ${formatCurrency(unpaidKurus / 100)} müşterinin borcuna yazılacak.`
                 : `Tahsil edilmeyen ${formatCurrency(unpaidKurus / 100)} var: veresiye için müşteri seçin ya da tutarı tahsil edin.`}
             </div>
           ) : null}
-          {unpaidKurus > 0 && totalKurus > 0 && customerId ? (
+          {unpaidKurus > 0 && totalKurus > 0 && customerId && canCredit ? (
             <OptionalGroup>
               <OptionalField label="Vade tarihi" chip="Vade tarihi" htmlFor="sl-due" filled={!!dueDate} onClear={() => setDueDate("")}>
                 <DateQuickPick id="sl-due" value={dueDate} onChange={setDueDate} />

@@ -34,7 +34,7 @@ export async function getSyncContext(
 
   const { data: profile, error: profileError } = await supabase
     .from("users")
-    .select("business_id")
+    .select("*")
     .eq("id", user.id)
     .single();
 
@@ -42,6 +42,13 @@ export async function getSyncContext(
     console.error("Eşitleme için kullanıcı işletmesi bulunamadı:", profileError?.message);
     return {
       response: Response.json({ error: "Kullanıcı işletmesi bulunamadı." }, { status: 403 }),
+    };
+  }
+
+  // Patronun pasifleştirdiği çalışan eşitleme yapamaz (K-119); 028'den önce sütun yoktur
+  if (profile.is_active === false) {
+    return {
+      response: Response.json({ error: "Hesabınız patron tarafından pasifleştirildi." }, { status: 403 }),
     };
   }
 

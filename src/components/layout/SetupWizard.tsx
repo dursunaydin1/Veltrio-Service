@@ -3,6 +3,8 @@
 import { useState } from "react";
 import { createClient } from "@/lib/supabase/client";
 import { useSessionStore } from "@/stores/session";
+import { acceptInvite, normalizeInviteCode } from "@/lib/auth/staff";
+import { errorMessage } from "@/lib/errors/message";
 
 /**
  * İlk kurulum sihirbazı (Adım 1.4, FR-002): hesap açılmış ama işletme kurulmamışsa
@@ -24,6 +26,24 @@ export function SetupWizard() {
   const [taxRate, setTaxRate] = useState("20");
   const [error, setError] = useState<string | null>(null);
   const [busy, setBusy] = useState(false);
+  // Çalışan, patronun gönderdiği davet koduyla mevcut işletmeye katılır (K-119)
+  const [mode, setMode] = useState<"new" | "join">("new");
+  const [code, setCode] = useState("");
+
+  async function join(event: React.FormEvent) {
+    event.preventDefault();
+    setError(null);
+    if (!isOnline) return setError("Katılmak için internet bağlantısı gerekir.");
+    if (normalizeInviteCode(code).length !== 8) return setError("Davet kodu 8 karakterdir (ör. ABCD-EFGH).");
+    setBusy(true);
+    try {
+      await acceptInvite(createClient(), code);
+    } catch (e) {
+      setBusy(false);
+      return setError(errorMessage(e, "Davet kodu kabul edilmedi."));
+    }
+    window.location.reload();
+  }
 
   async function submit(event: React.FormEvent) {
     event.preventDefault();
@@ -53,10 +73,65 @@ export function SetupWizard() {
     window.location.reload();
   }
 
+  const modePicker = (
+    <div className="chip-group" role="radiogroup" aria-label="Kurulum türü">
+      {([
+        ["new", "Yeni işletme kuruyorum"],
+        ["join", "Davet kodum var"],
+      ] as const).map(([value, label]) => (
+        <button
+          key={value}
+          type="button"
+          role="radio"
+          aria-checked={mode === value}
+          className="chip chip-toggle"
+          onClick={() => {
+            setMode(value);
+            setError(null);
+          }}
+        >
+          {label}
+        </button>
+      ))}
+    </div>
+  );
+
+  if (mode === "join") {
+    return (
+      <main className="container" style={{ maxWidth: 480, paddingTop: 32, paddingBottom: 48 }}>
+        <form className="card stack stack-md" onSubmit={join} noValidate>
+          <h1>Ekibe katılın</h1>
+          {modePicker}
+          <p>Patronunuzun gönderdiği 8 karakterlik davet kodunu yazın. Kod bir kez kullanılır.</p>
+          {!isOnline ? <div className="alert alert-error" role="alert">Çevrimdışısınız: katılmak için internet gerekir.</div> : null}
+          <div className="form-group">
+            <label className="form-label" htmlFor="su-code">Davet kodu</label>
+            <input
+              id="su-code"
+              className="form-input invite-code"
+              value={code}
+              onChange={(e) => setCode(e.target.value.toUpperCase())}
+              autoCapitalize="characters"
+              autoComplete="off"
+              spellCheck={false}
+              placeholder="ABCD-EFGH"
+              autoFocus
+            />
+          </div>
+          {error ? <div className="alert alert-error" role="alert">{error}</div> : null}
+          <button type="submit" className="btn btn-primary btn-full btn-lg" disabled={busy || !isOnline}>
+            {busy ? "Katılınıyor…" : "Ekibe katıl"}
+          </button>
+        </form>
+      </main>
+    );
+  }
+
   return (
     <main className="container" style={{ maxWidth: 480, paddingTop: 32, paddingBottom: 48 }}>
       <form className="card stack stack-md" onSubmit={submit} noValidate>
         <h1>İşletmenizi kuralım</h1>
+        {modePicker}
         <p>Bu bilgiler fişlerde ve belgelerde görünür; sonradan Ayarlar&apos;dan değiştirebilirsiniz.</p>
 
         {!emailConfirmed ? (

@@ -3,6 +3,7 @@
 import { moneyInput } from "@/lib/utils";
 import { PhotoField } from "@/components/common/PhotoField";
 import { useState } from "react";
+import { useCan } from "@/hooks/usePermission";
 import { useBusinessContext } from "@/hooks/useBusinessContext";
 import { useSessionStore } from "@/stores/session";
 import { PRODUCT_CATEGORIES, PRODUCT_UNITS, TAX_MODE_LABELS } from "@/lib/products/constants";
@@ -61,6 +62,8 @@ export function ProductForm({ product, initial }: { product?: Product; initial?:
     ...(!product && initial?.name ? { name: initial.name } : {}),
   }));
   const [errors, setErrors] = useState<Errors>({});
+  // Alış fiyatı yalnızca izni olana görünür; alan gizliyken mevcut değer olduğu gibi kalır (K-119)
+  const canSeeCosts = useCan("view_costs");
   const [formError, setFormError] = useState<string | null>(null);
   const [busy, setBusy] = useState(false);
 
@@ -183,10 +186,12 @@ export function ProductForm({ product, initial }: { product?: Product; initial?:
             <input {...field("model")} className="form-input grow" placeholder="Model" aria-label="Model" value={values.model} onChange={(e) => set("model", e.target.value.toLocaleUpperCase("tr"))} autoCapitalize="characters" />
           </div>
         </OptionalField>
-        <OptionalField label="Son alış fiyatı (₺)" chip="Alış fiyatı" htmlFor="f-lastPurchasePrice" filled={!!values.lastPurchasePrice} onClear={() => set("lastPurchasePrice", "")}>
-          <input {...field("lastPurchasePrice")} className="form-input" inputMode="decimal" placeholder="0,00" value={values.lastPurchasePrice} onChange={(e) => set("lastPurchasePrice", e.target.value)} />
-          {err("lastPurchasePrice")}
-        </OptionalField>
+        {canSeeCosts ? (
+          <OptionalField label="Son alış fiyatı (₺)" chip="Alış fiyatı" htmlFor="f-lastPurchasePrice" filled={!!values.lastPurchasePrice} onClear={() => set("lastPurchasePrice", "")}>
+            <input {...field("lastPurchasePrice")} className="form-input" inputMode="decimal" placeholder="0,00" value={values.lastPurchasePrice} onChange={(e) => set("lastPurchasePrice", e.target.value)} />
+            {err("lastPurchasePrice")}
+          </OptionalField>
+        ) : null}
         <OptionalField label="Kritik stok seviyesi" chip="Kritik stok" htmlFor="f-criticalStockLevel" filled={!!values.criticalStockLevel} onClear={() => set("criticalStockLevel", "")}>
           <input {...field("criticalStockLevel")} className="form-input" inputMode="decimal" value={values.criticalStockLevel} onChange={(e) => set("criticalStockLevel", e.target.value)} />
           <small className="muted">Stok bu miktara inince uyarılırsınız.</small>

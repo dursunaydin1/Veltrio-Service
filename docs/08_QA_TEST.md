@@ -39,3 +39,13 @@ Tarayıcı arayüzü (render, tıklama), `/api/sync/*` HTTP rotası, PWA/çevrim
 - e2e 7i (işletme izolasyonu, RLS), 7j (yedekten geri yükleme).
 - Migration doğrulaması: 001→024 gerçek PostgreSQL'e uygulanır (gömülü Postgres + Supabase stub'ları); kanıt `docs/KARAR_GUNLUGU.md` K-042.
 - Elle yapılacaklar: `docs/09`-`13`.
+
+## Patron ve çalışanlar (K-119)
+- Otomatik: `lib/auth/permissions.test.ts` (yetki kararı, yol kuralları, izin listesinin 028 ile birebir aynı olması), `lib/auth/staff.test.ts` (davet kodu, "kim yaptı" eşlemesi).
+- Elle (028 uygulandıktan sonra, iki hesapla):
+  1. Patron: Ayarlar → Çalışanlar → Çalışan ekle → kod WhatsApp ile gider.
+  2. Çalışan: yeni e-postayla hesap aç → "Davet kodum var" → kod → cihaz kaydı. Menüde Satın Almalar, Tedarikçiler, Raporlar, Ayarlar yok; Görünüm ve PIN var.
+  3. Çalışan satış yapar: fiyat değişmez, indirim alanı yok; tamamı tahsil edilmeden kesinleşmez (veresiye izni kapalıysa). Patron satışta "Satan: …" görür.
+  4. Çalışanın adresi elle yazıp `/purchases` açması → "Bu bölüm için yetkiniz yok".
+  5. Patron "İptal ve iade" iznini açar → çalışanda satış iptali görünür (yeniden giriş ya da sayfa yenileme sonrası).
+  6. Patron çalışanı pasifleştirir → çalışanın telefonu yerel veriyi siler, eşitleme 403 döner.

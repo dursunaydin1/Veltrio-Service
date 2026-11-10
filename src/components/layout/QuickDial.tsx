@@ -4,6 +4,8 @@ import { useEffect, useRef } from "react";
 import Link from "next/link";
 import { Package, Plus, ShoppingBag, ShoppingCart, User, Wrench } from "lucide-react";
 import { haptic } from "@/lib/utils/haptic";
+import { canOpenRoute } from "@/lib/auth/permissions";
+import { useSessionStore } from "@/stores/session";
 
 /**
  * Hızlı seçim: tüm "yeni kayıt" işleri tek satırda ikon olarak. En sık iş (Servis aç) ortada, logolu düğmenin üstünde.
@@ -17,7 +19,6 @@ const ACTIONS = [
   { href: "/products/new", short: "Ürün", label: "Ürün ekle", Icon: Package, tone: "violet" },
   { href: "/purchases/new", short: "Satın al", label: "Satın alma", Icon: ShoppingBag, tone: "yellow" },
 ] as const;
-const CENTER = 2;
 
 /** Kısa titreşim (destekleyen Android tarayıcılarında; diğerlerinde sessizce yok sayılır). */
 
@@ -27,21 +28,28 @@ const CENTER = 2;
  */
 export function QuickDial({ open, onClose }: { open: boolean; onClose: () => void }) {
   const listRef = useRef<HTMLUListElement>(null);
+  // Çalışan yalnızca izinli işleri görür; "Servis aç" yine ortada kalır (K-119)
+  const user = useSessionStore((s) => s.user);
+  const allowed = ACTIONS.filter(({ href }) => canOpenRoute(user, href));
+  const service = allowed.filter((a) => a.href === "/services/new");
+  const others = allowed.filter((a) => a.href !== "/services/new");
+  const center = Math.floor(others.length / 2);
+  const actions = [...others.slice(0, center), ...service, ...others.slice(center)];
 
   useEffect(() => {
     if (!open) return;
     const onKey = (e: KeyboardEvent) => e.key === "Escape" && onClose();
     window.addEventListener("keydown", onKey);
-    listRef.current?.querySelectorAll<HTMLElement>("a")[CENTER]?.focus();
+    listRef.current?.querySelectorAll<HTMLElement>("a")[center]?.focus();
     return () => window.removeEventListener("keydown", onKey);
-  }, [open, onClose]);
+  }, [open, onClose, center]);
 
   if (!open) return null;
   return (
     <div className="dial-backdrop" onClick={onClose}>
       <ul ref={listRef} className="dial" role="menu" aria-label="Hızlı işlemler" onClick={(e) => e.stopPropagation()}>
-        {ACTIONS.map(({ href, short, label, Icon, tone }, i) => (
-          <li key={href} style={{ animationDelay: `${Math.abs(i - CENTER) * 40}ms` }}>
+        {actions.map(({ href, short, label, Icon, tone }, i) => (
+          <li key={href} style={{ animationDelay: `${Math.abs(i - center) * 40}ms` }}>
             <Link
               href={href}
               role="menuitem"

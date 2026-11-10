@@ -11,6 +11,7 @@ import { CodeScanner } from "@/components/qr/CodeScanner";
 import { ProductPicker } from "@/components/products/ProductPicker";
 import { findProductByBarcode, normalizeBarcode, setProductBarcode } from "@/lib/products/service";
 import { errorMessage } from "@/lib/errors/message";
+import { useCan } from "@/hooks/usePermission";
 
 /**
  * QR / barkod tarama (Adım 3.4, AC-003, K-102). Makine veya ürün QR etiketi ilgili ekranı açar;
@@ -24,6 +25,7 @@ export function QrScanner() {
   const handled = useRef(false);
   const [error, setError] = useState<string | null>(null);
   const [manual, setManual] = useState("");
+  const canLink = useCan("products");
   /** Hiçbir ürüne tanıtılmamış barkod */
   const [unknown, setUnknown] = useState<string | null>(null);
   const [linking, setLinking] = useState(false);
@@ -72,7 +74,9 @@ export function QrScanner() {
             <br />
             Ürün stokta varsa ona bağlayın; bir dahaki okutmada doğrudan açılır.
           </p>
-          {linking ? (
+          {!canLink ? (
+            <div className="alert alert-warning" role="note">Barkodu ürüne bağlamak için ürün düzenleme izni gerekir; patronunuza haber verin.</div>
+          ) : linking ? (
             <ProductPicker value="" onChange={(p) => void link(p.id)} label="Hangi ürüne bağlansın?" includeSerial />
           ) : (
             <>

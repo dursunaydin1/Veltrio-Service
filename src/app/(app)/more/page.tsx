@@ -1,71 +1,16 @@
 import type { Metadata } from "next";
-import Link from "next/link";
-import {
-  ChartColumn,
-  CircleHelp,
-  Cog,
-  DatabaseBackup,
-  Package,
-  Settings,
-  ShoppingBag,
-  ShoppingCart,
-  Truck,
-} from "lucide-react";
 import { AppInfo } from "@/components/layout/AppInfo";
 import { version } from "../../../../package.json";
 import { PageHead } from "@/components/layout/PageHead";
-import { LogoutItem } from "@/components/layout/LogoutItem";
+import { MoreMenu } from "@/components/layout/MenuList";
 
 export const metadata: Metadata = { title: "Menü" };
-
-/** Menü — PRD §4.7. Telefonda alt menüde olmayan Satışlar ve Stok en üstte (K-044); tek tonlu sade liste (K-053). */
-const RECORDS = [
-  { href: "/sales", label: "Satışlar", Icon: ShoppingCart },
-  { href: "/products", label: "Stok", Icon: Package },
-  { href: "/machines", label: "Makineler", Icon: Cog },
-  { href: "/suppliers", label: "Tedarikçiler", Icon: Truck },
-  { href: "/purchases", label: "Satın Almalar", Icon: ShoppingBag },
-  { href: "/reports", label: "Raporlar", Icon: ChartColumn },
-] as const;
-
-const LINKS = [
-  { href: "/settings", label: "Ayarlar", Icon: Settings },
-  { href: "/settings/backup", label: "Yedekleme", Icon: DatabaseBackup },
-  { href: "/help", label: "Yardım", Icon: CircleHelp },
-] as const;
 
 export default function MorePage() {
   return (
     <section className="stack stack-lg">
       <PageHead title="Menü" />
-
-      <ul className="menu-list" aria-label="Kayıtlar">
-        {RECORDS.map(({ href, label, Icon }) => (
-          <li key={href}>
-            <Link href={href}>
-              <span className="avatar avatar-sm menu-avatar" aria-hidden="true">
-                <Icon size={18} />
-              </span>
-              {label}
-            </Link>
-          </li>
-        ))}
-      </ul>
-
-      <ul className="menu-list" aria-label="Uygulama">
-        {LINKS.map(({ href, label, Icon }) => (
-          <li key={href}>
-            <Link href={href}>
-              <span className="avatar avatar-sm menu-avatar" aria-hidden="true">
-                <Icon size={18} />
-              </span>
-              {label}
-            </Link>
-          </li>
-        ))}
-        <LogoutItem />
-      </ul>
-
+      <MoreMenu />
       <AppInfo version={version} />
     </section>
   );

@@ -15,6 +15,7 @@ import { formatDateTime } from "@/lib/utils";
 import type { SyncQueueItem } from "@/types";
 import { PageHead } from "@/components/layout/PageHead";
 import { errorMessage } from "@/lib/errors/message";
+import { useCan, useIsOwner } from "@/hooks/usePermission";
 
 const TYPE_LABEL: Record<string, string> = {
   CUSTOMER_APPROVAL_NEEDED: "Onay bekleniyor",
@@ -40,6 +41,9 @@ export function NotificationCenter() {
   const business = useSessionStore((s) => s.business);
   const lastSyncedAt = useSessionStore((s) => s.lastSyncedAt);
   const isOnline = useSessionStore((s) => s.isOnline);
+  // Yedek patronun, dışa aktarma rapor izninin işi (K-119)
+  const owner = useIsOwner();
+  const canExport = useCan("reports");
   const [showResolved, setShowResolved] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [busy, setBusy] = useState<string | null>(null);
@@ -103,10 +107,12 @@ export function NotificationCenter() {
           <div className="tile-value" style={{ fontSize: "1rem" }}>{lastBackup ? formatDateTime(lastBackup.at) : "Alınmadı"}</div>
         </div>
       </div>
-      <div className="row row-gap-md">
-        <Link href="/settings/backup" className="btn btn-secondary grow">Yedekleme / geri yükleme</Link>
-        <Link href="/reports/export" className="btn btn-secondary grow">Dışa aktar</Link>
-      </div>
+      {owner || canExport ? (
+        <div className="row row-gap-md">
+          {owner ? <Link href="/settings/backup" className="btn btn-secondary grow">Yedekleme / geri yükleme</Link> : null}
+          {canExport ? <Link href="/reports/export" className="btn btn-secondary grow">Dışa aktar</Link> : null}
+        </div>
+      ) : null}
       {!isOnline ? <div className="alert alert-warning" role="status">Çevrimdışısınız: çakışma çözümü internet gerektirir.</div> : null}
       {error ? <div className="alert alert-error" role="alert">{error}</div> : null}
 

@@ -3,6 +3,17 @@
 > Plandan (docs/00–07) veya PRD'den sapmaların, düzeltmelerin ve yeni çözümlerin kaydı. Yeni kayıtlar en üste eklenir.
 > Biçim: **Ne değişti → Neden → Sonuç / etkilenen dosyalar**
 
+## 2026-11-09
+
+### K-119 · Patron ve çalışanlar (rol ve izinler)
+- **Plan:** PRD "MVP tek kullanıcılı; rol bazlı yetki sonraki sürümde" diyordu (§2, §3). Sahip, bir patron ve birkaç çalışanlı iş yerinin şimdiden desteklenmesini istedi; tek kişilik kullanım aynen sürmeli.
+- **Karar:** `users.role` patron (`owner`) / çalışan (`staff`). Çalışan satış, servis, teslim, tahsilat, müşteri ve makine kaydını her zaman yapar. Gerisi patronun çalışana tek tek verdiği izinlerle açılır: alış fiyatı ve kâr, raporlar, satın alma ve stok girişi / sayım / tedarikçi, ürün ekleme ve fiyat, iptal / iade / ters kayıt, indirim, veresiye. Yeni çalışana önerilen izin yalnızca veresiye. Ayarlar, cihazlar, yedek, açılış bakiyesi ve içe aktarma yalnızca patronundur.
+- **Katılma:** Patron Ayarlar → Çalışanlar'dan davet kodu üretir (8 karakter, 7 gün, tek kullanım) ve kodu WhatsApp ile gönderir. Çalışan kendi e-postasıyla hesap açar, ilk kurulum ekranında "Davet kodum var" deyip kodu yazar. Kullanıcı satırı tarayıcıdan değiştirilemez; davet, izin ve pasifleştirme güvenli fonksiyonlarla yapılır. Pasifleştirilen çalışanın cihazları iptal edilir, telefonundaki yerel veri silinir, eşitleme reddedilir.
+- **Sunucu tarafı:** Migration 028. Pasif kullanıcıya bütün tablolarda kısıtlayıcı RLS. Patrona özel yazmalar (işletme ayarı, yedek kaydı, açılış bakiyesi, içe aktarma, başkasının cihazı) RLS ile korunur. İzne bağlı yazmalar BEFORE tetikleyicisiyle reddedilir: alış, tedarikçi ve stok giriş/sayım hareketleri; ürün; iptal, iade ve ödeme ters kaydı; indirim. İzin listesi `lib/auth/permissions.ts` ile SQL'de aynıdır (test karşılaştırır).
+- **Yalnızca ekranda olanlar:** Alış fiyatı / kâr, raporlar, veresiye ve satır fiyatını değiştirme. Veri internetsiz çalışmak için çalışanın telefonunda da bulunur. Gerçekten gizlenmesi gerekirse bu verinin çalışan cihazına hiç gönderilmemesi ayrı bir iştir.
+- **Kim yaptı:** Kayıtlar zaten cihaz koduyla imzalı. Cihaz → kişi eşlemesi sunucudan alınıp cihazda saklanır. Geçmiş ve cihaz listesinde ad görünür; servis ("Kabul eden"), satış ("Satan") ve ödeme satırlarında ise ekipte birden çok kişi varsa görünür.
+- **Etki:** `supabase/migrations/028_staff_roles.sql`, `src/lib/auth/{permissions,staff,actors}.ts`, `hooks/usePermission.ts`, `hooks/useActorNames.ts`, `components/settings/StaffManager.tsx`, `SetupWizard`, `AppShell` (yetkisiz bölüm ekranı), menü / hızlı işlem süzme, ürün, stok, satış, servis, cari, QR ve bildirim ekranları. Patron için davranış değişmez.
+
 ## 2026-11-07
 
 ### K-118 · Servis çalışanı (sw.js) depoya eklendi
