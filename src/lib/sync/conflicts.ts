@@ -1,6 +1,7 @@
 import type { SupabaseClient } from "@supabase/supabase-js";
 import { db } from "@/lib/db";
 import { isSyncTableName } from "@/lib/sync/tables";
+import { isMissingFunction } from "@/lib/sync/rpc";
 
 /**
  * Eşitleme çakışması çözümü (Adım 2.10, 6.7, AC-026, FR-021): sessiz ezme yoktur,
@@ -27,7 +28,11 @@ async function loadItem(id: string) {
 
 export async function resolveKeepServer(supabase: SupabaseClient, queueItemId: string): Promise<void> {
   const item = await loadItem(queueItemId);
-  const { data, error } = await supabase.from(item.table_name).select("*").eq("id", item.record_id).maybeSingle();
+  // Maliyet sütunları doğrudan okunamaz; kayıt kullanıcının iznine göre süzülerek gelir (029)
+  let { data, error } = await supabase.rpc("read_sync_record", { p_table: item.table_name, p_id: item.record_id });
+  if (error && isMissingFunction(error)) {
+    ({ data, error } = await supabase.from(item.table_name).select("*").eq("id", item.record_id).maybeSingle());
+  }
   if (error) throw new ConflictResolveError("Sunucudaki kayıt alınamadı.");
   await db.transaction("rw", db.table(item.table_name), db.sync_queue, async () => {
     if (data) await db.table(item.table_name).put(data);

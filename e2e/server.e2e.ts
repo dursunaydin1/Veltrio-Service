@@ -111,29 +111,26 @@ async function pullAll() {
   let cursor = pullCursor;
   let applied = 0;
   for (;;) {
-    const { data, error } = await supabase
-      .from("sync_changes")
-      .select("id, table_name, record_id, operation, record")
-      .gt("id", cursor)
-      .order("id", { ascending: true })
-      .limit(1000);
+    // Eşitleme günlüğü doğrudan okunamaz; uygulamayla aynı süzme fonksiyonu kullanılır (029)
+    const { data, error } = await supabase.rpc("pull_sync_changes", { p_cursor: cursor, p_limit: 1000 });
     if (error) throw new Error(`pull: ${error.message}`);
     if (!data?.length) break;
-    for (const change of data) {
+    for (const change of data as { id: string; table_name: string; record_id: string; operation: string; record: Record<string, unknown> | null }[]) {
       if (!isSyncTableName(change.table_name)) continue;
       const table = db.table(change.table_name);
       if (change.operation === "DELETE") await table.delete(change.record_id);
       else if (change.record) await table.put(change.record);
       applied++;
     }
-    cursor = data[data.length - 1].id as number;
+    cursor = Number(data[data.length - 1].id);
   }
   pullCursor = cursor;
   return applied;
 }
 
 async function one<T = Record<string, unknown>>(table: string, id: string): Promise<T> {
-  const { data, error } = await supabase.from(table).select("*").eq("id", id).maybeSingle();
+  // Maliyet sütunları doğrudan okunamaz; kayıt süzme fonksiyonuyla okunur (029)
+  const { data, error } = await supabase.rpc("read_sync_record", { p_table: table, p_id: id });
   if (error) throw new Error(`${table}: ${error.message}`);
   if (!data) throw new Error(`${table}/${id} sunucuda bulunamadı`);
   return data as T;
@@ -157,8 +154,8 @@ describe.skipIf(!URL || !ANON || !EMAIL || !PASSWORD)("sunucuya karşı uçtan u
     ctx = { businessId: profile?.business_id as string, deviceCode: DEVICE, actorId: data.user.id };
 
     // Önceki çalıştırmaların kayıtlarını çekmemek için imleç, mevcut son değişikliğe konur.
-    const { data: last } = await supabase.from("sync_changes").select("id").order("id", { ascending: false }).limit(1);
-    pullCursor = (last?.[0]?.id as number | undefined) ?? 0;
+    const { data: last } = await supabase.rpc("latest_sync_cursor");
+    pullCursor = Number(last ?? 0);
 
     hasDue = !(await supabase.from("sales").select("due_date").limit(1)).error;
     hasCatalog = !(await supabase.from("issue_catalog").select("id").limit(1)).error;
@@ -643,8 +640,7 @@ describe.skipIf(!URL || !ANON || !EMAIL || !PASSWORD)("sunucuya karşı uçtan u
 
   it("8) başka bir cihaz gibi çekme: yerel veri silinip sunucudan alınınca stok ve bakiyeler aynı çıkar", async () => {
     for (const t of db.tables) await t.clear();
-    const { data: first } = await supabase.from("sync_changes").select("id").order("id", { ascending: true }).limit(1);
-    pullCursor = ((first?.[0]?.id as number | undefined) ?? 1) - 1;
+    pullCursor = 0;
     const applied = await pullAll();
     expect(applied).toBeGreaterThan(0);
 

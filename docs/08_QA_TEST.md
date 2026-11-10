@@ -49,3 +49,12 @@ Tarayıcı arayüzü (render, tıklama), `/api/sync/*` HTTP rotası, PWA/çevrim
   4. Çalışanın adresi elle yazıp `/purchases` açması → "Bu bölüm için yetkiniz yok".
   5. Patron "İptal ve iade" iznini açar → çalışanda satış iptali görünür (yeniden giriş ya da sayfa yenileme sonrası).
   6. Patron çalışanı pasifleştirir → çalışanın telefonu yerel veriyi siler, eşitleme 403 döner.
+
+## Maliyet çalışana gitmez (K-120)
+- Otomatik: `lib/auth/permissions.test.ts` (satın alma / rapor izni maliyeti kapsar, veri kapsamı, 029'daki kuralın ve tablo listesinin uygulamayla aynı olması), `lib/sync/client.test.ts` (izin değişince baştan indirme kararı). `npm run test:e2e` artık eşitlemeyi ve kayıt okumayı 029 fonksiyonlarıyla yapar (029 uygulanmış olmalı).
+- Elle (029 uygulandıktan sonra):
+  1. Çalışan (yalnızca veresiye izni) uygulamayı açar → eşitleme baştan iner. Ürün ekranında alış fiyatı yok; Satın Almalar ve Tedarikçiler menüde yok.
+  2. Çalışanın tarayıcı konsolunda `indexedDB` → `products` kayıtlarında `last_purchase_price` alanı yok; `purchases` tablosu boş.
+  3. Çalışan stoklu bir ürünü satar → satış ve stok çıkışı patrona gelir (Ayarlar → Eşitleme'de hata yok). Patronun satış detayında kâr, ürünün alış fiyatıyla hesaplanmış görünür.
+  4. Patron çalışana "Alış fiyatı ve kârı görsün" iznini verir → çalışan uygulamayı yeniden açınca alış fiyatı görünür; izin kapatılınca yeniden kaybolur.
+  5. Patronun kendi telefonunda her şey eskisi gibi: ürün düzenleme, alış faturası, çakışma çözümü.

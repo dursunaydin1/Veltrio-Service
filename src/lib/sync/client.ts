@@ -4,6 +4,7 @@ import { isSyncTableName } from "@/lib/sync/tables";
 import { batchBySize } from "@/lib/sync/batch";
 import { useSessionStore } from "@/stores/session";
 import { nowISO } from "@/lib/utils";
+import { dataScope, FULL_DATA_SCOPE } from "@/lib/auth/permissions";
 import type { SyncQueueItem } from "@/types";
 
 type PushResult = { id: string; success: boolean; conflict?: boolean; error?: string };
@@ -19,6 +20,8 @@ type PullResponse = {
   changes: PullChange[];
   nextCursor: string;
   hasMore: boolean;
+  /** Sunucu kayıtları izne göre süzdü mü (029 uygulanmış) */
+  filtered?: boolean;
 };
 
 /**
@@ -49,6 +52,22 @@ function storeCursor(businessId: string, deviceCode: string, cursor: string): vo
     throw new Error("Eşitleme imleci yalnızca tarayıcıda saklanabilir.");
   }
   window.localStorage.setItem(cursorStorageKey(businessId, deviceCode), cursor);
+}
+
+function scopeStorageKey(businessId: string, deviceCode: string): string {
+  return `veltrio_sync_scope:${businessId}:${deviceCode}`;
+}
+
+/**
+ * Cihazdaki veri kapsamı izinle değiştiyse her şey baştan indirilir (K-120): sunucu gizli
+ * kaydı silme olarak, maliyetsiz kaydı maliyet alanı olmadan gönderir; `put` kaydın
+ * tamamını değiştirdiği için eski bilgi cihazda kalmaz. Kapsamı kayıtlı olmayan eski
+ * cihazın verisi tamdır: patronsa yeniden indirmeye gerek yoktur.
+ */
+export function scopeNeedsRepull(stored: string | null, current: string | null): boolean {
+  if (current === null) return false;
+  if (stored === null) return current !== FULL_DATA_SCOPE;
+  return stored !== current;
 }
 
 /**
@@ -130,6 +149,10 @@ async function pullChanges(
 ): Promise<number> {
   let cursor = getCursor(businessId, deviceCode);
   if (await shouldRepullEverything(businessId, cursor)) cursor = "0";
+  const scope = dataScope(useSessionStore.getState().user);
+  const scopeKey = scopeStorageKey(businessId, deviceCode);
+  if (scopeNeedsRepull(window.localStorage.getItem(scopeKey), scope)) cursor = "0";
+  let filtered = true;
   let pulled = 0;
   // Baştan indirme sürerken ekranlar "boş" yerine "yükleniyor" der
   const { setPullingAll } = useSessionStore.getState();
@@ -160,10 +183,14 @@ async function pullChanges(
         pulled += 1;
       }
 
+      if (body.filtered !== true) filtered = false;
       cursor = body.nextCursor;
       storeCursor(businessId, deviceCode, cursor);
       if (!body.hasMore) break;
     } while (true);
+    // Kapsam ancak indirme bitince ve sunucu süzdüyse kaydedilir; yarıda kalırsa ya da
+    // sunucu henüz süzmüyorsa bir sonraki eşitleme yeniden değerlendirir
+    if (scope !== null && filtered) window.localStorage.setItem(scopeKey, scope);
   } finally {
     setPullingAll(false);
   }
