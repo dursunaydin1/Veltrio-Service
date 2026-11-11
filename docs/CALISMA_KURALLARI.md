@@ -7,6 +7,8 @@
 2. **Kısa ve net.** Gereksiz tekrar, uzun anlatım yok (kullanıcı token tüketimine dikkat ediyor).
 3. **Adım adım ilerleme.** Kullanıcının bir işlem yapması gerekiyorsa tek seferde tek küçük, emin adım verilir; sonuç beklenir. Örnek değerler (e-posta, şifre vb.) kopyalanabilir biçimde verilir.
 4. **Ne yapıldığı anlatılır.** Her adımın sonunda: ne yapıldı, hangi dosyalar, neden, gerekirse nasıl geri alınır. Amaç: kullanıcı projeye hâkim olsun ve gerektiğinde kendisi müdahale edebilsin.
+12. **Onaydan önce Türkçe açıklama** (2026-11-10): Sahip onay ekranındaki İngilizce komutları anlamıyor. Onay isteyen her işlemden (komut, dosya yazma, push) önce ne yapılacağı tek kısa Türkçe cümleyle söylenir.
+13. **Onaysız silme yok** (2026-11-10): Sahip açıkça "sil" demeden bilgisayardan / depodan hiçbir şey silinmez (dosya, dal, kayıt; `git clean`, `git reset --hard`, zorla push dahil).
 
 ## Kaynaklar
 5. Gereksinimler `PRD.md` ve `docs/` altındadır.
@@ -22,6 +24,7 @@
 11. Kullanıcıya neyin gönderildiği kısaca söylenir.
 20. **main'e push = telefona canlı yayın** (2026-11-01): Uygulama https://veltrio-service.vercel.app adresinde (demo Supabase projesi) yayında; sahip telefonuna PWA olarak kurdu. main'e her push birkaç dakikada telefona gider. Riskli değişiklikten önce `npm run build` düzeyinde denetim yapılır. Önbelleğe alınan dosyalar değişince `public/sw.js` içindeki `VERSION` artırılır. Canlı ortam (ayrı Supabase projesi, alan adı, Play Store) sahip isteyince yapılır.
 21. **Birden çok oturum aynı depoda çalışabilir** (2026-11-07): sahip hem bilgisayardan hem telefondaki Claude'dan (Claude Code bulut oturumu) iş isteyebilir. Push etmeden önce `git pull --rebase` yapılır; çakışma varsa ötekinin işi korunarak birleştirilir.
+25. **Önce SQL, sonra yayın** (2026-11-11): Yeni migration'ı uygulama kodu kullanıyorsa kod önce ayrı dala gönderilir; sahip SQL'i Supabase SQL Editor'da çalıştırıp "tamam" deyince main'e birleştirilir. Sırası ters olursa telefondaki kayıtlar sunucuya gönderilemez.
 
 ## Testler
 22. **Testler iş grubunun sonunda bir kez** (2026-10-30, üç kez tekrarlandı): Sahip testleri beklemenin vakit kaybı olduğunu söyledi. Küçük arayüz / metin / stil değişikliklerinde yerelde test koşulmaz; `npx tsc --noEmit` ve değişen dosyalarda eslint yeterlidir, sonra doğrudan commit + push. GitHub Actions her push'ta `check:full` çalıştırır, Vercel derlemesi tür denetimi yapar; hata yayını durdurur, telefon çalışan sürümde kalır. Yalnızca ciddi mantık değişikliklerinde (eşitleme, para, stok, belge işlemleri) ilgili test dosyası çalıştırılır (`npx vitest run <dosya>`). `check:full` yerelde yalnızca sahip isterse ya da büyük bir iş grubunun sonunda çalıştırılır. Hız, özensizlik demek değildir: dikkatli ve özenli çalışılır.
