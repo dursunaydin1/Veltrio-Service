@@ -27,13 +27,36 @@ export function writeActorCache(businessId: string, names: ActorNames): void {
   }
 }
 
-export async function fetchActorNames(supabase: SupabaseClient): Promise<ActorNames> {
+/** Cihaz kodu → kullanıcı kimliği: patron, çalışanın cihazlarını kendi cihazlarından ayırır (K-121) */
+export type TeamDevices = Record<string, string>;
+
+const devicesKey = (businessId: string) => `veltrio_team_devices:${businessId}`;
+
+export function readTeamDevices(businessId: string): TeamDevices {
+  try {
+    const raw = window.localStorage.getItem(devicesKey(businessId));
+    const parsed: unknown = raw ? JSON.parse(raw) : null;
+    return parsed && typeof parsed === "object" && !Array.isArray(parsed) ? (parsed as TeamDevices) : {};
+  } catch {
+    return {};
+  }
+}
+
+/** Adları ve cihaz sahiplerini sunucudan alır, bu cihazda saklar. */
+export async function refreshTeam(supabase: SupabaseClient, businessId: string): Promise<ActorNames> {
   const [{ data: users, error: usersError }, { data: devices, error: devicesError }] = await Promise.all([
     supabase.from("users").select("id, name"),
     supabase.from("devices").select("device_code, user_id"),
   ]);
   if (usersError || devicesError) throw new Error("Kullanıcı adları yüklenemedi.");
-  return mapActorNames(users ?? [], devices ?? []);
+  const names = mapActorNames(users ?? [], devices ?? []);
+  writeActorCache(businessId, names);
+  try {
+    window.localStorage.setItem(devicesKey(businessId), JSON.stringify(Object.fromEntries((devices ?? []).map((d) => [d.device_code, d.user_id]))));
+  } catch {
+    // Depolama kapalıysa çalışan bildirimi üretilmez; "Yaptıkları" listesi sunucudan gelen cihazlarla çalışır
+  }
+  return names;
 }
 
 export function mapActorNames(

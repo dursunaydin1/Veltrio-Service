@@ -31,8 +31,14 @@ export async function markRead(deviceCode: string, id: string): Promise<void> {
   });
 }
 
-export async function markAllRead(deviceCode: string, businessId: string): Promise<number> {
-  const unread = await db.notifications.where("business_id").equals(businessId).filter((n) => !n.read_at).toArray();
+/** Çalışan bildirimi patronundur; çalışanın cihazına inse de ona gösterilmez (K-121). */
+export function visibleTo(owner: boolean) {
+  return (n: Pick<Notification, "type">) => owner || n.type !== "STAFF_ACTIVITY";
+}
+
+export async function markAllRead(deviceCode: string, businessId: string, owner = true): Promise<number> {
+  const visible = visibleTo(owner);
+  const unread = await db.notifications.where("business_id").equals(businessId).filter((n) => !n.read_at && visible(n)).toArray();
   for (const n of unread) await markRead(deviceCode, n.id);
   return unread.length;
 }
@@ -49,8 +55,9 @@ export async function markResolved(deviceCode: string, id: string): Promise<void
   });
 }
 
-export async function unreadCount(businessId: string): Promise<number> {
-  return db.notifications.where("business_id").equals(businessId).filter((n) => !n.read_at && !n.resolved_at).count();
+export async function unreadCount(businessId: string, owner = true): Promise<number> {
+  const visible = visibleTo(owner);
+  return db.notifications.where("business_id").equals(businessId).filter((n) => !n.read_at && !n.resolved_at && visible(n)).count();
 }
 
 const ISSUE_STATUSES: SyncQueueItem["status"][] = ["ERROR", "CONFLICT"];

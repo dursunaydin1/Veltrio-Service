@@ -76,6 +76,7 @@ describe("eşitleme sorunu bildirimi (6.6)", () => {
 /** Çakışma çözümü için minimal Supabase taklidi. */
 const fakeServer = (row: Record<string, unknown> | null) =>
   ({
+    rpc: () => Promise.resolve({ data: row, error: null }),
     from: () => ({ select: () => ({ eq: () => ({ maybeSingle: () => Promise.resolve({ data: row, error: null }) }) }) }),
   }) as unknown as SupabaseClient;
 

@@ -3,6 +3,16 @@
 > Plandan (docs/00–07) veya PRD'den sapmaların, düzeltmelerin ve yeni çözümlerin kaydı. Yeni kayıtlar en üste eklenir.
 > Biçim: **Ne değişti → Neden → Sonuç / etkilenen dosyalar**
 
+## 2026-11-11
+
+### K-121 · Çalışanın yaptıkları patrona bildirilir
+- **İstek:** Sahip, çalışanın yaptığı işi (yeni müşteri, servis açma / kapatma, satış) uygulamayı açınca Bildirimler'de görmek ve sonradan çalışan bazlı listelemek istedi. Telefona gelen gerçek bildirim (push) şimdilik yapılmadı.
+- **Karar:** Ayrı bir kayıt tutulmaz; bilgi cihaz koduyla imzalı kayıtlardan okunur (`lib/notifications/staffActivity.ts`). Sayılan işler: müşteri ekleme, servis açma, servisin işini tamamlama / teslim / iptal, kesinleşen satış, satış dışı tahsilat (satışın tahsilatı satış satırında görünür). Müşteri kaydı imzasızdı; migration 030 `customers.created_by_device` ekler, eski kayıtlar boş kalır.
+- **Bildirim:** Patron cihazında her eşitlemeden sonra üretilir (`STAFF_ACTIVITY`, anahtar `STAFF:{tür}:{kimlik}`), bir kez çıkar. Cihazın ilk çalışmasında başlangıç anı yazılır; geçmişteki işler bildirim olarak yağmaz, "Yaptıkları" listesinde durur. Patronun kendi cihazları (aynı kullanıcı) bildirim üretmez. Bildirimler eşitlenir (patronun ikinci cihazında okundu bilgisi ortak), çalışanın ekranında ve zil sayısında gösterilmez. Cihaz → kullanıcı eşlemesi `refreshTeam` ile alınıp cihazda saklanır.
+- **Liste:** Ayarlar → Çalışanlar → çalışan kartında "Yaptıkları" (Bugün / Bu hafta / Tümü).
+- **Sıra:** Uygulama müşteri kaydında yeni sütunu gönderdiği için 030, yeni sürüm yayına alınmadan önce çalıştırılır.
+- **Etki:** `supabase/migrations/030_customer_created_by.sql`, `lib/notifications/{staffActivity,center}.ts`, `lib/auth/actors.ts`, `lib/customers/service.ts`, `hooks/useStaffActivity.ts`, `components/settings/{StaffManager,StaffActivityList}.tsx`, `components/notifications/NotificationCenter.tsx`, `components/layout/NotificationBell.tsx`.
+
 ## 2026-11-10
 
 ### K-120 · Maliyet ve alış bilgisi çalışanın cihazına gitmez

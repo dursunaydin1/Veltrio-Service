@@ -55,6 +55,14 @@ Tarayıcı arayüzü (render, tıklama), `/api/sync/*` HTTP rotası, PWA/çevrim
 - Elle (029 uygulandıktan sonra):
   1. Çalışan (yalnızca veresiye izni) uygulamayı açar → eşitleme baştan iner. Ürün ekranında alış fiyatı yok; Satın Almalar ve Tedarikçiler menüde yok.
   2. Çalışanın tarayıcı konsolunda `indexedDB` → `products` kayıtlarında `last_purchase_price` alanı yok; `purchases` tablosu boş.
-  3. Çalışan stoklu bir ürünü satar → satış ve stok çıkışı patrona gelir (Ayarlar → Eşitleme'de hata yok). Patronun satış detayında kâr, ürünün alış fiyatıyla hesaplanmış görünür.
+  3. Çalışan stoklu bir ürünü satar → satış ve stok çıkışı patrona gelir (🔔 Bildirimler / "Eşitleme ve bildirimler" ekranında hata yok). Patronun satış detayında kâr, ürünün alış fiyatıyla hesaplanmış görünür.
   4. Patron çalışana "Alış fiyatı ve kârı görsün" iznini verir → çalışan uygulamayı yeniden açınca alış fiyatı görünür; izin kapatılınca yeniden kaybolur.
   5. Patronun kendi telefonunda her şey eskisi gibi: ürün düzenleme, alış faturası, çakışma çözümü.
+
+## Çalışanın yaptıkları patrona bildirilir (K-121)
+- Otomatik: `lib/notifications/staffActivity.test.ts` (hangi işlerin sayıldığı, patronun cihazlarının ayrılması, ilk çalışmada geçmişin bildirilmemesi, aynı işin bir kez bildirilmesi, çalışana gösterilmemesi).
+- Elle (030 uygulandıktan sonra):
+  1. Çalışan yeni müşteri ekler, servis açar, servisi teslim eder, satış yapar.
+  2. Patron uygulamayı açar → 🔔 zilinde sayı çıkar; Bildirimler'de "Ahmet yeni müşteri ekledi: …", "Ahmet servis açtı: …" satırları var; satıra dokununca kayıt açılır.
+  3. Patron Ayarlar → Çalışanlar → "Yaptıkları": aynı işler Bugün / Bu hafta / Tümü süzgeciyle listelenir.
+  4. Çalışanın kendi zilinde bu bildirimler görünmez. Patronun kendi yaptıkları bildirim üretmez.

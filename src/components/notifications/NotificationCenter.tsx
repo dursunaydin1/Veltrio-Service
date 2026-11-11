@@ -7,7 +7,8 @@ import { db } from "@/lib/db";
 import { createClient } from "@/lib/supabase/client";
 import { useBusinessContext } from "@/hooks/useBusinessContext";
 import { useSessionStore } from "@/stores/session";
-import { markAllRead, markRead, markResolved } from "@/lib/notifications/center";
+import { markAllRead, markRead, markResolved, visibleTo } from "@/lib/notifications/center";
+import { staffActivityHref } from "@/lib/notifications/staffActivity";
 import { getIssueCount } from "@/lib/sync/queue";
 import { resolveKeepMine, resolveKeepServer, retryItem } from "@/lib/sync/conflicts";
 import { readLastBackup } from "@/lib/backup/backup";
@@ -25,6 +26,7 @@ const TYPE_LABEL: Record<string, string> = {
   LOW_STOCK: "Kritik stok",
   PAYMENT_DUE: "Vade",
   SYNC_CONFLICT: "Eşitleme / stok",
+  STAFF_ACTIVITY: "Çalışan",
 };
 
 const TABLE_LABEL: Record<string, string> = {
@@ -58,9 +60,9 @@ export function NotificationCenter() {
   );
   const notifications = useLiveQuery(async () => {
     if (!business) return undefined;
-    const all = await db.notifications.where("business_id").equals(business.id).toArray();
+    const all = await db.notifications.where("business_id").equals(business.id).filter(visibleTo(owner)).toArray();
     return all.sort((a, b) => b.created_at.localeCompare(a.created_at));
-  }, [business?.id]);
+  }, [business?.id, owner]);
 
   // localStorage yalnızca tarayıcıda okunur; sunucu çiziminde boş kalır (uyuşmazlık olmaz)
   const lastBackupRaw = useSyncExternalStore(
@@ -151,20 +153,22 @@ export function NotificationCenter() {
         <div className="row row-between">
           <h2 id="nc-notes">Bildirimler</h2>
           {open.some((n) => !n.read_at) && ctx ? (
-            <button type="button" className="btn btn-ghost btn-sm" onClick={() => void markAllRead(ctx.deviceCode, ctx.businessId)}>Tümünü okundu yap</button>
+            <button type="button" className="btn btn-ghost btn-sm" onClick={() => void markAllRead(ctx.deviceCode, ctx.businessId, owner)}>Tümünü okundu yap</button>
           ) : null}
         </div>
         {notifications === undefined ? null : open.length === 0 ? (
           <p>Açık bildirim yok.</p>
         ) : (
           <ul className="menu-list" aria-label="Açık bildirimler">
-            {open.map((n) => (
+            {open.map((n) => {
+              const href = staffActivityHref(n.dedupe_key, n.related_record_id);
+              return (
               <li key={n.id} style={{ display: "flex", flexDirection: "column", gap: 4, padding: "8px 0", opacity: n.read_at ? 0.75 : 1 }}>
                 <span className="row row-between">
                   <strong>{TYPE_LABEL[n.type] ?? n.type}</strong>
                   {!n.read_at ? <span className="badge badge-yellow">Yeni</span> : null}
                 </span>
-                <span>{n.message}</span>
+                {href && ctx ? <Link href={href} onClick={() => void markRead(ctx.deviceCode, n.id)}>{n.message}</Link> : <span>{n.message}</span>}
                 <small className="muted">{formatDateTime(n.created_at)}</small>
                 {ctx ? (
                   <span className="row row-gap-sm">
@@ -173,7 +177,8 @@ export function NotificationCenter() {
                   </span>
                 ) : null}
               </li>
-            ))}
+              );
+            })}
           </ul>
         )}
         {resolved.length > 0 ? (

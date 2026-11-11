@@ -5,6 +5,7 @@ import { useAuthSync, useOnlineStatus } from "@/hooks/useAuth";
 import { configureOfflineLimit } from "@/lib/sync/offlineLimit";
 import { useSessionStore } from "@/stores/session";
 import { useReminders } from "@/hooks/useReminders";
+import { useStaffActivity } from "@/hooks/useStaffActivity";
 import { usePwa } from "@/hooks/usePwa";
 import { useDeviceGuard } from "@/hooks/useDeviceGuard";
 import { useSync } from "@/hooks/useSync";
@@ -44,6 +45,7 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
     };
   }, []);
   useReminders();
+  useStaffActivity();
   return <>{children}</>;
 }
 

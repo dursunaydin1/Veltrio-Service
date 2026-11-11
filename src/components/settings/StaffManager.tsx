@@ -15,6 +15,8 @@ import {
 } from "@/lib/auth/staff";
 import { DEFAULT_STAFF_PERMISSIONS, PERMISSION_LABELS, ROLE_LABELS, STAFF_PERMISSIONS } from "@/lib/auth/permissions";
 import { writeAuditLog } from "@/lib/sync/audit";
+import { readTeamDevices, refreshTeam, type TeamDevices } from "@/lib/auth/actors";
+import { StaffActivityList } from "@/components/settings/StaffActivityList";
 import { useBusinessContext } from "@/hooks/useBusinessContext";
 import { useSessionStore } from "@/stores/session";
 import { formatDate } from "@/lib/utils";
@@ -81,6 +83,9 @@ export function StaffManager() {
   const [name, setName] = useState("");
   const [newPermissions, setNewPermissions] = useState<string[]>([...DEFAULT_STAFF_PERMISSIONS]);
   const [copied, setCopied] = useState<string | null>(null);
+  const [devices, setDevices] = useState<TeamDevices>({});
+  const [showActivity, setShowActivity] = useState<string | null>(null);
+  const businessId = ctx?.businessId;
 
   const load = useCallback(async () => {
     try {
@@ -88,11 +93,16 @@ export function StaffManager() {
       const [users, inv] = await Promise.all([listTeam(supabase), listInvites(supabase)]);
       setTeam(users);
       setInvites(inv.filter((i) => isInviteOpen(i)));
+      if (businessId) {
+        // Yaptıkları listesi için çalışanın cihazları
+        await refreshTeam(supabase, businessId).catch(() => undefined);
+        setDevices(readTeamDevices(businessId));
+      }
       setError(null);
     } catch (e) {
       setError(errorMessage(e, "Çalışanlar yüklenemedi."));
     }
-  }, []);
+  }, [businessId]);
 
   useEffect(() => {
     // Sayfa açılışında sunucudaki liste bir kez yüklenir
@@ -211,6 +221,17 @@ export function StaffManager() {
                   <>
                     {active ? (
                       <PermissionSwitches value={u.permissions ?? []} onChange={(next) => changePermissions(u, next)} disabled={busy || !isOnline} />
+                    ) : null}
+                    <button
+                      type="button"
+                      className="btn btn-secondary btn-sm self-start"
+                      aria-expanded={showActivity === u.id}
+                      onClick={() => setShowActivity(showActivity === u.id ? null : u.id)}
+                    >
+                      {showActivity === u.id ? "Yaptıklarını gizle" : "Yaptıkları"}
+                    </button>
+                    {showActivity === u.id && businessId ? (
+                      <StaffActivityList businessId={businessId} devices={Object.keys(devices).filter((d) => devices[d] === u.id)} />
                     ) : null}
                     <button
                       type="button"

@@ -2,7 +2,7 @@
 
 import { useEffect, useState } from "react";
 import { useSessionStore } from "@/stores/session";
-import { fetchActorNames, readActorCache, writeActorCache, type ActorNames } from "@/lib/auth/actors";
+import { readActorCache, refreshTeam, type ActorNames } from "@/lib/auth/actors";
 
 const SUPABASE_CONFIGURED = !!process.env.NEXT_PUBLIC_SUPABASE_URL && !!process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY;
 // Aynı oturumda her ekran açılışında yeniden sorulmasın
@@ -22,11 +22,8 @@ export function useActorNames(): ActorNames {
     if (!SUPABASE_CONFIGURED || !isOnline || refreshed.has(businessId)) return;
     refreshed.add(businessId);
     void import("@/lib/supabase/client")
-      .then(({ createClient }) => fetchActorNames(createClient()))
-      .then((fresh) => {
-        writeActorCache(businessId, fresh);
-        setNames(fresh);
-      })
+      .then(({ createClient }) => refreshTeam(createClient(), businessId))
+      .then(setNames)
       .catch(() => refreshed.delete(businessId));
   }, [businessId, isOnline]);
 

@@ -88,6 +88,7 @@ export async function createCustomer(
     ...fields,
     id: generateId(),
     business_id: ctx.businessId,
+    created_by_device: ctx.deviceCode,
     created_at: now,
     updated_at: now,
   };
@@ -102,7 +103,7 @@ export async function createCustomer(
       "customers",
       customer.id,
       "INSERT",
-      { ...editablePayload(customer), created_at: now },
+      { ...editablePayload(customer), created_by_device: ctx.deviceCode, created_at: now },
       ctx.deviceCode
     );
   });

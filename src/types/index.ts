@@ -91,6 +91,8 @@ export interface Customer {
   notes?: string;
   /** İsteğe bağlı fotoğraf (JPEG data URL, ≤1200px) */
   photo?: string;
+  /** Müşteriyi ekleyen cihaz (K-121); 030'dan önceki kayıtlarda yok */
+  created_by_device?: string;
   /** Sunucu kayıt sürümü; güncellemede çakışma tespiti için gönderilir. */
   version?: number;
   archived_at?: ISODateTimeString;
@@ -341,7 +343,9 @@ export type NotificationType =
   | "SERVICE_COMPLETED"
   | "LOW_STOCK"
   | "PAYMENT_DUE"
-  | "SYNC_CONFLICT";
+  | "SYNC_CONFLICT"
+  /** Çalışanın yaptığı iş; yalnızca patrona gösterilir (K-121) */
+  | "STAFF_ACTIVITY";
 
 export interface Notification {
   id: UUID;
