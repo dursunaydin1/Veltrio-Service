@@ -1,0 +1,60 @@
+name: Veritabanını güncelle
+
+# Bekleyen supabase/migrations dosyalarını sırayla çalıştırır (scripts/migrate.mjs).
+# Yalnızca sahip elle başlatır (Actions → Veritabanını güncelle → Run workflow): onay bu düğmedir.
+# Bağlantı adresi GitHub gizli ayarındadır (SUPABASE_DB_URL); kod içinde ya da sohbette durmaz.
+# Sıra: SQL dosyası dala gönderilir → sahip bu akışı o dalda çalıştırır → başarılıysa kod main'e birleşir.
+
+on:
+  workflow_dispatch:
+    inputs:
+      mode:
+        description: "Ne yapılsın?"
+        type: choice
+        default: "durum"
+        options:
+          - "durum"
+          - "uygula"
+          - "ilk-kurulum"
+      baseline:
+        description: "Yalnızca ilk kurulum: bu numaraya kadar olanlar elle uygulandı (ör. 030)"
+        required: false
+        default: ""
+
+concurrency:
+  group: db-migrate
+  cancel-in-progress: false
+
+jobs:
+  migrate:
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: npm
+      - run: npm ci --ignore-scripts
+      - name: Durum (uygulanmış / bekleyen)
+        run: npm run db:migrate -- --status
+        env:
+          SUPABASE_DB_URL: ${{ secrets.SUPABASE_DB_URL }}
+      - name: İlk kurulum işareti
+        if: inputs.mode == 'ilk-kurulum'
+        run: |
+          if ! [[ "$BASELINE" =~ ^[0-9]{1,3}$ ]]; then echo "Numara yazın (ör. 030)."; exit 1; fi
+          npm run db:migrate -- --baseline "$BASELINE"
+        env:
+          SUPABASE_DB_URL: ${{ secrets.SUPABASE_DB_URL }}
+          BASELINE: ${{ inputs.baseline }}
+      - name: Bekleyenleri uygula
+        if: inputs.mode == 'uygula'
+        run: npm run db:migrate
+        env:
+          SUPABASE_DB_URL: ${{ secrets.SUPABASE_DB_URL }}
+      - name: Son durum
+        if: inputs.mode != 'durum'
+        run: npm run db:migrate -- --status
+        env:
+          SUPABASE_DB_URL: ${{ secrets.SUPABASE_DB_URL }}

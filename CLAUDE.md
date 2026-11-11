@@ -26,7 +26,7 @@ npm run check:full  # aynısı, bütün testlerle (GitHub Actions her push'ta bu
 
 Tests are Vitest tests next to the code: logic in `*.test.ts` (node), screens in `*.test.tsx` with Testing Library (first line `// @vitest-environment jsdom`, then `import "@/test/dom"`). `@` alias configured in `vitest.config.mts`. Environment vars go in `.env.local` (see `.env.local.example`): `NEXT_PUBLIC_SUPABASE_URL`, `NEXT_PUBLIC_SUPABASE_ANON_KEY`. If they are missing, `src/proxy.ts` skips the auth redirect so the app still runs locally.
 
-Database migrations live in `supabase/migrations/` and must be applied in order (001 → 030), via the Supabase SQL editor or `npm run db:migrate` (needs `SUPABASE_DB_URL` in `.env.local`). The sync API routes do not work until `005_sync_changes.sql` is applied.
+Database migrations live in `supabase/migrations/` and must be applied in order (001 → 030), via the Supabase SQL editor or `npm run db:migrate` (needs `SUPABASE_DB_URL` in `.env.local`). From a phone / cloud session, the owner runs the manual GitHub Actions workflow "Veritabanını güncelle" (`.github/workflows/db-migrate.yml`) on the branch that adds the migration; merge to main only after it succeeds (see `docs/CALISMA_KURALLARI.md` rule 25). The sync API routes do not work until `005_sync_changes.sql` is applied.
 
 ## Stack notes
 
