@@ -17,7 +17,8 @@ export function NotificationBell() {
       <Bell size={22} aria-hidden="true" />
       {count > 0 ? (
         <span className="icon-badge" aria-hidden="true">
-          {count > 9 ? "9+" : count}
+          {/* Yeni gelen bildirim sayıyı değiştirsin diye "9+" yerine gerçek sayı (K-121) */}
+          {count > 99 ? "99+" : count}
         </span>
       ) : null}
     </Link>
