@@ -10,8 +10,9 @@ import { useIsOwner } from "@/hooks/usePermission";
 /** Üst çubuktaki bildirim simgesi: okunmamış sayısı, eşitleme ve bildirim merkezine gider. */
 export function NotificationBell() {
   const businessId = useSessionStore((s) => s.business?.id);
+  const userId = useSessionStore((s) => s.user?.id ?? "");
   const owner = useIsOwner();
-  const count = useLiveQuery(() => (businessId ? unreadCount(businessId, owner) : 0), [businessId, owner], 0);
+  const count = useLiveQuery(() => (businessId ? unreadCount(userId, businessId, owner) : 0), [userId, businessId, owner], 0);
   return (
     <Link href="/notifications" className="icon-btn" aria-label={count > 0 ? `Bildirimler (${count} yeni)` : "Bildirimler"}>
       <Bell size={22} aria-hidden="true" />

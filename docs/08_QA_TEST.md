@@ -66,3 +66,4 @@ Tarayıcı arayüzü (render, tıklama), `/api/sync/*` HTTP rotası, PWA/çevrim
   2. Patron uygulamayı açar → 🔔 zilinde sayı çıkar; Bildirimler'de "Ahmet yeni müşteri ekledi: …", "Ahmet servis açtı: …" satırları var; satıra dokununca kayıt açılır.
   3. Patron Ayarlar → Çalışanlar → "Yaptıkları": aynı işler Bugün / Bu hafta / Tümü süzgeciyle listelenir.
   4. Çalışanın kendi zilinde bu bildirimler görünmez. Patronun kendi yaptıkları bildirim üretmez.
+  5. Çalışan bir kritik stok bildirimine "Okundu" / "Çözüldü say" der → patronun zilinde aynı bildirim hâlâ okunmamış görünür (K-122; `lib/notifications/center.test.ts`).

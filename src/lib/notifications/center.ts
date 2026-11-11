@@ -1,34 +1,56 @@
-import { db } from "@/lib/db";
-import { enqueue } from "@/lib/sync/queue";
+import { db, type NotificationMark } from "@/lib/db";
 import { nowISO } from "@/lib/utils";
 import type { Notification, SyncQueueItem } from "@/types";
 import { reconcileNotifications, type NotificationContext, type PlannedNotification } from "./core";
 
 /**
- * Bildirim merkezi işlemleri (Adım 6.6-6.7, FR-022): okundu / çözüldü işaretleme
- * (sunucuya eşitlenir; çevrimdışı işaret kuyrukta bekler) ve eşitleme sorunu bildirimi.
+ * Bildirim merkezi işlemleri (Adım 6.6-6.7, FR-022): okundu / çözüldü işaretleme ve eşitleme
+ * sorunu bildirimi. Okundu ve elle "çözüldü say" kişiye özeldir (K-122): bu cihazda tutulur,
+ * sunucuya gitmez; çalışanın okuması patronun zilini etkilemez. Koşul ortadan kalkınca sistemin
+ * çözdüğü bildirim (`resolved_at`) ise herkes için çözülür. K-122'den önce ortak yazılmış
+ * `read_at` / `resolved_at` olduğu gibi geçerlidir.
  */
 
-type Versioned = Notification & { version?: number };
+const markId = (userId: string, notificationId: string) => `${userId}:${notificationId}`;
 
-function payload(n: Versioned, readAt: string | undefined, resolvedAt: string | undefined) {
-  return {
-    id: n.id,
-    business_id: n.business_id,
-    read_at: readAt ?? null,
-    resolved_at: resolvedAt ?? null,
-    version: n.version ?? 1,
-  };
+export type Marks = Map<string, NotificationMark>;
+
+/** Kişinin işaretleri, bildirim kimliğine göre */
+export async function loadMarks(userId: string): Promise<Marks> {
+  const rows = await db.notification_marks.where("user_id").equals(userId).toArray();
+  return new Map(rows.map((m) => [m.notification_id, m]));
 }
 
-export async function markRead(deviceCode: string, id: string): Promise<void> {
-  await db.transaction("rw", db.notifications, db.sync_queue, async () => {
-    const n = (await db.notifications.get(id)) as Versioned | undefined;
-    if (!n || n.read_at) return;
-    const now = nowISO();
-    await db.notifications.put({ ...n, read_at: now });
-    await enqueue("notifications", id, "UPDATE", payload(n, now, n.resolved_at), deviceCode);
+export function isResolved(n: Pick<Notification, "id" | "resolved_at">, marks: Marks): boolean {
+  return !!(n.resolved_at || marks.get(n.id)?.resolved_at);
+}
+
+export function isRead(n: Pick<Notification, "id" | "read_at" | "resolved_at">, marks: Marks): boolean {
+  return !!(n.read_at || marks.get(n.id)?.read_at) || isResolved(n, marks);
+}
+
+async function mark(userId: string, notificationId: string, resolve: boolean): Promise<void> {
+  const id = markId(userId, notificationId);
+  const existing = await db.notification_marks.get(id);
+  if (resolve ? existing?.resolved_at : existing?.read_at) return;
+  const now = nowISO();
+  await db.notification_marks.put({
+    ...existing,
+    id,
+    user_id: userId,
+    notification_id: notificationId,
+    read_at: existing?.read_at ?? now,
+    resolved_at: resolve ? now : existing?.resolved_at,
   });
+}
+
+export function markRead(userId: string, id: string): Promise<void> {
+  return mark(userId, id, false);
+}
+
+/** Elle çözüldü işaretleme (ör. kullanıcı konuyu başka yolla çözdü). */
+export function markResolved(userId: string, id: string): Promise<void> {
+  return mark(userId, id, true);
 }
 
 /** Çalışan bildirimi patronundur; çalışanın cihazına inse de ona gösterilmez (K-121). */
@@ -36,28 +58,20 @@ export function visibleTo(owner: boolean) {
   return (n: Pick<Notification, "type">) => owner || n.type !== "STAFF_ACTIVITY";
 }
 
-export async function markAllRead(deviceCode: string, businessId: string, owner = true): Promise<number> {
+async function unreadOf(userId: string, businessId: string, owner: boolean): Promise<Notification[]> {
+  const [marks, all] = await Promise.all([loadMarks(userId), db.notifications.where("business_id").equals(businessId).toArray()]);
   const visible = visibleTo(owner);
-  const unread = await db.notifications.where("business_id").equals(businessId).filter((n) => !n.read_at && visible(n)).toArray();
-  for (const n of unread) await markRead(deviceCode, n.id);
+  return all.filter((n) => visible(n) && !isRead(n, marks));
+}
+
+export async function markAllRead(userId: string, businessId: string, owner = true): Promise<number> {
+  const unread = await unreadOf(userId, businessId, owner);
+  for (const n of unread) await markRead(userId, n.id);
   return unread.length;
 }
 
-/** Elle çözüldü işaretleme (ör. kullanıcı konuyu başka yolla çözdü). */
-export async function markResolved(deviceCode: string, id: string): Promise<void> {
-  await db.transaction("rw", db.notifications, db.sync_queue, async () => {
-    const n = (await db.notifications.get(id)) as Versioned | undefined;
-    if (!n || n.resolved_at) return;
-    const now = nowISO();
-    const readAt = n.read_at ?? now;
-    await db.notifications.put({ ...n, read_at: readAt, resolved_at: now });
-    await enqueue("notifications", id, "UPDATE", payload(n, readAt, now), deviceCode);
-  });
-}
-
-export async function unreadCount(businessId: string, owner = true): Promise<number> {
-  const visible = visibleTo(owner);
-  return db.notifications.where("business_id").equals(businessId).filter((n) => !n.read_at && !n.resolved_at && visible(n)).count();
+export async function unreadCount(userId: string, businessId: string, owner = true): Promise<number> {
+  return (await unreadOf(userId, businessId, owner)).length;
 }
 
 const ISSUE_STATUSES: SyncQueueItem["status"][] = ["ERROR", "CONFLICT"];

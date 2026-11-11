@@ -3,7 +3,7 @@ import { beforeEach, describe, expect, it } from "vitest";
 import type { SupabaseClient } from "@supabase/supabase-js";
 import { db } from "@/lib/db";
 import { reconcileNotifications } from "./core";
-import { markAllRead, markRead, markResolved, syncIssueNotifications, unreadCount } from "./center";
+import { isResolved, loadMarks, markAllRead, markRead, markResolved, syncIssueNotifications, unreadCount } from "./center";
 import { ConflictResolveError, resolveKeepMine, resolveKeepServer, retryItem } from "@/lib/sync/conflicts";
 
 const B = "00000000-0000-0000-0000-000000000001";
@@ -16,35 +16,40 @@ beforeEach(async () => {
 const make = (key: string) =>
   reconcileNotifications(ctx, "LOW_STOCK", [{ type: "LOW_STOCK", dedupeKey: key, relatedId: "r1", message: "m" }], () => false);
 
+const OWNER = "owner-id";
+const STAFF = "staff-id";
+
 describe("bildirim merkezi (FR-022)", () => {
-  it("okundu / çözüldü işareti yerel kaydı günceller ve sürümle kuyruğa yazılır", async () => {
+  it("okundu / çözüldü kişiye özeldir ve sunucuya gönderilmez (K-122)", async () => {
     await make("LOW_STOCK:p1:1");
     await db.sync_queue.clear();
     const [n] = await db.notifications.toArray();
-    expect(await unreadCount(B)).toBe(1);
+    expect(await unreadCount(STAFF, B)).toBe(1);
 
-    await markRead(ctx.deviceCode, n.id);
-    expect(await unreadCount(B)).toBe(0);
-    const q = await db.sync_queue.toArray();
-    expect(q[0]).toMatchObject({ table_name: "notifications", operation: "UPDATE" });
-    expect(q[0].payload).toMatchObject({ id: n.id, version: 1 });
-    expect(q[0].payload.read_at).toBeTruthy();
+    await markRead(STAFF, n.id);
+    expect(await unreadCount(STAFF, B)).toBe(0);
+    expect(await unreadCount(OWNER, B)).toBe(1); // çalışanın okuması patronun zilini etkilemez
 
-    await markResolved(ctx.deviceCode, n.id);
-    const after = (await db.notifications.get(n.id))!;
-    expect(after.resolved_at).toBeTruthy();
-    // aynı işareti ikinci kez kuyruğa yazmaz
-    const count = await db.sync_queue.count();
-    await markResolved(ctx.deviceCode, n.id);
-    await markRead(ctx.deviceCode, n.id);
-    expect(await db.sync_queue.count()).toBe(count);
+    await markResolved(STAFF, n.id);
+    expect(isResolved(n, await loadMarks(STAFF))).toBe(true);
+    expect(isResolved(n, await loadMarks(OWNER))).toBe(false);
+    expect((await db.notifications.get(n.id))!.resolved_at).toBeUndefined();
+    expect(await db.sync_queue.count()).toBe(0);
+  });
+
+  it("sistemin çözdüğü ya da eskiden ortak okunmuş bildirim herkes için okunmuştur", async () => {
+    await make("LOW_STOCK:p2:1");
+    const [n] = await db.notifications.toArray();
+    await db.notifications.update(n.id, { read_at: "2026-11-01T00:00:00Z" });
+    expect(await unreadCount(OWNER, B)).toBe(0);
   });
 
   it("tümünü okundu yapar", async () => {
     await make("LOW_STOCK:a:1");
     await make("LOW_STOCK:b:1");
-    expect(await markAllRead(ctx.deviceCode, B)).toBe(2);
-    expect(await unreadCount(B)).toBe(0);
+    expect(await markAllRead(OWNER, B)).toBe(2);
+    expect(await unreadCount(OWNER, B)).toBe(0);
+    expect(await unreadCount(STAFF, B)).toBe(2);
   });
 });
 

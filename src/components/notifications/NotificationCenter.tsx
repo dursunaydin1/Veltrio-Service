@@ -7,7 +7,7 @@ import { db } from "@/lib/db";
 import { createClient } from "@/lib/supabase/client";
 import { useBusinessContext } from "@/hooks/useBusinessContext";
 import { useSessionStore } from "@/stores/session";
-import { markAllRead, markRead, markResolved, visibleTo } from "@/lib/notifications/center";
+import { isRead, isResolved, loadMarks, markAllRead, markRead, markResolved, visibleTo } from "@/lib/notifications/center";
 import { staffActivityHref } from "@/lib/notifications/staffActivity";
 import { getIssueCount } from "@/lib/sync/queue";
 import { resolveKeepMine, resolveKeepServer, retryItem } from "@/lib/sync/conflicts";
@@ -58,11 +58,22 @@ export function NotificationCenter() {
         .sort((a, b) => a.created_at.localeCompare(b.created_at)),
     [business?.id]
   );
+  // Okundu / çözüldü kişiye özel (K-122)
+  const userId = useSessionStore((s) => s.user?.id ?? "");
   const notifications = useLiveQuery(async () => {
     if (!business) return undefined;
-    const all = await db.notifications.where("business_id").equals(business.id).filter(visibleTo(owner)).toArray();
-    return all.sort((a, b) => b.created_at.localeCompare(a.created_at));
-  }, [business?.id, owner]);
+    const [marks, all] = await Promise.all([
+      loadMarks(userId),
+      db.notifications.where("business_id").equals(business.id).filter(visibleTo(owner)).toArray(),
+    ]);
+    return all
+      .sort((a, b) => b.created_at.localeCompare(a.created_at))
+      .map((n) => ({
+        ...n,
+        read_at: isRead(n, marks) ? (n.read_at ?? marks.get(n.id)?.read_at) : undefined,
+        resolved_at: isResolved(n, marks) ? (n.resolved_at ?? marks.get(n.id)?.resolved_at) : undefined,
+      }));
+  }, [business?.id, owner, userId]);
 
   // localStorage yalnızca tarayıcıda okunur; sunucu çiziminde boş kalır (uyuşmazlık olmaz)
   const lastBackupRaw = useSyncExternalStore(
@@ -153,7 +164,7 @@ export function NotificationCenter() {
         <div className="row row-between">
           <h2 id="nc-notes">Bildirimler</h2>
           {open.some((n) => !n.read_at) && ctx ? (
-            <button type="button" className="btn btn-ghost btn-sm" onClick={() => void markAllRead(ctx.deviceCode, ctx.businessId, owner)}>Tümünü okundu yap</button>
+            <button type="button" className="btn btn-ghost btn-sm" onClick={() => void markAllRead(userId, ctx.businessId, owner)}>Tümünü okundu yap</button>
           ) : null}
         </div>
         {notifications === undefined ? null : open.length === 0 ? (
@@ -168,12 +179,12 @@ export function NotificationCenter() {
                   <strong>{TYPE_LABEL[n.type] ?? n.type}</strong>
                   {!n.read_at ? <span className="badge badge-yellow">Yeni</span> : null}
                 </span>
-                {href && ctx ? <Link href={href} onClick={() => void markRead(ctx.deviceCode, n.id)}>{n.message}</Link> : <span>{n.message}</span>}
+                {href && ctx ? <Link href={href} onClick={() => void markRead(userId, n.id)}>{n.message}</Link> : <span>{n.message}</span>}
                 <small className="muted">{formatDateTime(n.created_at)}</small>
                 {ctx ? (
                   <span className="row row-gap-sm">
-                    {!n.read_at ? <button type="button" className="btn btn-secondary btn-sm" onClick={() => void markRead(ctx.deviceCode, n.id)}>Okundu</button> : null}
-                    <button type="button" className="btn btn-ghost btn-sm" onClick={() => void markResolved(ctx.deviceCode, n.id)}>Çözüldü say</button>
+                    {!n.read_at ? <button type="button" className="btn btn-secondary btn-sm" onClick={() => void markRead(userId, n.id)}>Okundu</button> : null}
+                    <button type="button" className="btn btn-ghost btn-sm" onClick={() => void markResolved(userId, n.id)}>Çözüldü say</button>
                   </span>
                 ) : null}
               </li>

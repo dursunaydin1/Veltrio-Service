@@ -5,6 +5,12 @@
 
 ## 2026-11-11
 
+### K-122 · Bildirim okundu bilgisi kişiye özel
+- **Bulgu:** Okundu ve "Çözüldü say" işareti bildirim satırına yazılıp eşitleniyordu. Çalışan kritik stok bildirimini kapatınca patronun telefonunda da kapanıyordu.
+- **Karar:** Okundu ve elle çözüldü işareti kişiye özeldir; cihazdaki yerel `notification_marks` tablosunda tutulur (Dexie sürüm 8), sunucuya gitmez. Sistemin koşul ortadan kalkınca çözdüğü bildirim (`resolved_at`) herkes için çözülür. Daha önce ortak yazılmış `read_at` / `resolved_at` geçerli kalır. Patronun iki cihazı varsa her cihaz okumayı ayrı tutar; bu, SQL gerektirmeyen basit çözüm için kabul edildi.
+- **Ek:** Zil rozeti "9+" yerine 99'a kadar gerçek sayıyı gösterir; yeni bildirim sayıyı değiştirir.
+- **Etki:** `lib/notifications/center.ts`, `lib/db/schema.ts`, `components/notifications/NotificationCenter.tsx`, `components/layout/NotificationBell.tsx`.
+
 ### K-121 · Çalışanın yaptıkları patrona bildirilir
 - **İstek:** Sahip, çalışanın yaptığı işi (yeni müşteri, servis açma / kapatma, satış) uygulamayı açınca Bildirimler'de görmek ve sonradan çalışan bazlı listelemek istedi. Telefona gelen gerçek bildirim (push) şimdilik yapılmadı.
 - **Karar:** Ayrı bir kayıt tutulmaz; bilgi cihaz koduyla imzalı kayıtlardan okunur (`lib/notifications/staffActivity.ts`). Sayılan işler: müşteri ekleme, servis açma, servisin işini tamamlama / teslim / iptal, kesinleşen satış, satış dışı tahsilat (satışın tahsilatı satış satırında görünür). Müşteri kaydı imzasızdı; migration 030 `customers.created_by_device` ekler, eski kayıtlar boş kalır.

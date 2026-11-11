@@ -74,7 +74,7 @@ describe("çalışanın yaptıkları (K-121)", () => {
 
     const [n] = await db.notifications.toArray();
     expect(n).toMatchObject({ type: "STAFF_ACTIVITY", message: "Ahmet yeni müşteri ekledi: Yeni Müşteri", related_record_id: "c9" });
-    expect(await unreadCount(B, true)).toBe(1);
-    expect(await unreadCount(B, false)).toBe(0);
+    expect(await unreadCount("owner-id", B, true)).toBe(1);
+    expect(await unreadCount("staff-id", B, false)).toBe(0);
   });
 });

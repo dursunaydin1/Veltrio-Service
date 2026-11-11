@@ -387,6 +387,16 @@ export interface DocumentCounter {
   last_value: number;
 }
 
+/** Bir kişinin bir bildirimi okuduğu / kapattığı an (K-122); yalnızca bu cihazda */
+export interface NotificationMark {
+  /** `{kullanıcı}:{bildirim}` */
+  id: string;
+  user_id: string;
+  notification_id: string;
+  read_at?: string;
+  resolved_at?: string;
+}
+
 // ============================================================
 // DEXIE VERİTABANI SINIFI
 // ============================================================
@@ -399,6 +409,7 @@ export class VeltrioDatabase extends Dexie {
   audit_logs!: Table<AuditLog>;
   sync_queue!: Table<SyncQueueItem>;
   notifications!: Table<Notification>;
+  notification_marks!: Table<NotificationMark>;
   counters!: Table<DocumentCounter>;
 
   // FAZ 2 — Stok & Ödeme
@@ -522,6 +533,11 @@ export class VeltrioDatabase extends Dexie {
     // Şema sürüm 7: ürün fabrika barkoduyla bulunur (K-102)
     this.version(7).stores({
       products: "id, business_id, code, category, archived_at, barcode",
+    });
+
+    // Şema sürüm 8: kişiye özel bildirim okundu / çözüldü işareti, eşitlenmez (K-122)
+    this.version(8).stores({
+      notification_marks: "id, user_id",
     });
   }
 }

@@ -30,4 +30,5 @@ export type {
   ServiceTemplate,
   ServiceTemplateItem,
   ServiceChecklistItem,
+  NotificationMark,
 } from "./schema";
